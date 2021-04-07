@@ -3,8 +3,8 @@
 Abstract base class which serves as both a wrapper for scikit-multiflow predictive models and a constructor for user-defined predictive models.
 
 #### Attributes
-name
-: string
+name (str)
+: name of the predictive model
 
 #### Functions
 fit

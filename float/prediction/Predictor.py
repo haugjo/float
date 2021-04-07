@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 
 class Predictor(metaclass=ABCMeta):
     """
-    Abstract base class which serves as both a wrapper for scikit-multiflow predictive models and a constructor for
+    Abstract base class which serves as both a wrapper for skmultiflow predictive models and a constructor for
     user-defined predictive models.
 
     Attributes:

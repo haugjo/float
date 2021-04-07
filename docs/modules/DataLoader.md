@@ -3,11 +3,14 @@
 This class serves as a wrapper for the skmultiflow Stream module.
 
 #### Attributes
-stream
-: skmultiflow.data.base_stream.Stream
+stream (skmultiflow.data.base_stream.Stream)
+: data stream object
 
-target_column
-: integer
+file_path (str)
+: path to a .csv file containing the data
+
+target_column (int)
+: index of the target column of the .csv file
 
 #### Functions
 init
