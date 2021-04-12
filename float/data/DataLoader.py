@@ -20,13 +20,12 @@ class DataLoader:
             stream (skmultiflow.data.base_stream.Stream): data stream object
             file_path (str): path to a .csv file containing the data
             target_col (int): index of the target column of the .csv file
-
         """
         self.stream = stream
         self.target_col = target_col
         self.file_path = file_path
         if not self._evaluate_input():
-            raise AttributeError
+            raise AttributeError('Neither a skmultiflow Stream object nor a valid .csv file path was provided.')
         self.stream = stream if stream else FileStream(self.file_path, self.target_col)
 
     def get_data(self, n_samples):

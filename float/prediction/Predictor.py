@@ -5,12 +5,13 @@ class Predictor(metaclass=ABCMeta):
     """
     Abstract base class which serves as both a wrapper for skmultiflow predictive models and a constructor for
     user-defined predictive models.
-
-    Attributes:
-        name (str): name of the predictive model
     """
-    def __init__(self, name):
-        self.name = name
+    @abstractmethod
+    def __init__(self):
+        """
+        Initializes the predictor.
+        """
+        raise NotImplementedError
 
     def fit(self, X, y, sample_weight=None):
         """
