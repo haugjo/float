@@ -24,14 +24,25 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         """
         self.detector.reset()
 
-    def detected_change(self):
+    @abstractmethod
+    def detected_global_change(self):
         """
-        Checks whether concept drift was detected or not.
+        Checks whether global concept drift was detected or not.
 
         Returns:
-            bool: whether the concept drift was detector or not.
+            bool: whether global concept drift was detected or not.
         """
-        return self.detector.detected_change()
+        raise NotImplementedError
+
+    @abstractmethod
+    def detected_partial_change(self):
+        """
+        Checks whether partial concept drift was detected or not.
+
+        Returns:
+            bool: whether partial concept drift was detected or not.
+        """
+        raise NotImplementedError
 
     def detected_warning_zone(self):
         """
@@ -53,9 +64,9 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         return self.detector.estimation
 
     @abstractmethod
-    def add_element(self, input_value):
+    def partial_fit(self, input_value):
         """
-        Adds the relevant data from a sample into the concept drift detector.
+        Update the parameters of the concept drift detection model.
 
         Args:
             input_value (any): whatever input value the concept drift detector takes.

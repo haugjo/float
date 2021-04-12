@@ -54,9 +54,15 @@ class FeatureSelector(metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    def select_features(self):
+    def select_features(self, X):
         """
         Selects features with highest absolute weights.
+
+        Args:
+            X (np.array): the data samples
+
+        Returns:
+            np.array: the data samples with the non-selected features set to a reference value
         """
         # if vector contains negative weights, issue warning
         if np.any(self.raw_weight_vector < 0):
@@ -68,15 +74,23 @@ class FeatureSelector(metaclass=ABCMeta):
         else:
             abs_weights = self.raw_weight_vector
 
-        selected_indices = np.argsort(abs_weights)[::-1][:self.n_selected_ftr]
-        zero_indices = [x for x in range(len(self.raw_weight_vector)) if x not in selected_indices]
-        abs_weights[zero_indices] = 0
+        sorted_indices = np.argsort(abs_weights)[::-1]
+        selected_indices = sorted_indices[:self.n_selected_ftr]
+        non_selected_indices = sorted_indices[self.n_selected_ftr:]
+        # TODO: test if this works
+        X[non_selected_indices] = np.full(shape=(X.shape[0],), fill_value=self._get_reference_value())
+
         self.weights.append(abs_weights.tolist())
         self.selection.append(selected_indices.tolist())
 
-    # @abstractmethod
-    # def substitute_remaining_features(self):
-    #     """
-    #     Substitutes the features that are not part of the selected feature set.
-    #     """
-    #     pass
+        return X
+
+    @abstractmethod
+    def _get_reference_value(self):
+        """
+        Returns the reference value to be used for the non-selected features.
+
+        Returns:
+            float: the reference value
+        """
+        return 0
