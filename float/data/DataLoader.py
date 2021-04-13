@@ -24,8 +24,7 @@ class DataLoader:
         self.stream = stream
         self.target_col = target_col
         self.file_path = file_path
-        if not self._evaluate_input():
-            raise AttributeError('Neither a skmultiflow Stream object nor a valid .csv file path was provided.')
+        self._evaluate_input()
         self.stream = stream if stream else FileStream(self.file_path, self.target_col)
 
     def get_data(self, n_samples):
@@ -46,16 +45,22 @@ class DataLoader:
         Evaluates the input data to check if it is in a valid format, i.e. if either a Stream object or a valid .csv
         file is provided. May be extended by further checks.
 
-        Returns:
-            bool: True if a valid input is provided, False otherwise
+        Raises:
+            AttributeError: if neither a valid skmultiflow Stream object nor a .csv file path is provided
+            FileNotFoundError: if the provided file path does not exist
+            ValueError: if the .csv cannot be converted to a skmultiflow FileStream
         """
-        if type(self.stream) is Stream:
-            return True
-        if type(self.file_path) is str and type(self.target_col) is int:
-            if self.file_path.endswith('.csv'):
+        if not type(self.stream) is Stream:
+            if not type(self.file_path) is str:
+                raise AttributeError('Neither a valid skmultiflow Stream object nor a file path was provided.')
+            elif not self.file_path.endswith('.csv'):
+                raise AttributeError('Neither a valid skmultiflow Stream object nor a .csv file path was provided.')
+            elif not type(self.target_col) is int:
+                raise AttributeError('The parameter target_col needs to be an integer.')
+            else:
                 try:
                     FileStream(self.file_path, self.target_col)
-                    return True
-                except (FileNotFoundError, ValueError):
-                    pass
-        return False
+                except FileNotFoundError:
+                    raise FileNotFoundError('The file path you provided does not exist.')
+                except ValueError:
+                    raise ValueError('The .csv file cannot be converted to a skmultiflow FileStream.')
