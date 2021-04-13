@@ -77,15 +77,13 @@ class FeatureSelector(metaclass=ABCMeta):
         sorted_indices = np.argsort(abs_weights)[::-1]
         selected_indices = sorted_indices[:self.n_selected_ftr]
         non_selected_indices = sorted_indices[self.n_selected_ftr:]
-        # TODO: test if this works
-        X[non_selected_indices] = np.full(shape=(X.shape[0],), fill_value=self._get_reference_value())
+        X[:, non_selected_indices] = np.full(shape=X[:, non_selected_indices].shape, fill_value=self._get_reference_value())
 
         self.weights.append(abs_weights.tolist())
         self.selection.append(selected_indices.tolist())
 
         return X
 
-    @abstractmethod
     def _get_reference_value(self):
         """
         Returns the reference value to be used for the non-selected features.

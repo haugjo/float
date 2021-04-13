@@ -37,7 +37,7 @@ class DataLoader:
             n_samples (int): number of samples to draw from data stream
 
         Returns:
-            np.array: data samples
+            tuples(np.array, np.array): data samples and targets
         """
         return self.stream.next_sample(n_samples)
 
