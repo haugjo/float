@@ -1,22 +1,29 @@
-from abc import ABCMeta, abstractmethod
+from float.concept_drift_detection import ConceptDriftDetector
+from skmultiflow.drift_detection.base_drift_detector import BaseDriftDetector
 
 
-class ConceptDriftDetector(metaclass=ABCMeta):
+class SkmultiflowDriftDetector(ConceptDriftDetector):
     """
-    Abstract base class for concept drift detection models.
-    """
-    @abstractmethod
-    def __init__(self):
-        raise NotImplementedError
+    Serves as a wrapper for the skmultiflow drift_detection module.
 
-    @abstractmethod
+    Attributes:
+        detector (BaseDriftDetector): the concept drift detector
+    """
+    def __init__(self, detector):
+        """
+        Receives a skmultiflow BaseDriftDetector object.
+
+        Args:
+            detector (BaseDriftDetector): the concept drift detector
+        """
+        self.detector = detector
+
     def reset(self):
         """
         Resets the concept drift detector parameters.
         """
-        raise NotImplementedError
+        self.detector.reset()
 
-    @abstractmethod
     def detected_global_change(self):
         """
         Checks whether global concept drift was detected or not.
@@ -24,9 +31,8 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             bool: whether global concept drift was detected or not.
         """
-        raise NotImplementedError
+        self.detector.detected_change()
 
-    @abstractmethod  # TODO: maybe not abstract after all because the functionality is missing in skmultiflow?
     def detected_partial_change(self):
         """
         Checks whether partial concept drift was detected or not.
@@ -34,9 +40,8 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             bool: whether partial concept drift was detected or not.
         """
-        raise NotImplementedError
+        pass
 
-    @abstractmethod
     def detected_warning_zone(self):
         """
         If the concept drift detector supports the warning zone, this function will return
@@ -45,9 +50,8 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             bool: whether the concept drift detector is in the warning zone or not.
         """
-        raise NotImplementedError
+        return self.detector.in_warning_zone
 
-    @abstractmethod
     def get_length_estimation(self):
         """
         Returns the length estimation.
@@ -55,11 +59,13 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             int: length estimation
         """
-        raise NotImplementedError
+        return self.detector.estimation
 
-    @abstractmethod
-    def partial_fit(self):
+    def partial_fit(self, input_value):
         """
         Update the parameters of the concept drift detection model.
+
+        Args:
+            input_value (any): whatever input value the concept drift detector takes.
         """
-        raise NotImplementedError
+        self.detector.add_element(input_value)

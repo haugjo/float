@@ -4,10 +4,10 @@ from skmultiflow.data.base_stream import Stream
 
 class DataLoader:
     """
-    Serves as a wrapper for the scikit-multiflow Stream module.
+    Serves as a wrapper for the skmultiflow Stream class.
 
     Attributes:
-        stream (skmultiflow.data.base_stream.Stream): data stream object
+        stream (Stream): data stream object
         file_path (str): path to a .csv file containing the data
         target_col (int): index of the target column of the .csv file
     """
