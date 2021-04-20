@@ -6,10 +6,6 @@ class ConceptDriftDetector(metaclass=ABCMeta):
     Abstract base class for concept drift detection models.
     """
     @abstractmethod
-    def __init__(self):
-        raise NotImplementedError
-
-    @abstractmethod
     def reset(self):
         """
         Resets the concept drift detector parameters.
@@ -58,7 +54,7 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def partial_fit(self):
+    def partial_fit(self, *args, **kwargs):
         """
         Update the parameters of the concept drift detection model.
         """

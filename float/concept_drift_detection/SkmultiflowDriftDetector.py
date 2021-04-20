@@ -1,4 +1,4 @@
-from float.concept_drift_detection import ConceptDriftDetector
+from float.concept_drift_detection.ConceptDriftDetector import ConceptDriftDetector
 from skmultiflow.drift_detection.base_drift_detector import BaseDriftDetector
 
 
