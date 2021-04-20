@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>float.concept_drift_detection.ConceptDriftDetector API documentation</title>
+<title>float.concept_drift_detection.SkmultiflowDriftDetector API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,28 +19,39 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>float.concept_drift_detection.ConceptDriftDetector</code></h1>
+<h1 class="title">Module <code>float.concept_drift_detection.SkmultiflowDriftDetector</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from abc import ABCMeta, abstractmethod
+<pre><code class="python">from float.concept_drift_detection.ConceptDriftDetector import ConceptDriftDetector
+from skmultiflow.drift_detection.base_drift_detector import BaseDriftDetector
 
 
-class ConceptDriftDetector(metaclass=ABCMeta):
+class SkmultiflowDriftDetector(ConceptDriftDetector):
     &#34;&#34;&#34;
-    Abstract base class for concept drift detection models.
+    Serves as a wrapper for the skmultiflow drift_detection module.
+
+    Attributes:
+        detector (BaseDriftDetector): the concept drift detector
     &#34;&#34;&#34;
-    @abstractmethod
+    def __init__(self, detector):
+        &#34;&#34;&#34;
+        Receives a skmultiflow BaseDriftDetector object.
+
+        Args:
+            detector (BaseDriftDetector): the concept drift detector
+        &#34;&#34;&#34;
+        self.detector = detector
+
     def reset(self):
         &#34;&#34;&#34;
         Resets the concept drift detector parameters.
         &#34;&#34;&#34;
-        raise NotImplementedError
+        self.detector.reset()
 
-    @abstractmethod
     def detected_global_change(self):
         &#34;&#34;&#34;
         Checks whether global concept drift was detected or not.
@@ -48,9 +59,8 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             bool: whether global concept drift was detected or not.
         &#34;&#34;&#34;
-        raise NotImplementedError
+        self.detector.detected_change()
 
-    @abstractmethod  # TODO: maybe not abstract after all because the functionality is missing in skmultiflow?
     def detected_partial_change(self):
         &#34;&#34;&#34;
         Checks whether partial concept drift was detected or not.
@@ -58,9 +68,8 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             bool: whether partial concept drift was detected or not.
         &#34;&#34;&#34;
-        raise NotImplementedError
+        pass
 
-    @abstractmethod
     def detected_warning_zone(self):
         &#34;&#34;&#34;
         If the concept drift detector supports the warning zone, this function will return
@@ -69,9 +78,8 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             bool: whether the concept drift detector is in the warning zone or not.
         &#34;&#34;&#34;
-        raise NotImplementedError
+        return self.detector.in_warning_zone
 
-    @abstractmethod
     def get_length_estimation(self):
         &#34;&#34;&#34;
         Returns the length estimation.
@@ -79,14 +87,16 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             int: length estimation
         &#34;&#34;&#34;
-        raise NotImplementedError
+        return self.detector.estimation
 
-    @abstractmethod
-    def partial_fit(self, *args, **kwargs):
+    def partial_fit(self, input_value):
         &#34;&#34;&#34;
         Update the parameters of the concept drift detection model.
+
+        Args:
+            input_value (any): whatever input value the concept drift detector takes.
         &#34;&#34;&#34;
-        raise NotImplementedError</code></pre>
+        self.detector.add_element(input_value)</code></pre>
 </details>
 </section>
 <section>
@@ -98,27 +108,49 @@ class ConceptDriftDetector(metaclass=ABCMeta):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector"><code class="flex name class">
-<span>class <span class="ident">ConceptDriftDetector</span></span>
+<dt id="float.concept_drift_detection.SkmultiflowDriftDetector.SkmultiflowDriftDetector"><code class="flex name class">
+<span>class <span class="ident">SkmultiflowDriftDetector</span></span>
+<span>(</span><span>detector)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Abstract base class for concept drift detection models.</p></div>
+<div class="desc"><p>Serves as a wrapper for the skmultiflow drift_detection module.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>detector</code></strong> :&ensp;<code>BaseDriftDetector</code></dt>
+<dd>the concept drift detector</dd>
+</dl>
+<p>Receives a skmultiflow BaseDriftDetector object.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>detector</code></strong> :&ensp;<code>BaseDriftDetector</code></dt>
+<dd>the concept drift detector</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ConceptDriftDetector(metaclass=ABCMeta):
+<pre><code class="python">class SkmultiflowDriftDetector(ConceptDriftDetector):
     &#34;&#34;&#34;
-    Abstract base class for concept drift detection models.
+    Serves as a wrapper for the skmultiflow drift_detection module.
+
+    Attributes:
+        detector (BaseDriftDetector): the concept drift detector
     &#34;&#34;&#34;
-    @abstractmethod
+    def __init__(self, detector):
+        &#34;&#34;&#34;
+        Receives a skmultiflow BaseDriftDetector object.
+
+        Args:
+            detector (BaseDriftDetector): the concept drift detector
+        &#34;&#34;&#34;
+        self.detector = detector
+
     def reset(self):
         &#34;&#34;&#34;
         Resets the concept drift detector parameters.
         &#34;&#34;&#34;
-        raise NotImplementedError
+        self.detector.reset()
 
-    @abstractmethod
     def detected_global_change(self):
         &#34;&#34;&#34;
         Checks whether global concept drift was detected or not.
@@ -126,9 +158,8 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             bool: whether global concept drift was detected or not.
         &#34;&#34;&#34;
-        raise NotImplementedError
+        self.detector.detected_change()
 
-    @abstractmethod  # TODO: maybe not abstract after all because the functionality is missing in skmultiflow?
     def detected_partial_change(self):
         &#34;&#34;&#34;
         Checks whether partial concept drift was detected or not.
@@ -136,9 +167,8 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             bool: whether partial concept drift was detected or not.
         &#34;&#34;&#34;
-        raise NotImplementedError
+        pass
 
-    @abstractmethod
     def detected_warning_zone(self):
         &#34;&#34;&#34;
         If the concept drift detector supports the warning zone, this function will return
@@ -147,9 +177,8 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             bool: whether the concept drift detector is in the warning zone or not.
         &#34;&#34;&#34;
-        raise NotImplementedError
+        return self.detector.in_warning_zone
 
-    @abstractmethod
     def get_length_estimation(self):
         &#34;&#34;&#34;
         Returns the length estimation.
@@ -157,158 +186,60 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             int: length estimation
         &#34;&#34;&#34;
-        raise NotImplementedError
+        return self.detector.estimation
 
-    @abstractmethod
-    def partial_fit(self, *args, **kwargs):
+    def partial_fit(self, input_value):
         &#34;&#34;&#34;
         Update the parameters of the concept drift detection model.
+
+        Args:
+            input_value (any): whatever input value the concept drift detector takes.
         &#34;&#34;&#34;
-        raise NotImplementedError</code></pre>
+        self.detector.add_element(input_value)</code></pre>
 </details>
-<h3>Subclasses</h3>
+<h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="float.concept_drift_detection.SkmultiflowDriftDetector.SkmultiflowDriftDetector" href="SkmultiflowDriftDetector.html#float.concept_drift_detection.SkmultiflowDriftDetector.SkmultiflowDriftDetector">SkmultiflowDriftDetector</a></li>
+<li><a title="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector" href="ConceptDriftDetector.html#float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector">ConceptDriftDetector</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_global_change"><code class="name flex">
-<span>def <span class="ident">detected_global_change</span></span>(<span>self)</span>
+<dt id="float.concept_drift_detection.SkmultiflowDriftDetector.SkmultiflowDriftDetector.partial_fit"><code class="name flex">
+<span>def <span class="ident">partial_fit</span></span>(<span>self, input_value)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Checks whether global concept drift was detected or not.</p>
-<h2 id="returns">Returns</h2>
+<div class="desc"><p>Update the parameters of the concept drift detection model.</p>
+<h2 id="args">Args</h2>
 <dl>
-<dt><code>bool</code></dt>
-<dd>whether global concept drift was detected or not.</dd>
+<dt><strong><code>input_value</code></strong> :&ensp;<code>any</code></dt>
+<dd>whatever input value the concept drift detector takes.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-def detected_global_change(self):
-    &#34;&#34;&#34;
-    Checks whether global concept drift was detected or not.
-
-    Returns:
-        bool: whether global concept drift was detected or not.
-    &#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
-</details>
-</dd>
-<dt id="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_partial_change"><code class="name flex">
-<span>def <span class="ident">detected_partial_change</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Checks whether partial concept drift was detected or not.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>bool</code></dt>
-<dd>whether partial concept drift was detected or not.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod  # TODO: maybe not abstract after all because the functionality is missing in skmultiflow?
-def detected_partial_change(self):
-    &#34;&#34;&#34;
-    Checks whether partial concept drift was detected or not.
-
-    Returns:
-        bool: whether partial concept drift was detected or not.
-    &#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
-</details>
-</dd>
-<dt id="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_warning_zone"><code class="name flex">
-<span>def <span class="ident">detected_warning_zone</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>If the concept drift detector supports the warning zone, this function will return
-whether it's inside the warning zone or not.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>bool</code></dt>
-<dd>whether the concept drift detector is in the warning zone or not.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-def detected_warning_zone(self):
-    &#34;&#34;&#34;
-    If the concept drift detector supports the warning zone, this function will return
-    whether it&#39;s inside the warning zone or not.
-
-    Returns:
-        bool: whether the concept drift detector is in the warning zone or not.
-    &#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
-</details>
-</dd>
-<dt id="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.get_length_estimation"><code class="name flex">
-<span>def <span class="ident">get_length_estimation</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Returns the length estimation.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>int</code></dt>
-<dd>length estimation</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-def get_length_estimation(self):
-    &#34;&#34;&#34;
-    Returns the length estimation.
-
-    Returns:
-        int: length estimation
-    &#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
-</details>
-</dd>
-<dt id="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.partial_fit"><code class="name flex">
-<span>def <span class="ident">partial_fit</span></span>(<span>self, *args, **kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Update the parameters of the concept drift detection model.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-def partial_fit(self, *args, **kwargs):
+<pre><code class="python">def partial_fit(self, input_value):
     &#34;&#34;&#34;
     Update the parameters of the concept drift detection model.
+
+    Args:
+        input_value (any): whatever input value the concept drift detector takes.
     &#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
-</details>
-</dd>
-<dt id="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.reset"><code class="name flex">
-<span>def <span class="ident">reset</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Resets the concept drift detector parameters.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-def reset(self):
-    &#34;&#34;&#34;
-    Resets the concept drift detector parameters.
-    &#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+    self.detector.add_element(input_value)</code></pre>
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector" href="ConceptDriftDetector.html#float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector">ConceptDriftDetector</a></b></code>:
+<ul class="hlist">
+<li><code><a title="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_global_change" href="ConceptDriftDetector.html#float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_global_change">detected_global_change</a></code></li>
+<li><code><a title="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_partial_change" href="ConceptDriftDetector.html#float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_partial_change">detected_partial_change</a></code></li>
+<li><code><a title="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_warning_zone" href="ConceptDriftDetector.html#float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_warning_zone">detected_warning_zone</a></code></li>
+<li><code><a title="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.get_length_estimation" href="ConceptDriftDetector.html#float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.get_length_estimation">get_length_estimation</a></code></li>
+<li><code><a title="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.reset" href="ConceptDriftDetector.html#float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.reset">reset</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
 </section>
@@ -327,14 +258,9 @@ def reset(self):
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector" href="#float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector">ConceptDriftDetector</a></code></h4>
+<h4><code><a title="float.concept_drift_detection.SkmultiflowDriftDetector.SkmultiflowDriftDetector" href="#float.concept_drift_detection.SkmultiflowDriftDetector.SkmultiflowDriftDetector">SkmultiflowDriftDetector</a></code></h4>
 <ul class="">
-<li><code><a title="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_global_change" href="#float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_global_change">detected_global_change</a></code></li>
-<li><code><a title="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_partial_change" href="#float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_partial_change">detected_partial_change</a></code></li>
-<li><code><a title="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_warning_zone" href="#float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.detected_warning_zone">detected_warning_zone</a></code></li>
-<li><code><a title="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.get_length_estimation" href="#float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.get_length_estimation">get_length_estimation</a></code></li>
-<li><code><a title="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.partial_fit" href="#float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.partial_fit">partial_fit</a></code></li>
-<li><code><a title="float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.reset" href="#float.concept_drift_detection.ConceptDriftDetector.ConceptDriftDetector.reset">reset</a></code></li>
+<li><code><a title="float.concept_drift_detection.SkmultiflowDriftDetector.SkmultiflowDriftDetector.partial_fit" href="#float.concept_drift_detection.SkmultiflowDriftDetector.SkmultiflowDriftDetector.partial_fit">partial_fit</a></code></li>
 </ul>
 </li>
 </ul>

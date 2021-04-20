@@ -27,11 +27,38 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">import unittest
-
+from float.data.DataLoader import DataLoader
+from skmultiflow.data.base_stream import Stream
+import numpy as np
 
 class TestDataLoader(unittest.TestCase):
-    def __init__(self):
-        super().__init__()</code></pre>
+    def __init__(self, method_name):
+        super().__init__(method_name)
+        self.data_loader = DataLoader(file_path=&#39;../data/datasets/spambase.csv&#39;, target_col=0)
+
+    def test_evaluate_input(self):
+        with self.assertRaises(AttributeError, msg=&#39;passing no inputs&#39;):
+            DataLoader()
+        with self.assertRaises(AttributeError, msg=&#39;passing non .csv file&#39;):
+            DataLoader(file_path=&#39;../data/__init__.py&#39;)
+        with self.assertRaises(AttributeError, msg=&#39;passing non int value for target_col&#39;):
+            DataLoader(file_path=&#39;../data/datasets/spambase.csv&#39;, target_col=None)
+        with self.assertRaises(FileNotFoundError, msg=&#39;file not found&#39;):
+            DataLoader(file_path=&#39;../data/datasets/spam_base.csv&#39;)
+        with self.assertRaises(ValueError, msg=&#39;non compatible .csv file&#39;):
+            DataLoader(file_path=&#39;../../docs/time_tracking.csv&#39;)
+
+    def test_init(self):
+        self.assertIsInstance(self.data_loader.stream, Stream, msg=&#39;attribute stream of type Stream&#39;)
+
+    def test_get_data(self):
+        n_samples = 3
+        samples = self.data_loader.get_data(n_samples)
+        self.assertIsInstance(samples, tuple, msg=&#39;returns tuple&#39;)
+        self.assertIsInstance(samples[0], np.ndarray, msg=&#39;returns tuple of numpy arrays&#39;)
+        self.assertIsInstance(samples[1], np.ndarray, msg=&#39;returns tuple of numpy arrays&#39;)
+        self.assertEqual(samples[0].shape, (n_samples, self.data_loader.stream.n_features), msg=&#39;returns data in correct shape&#39;)
+        self.assertEqual(samples[1].shape, (n_samples,), msg=&#39;returns target values in correct shape&#39;)</code></pre>
 </details>
 </section>
 <section>
@@ -45,6 +72,7 @@ class TestDataLoader(unittest.TestCase):
 <dl>
 <dt id="float.testing.TestDataLoader.TestDataLoader"><code class="flex name class">
 <span>class <span class="ident">TestDataLoader</span></span>
+<span>(</span><span>method_name)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A class whose instances are single test cases.</p>
@@ -80,13 +108,95 @@ not have a method with the specified name.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class TestDataLoader(unittest.TestCase):
-    def __init__(self):
-        super().__init__()</code></pre>
+    def __init__(self, method_name):
+        super().__init__(method_name)
+        self.data_loader = DataLoader(file_path=&#39;../data/datasets/spambase.csv&#39;, target_col=0)
+
+    def test_evaluate_input(self):
+        with self.assertRaises(AttributeError, msg=&#39;passing no inputs&#39;):
+            DataLoader()
+        with self.assertRaises(AttributeError, msg=&#39;passing non .csv file&#39;):
+            DataLoader(file_path=&#39;../data/__init__.py&#39;)
+        with self.assertRaises(AttributeError, msg=&#39;passing non int value for target_col&#39;):
+            DataLoader(file_path=&#39;../data/datasets/spambase.csv&#39;, target_col=None)
+        with self.assertRaises(FileNotFoundError, msg=&#39;file not found&#39;):
+            DataLoader(file_path=&#39;../data/datasets/spam_base.csv&#39;)
+        with self.assertRaises(ValueError, msg=&#39;non compatible .csv file&#39;):
+            DataLoader(file_path=&#39;../../docs/time_tracking.csv&#39;)
+
+    def test_init(self):
+        self.assertIsInstance(self.data_loader.stream, Stream, msg=&#39;attribute stream of type Stream&#39;)
+
+    def test_get_data(self):
+        n_samples = 3
+        samples = self.data_loader.get_data(n_samples)
+        self.assertIsInstance(samples, tuple, msg=&#39;returns tuple&#39;)
+        self.assertIsInstance(samples[0], np.ndarray, msg=&#39;returns tuple of numpy arrays&#39;)
+        self.assertIsInstance(samples[1], np.ndarray, msg=&#39;returns tuple of numpy arrays&#39;)
+        self.assertEqual(samples[0].shape, (n_samples, self.data_loader.stream.n_features), msg=&#39;returns data in correct shape&#39;)
+        self.assertEqual(samples[1].shape, (n_samples,), msg=&#39;returns target values in correct shape&#39;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>unittest.case.TestCase</li>
 </ul>
+<h3>Methods</h3>
+<dl>
+<dt id="float.testing.TestDataLoader.TestDataLoader.test_evaluate_input"><code class="name flex">
+<span>def <span class="ident">test_evaluate_input</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_evaluate_input(self):
+    with self.assertRaises(AttributeError, msg=&#39;passing no inputs&#39;):
+        DataLoader()
+    with self.assertRaises(AttributeError, msg=&#39;passing non .csv file&#39;):
+        DataLoader(file_path=&#39;../data/__init__.py&#39;)
+    with self.assertRaises(AttributeError, msg=&#39;passing non int value for target_col&#39;):
+        DataLoader(file_path=&#39;../data/datasets/spambase.csv&#39;, target_col=None)
+    with self.assertRaises(FileNotFoundError, msg=&#39;file not found&#39;):
+        DataLoader(file_path=&#39;../data/datasets/spam_base.csv&#39;)
+    with self.assertRaises(ValueError, msg=&#39;non compatible .csv file&#39;):
+        DataLoader(file_path=&#39;../../docs/time_tracking.csv&#39;)</code></pre>
+</details>
+</dd>
+<dt id="float.testing.TestDataLoader.TestDataLoader.test_get_data"><code class="name flex">
+<span>def <span class="ident">test_get_data</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_get_data(self):
+    n_samples = 3
+    samples = self.data_loader.get_data(n_samples)
+    self.assertIsInstance(samples, tuple, msg=&#39;returns tuple&#39;)
+    self.assertIsInstance(samples[0], np.ndarray, msg=&#39;returns tuple of numpy arrays&#39;)
+    self.assertIsInstance(samples[1], np.ndarray, msg=&#39;returns tuple of numpy arrays&#39;)
+    self.assertEqual(samples[0].shape, (n_samples, self.data_loader.stream.n_features), msg=&#39;returns data in correct shape&#39;)
+    self.assertEqual(samples[1].shape, (n_samples,), msg=&#39;returns target values in correct shape&#39;)</code></pre>
+</details>
+</dd>
+<dt id="float.testing.TestDataLoader.TestDataLoader.test_init"><code class="name flex">
+<span>def <span class="ident">test_init</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_init(self):
+    self.assertIsInstance(self.data_loader.stream, Stream, msg=&#39;attribute stream of type Stream&#39;)</code></pre>
+</details>
+</dd>
+</dl>
 </dd>
 </dl>
 </section>
@@ -106,6 +216,11 @@ not have a method with the specified name.</p></div>
 <ul>
 <li>
 <h4><code><a title="float.testing.TestDataLoader.TestDataLoader" href="#float.testing.TestDataLoader.TestDataLoader">TestDataLoader</a></code></h4>
+<ul class="">
+<li><code><a title="float.testing.TestDataLoader.TestDataLoader.test_evaluate_input" href="#float.testing.TestDataLoader.TestDataLoader.test_evaluate_input">test_evaluate_input</a></code></li>
+<li><code><a title="float.testing.TestDataLoader.TestDataLoader.test_get_data" href="#float.testing.TestDataLoader.TestDataLoader.test_get_data">test_get_data</a></code></li>
+<li><code><a title="float.testing.TestDataLoader.TestDataLoader.test_init" href="#float.testing.TestDataLoader.TestDataLoader.test_init">test_init</a></code></li>
+</ul>
 </li>
 </ul>
 </li>
