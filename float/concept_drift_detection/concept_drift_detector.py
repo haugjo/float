@@ -5,6 +5,12 @@ class ConceptDriftDetector(metaclass=ABCMeta):
     """
     Abstract base class for concept drift detection models.
     """
+    def __init__(self):
+        """
+        Initializes the concept drift detector.
+        """
+        pass
+
     @abstractmethod
     def reset(self):
         """
@@ -22,7 +28,7 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    @abstractmethod  # TODO: maybe not abstract after all because the functionality is missing in skmultiflow?
+    @abstractmethod
     def detected_partial_change(self):
         """
         Checks whether partial concept drift was detected or not.

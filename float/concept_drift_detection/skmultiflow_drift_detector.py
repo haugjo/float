@@ -1,4 +1,4 @@
-from float.concept_drift_detection.ConceptDriftDetector import ConceptDriftDetector
+from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
 from skmultiflow.drift_detection.base_drift_detector import BaseDriftDetector
 
 
@@ -16,6 +16,7 @@ class SkmultiflowDriftDetector(ConceptDriftDetector):
         Args:
             detector (BaseDriftDetector): the concept drift detector
         """
+        super().__init__()
         self.detector = detector
 
     def reset(self):

@@ -1,5 +1,5 @@
 import unittest
-from float.data.DataLoader import DataLoader
+from float.data.data_loader import DataLoader
 from skmultiflow.data.base_stream import Stream
 import numpy as np
 
