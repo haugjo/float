@@ -1,5 +1,5 @@
 """
-The float.event module includes methods for creating events for specific routines.
+The float.event module includes methods for calling functions for specific event routines.
 """
 
 from .event import Event
