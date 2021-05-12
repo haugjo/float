@@ -1,3 +1,4 @@
+from abc import ABCMeta, abstractmethod
 from float.data.data_loader import DataLoader
 from float.feature_selection import FeatureSelector
 from float.concept_drift_detection import ConceptDriftDetector
@@ -5,30 +6,29 @@ from float.prediction import Predictor
 from float.evaluation.evaluator import Evaluator
 
 
-class Pipeline:
+class Pipeline(metaclass=ABCMeta):
     """
-    Base class which triggers events for different kinds of training procedures.
-
-    Attributes:
-        data_loaders (list[DataLoader]): list of DataLoader objects
-        feature_selectors (list[FeatureSelector]): list of FeatureSelector objects
-        concept_drift_detectors (list[ConceptDriftDetector]): list of ConceptDriftDetector objects
-        predictors (list[Predictor]): list of Predictor objects
-        evaluators (list[Evaluator]): list of Evaluator objects
+    Abstract base class which triggers events for different kinds of training procedures.
     """
-    def __init__(self, data_loaders, feature_selectors, concept_drift_detectors, predictors, evaluators):
+    def __init__(self, data_loader, feature_selector, concept_drift_detector, predictor, evaluator):
         """
-        Takes objects from the DataLoader, FeatureSelector, ConceptDriftDetector, Predictor and Evaluator classes.
+        Checks if the provided parameter values are sufficient to run a pipeline.
+        TODO: determine which parameters are actually crucial instead of raising an error for all of them
 
-        Args:
-            data_loaders (list[DataLoader]): list of DataLoader objects
-            feature_selectors (list[FeatureSelector]): list of FeatureSelector objects
-            concept_drift_detectors (list[ConceptDriftDetector]): list of ConceptDriftDetector objects
-            predictors (list[Predictor]): list of Predictor objects
-            evaluators (list[Evaluator]): list of Evaluator objects
+        Raises:
+            AttributeError: if a crucial parameter is missing
         """
-        self.data_loaders = data_loaders
-        self.feature_selectors = feature_selectors
-        self.concept_drift_detectors = concept_drift_detectors
-        self.predictors = predictors
-        self.evaluators = evaluators
+        if type(data_loader) is not DataLoader:
+            raise AttributeError('No valid DataLoader object was provided.')
+        elif type(feature_selector) is not FeatureSelector:
+            raise AttributeError('No valid FeatureSelector object was provided.')
+        elif type(concept_drift_detector) is not ConceptDriftDetector:
+            raise AttributeError('No valid ConceptDriftDetector object was provided.')
+        elif type(predictor) is not Predictor:
+            raise AttributeError('No valid Predictor object was provided.')
+        elif type(evaluator) is not Evaluator:
+            raise AttributeError('No valid Evaluator object was provided.')
+
+    @abstractmethod
+    def run(self):
+        raise NotImplementedError
