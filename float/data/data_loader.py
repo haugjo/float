@@ -8,8 +8,6 @@ class DataLoader:
 
     Attributes:
         stream (Stream): data stream object
-        file_path (str): path to a .csv file containing the data
-        target_col (int): index of the target column of the .csv file
     """
     def __init__(self, stream=None, file_path=None, target_col=-1):
         """
@@ -24,7 +22,7 @@ class DataLoader:
         self.stream = stream
         self.target_col = target_col
         self.file_path = file_path
-        self._evaluate_input()
+        self._check_input()
         self.stream = stream if stream else FileStream(self.file_path, self.target_col)
 
     def get_data(self, n_samples):
@@ -36,11 +34,11 @@ class DataLoader:
             n_samples (int): number of samples to draw from data stream
 
         Returns:
-            tuples(np.array, np.array): data samples and targets
+            tuple(np.array, np.array): data samples and targets
         """
         return self.stream.next_sample(n_samples)
 
-    def _evaluate_input(self):
+    def _check_input(self):
         """
         Evaluates the input data to check if it is in a valid format, i.e. if either a Stream object or a valid .csv
         file is provided. May be extended by further checks.

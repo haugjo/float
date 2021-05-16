@@ -9,18 +9,18 @@ from float.evaluation.evaluator import Evaluator
 class HoldoutPipeline(Pipeline):
     """
     Pipeline which implements the holdout evaluation.
-
-     Attributes:
-        data_loader (DataLoader): DataLoader object
-        feature_selector (FeatureSelector): FeatureSelector object
-        concept_drift_detector (ConceptDriftDetector): ConceptDriftDetector object
-        predictor (Predictor): Predictor object
-        evaluator (Evaluator): Evaluator object
     """
     def __init__(self, data_loader=None, feature_selector=None, concept_drift_detector=None, predictor=None,
                  evaluator=None):
         """
-        Initializes the pipeline and checks the input parameters.
+        Initializes the pipeline.
+
+        Args:
+            data_loader (DataLoader): DataLoader object
+            feature_selector (FeatureSelector): FeatureSelector object
+            concept_drift_detector (ConceptDriftDetector): ConceptDriftDetector object
+            predictor (Predictor): Predictor object
+            evaluator (Evaluator): Evaluator object
         """
         super().__init__(data_loader, feature_selector, concept_drift_detector, predictor, evaluator)
         self.data_loader = data_loader
