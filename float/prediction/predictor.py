@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+import numpy as np
 
 
 class Predictor(metaclass=ABCMeta):
@@ -18,9 +19,9 @@ class Predictor(metaclass=ABCMeta):
         Fits the model.
 
         Args:
-            X (np.array): data samples to train the model with
-            y (np.array): target values for all samples in X
-            sample_weight (np.array): sample weights
+            X (np.ndarray): data samples to train the model with
+            y (np.ndarray): target values for all samples in X
+            sample_weight (np.ndarray): sample weights
 
         Returns:
             self
@@ -35,9 +36,9 @@ class Predictor(metaclass=ABCMeta):
         Partially (incrementally) fit the model.
 
         Args:
-            X (np.array): data samples to train the model with
-            y (np.array): target values for all samples in X
-            sample_weight (np.array): sample weights
+            X (np.ndarray): data samples to train the model with
+            y (np.ndarray): target values for all samples in X
+            sample_weight (np.ndarray): sample weights
 
         Returns:
             self
@@ -50,10 +51,10 @@ class Predictor(metaclass=ABCMeta):
         Predicts target values for the passed data.
 
         Args:
-            X (np.array): data samples to predict the values for
+            X (np.ndarray): data samples to predict the values for
 
         Returns:
-            np.array: predictions for all samples in X
+            np.ndarray: predictions for all samples in X
         """
         raise NotImplementedError
 
@@ -63,10 +64,10 @@ class Predictor(metaclass=ABCMeta):
         Estimates the probability for probabilistic/bayesian regressors.
 
         Args:
-            X (np.array): data samples to predict the probabilities for
+            X (np.ndarray): data samples to predict the probabilities for
 
         Returns:
-            np.array: prediction probability for all samples in X
+            np.ndarray: prediction probability for all samples in X
         """
         raise NotImplementedError
 
@@ -76,8 +77,8 @@ class Predictor(metaclass=ABCMeta):
         Returns the accuracy based on the given test samples and true values.
 
         Args:
-            X (np.array): test data samples
-            y (np.array): true values for all samples in X
+            X (np.ndarray): test data samples
+            y (np.ndarray): true values for all samples in X
 
         Returns:
             float: accuracy based on test data and target values

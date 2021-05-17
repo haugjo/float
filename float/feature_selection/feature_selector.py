@@ -13,7 +13,7 @@ class FeatureSelector(metaclass=ABCMeta):
         n_selected_ftr (int): number of selected features
         supports_multi_class (bool): True if model support multi-class classification, False otherwise
         supports_streaming_features (bool): True if model supports streaming features, False otherwise
-        raw_weight_vector (np.array): current weights (as produced by feature selection model)
+        raw_weight_vector (np.ndarray): current weights (as produced by feature selection model)
         weights (list): absolute weights in all time steps
         selection (list): indices of selected features in all time steps
         comp_time (list): computation time in all time steps
@@ -49,8 +49,8 @@ class FeatureSelector(metaclass=ABCMeta):
         Weights features.
 
         Args:
-        X (np.array): samples of current batch
-        y (np.array): labels of current batch
+            X (np.ndarray): samples of current batch
+            y (np.ndarray): labels of current batch
         """
         raise NotImplementedError
 
@@ -59,10 +59,10 @@ class FeatureSelector(metaclass=ABCMeta):
         Selects features with highest absolute weights.
 
         Args:
-            X (np.array): the data samples
+            X (np.ndarray): the data samples
 
         Returns:
-            np.array: the data samples with the non-selected features set to a reference value
+            np.ndarray: the data samples with the non-selected features set to a reference value
         """
         # if vector contains negative weights, issue warning
         if np.any(self.raw_weight_vector < 0):

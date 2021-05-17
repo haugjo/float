@@ -1,5 +1,6 @@
 from skmultiflow.data.file_stream import FileStream
 from skmultiflow.data.base_stream import Stream
+import numpy as np
 
 
 class DataLoader:
@@ -34,7 +35,7 @@ class DataLoader:
             n_samples (int): number of samples to draw from data stream
 
         Returns:
-            tuple(np.array, np.array): data samples and targets
+            (np.ndarray, np.ndarray): data samples and targets
         """
         return self.stream.next_sample(n_samples)
 
