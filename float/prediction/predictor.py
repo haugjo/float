@@ -1,18 +1,26 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
+from float.evaluation.time_metric import TimeMetric
 
 
 class Predictor(metaclass=ABCMeta):
     """
     Abstract base class which serves as both a wrapper for skmultiflow predictive models and a constructor for
     user-defined predictive models.
+
+    Attributes:
+        predictions (list): predicted labels per time step
+        testing_time (TimeMetric): testing times per time step
+        training_time (TimeMetric): training times per time step
     """
     @abstractmethod
     def __init__(self):
         """
         Initializes the predictor.
         """
-        raise NotImplementedError
+        self.predictions = []
+        self.testing_time = TimeMetric()
+        self.training_time = TimeMetric()
 
     def fit(self, X, y, sample_weight=None):
         """

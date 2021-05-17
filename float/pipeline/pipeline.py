@@ -14,8 +14,8 @@ class Pipeline(metaclass=ABCMeta):
     """
     Abstract base class which triggers events for different kinds of training procedures.
     """
-    def __init__(self, data_loader, feature_selector, concept_drift_detector, predictor, evaluator, max_samples,
-                 batch_size, pretrain_size, pred_metrics, fs_metrics, streaming_features):
+    def __init__(self, data_loader, feature_selector, concept_drift_detector, predictor, evaluator, max_n_samples,
+                 batch_size, n_pretrain_samples, streaming_features):
         """
         Initializes the pipeline.
 
@@ -25,12 +25,9 @@ class Pipeline(metaclass=ABCMeta):
             concept_drift_detector (ConceptDriftDetector): ConceptDriftDetector object
             predictor (Predictor): Predictor object
             evaluator (Evaluator): Evaluator object
-            evaluator (Evaluator): Evaluator object
-            max_samples (int): maximum number of observations used in the evaluation
+            max_n_samples (int): maximum number of observations used in the evaluation
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
-            pretrain_size (int): no. of observations used for initial training of the predictive model
-            pred_metrics (list): predictive metrics/measures
-            fs_metrics (list): feature selection metrics/measures
+            n_pretrain_samples (int): no. of observations used for initial training of the predictive model
             streaming_features (dict): (time, feature index) tuples to simulate streaming features
         """
         self.data_loader = data_loader
@@ -39,16 +36,13 @@ class Pipeline(metaclass=ABCMeta):
         self.predictor = predictor
         self.evaluator = evaluator
 
-        self.max_samples = max_samples
+        self.max_n_samples = max_n_samples
         self.batch_size = batch_size
-        self.pretrain_size = pretrain_size
-        self.pred_metrics = pred_metrics
-        self.fs_metrics = fs_metrics
-        self.streaming_features = dict() if streaming_features is None else streaming_features
+        self.n_pretrain_samples = n_pretrain_samples
+        self.streaming_features = streaming_features if streaming_features else dict()
 
-        self.iteration = 1
-        self.start_time = 0
-        self.global_sample_count = 0
+        self.iterator = 1
+        self.n_global_samples = 0
         self.active_features = []
 
         self._check_input()
@@ -73,19 +67,18 @@ class Pipeline(metaclass=ABCMeta):
         """
         Starts the evaluation routine.
         """
-        self.start_time = time.time()
-        if self.pretrain_size > 0:
-            self._pretrain_predictive_model()
+        if self.n_pretrain_samples > 0:
+            self._pretrain_predictor()
 
-    def _finish_iteration(self, samples):
+    def _finish_iteration(self, n_samples):
         """
         Finishes one iteration routine.
 
         Args:
-            samples (int): size of current data batch
+            n_samples (int): number of samples in current data batch
         """
-        self.iteration += 1
-        self.global_sample_count += samples
+        self.iterator += 1
+        self.n_global_samples += n_samples
 
     def _finish_evaluation(self):
         """
@@ -93,83 +86,89 @@ class Pipeline(metaclass=ABCMeta):
         """
         self.data_loader.stream.restart()
 
-    def _pretrain_predictive_model(self):
+    def _pretrain_predictor(self):
         """
-        Pre-trains the predictive model before starting the evaluation.
+        Pretrains the predictive model before starting the evaluation.
         """
-        print('Pre-train predictor with {} observation(s).'.format(self.pretrain_size))
+        print('Pretrain predictor with {} observation(s).'.format(self.n_pretrain_samples))
 
-        X, y = self.data_loader.get_data(self.pretrain_size)
+        X, y = self.data_loader.get_data(self.n_pretrain_samples)
 
         self.predictor.partial_fit(X=X, y=y)
-        self.global_sample_count += self.pretrain_size
+        self.n_global_samples += self.n_pretrain_samples
 
-    def _one_training_iteration(self):
+    def _run_single_training_iteration(self):
         """
-        Executes one training iteration.
+        Executes a single training iteration.
         """
-        if self.global_sample_count + self.batch_size <= self.max_samples:
-            samples = self.batch_size
+        if self.n_global_samples + self.batch_size <= self.max_n_samples:
+            n_samples = self.batch_size
         else:
-            samples = self.max_samples - self.global_sample_count
-        X, y = self.data_loader.get_data(samples)
+            n_samples = self.max_n_samples - self.n_global_samples
+        X, y = self.data_loader.get_data(n_samples)
 
-        if self.feature_selector.supports_streaming_features:
-            X = self._simulate_streaming_features(X)
+        if self.feature_selector:
+            if self.feature_selector.supports_streaming_features:
+                X = self._simulate_streaming_features(X)
 
-        self.start_time = time.time()
-        self.feature_selector.weight_features(copy.copy(X), copy.copy(y))
-        self.feature_selector.comp_time.compute(self.start_time, time.time())
-        self.feature_selector.select_features(X)
-        for metric in self.fs_metrics:
-            metric.compute(self.feature_selector)
+            start_time = time.time()
+            self.feature_selector.weight_features(copy.copy(X), copy.copy(y))
+            self.feature_selector.comp_time.compute(start_time, time.time())
+            self.feature_selector.select_features(X)
 
-        X = self._sparsify_X(X, self.feature_selector.selection[-1])
+            X = self._sparsify_feature_vector(X, self.feature_selector.selection[-1])
 
-        self.start_time = time.time()
-        prediction = self.predictor.predict(X).tolist()
-        self.predictor.testing_time.compute(self.start_time, time.time())
-        self.predictor.predictions.append(prediction)
-        for metric in self.pred_metrics:
-            metric.compute(y, prediction)
+        if self.concept_drift_detector:
+            # TODO
+            pass
 
-        self.start_time = time.time()
-        self.predictor.partial_fit(X, y)
-        self.predictor.training_time.compute(self.start_time, time.time())
+        if self.predictor:
+            start_time = time.time()
+            prediction = self.predictor.predict(X).tolist()
+            self.predictor.testing_time.compute(start_time, time.time())
+            self.predictor.predictions.append(prediction)
 
-        self._finish_iteration(samples)
+            start_time = time.time()
+            self.predictor.partial_fit(X, y)
+            self.predictor.training_time.compute(start_time, time.time())
+
+        if self.evaluator:
+            # TODO
+            pass
+
+        self._finish_iteration(n_samples)
 
     def _simulate_streaming_features(self, X):
         """
         Simulates streaming features. Removes inactive features as specified in streaming_features.
 
         Args:
-            X (np.array): samples of current batch
+            X (np.ndarray): samples of current batch
 
         Returns:
-            np.array: sparse X
+            np.ndarray: sparse X
         """
-        if self.iteration == 0 and self.iteration not in self.streaming_features:
-            self.active_features = np.arange(self.feature_selector.n_total_ftr)
+        if self.iterator == 0 and self.iterator not in self.streaming_features:
+            self.active_features = np.arange(self.feature_selector.n_total_features)
             warnings.warn(
                 'Simulate streaming features: No active features provided at t=0. All features are used instead.')
-        elif self.iteration in self.streaming_features:
-            self.active_features = self.streaming_features[self.iteration]
-            print('New streaming features {} at t={}'.format(self.streaming_features[self.iteration], self.iteration))
+        elif self.iterator in self.streaming_features:
+            self.active_features = self.streaming_features[self.iterator]
+            print('New streaming features {} at t={}'.format(self.streaming_features[self.iterator], self.iterator))
 
-        return self._sparsify_X(X, self.active_features)
+        return self._sparsify_feature_vector(X, self.active_features)
 
     @staticmethod
-    def _sparsify_X(X, active_features):
+    def _sparsify_feature_vector(X, active_features):
         """
-        'Removes' inactive features from X by setting them to zero.
+        'Removes' inactive features from feature vector by setting them to zero.
 
         Args:
-            X (np.array): samples of current batch
+            X (np.ndarray): samples of current batch
             active_features (list): indices of active features
 
         Returns:
-            np.array: sparse X
+            np.ndarray: sparse feature vector
         """
         sparse_X = np.zeros(X.shape)
         sparse_X[:, active_features] = X[:, active_features]

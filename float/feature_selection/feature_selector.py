@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import warnings
+from float.evaluation.time_metric import TimeMetric
 
 
 class FeatureSelector(metaclass=ABCMeta):
@@ -8,39 +9,36 @@ class FeatureSelector(metaclass=ABCMeta):
     Abstract base class for online feature selection methods.
 
     Attributes:
-        name (str): name of feature selection model
-        n_total_ftr (int): total number of features
-        n_selected_ftr (int): number of selected features
+        n_total_features (int): total number of features
+        n_selected_features (int): number of selected features
         supports_multi_class (bool): True if model support multi-class classification, False otherwise
         supports_streaming_features (bool): True if model supports streaming features, False otherwise
         raw_weight_vector (np.ndarray): current weights (as produced by feature selection model)
         weights (list): absolute weights in all time steps
         selection (list): indices of selected features in all time steps
         comp_time (list): computation time in all time steps
-        _auto_scale (bool): indicator for scaling of weights
     """
 
-    def __init__(self, name, n_total_ftr, n_selected_ftr, supports_multi_class=False, supports_streaming_features=False):
+    def __init__(self, n_total_features, n_selected_features, supports_multi_class=False,
+                 supports_streaming_features=False):
         """
         Receives parameters of feature selection model.
 
         Args:
-            name (str): name of feature selection model
-            n_total_ftr (int): total number of features
-            n_selected_ftr (int): number of selected features
+            n_total_features (int): total number of features
+            n_selected_features (int): number of selected features
             supports_multi_class (bool): True if model support multi-class classification, False otherwise
             supports_streaming_features (bool): True if model supports streaming features, False otherwise
         """
-        self.name = name
-        self.n_total_ftr = n_total_ftr
-        self.n_selected_ftr = n_selected_ftr
+        self.n_total_features = n_total_features
+        self.n_selected_features = n_selected_features
         self.supports_multi_class = supports_multi_class
         self.supports_streaming_features = supports_streaming_features
 
-        self.raw_weight_vector = np.zeros(self.n_total_ftr)
+        self.raw_weight_vector = np.zeros(self.n_total_features)
         self.weights = []
         self.selection = []
-        self.comp_time = []
+        self.comp_time = TimeMetric()
         self._auto_scale = False
 
     @abstractmethod
@@ -75,8 +73,8 @@ class FeatureSelector(metaclass=ABCMeta):
             abs_weights = self.raw_weight_vector
 
         sorted_indices = np.argsort(abs_weights)[::-1]
-        selected_indices = sorted_indices[:self.n_selected_ftr]
-        non_selected_indices = sorted_indices[self.n_selected_ftr:]
+        selected_indices = sorted_indices[:self.n_selected_features]
+        non_selected_indices = sorted_indices[self.n_selected_features:]
         X[:, non_selected_indices] = np.full(shape=X[:, non_selected_indices].shape, fill_value=self._get_reference_value())
 
         self.weights.append(abs_weights.tolist())
