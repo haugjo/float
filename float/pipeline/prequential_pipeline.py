@@ -12,7 +12,7 @@ class PrequentialPipeline(Pipeline):
     Pipeline which implements the test-then-train evaluation.
     """
     def __init__(self, data_loader=None, feature_selector=None, concept_drift_detector=None, predictor=None,
-                 evaluator=None, max_n_samples=100000, batch_size=100, n_pretrain_samples=100, streaming_features=None):
+                 evaluators=None, max_n_samples=100000, batch_size=100, n_pretrain_samples=100, streaming_features=None):
         """
         Initializes the pipeline.
 
@@ -21,13 +21,13 @@ class PrequentialPipeline(Pipeline):
             feature_selector (FeatureSelector): FeatureSelector object
             concept_drift_detector (ConceptDriftDetector): ConceptDriftDetector object
             predictor (Predictor): Predictor object
-            evaluator (Evaluator): Evaluator object
+            evaluators (list[Evaluator]): list of Evaluator objects
             max_n_samples (int): maximum number of observations used in the evaluation
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
             streaming_features (dict): (time, feature index) tuples to simulate streaming features
         """
-        super().__init__(data_loader, feature_selector, concept_drift_detector, predictor, evaluator, max_n_samples,
+        super().__init__(data_loader, feature_selector, concept_drift_detector, predictor, evaluators, max_n_samples,
                          batch_size, n_pretrain_samples, streaming_features)
 
     def run(self):
@@ -35,9 +35,9 @@ class PrequentialPipeline(Pipeline):
         Runs the pipeline.
         """
         if (self.data_loader.stream.n_remaining_samples() > 0) and \
-                (self.data_loader.stream.n_remaining_samples() < self.max_num_samples):
-            self.max_num_samples = self.data_loader.stream.n_samples
-            warnings.warn('Parameter max_samples exceeds the size of data_loader and will be automatically reset.',
+                (self.data_loader.stream.n_remaining_samples() < self.max_n_samples):
+            self.max_n_samples = self.data_loader.stream.n_samples
+            warnings.warn('Parameter max_n_samples exceeds the size of data_loader and will be automatically reset.',
                           stacklevel=2)
 
         self._start_evaluation()
@@ -48,7 +48,7 @@ class PrequentialPipeline(Pipeline):
         """
         Test-then-train evaluation
         """
-        while self.n_global_samples < self.max_num_samples:
+        while self.n_global_samples < self.max_n_samples:
             try:
                 self._run_single_training_iteration()
             except BaseException as e:

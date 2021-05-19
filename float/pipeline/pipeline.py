@@ -2,7 +2,6 @@ from abc import ABCMeta, abstractmethod
 import warnings
 import time
 import copy
-import numpy as np
 from float.data.data_loader import DataLoader
 from float.feature_selection import FeatureSelector
 from float.concept_drift_detection import ConceptDriftDetector
@@ -14,7 +13,7 @@ class Pipeline(metaclass=ABCMeta):
     """
     Abstract base class which triggers events for different kinds of training procedures.
     """
-    def __init__(self, data_loader, feature_selector, concept_drift_detector, predictor, evaluator, max_n_samples,
+    def __init__(self, data_loader, feature_selector, concept_drift_detector, predictor, evaluators, max_n_samples,
                  batch_size, n_pretrain_samples, streaming_features):
         """
         Initializes the pipeline.
@@ -24,7 +23,7 @@ class Pipeline(metaclass=ABCMeta):
             feature_selector (FeatureSelector): FeatureSelector object
             concept_drift_detector (ConceptDriftDetector): ConceptDriftDetector object
             predictor (Predictor): Predictor object
-            evaluator (Evaluator): Evaluator object
+            evaluators (list[Evaluator]): list of Evaluator objects
             max_n_samples (int): maximum number of observations used in the evaluation
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
@@ -34,7 +33,7 @@ class Pipeline(metaclass=ABCMeta):
         self.feature_selector = feature_selector
         self.concept_drift_detector = concept_drift_detector
         self.predictor = predictor
-        self.evaluator = evaluator
+        self.evaluators = evaluators
 
         self.max_n_samples = max_n_samples
         self.batch_size = batch_size
@@ -59,7 +58,7 @@ class Pipeline(metaclass=ABCMeta):
                 type(self.concept_drift_detector) is not ConceptDriftDetector and \
                 type(self.predictor) is not Predictor:
             raise AttributeError('No valid FeatureSelector, ConceptDriftDetector or Predictor object was provided.')
-        if type(self.evaluator) is not Evaluator:
+        if not self.evaluators:
             warnings.warn('No valid Evaluator object was provided.')
 
     def _start_evaluation(self):
@@ -116,8 +115,8 @@ class Pipeline(metaclass=ABCMeta):
         X = self.feature_selector.select_features(X)
 
         if self.concept_drift_detector:
-            # TODO
-            pass
+            if self.concept_drift_detector.detected_global_change():
+                self.concept_drift_detector.partial_fit(X)
 
         if self.predictor:
             start_time = time.time()
@@ -129,9 +128,8 @@ class Pipeline(metaclass=ABCMeta):
             self.predictor.partial_fit(X, y)
             self.predictor.training_time.compute(start_time, time.time())
 
-        if self.evaluator:
-            # TODO
-            pass
+        for evaluator in self.evaluators:
+            evaluator.compute()
 
         self._finish_iteration(n_samples)
 
