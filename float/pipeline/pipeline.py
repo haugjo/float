@@ -41,9 +41,8 @@ class Pipeline(metaclass=ABCMeta):
         self.n_pretrain_samples = n_pretrain_samples
         self.streaming_features = streaming_features if streaming_features else dict()
 
-        self.iterator = 1
+        self.time_step = 0
         self.n_global_samples = 0
-        self.active_features = []
 
         self._check_input()
 
@@ -77,7 +76,7 @@ class Pipeline(metaclass=ABCMeta):
         Args:
             n_samples (int): number of samples in current data batch
         """
-        self.iterator += 1
+        self.time_step += 1
         self.n_global_samples += n_samples
 
     def _finish_evaluation(self):
@@ -109,14 +108,12 @@ class Pipeline(metaclass=ABCMeta):
 
         if self.feature_selector:
             if self.feature_selector.supports_streaming_features:
-                X = self._simulate_streaming_features(X)
+                X = self.feature_selector.simulate_streaming_features(X, self.time_step, self.streaming_features)
 
-            start_time = time.time()
-            self.feature_selector.weight_features(copy.copy(X), copy.copy(y))
-            self.feature_selector.comp_time.compute(start_time, time.time())
-            self.feature_selector.select_features(X)
-
-            X = self._sparsify_feature_vector(X, self.feature_selector.selection[-1])
+        start_time = time.time()
+        self.feature_selector.weight_features(copy.copy(X), copy.copy(y))
+        self.feature_selector.comp_time.compute(start_time, time.time())
+        X = self.feature_selector.select_features(X)
 
         if self.concept_drift_detector:
             # TODO
@@ -137,42 +134,6 @@ class Pipeline(metaclass=ABCMeta):
             pass
 
         self._finish_iteration(n_samples)
-
-    def _simulate_streaming_features(self, X):
-        """
-        Simulates streaming features. Removes inactive features as specified in streaming_features.
-
-        Args:
-            X (np.ndarray): samples of current batch
-
-        Returns:
-            np.ndarray: sparse X
-        """
-        if self.iterator == 0 and self.iterator not in self.streaming_features:
-            self.active_features = np.arange(self.feature_selector.n_total_features)
-            warnings.warn(
-                'Simulate streaming features: No active features provided at t=0. All features are used instead.')
-        elif self.iterator in self.streaming_features:
-            self.active_features = self.streaming_features[self.iterator]
-            print('New streaming features {} at t={}'.format(self.streaming_features[self.iterator], self.iterator))
-
-        return self._sparsify_feature_vector(X, self.active_features)
-
-    @staticmethod
-    def _sparsify_feature_vector(X, active_features):
-        """
-        'Removes' inactive features from feature vector by setting them to zero.
-
-        Args:
-            X (np.ndarray): samples of current batch
-            active_features (list): indices of active features
-
-        Returns:
-            np.ndarray: sparse feature vector
-        """
-        sparse_X = np.zeros(X.shape)
-        sparse_X[:, active_features] = X[:, active_features]
-        return sparse_X
 
     @abstractmethod
     def run(self):

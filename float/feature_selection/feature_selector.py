@@ -39,6 +39,7 @@ class FeatureSelector(metaclass=ABCMeta):
         self.weights = []
         self.selection = []
         self.comp_time = TimeMetric()
+        self.active_features = []
         self._auto_scale = False
 
     @abstractmethod
@@ -75,12 +76,35 @@ class FeatureSelector(metaclass=ABCMeta):
         sorted_indices = np.argsort(abs_weights)[::-1]
         selected_indices = sorted_indices[:self.n_selected_features]
         non_selected_indices = sorted_indices[self.n_selected_features:]
-        X[:, non_selected_indices] = np.full(shape=X[:, non_selected_indices].shape, fill_value=self._get_reference_value())
-
         self.weights.append(abs_weights.tolist())
         self.selection.append(selected_indices.tolist())
 
+        X[:, non_selected_indices] = np.full(shape=X[:, non_selected_indices].shape, fill_value=self._get_reference_value())
         return X
+
+    def simulate_streaming_features(self, X, time_step, streaming_features):
+        """
+        Simulates streaming features.
+
+        Args:
+            X (np.ndarray): samples of current batch
+            time_step (int): the current time step
+            streaming_features (dict): (time, feature index) tuples to simulate streaming features
+
+        Returns:
+            np.ndarray: the data samples with the non-active features set to a reference value
+        """
+        if time_step == 0 and time_step not in streaming_features:
+            self.active_features = np.arange(self.n_total_features)
+            warnings.warn(
+                'Simulate streaming features: No active features provided at t=0. All features are used instead.')
+        elif time_step in streaming_features:
+            self.active_features = streaming_features[time_step]
+            print('New streaming features {} at t={}'.format(streaming_features[time_step], time_step))
+
+        sparse_X = np.full(X.shape, self._get_reference_value())
+        sparse_X[:, self.active_features] = X[:, self.active_features]
+        return sparse_X
 
     def _get_reference_value(self):
         """
