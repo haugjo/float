@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
 <title>float.prediction API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="The float.prediction module includes methods for predicting using defined models." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,11 +22,24 @@
 <h1 class="title">Module <code>float.prediction</code></h1>
 </header>
 <section id="section-intro">
+<p>The float.prediction module includes methods for predicting using defined models.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+The float.prediction module includes methods for predicting using defined models.
+&#34;&#34;&#34;
+
+from .predictor import Predictor
+
+__all__ = [&#39;Predictor&#39;]</code></pre>
+</details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="float.prediction.Predictor" href="Predictor.html">float.prediction.Predictor</a></code></dt>
+<dt><code class="name"><a title="float.prediction.predictor" href="predictor.html">float.prediction.predictor</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -37,6 +50,298 @@
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="float.prediction.Predictor"><code class="flex name class">
+<span>class <span class="ident">Predictor</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Abstract base class which serves as both a wrapper for skmultiflow predictive models and a constructor for
+user-defined predictive models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>predictions</code></strong> :&ensp;<code>list</code></dt>
+<dd>predicted labels per time step</dd>
+<dt><strong><code>testing_time</code></strong> :&ensp;<code>TimeMetric</code></dt>
+<dd>testing times per time step</dd>
+<dt><strong><code>training_time</code></strong> :&ensp;<code>TimeMetric</code></dt>
+<dd>training times per time step</dd>
+</dl>
+<p>Initializes the predictor.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Predictor(metaclass=ABCMeta):
+    &#34;&#34;&#34;
+    Abstract base class which serves as both a wrapper for skmultiflow predictive models and a constructor for
+    user-defined predictive models.
+
+    Attributes:
+        predictions (list): predicted labels per time step
+        testing_time (TimeMetric): testing times per time step
+        training_time (TimeMetric): training times per time step
+    &#34;&#34;&#34;
+    @abstractmethod
+    def __init__(self):
+        &#34;&#34;&#34;
+        Initializes the predictor.
+        &#34;&#34;&#34;
+        self.predictions = []
+        self.testing_time = TimeMetric()
+        self.training_time = TimeMetric()
+
+    def fit(self, X, y, sample_weight=None):
+        &#34;&#34;&#34;
+        Fits the model.
+
+        Args:
+            X (np.ndarray): data samples to train the model with
+            y (np.ndarray): target values for all samples in X
+            sample_weight (np.ndarray): sample weights
+
+        Returns:
+            self
+        &#34;&#34;&#34;
+        self.partial_fit(X, y, sample_weight=sample_weight)
+
+        return self
+
+    @abstractmethod
+    def partial_fit(self, X, y, sample_weight=None):
+        &#34;&#34;&#34;
+        Partially (incrementally) fit the model.
+
+        Args:
+            X (np.ndarray): data samples to train the model with
+            y (np.ndarray): target values for all samples in X
+            sample_weight (np.ndarray): sample weights
+
+        Returns:
+            self
+        &#34;&#34;&#34;
+        raise NotImplementedError
+
+    @abstractmethod
+    def predict(self, X):
+        &#34;&#34;&#34;
+        Predicts target values for the passed data.
+
+        Args:
+            X (np.ndarray): data samples to predict the values for
+
+        Returns:
+            np.ndarray: predictions for all samples in X
+        &#34;&#34;&#34;
+        raise NotImplementedError
+
+    @abstractmethod
+    def predict_proba(self, X):
+        &#34;&#34;&#34;
+        Estimates the probability for probabilistic/bayesian regressors.
+
+        Args:
+            X (np.ndarray): data samples to predict the probabilities for
+
+        Returns:
+            np.ndarray: prediction probability for all samples in X
+        &#34;&#34;&#34;
+        raise NotImplementedError
+
+    @abstractmethod
+    def score(self, X, y):
+        &#34;&#34;&#34;
+        Returns the accuracy based on the given test samples and true values.
+
+        Args:
+            X (np.ndarray): test data samples
+            y (np.ndarray): true values for all samples in X
+
+        Returns:
+            float: accuracy based on test data and target values
+        &#34;&#34;&#34;
+        raise NotImplementedError</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="float.prediction.Predictor.fit"><code class="name flex">
+<span>def <span class="ident">fit</span></span>(<span>self, X, y, sample_weight=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Fits the model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>X</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>data samples to train the model with</dd>
+<dt><strong><code>y</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>target values for all samples in X</dd>
+<dt><strong><code>sample_weight</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>sample weights</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>self</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fit(self, X, y, sample_weight=None):
+    &#34;&#34;&#34;
+    Fits the model.
+
+    Args:
+        X (np.ndarray): data samples to train the model with
+        y (np.ndarray): target values for all samples in X
+        sample_weight (np.ndarray): sample weights
+
+    Returns:
+        self
+    &#34;&#34;&#34;
+    self.partial_fit(X, y, sample_weight=sample_weight)
+
+    return self</code></pre>
+</details>
+</dd>
+<dt id="float.prediction.Predictor.partial_fit"><code class="name flex">
+<span>def <span class="ident">partial_fit</span></span>(<span>self, X, y, sample_weight=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Partially (incrementally) fit the model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>X</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>data samples to train the model with</dd>
+<dt><strong><code>y</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>target values for all samples in X</dd>
+<dt><strong><code>sample_weight</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>sample weights</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>self</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+def partial_fit(self, X, y, sample_weight=None):
+    &#34;&#34;&#34;
+    Partially (incrementally) fit the model.
+
+    Args:
+        X (np.ndarray): data samples to train the model with
+        y (np.ndarray): target values for all samples in X
+        sample_weight (np.ndarray): sample weights
+
+    Returns:
+        self
+    &#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
+</details>
+</dd>
+<dt id="float.prediction.Predictor.predict"><code class="name flex">
+<span>def <span class="ident">predict</span></span>(<span>self, X)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Predicts target values for the passed data.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>X</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>data samples to predict the values for</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>np.ndarray</code></dt>
+<dd>predictions for all samples in X</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+def predict(self, X):
+    &#34;&#34;&#34;
+    Predicts target values for the passed data.
+
+    Args:
+        X (np.ndarray): data samples to predict the values for
+
+    Returns:
+        np.ndarray: predictions for all samples in X
+    &#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
+</details>
+</dd>
+<dt id="float.prediction.Predictor.predict_proba"><code class="name flex">
+<span>def <span class="ident">predict_proba</span></span>(<span>self, X)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Estimates the probability for probabilistic/bayesian regressors.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>X</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>data samples to predict the probabilities for</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>np.ndarray</code></dt>
+<dd>prediction probability for all samples in X</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+def predict_proba(self, X):
+    &#34;&#34;&#34;
+    Estimates the probability for probabilistic/bayesian regressors.
+
+    Args:
+        X (np.ndarray): data samples to predict the probabilities for
+
+    Returns:
+        np.ndarray: prediction probability for all samples in X
+    &#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
+</details>
+</dd>
+<dt id="float.prediction.Predictor.score"><code class="name flex">
+<span>def <span class="ident">score</span></span>(<span>self, X, y)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the accuracy based on the given test samples and true values.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>X</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>test data samples</dd>
+<dt><strong><code>y</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>true values for all samples in X</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="float" href="../index.html">float</a></code></dt>
+<dd>accuracy based on test data and target values</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+def score(self, X, y):
+    &#34;&#34;&#34;
+    Returns the accuracy based on the given test samples and true values.
+
+    Args:
+        X (np.ndarray): test data samples
+        y (np.ndarray): true values for all samples in X
+
+    Returns:
+        float: accuracy based on test data and target values
+    &#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -52,7 +357,21 @@
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="float.prediction.Predictor" href="Predictor.html">float.prediction.Predictor</a></code></li>
+<li><code><a title="float.prediction.predictor" href="predictor.html">float.prediction.predictor</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="float.prediction.Predictor" href="#float.prediction.Predictor">Predictor</a></code></h4>
+<ul class="">
+<li><code><a title="float.prediction.Predictor.fit" href="#float.prediction.Predictor.fit">fit</a></code></li>
+<li><code><a title="float.prediction.Predictor.partial_fit" href="#float.prediction.Predictor.partial_fit">partial_fit</a></code></li>
+<li><code><a title="float.prediction.Predictor.predict" href="#float.prediction.Predictor.predict">predict</a></code></li>
+<li><code><a title="float.prediction.Predictor.predict_proba" href="#float.prediction.Predictor.predict_proba">predict_proba</a></code></li>
+<li><code><a title="float.prediction.Predictor.score" href="#float.prediction.Predictor.score">score</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

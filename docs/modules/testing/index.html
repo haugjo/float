@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
 <title>float.testing API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="The float.testing module includes testing functionality." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,15 +22,29 @@
 <h1 class="title">Module <code>float.testing</code></h1>
 </header>
 <section id="section-intro">
+<p>The float.testing module includes testing functionality.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+The float.testing module includes testing functionality.
+&#34;&#34;&#34;
+
+from .test import Test
+from .test_data_loader import TestDataLoader
+
+__all__ = [&#39;Test&#39;, &#39;TestDataLoader&#39;]</code></pre>
+</details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="float.testing.Test" href="Test.html">float.testing.Test</a></code></dt>
+<dt><code class="name"><a title="float.testing.test" href="test.html">float.testing.test</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="float.testing.TestDataLoader" href="TestDataLoader.html">float.testing.TestDataLoader</a></code></dt>
+<dt><code class="name"><a title="float.testing.test_data_loader" href="test_data_loader.html">float.testing.test_data_loader</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -41,6 +55,151 @@
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="float.testing.Test"><code class="flex name class">
+<span>class <span class="ident">Test</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Test:
+    def __init__(self):
+        raise NotImplementedError</code></pre>
+</details>
+</dd>
+<dt id="float.testing.TestDataLoader"><code class="flex name class">
+<span>class <span class="ident">TestDataLoader</span></span>
+<span>(</span><span>method_name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A class whose instances are single test cases.</p>
+<p>By default, the test code itself should be placed in a method named
+'runTest'.</p>
+<p>If the fixture may be used for many test cases, create as
+many test methods as are needed. When instantiating such a TestCase
+subclass, specify in the constructor arguments the name of the test method
+that the instance is to execute.</p>
+<p>Test authors should subclass TestCase for their own tests. Construction
+and deconstruction of the test's environment ('fixture') can be
+implemented by overriding the 'setUp' and 'tearDown' methods respectively.</p>
+<p>If it is necessary to override the <strong>init</strong> method, the base class
+<strong>init</strong> method must always be called. It is important that subclasses
+should not change the signature of their <strong>init</strong> method, since instances
+of the classes are instantiated automatically by parts of the framework
+in order to be run.</p>
+<p>When subclassing TestCase, you can set these attributes:
+* failureException: determines which exception will be raised when
+the instance's assertion methods fail; test methods raising this
+exception will be deemed to have 'failed' rather than 'errored'.
+* longMessage: determines whether long messages (including repr of
+objects used in assert methods) will be printed on failure in <em>addition</em>
+to any explicit message passed.
+* maxDiff: sets the maximum length of a diff in failure messages
+by assert methods using difflib. It is looked up as an instance
+attribute so can be configured by individual tests if required.</p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TestDataLoader(unittest.TestCase):
+    def __init__(self, method_name):
+        super().__init__(method_name)
+        self.data_loader = DataLoader(file_path=&#39;../data/datasets/spambase.csv&#39;, target_col=0)
+
+    def test_evaluate_input(self):
+        with self.assertRaises(AttributeError, msg=&#39;passing no inputs&#39;):
+            DataLoader()
+        with self.assertRaises(AttributeError, msg=&#39;passing non .csv file&#39;):
+            DataLoader(file_path=&#39;../data/__init__.py&#39;)
+        with self.assertRaises(AttributeError, msg=&#39;passing non int value for target_col&#39;):
+            DataLoader(file_path=&#39;../data/datasets/spambase.csv&#39;, target_col=None)
+        with self.assertRaises(FileNotFoundError, msg=&#39;file not found&#39;):
+            DataLoader(file_path=&#39;../data/datasets/spam_base.csv&#39;)
+        with self.assertRaises(ValueError, msg=&#39;non compatible .csv file&#39;):
+            DataLoader(file_path=&#39;../../docs/time_tracking.csv&#39;)
+
+    def test_init(self):
+        self.assertIsInstance(self.data_loader.stream, Stream, msg=&#39;attribute stream of type Stream&#39;)
+
+    def test_get_data(self):
+        n_samples = 3
+        samples = self.data_loader.get_data(n_samples)
+        self.assertIsInstance(samples, tuple, msg=&#39;returns tuple&#39;)
+        self.assertIsInstance(samples[0], np.ndarray, msg=&#39;returns tuple of numpy arrays&#39;)
+        self.assertIsInstance(samples[1], np.ndarray, msg=&#39;returns tuple of numpy arrays&#39;)
+        self.assertEqual(samples[0].shape, (n_samples, self.data_loader.stream.n_features), msg=&#39;returns data in correct shape&#39;)
+        self.assertEqual(samples[1].shape, (n_samples,), msg=&#39;returns target values in correct shape&#39;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>unittest.case.TestCase</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="float.testing.TestDataLoader.test_evaluate_input"><code class="name flex">
+<span>def <span class="ident">test_evaluate_input</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_evaluate_input(self):
+    with self.assertRaises(AttributeError, msg=&#39;passing no inputs&#39;):
+        DataLoader()
+    with self.assertRaises(AttributeError, msg=&#39;passing non .csv file&#39;):
+        DataLoader(file_path=&#39;../data/__init__.py&#39;)
+    with self.assertRaises(AttributeError, msg=&#39;passing non int value for target_col&#39;):
+        DataLoader(file_path=&#39;../data/datasets/spambase.csv&#39;, target_col=None)
+    with self.assertRaises(FileNotFoundError, msg=&#39;file not found&#39;):
+        DataLoader(file_path=&#39;../data/datasets/spam_base.csv&#39;)
+    with self.assertRaises(ValueError, msg=&#39;non compatible .csv file&#39;):
+        DataLoader(file_path=&#39;../../docs/time_tracking.csv&#39;)</code></pre>
+</details>
+</dd>
+<dt id="float.testing.TestDataLoader.test_get_data"><code class="name flex">
+<span>def <span class="ident">test_get_data</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_get_data(self):
+    n_samples = 3
+    samples = self.data_loader.get_data(n_samples)
+    self.assertIsInstance(samples, tuple, msg=&#39;returns tuple&#39;)
+    self.assertIsInstance(samples[0], np.ndarray, msg=&#39;returns tuple of numpy arrays&#39;)
+    self.assertIsInstance(samples[1], np.ndarray, msg=&#39;returns tuple of numpy arrays&#39;)
+    self.assertEqual(samples[0].shape, (n_samples, self.data_loader.stream.n_features), msg=&#39;returns data in correct shape&#39;)
+    self.assertEqual(samples[1].shape, (n_samples,), msg=&#39;returns target values in correct shape&#39;)</code></pre>
+</details>
+</dd>
+<dt id="float.testing.TestDataLoader.test_init"><code class="name flex">
+<span>def <span class="ident">test_init</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_init(self):
+    self.assertIsInstance(self.data_loader.stream, Stream, msg=&#39;attribute stream of type Stream&#39;)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -56,8 +215,23 @@
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="float.testing.Test" href="Test.html">float.testing.Test</a></code></li>
-<li><code><a title="float.testing.TestDataLoader" href="TestDataLoader.html">float.testing.TestDataLoader</a></code></li>
+<li><code><a title="float.testing.test" href="test.html">float.testing.test</a></code></li>
+<li><code><a title="float.testing.test_data_loader" href="test_data_loader.html">float.testing.test_data_loader</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="float.testing.Test" href="#float.testing.Test">Test</a></code></h4>
+</li>
+<li>
+<h4><code><a title="float.testing.TestDataLoader" href="#float.testing.TestDataLoader">TestDataLoader</a></code></h4>
+<ul class="">
+<li><code><a title="float.testing.TestDataLoader.test_evaluate_input" href="#float.testing.TestDataLoader.test_evaluate_input">test_evaluate_input</a></code></li>
+<li><code><a title="float.testing.TestDataLoader.test_get_data" href="#float.testing.TestDataLoader.test_get_data">test_get_data</a></code></li>
+<li><code><a title="float.testing.TestDataLoader.test_init" href="#float.testing.TestDataLoader.test_init">test_init</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

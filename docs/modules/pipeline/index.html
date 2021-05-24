@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
 <title>float.pipeline API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="The float.pipeline module includes methods for creating and triggering events." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,11 +22,34 @@
 <h1 class="title">Module <code>float.pipeline</code></h1>
 </header>
 <section id="section-intro">
+<p>The float.pipeline module includes methods for creating and triggering events.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+The float.pipeline module includes methods for creating and triggering events.
+&#34;&#34;&#34;
+
+from .pipeline import Pipeline
+from .prequential_pipeline import PrequentialPipeline
+from .holdout_pipeline import HoldoutPipeline
+
+__all__ = [&#39;Pipeline&#39;, &#39;PrequentialPipeline&#39;, &#39;HoldoutPipeline&#39;]</code></pre>
+</details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="float.pipeline.Pipeline" href="Pipeline.html">float.pipeline.Pipeline</a></code></dt>
+<dt><code class="name"><a title="float.pipeline.holdout_pipeline" href="holdout_pipeline.html">float.pipeline.holdout_pipeline</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="float.pipeline.pipeline" href="pipeline.html">float.pipeline.pipeline</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="float.pipeline.prequential_pipeline" href="prequential_pipeline.html">float.pipeline.prequential_pipeline</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -37,6 +60,395 @@
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="float.pipeline.HoldoutPipeline"><code class="flex name class">
+<span>class <span class="ident">HoldoutPipeline</span></span>
+<span>(</span><span>data_loader=None, feature_selector=None, concept_drift_detector=None, predictor=None, evaluators=None, max_n_samples=100000, batch_size=100, n_pretrain_samples=100)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Pipeline which implements the holdout evaluation.</p>
+<p>Initializes the pipeline.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data_loader</code></strong> :&ensp;<code>DataLoader</code></dt>
+<dd>DataLoader object</dd>
+<dt><strong><code>feature_selector</code></strong> :&ensp;<code>FeatureSelector</code></dt>
+<dd>FeatureSelector object</dd>
+<dt><strong><code>concept_drift_detector</code></strong> :&ensp;<code>ConceptDriftDetector</code></dt>
+<dd>ConceptDriftDetector object</dd>
+<dt><strong><code>predictor</code></strong> :&ensp;<code>Predictor</code></dt>
+<dd>Predictor object</dd>
+<dt><strong><code>evaluators</code></strong> :&ensp;<code>list[Evaluator]</code></dt>
+<dd>list of Evaluator objects</dd>
+<dt><strong><code>max_n_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>maximum number of observations used in the evaluation</dd>
+<dt><strong><code>batch_size</code></strong> :&ensp;<code>int</code></dt>
+<dd>size of one batch (i.e. no. of observations at one time step)</dd>
+<dt><strong><code>n_pretrain_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>no. of observations used for initial training of the predictive model</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class HoldoutPipeline(Pipeline):
+    &#34;&#34;&#34;
+    Pipeline which implements the holdout evaluation.
+    &#34;&#34;&#34;
+    def __init__(self, data_loader=None, feature_selector=None, concept_drift_detector=None, predictor=None,
+                 evaluators=None, max_n_samples=100000, batch_size=100, n_pretrain_samples=100):
+        &#34;&#34;&#34;
+        Initializes the pipeline.
+
+        Args:
+            data_loader (DataLoader): DataLoader object
+            feature_selector (FeatureSelector): FeatureSelector object
+            concept_drift_detector (ConceptDriftDetector): ConceptDriftDetector object
+            predictor (Predictor): Predictor object
+            evaluators (list[Evaluator]): list of Evaluator objects
+            max_n_samples (int): maximum number of observations used in the evaluation
+            batch_size (int): size of one batch (i.e. no. of observations at one time step)
+            n_pretrain_samples (int): no. of observations used for initial training of the predictive model
+        &#34;&#34;&#34;
+        super().__init__(data_loader, feature_selector, concept_drift_detector, predictor, evaluators, max_n_samples,
+                         batch_size, n_pretrain_samples)
+        self.data_loader = data_loader
+        self.feature_selector = feature_selector
+        self.concept_drift_detector = concept_drift_detector
+        self.predictor = predictor
+        self.evaluators = evaluators
+
+    def run(self):
+        pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="float.pipeline.pipeline.Pipeline" href="pipeline.html#float.pipeline.pipeline.Pipeline">Pipeline</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="float.pipeline.HoldoutPipeline.run"><code class="name flex">
+<span>def <span class="ident">run</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run(self):
+    pass</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="float.pipeline.Pipeline"><code class="flex name class">
+<span>class <span class="ident">Pipeline</span></span>
+<span>(</span><span>data_loader, feature_selector, concept_drift_detector, predictor, evaluators, max_n_samples, batch_size, n_pretrain_samples)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Abstract base class which triggers events for different kinds of training procedures.</p>
+<p>Initializes the pipeline.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data_loader</code></strong> :&ensp;<code>DataLoader</code></dt>
+<dd>DataLoader object</dd>
+<dt><strong><code>feature_selector</code></strong> :&ensp;<code>FeatureSelector</code></dt>
+<dd>FeatureSelector object</dd>
+<dt><strong><code>concept_drift_detector</code></strong> :&ensp;<code>ConceptDriftDetector</code></dt>
+<dd>ConceptDriftDetector object</dd>
+<dt><strong><code>predictor</code></strong> :&ensp;<code>Predictor</code></dt>
+<dd>Predictor object</dd>
+<dt><strong><code>evaluators</code></strong> :&ensp;<code>list[Evaluator]</code></dt>
+<dd>list of Evaluator objects</dd>
+<dt><strong><code>max_n_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>maximum number of observations used in the evaluation</dd>
+<dt><strong><code>batch_size</code></strong> :&ensp;<code>int</code></dt>
+<dd>size of one batch (i.e. no. of observations at one time step)</dd>
+<dt><strong><code>n_pretrain_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>no. of observations used for initial training of the predictive model</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Pipeline(metaclass=ABCMeta):
+    &#34;&#34;&#34;
+    Abstract base class which triggers events for different kinds of training procedures.
+    &#34;&#34;&#34;
+    def __init__(self, data_loader, feature_selector, concept_drift_detector, predictor, evaluators, max_n_samples,
+                 batch_size, n_pretrain_samples):
+        &#34;&#34;&#34;
+        Initializes the pipeline.
+
+        Args:
+            data_loader (DataLoader): DataLoader object
+            feature_selector (FeatureSelector): FeatureSelector object
+            concept_drift_detector (ConceptDriftDetector): ConceptDriftDetector object
+            predictor (Predictor): Predictor object
+            evaluators (list[Evaluator]): list of Evaluator objects
+            max_n_samples (int): maximum number of observations used in the evaluation
+            batch_size (int): size of one batch (i.e. no. of observations at one time step)
+            n_pretrain_samples (int): no. of observations used for initial training of the predictive model
+        &#34;&#34;&#34;
+        self.data_loader = data_loader
+        self.feature_selector = feature_selector
+        self.concept_drift_detector = concept_drift_detector
+        self.predictor = predictor
+        self.evaluators = evaluators
+
+        self.max_n_samples = max_n_samples
+        self.batch_size = batch_size
+        self.n_pretrain_samples = n_pretrain_samples
+
+        self.time_step = 0
+        self.n_global_samples = 0
+
+        self._check_input()
+
+    def _check_input(self):
+        &#34;&#34;&#34;
+        Checks if the provided parameter values are sufficient to run a pipeline.
+
+        Raises:
+            AttributeError: if a crucial parameter is missing
+        &#34;&#34;&#34;
+        if type(self.data_loader) is not DataLoader:
+            raise AttributeError(&#39;No valid DataLoader object was provided.&#39;)
+        if type(self.feature_selector) is not FeatureSelector and \
+                type(self.concept_drift_detector) is not ConceptDriftDetector and \
+                type(self.predictor) is not Predictor:
+            raise AttributeError(&#39;No valid FeatureSelector, ConceptDriftDetector or Predictor object was provided.&#39;)
+        if not self.evaluators:
+            warnings.warn(&#39;No valid Evaluator object was provided.&#39;)
+
+    def _start_evaluation(self):
+        &#34;&#34;&#34;
+        Starts the evaluation routine.
+        &#34;&#34;&#34;
+        if self.n_pretrain_samples &gt; 0:
+            self._pretrain_predictor()
+
+    def _finish_iteration(self, n_samples):
+        &#34;&#34;&#34;
+        Finishes one iteration routine.
+
+        Args:
+            n_samples (int): number of samples in current data batch
+        &#34;&#34;&#34;
+        self.time_step += 1
+        self.n_global_samples += n_samples
+
+    def _finish_evaluation(self):
+        &#34;&#34;&#34;
+        Finishes the evaluation routine.
+        &#34;&#34;&#34;
+        self.data_loader.stream.restart()
+
+    def _pretrain_predictor(self):
+        &#34;&#34;&#34;
+        Pretrains the predictive model before starting the evaluation.
+        &#34;&#34;&#34;
+        print(&#39;Pretrain predictor with {} observation(s).&#39;.format(self.n_pretrain_samples))
+
+        X, y = self.data_loader.get_data(self.n_pretrain_samples)
+
+        self.predictor.partial_fit(X=X, y=y)
+        self.n_global_samples += self.n_pretrain_samples
+
+    def _run_single_training_iteration(self):
+        &#34;&#34;&#34;
+        Executes a single training iteration.
+        &#34;&#34;&#34;
+        if self.n_global_samples + self.batch_size &lt;= self.max_n_samples:
+            n_samples = self.batch_size
+        else:
+            n_samples = self.max_n_samples - self.n_global_samples
+        X, y = self.data_loader.get_data(n_samples)
+
+        if self.concept_drift_detector:
+            self.concept_drift_detector.partial_fit(X)
+            change_detected = self.concept_drift_detector.detected_global_change()
+            self.concept_drift_detector.change_detections.compute(change_detected)
+            if change_detected:
+                print(f&#34;Change detected at {self.time_step}.&#34;)
+
+        if self.feature_selector:
+            start_time = time.time()
+            self.feature_selector.weight_features(copy.copy(X), copy.copy(y))
+            self.feature_selector.comp_time.compute(start_time, time.time())
+            X = self.feature_selector.select_features(X, self.time_step)
+
+        if self.predictor:
+            start_time = time.time()
+            prediction = self.predictor.predict(X).tolist()
+            self.predictor.testing_time.compute(start_time, time.time())
+            self.predictor.predictions.append(prediction)
+
+            start_time = time.time()
+            self.predictor.partial_fit(X, y)
+            self.predictor.training_time.compute(start_time, time.time())
+
+        for evaluator in self.evaluators:
+            evaluator.compute()
+
+        self._finish_iteration(n_samples)
+
+    @abstractmethod
+    def run(self):
+        raise NotImplementedError</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="float.pipeline.holdout_pipeline.HoldoutPipeline" href="holdout_pipeline.html#float.pipeline.holdout_pipeline.HoldoutPipeline">HoldoutPipeline</a></li>
+<li><a title="float.pipeline.prequential_pipeline.PrequentialPipeline" href="prequential_pipeline.html#float.pipeline.prequential_pipeline.PrequentialPipeline">PrequentialPipeline</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="float.pipeline.Pipeline.run"><code class="name flex">
+<span>def <span class="ident">run</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+def run(self):
+    raise NotImplementedError</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="float.pipeline.PrequentialPipeline"><code class="flex name class">
+<span>class <span class="ident">PrequentialPipeline</span></span>
+<span>(</span><span>data_loader=None, feature_selector=None, concept_drift_detector=None, predictor=None, evaluators=None, max_n_samples=100000, batch_size=100, n_pretrain_samples=100)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Pipeline which implements the test-then-train evaluation.</p>
+<p>Initializes the pipeline.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data_loader</code></strong> :&ensp;<code>DataLoader</code></dt>
+<dd>DataLoader object</dd>
+<dt><strong><code>feature_selector</code></strong> :&ensp;<code>FeatureSelector</code></dt>
+<dd>FeatureSelector object</dd>
+<dt><strong><code>concept_drift_detector</code></strong> :&ensp;<code>ConceptDriftDetector</code></dt>
+<dd>ConceptDriftDetector object</dd>
+<dt><strong><code>predictor</code></strong> :&ensp;<code>Predictor</code></dt>
+<dd>Predictor object</dd>
+<dt><strong><code>evaluators</code></strong> :&ensp;<code>list[Evaluator]</code></dt>
+<dd>list of Evaluator objects</dd>
+<dt><strong><code>max_n_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>maximum number of observations used in the evaluation</dd>
+<dt><strong><code>batch_size</code></strong> :&ensp;<code>int</code></dt>
+<dd>size of one batch (i.e. no. of observations at one time step)</dd>
+<dt><strong><code>n_pretrain_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>no. of observations used for initial training of the predictive model</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PrequentialPipeline(Pipeline):
+    &#34;&#34;&#34;
+    Pipeline which implements the test-then-train evaluation.
+    &#34;&#34;&#34;
+    def __init__(self, data_loader=None, feature_selector=None, concept_drift_detector=None, predictor=None,
+                 evaluators=None, max_n_samples=100000, batch_size=100, n_pretrain_samples=100):
+        &#34;&#34;&#34;
+        Initializes the pipeline.
+
+        Args:
+            data_loader (DataLoader): DataLoader object
+            feature_selector (FeatureSelector): FeatureSelector object
+            concept_drift_detector (ConceptDriftDetector): ConceptDriftDetector object
+            predictor (Predictor): Predictor object
+            evaluators (list[Evaluator]): list of Evaluator objects
+            max_n_samples (int): maximum number of observations used in the evaluation
+            batch_size (int): size of one batch (i.e. no. of observations at one time step)
+            n_pretrain_samples (int): no. of observations used for initial training of the predictive model
+        &#34;&#34;&#34;
+        super().__init__(data_loader, feature_selector, concept_drift_detector, predictor, evaluators, max_n_samples,
+                         batch_size, n_pretrain_samples)
+
+    def run(self):
+        &#34;&#34;&#34;
+        Runs the pipeline.
+
+        Returns:
+            list[Evaluator]: the list of evaluators
+        &#34;&#34;&#34;
+        if (self.data_loader.stream.n_remaining_samples() &gt; 0) and \
+                (self.data_loader.stream.n_remaining_samples() &lt; self.max_n_samples):
+            self.max_n_samples = self.data_loader.stream.n_samples
+            warnings.warn(&#39;Parameter max_n_samples exceeds the size of data_loader and will be automatically reset.&#39;,
+                          stacklevel=2)
+
+        self._start_evaluation()
+        self._test_then_train()
+        self._finish_evaluation()
+
+        # TODO: find solution for returning metrics from other objects (FS, CDD, etc.)
+        return self.evaluators
+
+    def _test_then_train(self):
+        &#34;&#34;&#34;
+        Test-then-train evaluation
+        &#34;&#34;&#34;
+        while self.n_global_samples &lt; self.max_n_samples:
+            try:
+                self._run_single_training_iteration()
+            except BaseException as e:
+                print(e)
+                break</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="float.pipeline.pipeline.Pipeline" href="pipeline.html#float.pipeline.pipeline.Pipeline">Pipeline</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="float.pipeline.PrequentialPipeline.run"><code class="name flex">
+<span>def <span class="ident">run</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Runs the pipeline.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[Evaluator]</code></dt>
+<dd>the list of evaluators</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run(self):
+    &#34;&#34;&#34;
+    Runs the pipeline.
+
+    Returns:
+        list[Evaluator]: the list of evaluators
+    &#34;&#34;&#34;
+    if (self.data_loader.stream.n_remaining_samples() &gt; 0) and \
+            (self.data_loader.stream.n_remaining_samples() &lt; self.max_n_samples):
+        self.max_n_samples = self.data_loader.stream.n_samples
+        warnings.warn(&#39;Parameter max_n_samples exceeds the size of data_loader and will be automatically reset.&#39;,
+                      stacklevel=2)
+
+    self._start_evaluation()
+    self._test_then_train()
+    self._finish_evaluation()
+
+    # TODO: find solution for returning metrics from other objects (FS, CDD, etc.)
+    return self.evaluators</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -52,7 +464,31 @@
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="float.pipeline.Pipeline" href="Pipeline.html">float.pipeline.Pipeline</a></code></li>
+<li><code><a title="float.pipeline.holdout_pipeline" href="holdout_pipeline.html">float.pipeline.holdout_pipeline</a></code></li>
+<li><code><a title="float.pipeline.pipeline" href="pipeline.html">float.pipeline.pipeline</a></code></li>
+<li><code><a title="float.pipeline.prequential_pipeline" href="prequential_pipeline.html">float.pipeline.prequential_pipeline</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="float.pipeline.HoldoutPipeline" href="#float.pipeline.HoldoutPipeline">HoldoutPipeline</a></code></h4>
+<ul class="">
+<li><code><a title="float.pipeline.HoldoutPipeline.run" href="#float.pipeline.HoldoutPipeline.run">run</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="float.pipeline.Pipeline" href="#float.pipeline.Pipeline">Pipeline</a></code></h4>
+<ul class="">
+<li><code><a title="float.pipeline.Pipeline.run" href="#float.pipeline.Pipeline.run">run</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="float.pipeline.PrequentialPipeline" href="#float.pipeline.PrequentialPipeline">PrequentialPipeline</a></code></h4>
+<ul class="">
+<li><code><a title="float.pipeline.PrequentialPipeline.run" href="#float.pipeline.PrequentialPipeline.run">run</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
 <title>float.data API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="The float.data module includes methods for handling data streams." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,11 +22,24 @@
 <h1 class="title">Module <code>float.data</code></h1>
 </header>
 <section id="section-intro">
+<p>The float.data module includes methods for handling data streams.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+The float.data module includes methods for handling data streams.
+&#34;&#34;&#34;
+
+from .data_loader import DataLoader
+
+__all__ = [&#39;DataLoader&#39;]</code></pre>
+</details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="float.data.DataLoader" href="DataLoader.html">float.data.DataLoader</a></code></dt>
+<dt><code class="name"><a title="float.data.data_loader" href="data_loader.html">float.data.data_loader</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -37,6 +50,131 @@
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="float.data.DataLoader"><code class="flex name class">
+<span>class <span class="ident">DataLoader</span></span>
+<span>(</span><span>stream=None, file_path=None, target_col=-1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Serves as a wrapper for the skmultiflow Stream class.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>stream</code></strong> :&ensp;<code>Stream</code></dt>
+<dd>data stream object</dd>
+</dl>
+<p>Receives either the path to a csv file (+ a target index) which is then mapped to a skmultiflow FileStream
+object OR a skmultiflow Stream object.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>stream</code></strong> :&ensp;<code>skmultiflow.data.base_stream.Stream</code></dt>
+<dd>data stream object</dd>
+<dt><strong><code>file_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>path to a .csv file containing the data</dd>
+<dt><strong><code>target_col</code></strong> :&ensp;<code>int</code></dt>
+<dd>index of the target column of the .csv file</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DataLoader:
+    &#34;&#34;&#34;
+    Serves as a wrapper for the skmultiflow Stream class.
+
+    Attributes:
+        stream (Stream): data stream object
+    &#34;&#34;&#34;
+    def __init__(self, stream=None, file_path=None, target_col=-1):
+        &#34;&#34;&#34;
+        Receives either the path to a csv file (+ a target index) which is then mapped to a skmultiflow FileStream
+        object OR a skmultiflow Stream object.
+
+        Args:
+            stream (skmultiflow.data.base_stream.Stream): data stream object
+            file_path (str): path to a .csv file containing the data
+            target_col (int): index of the target column of the .csv file
+        &#34;&#34;&#34;
+        self.stream = stream
+        self.target_col = target_col
+        self.file_path = file_path
+        self._check_input()
+        self.stream = stream if stream else FileStream(self.file_path, self.target_col)
+
+    def get_data(self, n_samples):
+        &#34;&#34;&#34;
+        Loads next batch of data from the Stream object. This is a wrapper for the skmultiflow
+        Stream.next_sample(batch_size) function.
+
+        Args:
+            n_samples (int): number of samples to draw from data stream
+
+        Returns:
+            (np.ndarray, np.ndarray): data samples and targets
+        &#34;&#34;&#34;
+        return self.stream.next_sample(n_samples)
+
+    def _check_input(self):
+        &#34;&#34;&#34;
+        Evaluates the input data to check if it is in a valid format, i.e. if either a Stream object or a valid .csv
+        file is provided. May be extended by further checks.
+
+        Raises:
+            AttributeError: if neither a valid skmultiflow Stream object nor a .csv file path is provided
+            FileNotFoundError: if the provided file path does not exist
+            ValueError: if the .csv cannot be converted to a skmultiflow FileStream
+        &#34;&#34;&#34;
+        if not type(self.stream) is Stream:
+            if not type(self.file_path) is str:
+                raise AttributeError(&#39;Neither a valid skmultiflow Stream object nor a file path was provided.&#39;)
+            elif not self.file_path.endswith(&#39;.csv&#39;):
+                raise AttributeError(&#39;Neither a valid skmultiflow Stream object nor a .csv file path was provided.&#39;)
+            elif not type(self.target_col) is int:
+                raise AttributeError(&#39;The parameter target_col needs to be an integer.&#39;)
+            else:
+                try:
+                    FileStream(self.file_path, self.target_col)
+                except FileNotFoundError:
+                    raise FileNotFoundError(&#39;The file path you provided does not exist.&#39;)
+                except ValueError:
+                    raise ValueError(&#39;The .csv file cannot be converted to a skmultiflow FileStream.&#39;)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="float.data.DataLoader.get_data"><code class="name flex">
+<span>def <span class="ident">get_data</span></span>(<span>self, n_samples)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Loads next batch of data from the Stream object. This is a wrapper for the skmultiflow
+Stream.next_sample(batch_size) function.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>n_samples</code></strong> :&ensp;<code>int</code></dt>
+<dd>number of samples to draw from data stream</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>(np.ndarray, np.ndarray): data samples and targets</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_data(self, n_samples):
+    &#34;&#34;&#34;
+    Loads next batch of data from the Stream object. This is a wrapper for the skmultiflow
+    Stream.next_sample(batch_size) function.
+
+    Args:
+        n_samples (int): number of samples to draw from data stream
+
+    Returns:
+        (np.ndarray, np.ndarray): data samples and targets
+    &#34;&#34;&#34;
+    return self.stream.next_sample(n_samples)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -52,7 +190,17 @@
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="float.data.DataLoader" href="DataLoader.html">float.data.DataLoader</a></code></li>
+<li><code><a title="float.data.data_loader" href="data_loader.html">float.data.data_loader</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="float.data.DataLoader" href="#float.data.DataLoader">DataLoader</a></code></h4>
+<ul class="">
+<li><code><a title="float.data.DataLoader.get_data" href="#float.data.DataLoader.get_data">get_data</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
