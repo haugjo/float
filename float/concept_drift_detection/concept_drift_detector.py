@@ -1,15 +1,19 @@
 from abc import ABCMeta, abstractmethod
+from float.evaluation.change_detection_metric import ChangeDetectionMetric
 
 
 class ConceptDriftDetector(metaclass=ABCMeta):
     """
     Abstract base class for concept drift detection models.
+
+    Attributes:
+        change_detections (ChangeDetectionMetric): monitors if there was detected change at each time step
     """
     def __init__(self):
         """
         Initializes the concept drift detector.
         """
-        pass
+        self.change_detections = ChangeDetectionMetric()
 
     @abstractmethod
     def reset(self):

@@ -32,6 +32,9 @@ class PrequentialPipeline(Pipeline):
     def run(self):
         """
         Runs the pipeline.
+
+        Returns:
+            list[Evaluator]: the list of evaluators
         """
         if (self.data_loader.stream.n_remaining_samples() > 0) and \
                 (self.data_loader.stream.n_remaining_samples() < self.max_n_samples):

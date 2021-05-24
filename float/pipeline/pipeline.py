@@ -105,7 +105,9 @@ class Pipeline(metaclass=ABCMeta):
 
         if self.concept_drift_detector:
             self.concept_drift_detector.partial_fit(X)
-            if self.concept_drift_detector.detected_global_change():
+            change_detected = self.concept_drift_detector.detected_global_change()
+            self.concept_drift_detector.change_detections.compute(change_detected)
+            if change_detected:
                 print(f"Change detected at {self.time_step}.")
 
         if self.feature_selector:
