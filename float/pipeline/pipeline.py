@@ -14,7 +14,7 @@ class Pipeline(metaclass=ABCMeta):
     Abstract base class which triggers events for different kinds of training procedures.
     """
     def __init__(self, data_loader, feature_selector, concept_drift_detector, predictor, evaluators, max_n_samples,
-                 batch_size, n_pretrain_samples, streaming_features):
+                 batch_size, n_pretrain_samples):
         """
         Initializes the pipeline.
 
@@ -27,7 +27,6 @@ class Pipeline(metaclass=ABCMeta):
             max_n_samples (int): maximum number of observations used in the evaluation
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
-            streaming_features (dict): (time, feature index) tuples to simulate streaming features
         """
         self.data_loader = data_loader
         self.feature_selector = feature_selector
@@ -38,7 +37,6 @@ class Pipeline(metaclass=ABCMeta):
         self.max_n_samples = max_n_samples
         self.batch_size = batch_size
         self.n_pretrain_samples = n_pretrain_samples
-        self.streaming_features = streaming_features if streaming_features else dict()
 
         self.time_step = 0
         self.n_global_samples = 0
@@ -105,18 +103,16 @@ class Pipeline(metaclass=ABCMeta):
             n_samples = self.max_n_samples - self.n_global_samples
         X, y = self.data_loader.get_data(n_samples)
 
-        if self.feature_selector:
-            if self.feature_selector.supports_streaming_features:
-                X = self.feature_selector.simulate_streaming_features(X, self.time_step, self.streaming_features)
-
-        start_time = time.time()
-        self.feature_selector.weight_features(copy.copy(X), copy.copy(y))
-        self.feature_selector.comp_time.compute(start_time, time.time())
-        X = self.feature_selector.select_features(X)
-
         if self.concept_drift_detector:
+            self.concept_drift_detector.partial_fit(X)
             if self.concept_drift_detector.detected_global_change():
-                self.concept_drift_detector.partial_fit(X)
+                print(f"Change detected at {self.time_step}.")
+
+        if self.feature_selector:
+            start_time = time.time()
+            self.feature_selector.weight_features(copy.copy(X), copy.copy(y))
+            self.feature_selector.comp_time.compute(start_time, time.time())
+            X = self.feature_selector.select_features(X, self.time_step)
 
         if self.predictor:
             start_time = time.time()

@@ -4,7 +4,7 @@ from float.evaluation import Evaluator
 
 class TimeMetric(Evaluator):
     def __init__(self):
-        super().__init__()
+        super().__init__(line_plot=True, scatter_plot=True, bar_plot=False)
         self.mean = None
         self.var = None
 
