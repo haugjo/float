@@ -16,7 +16,7 @@ class FeatureSelector(metaclass=ABCMeta):
         raw_weight_vector (np.ndarray): current weights (as produced by feature selection model)
         weights (list): absolute weights in all time steps
         selection (list): indices of selected features in all time steps
-        comp_time (list): computation time in all time steps
+        comp_time (TimeMetric): computation time in all time steps
     """
 
     def __init__(self, n_total_features, n_selected_features, supports_multi_class=False,
