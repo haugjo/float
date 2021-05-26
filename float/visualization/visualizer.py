@@ -1,6 +1,6 @@
 from float.evaluation.evaluator import Evaluator
 import matplotlib.pyplot as plt
-import numpy as np
+from matplotlib.axes import Axes
 import warnings
 
 
@@ -21,33 +21,42 @@ class Visualizer:
 
     def plot(self):
         """
-        Create a line plot.
+        Creates a line plot.
+
+        Returns:
+            Axes: the Axes object containing the line plot
         """
         if self.evaluator.line_plot:
-            plt.figure(figsize=self.fig_size)
-            plt.plot(range(len(self.evaluator.measures)), self.evaluator.measures)
-            plt.show()
+            fig, ax = plt.subplots(figsize=self.fig_size)
+            ax.plot(range(len(self.evaluator.measures)), self.evaluator.measures)
+            return ax
         else:
             warnings.warn("This metric cannot be visualized with a line plot.")
 
     def scatter(self):
         """
-        Create a scatter plot.
+        Creates a scatter plot.
+
+        Returns:
+            Axes: the Axes object containing the scatter plot
         """
         if self.evaluator.scatter_plot:
-            plt.figure(figsize=self.fig_size)
-            plt.scatter(range(len(self.evaluator.measures)), self.evaluator.measures)
-            plt.show()
+            fig, ax = plt.subplots(figsize=self.fig_size)
+            ax.scatter(range(len(self.evaluator.measures)), self.evaluator.measures)
+            return ax
         else:
             warnings.warn("This metric cannot be visualized with a scatter plot.")
 
     def bar(self):
         """
-        Create a bar plot.
+        Creates a bar plot.
+
+        Returns:
+            Axes: the Axes object containing the bar plot
         """
         if self.evaluator.bar_plot:
-            plt.figure(figsize=self.fig_size)
-            plt.bar(range(len(self.evaluator.measures)), self.evaluator.measures)
-            plt.show()
+            fig, ax = plt.subplots(figsize=self.fig_size)
+            ax.bar(range(len(self.evaluator.measures)), self.evaluator.measures)
+            return ax
         else:
             warnings.warn("This metric cannot be visualized with a bar plot.")
