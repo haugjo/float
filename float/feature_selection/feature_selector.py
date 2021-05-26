@@ -41,7 +41,7 @@ class FeatureSelector(metaclass=ABCMeta):
         self.weights = []
         self.selection = []
         self.comp_time = TimeMetric()
-        self.active_features = []
+        self.selected_features = []
         self._auto_scale = False
 
     @abstractmethod
@@ -68,18 +68,13 @@ class FeatureSelector(metaclass=ABCMeta):
         """
         if self.supports_streaming_features:
             if time_step == 0 and time_step not in self.streaming_features:
-                self.active_features = np.arange(self.n_total_features)
+                self.selected_features = np.arange(self.n_total_features)
                 warnings.warn(
                     'Simulate streaming features: No active features provided at t=0. All features are used instead.')
             elif time_step in self.streaming_features:
-                self.active_features = self.streaming_features[time_step]
+                self.selected_features = self.streaming_features[time_step]
                 print('New streaming features {} at t={}'.format(self.streaming_features[time_step], time_step))
-
-            sparse_X = np.full(X.shape, self._get_reference_value())
-            sparse_X[:, self.active_features] = X[:, self.active_features]
-            return sparse_X
         else:
-            # if vector contains negative weights, issue warning
             if np.any(self.raw_weight_vector < 0):
                 abs_weights = abs(self.raw_weight_vector)
                 if not self._auto_scale:
@@ -90,13 +85,13 @@ class FeatureSelector(metaclass=ABCMeta):
                 abs_weights = self.raw_weight_vector
 
             sorted_indices = np.argsort(abs_weights)[::-1]
-            selected_indices = sorted_indices[:self.n_selected_features]
-            non_selected_indices = sorted_indices[self.n_selected_features:]
+            self.selected_features = sorted_indices[:self.n_selected_features]
             self.weights.append(abs_weights.tolist())
-            self.selection.append(selected_indices.tolist())
+            self.selection.append(self.selected_features.tolist())
 
-            X[:, non_selected_indices] = np.full(shape=X[:, non_selected_indices].shape, fill_value=self._get_reference_value())
-            return X
+        X_new = np.full(X.shape, self._get_reference_value())
+        X_new[:, self.selected_features] = X[:, self.selected_features]
+        return X_new
 
     def _get_reference_value(self):
         """
