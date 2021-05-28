@@ -32,7 +32,7 @@ class SkmultiflowDriftDetector(ConceptDriftDetector):
         Returns:
             bool: whether global concept drift was detected or not.
         """
-        self.detector.detected_change()
+        return self.detector.detected_change()
 
     def detected_partial_change(self):
         """
@@ -41,7 +41,7 @@ class SkmultiflowDriftDetector(ConceptDriftDetector):
         Returns:
             bool: whether partial concept drift was detected or not.
         """
-        pass
+        return False
 
     def detected_warning_zone(self):
         """
@@ -58,7 +58,7 @@ class SkmultiflowDriftDetector(ConceptDriftDetector):
         Returns the length estimation.
 
         Returns:
-            int: length estimation
+            float: length estimation
         """
         return self.detector.estimation
 
