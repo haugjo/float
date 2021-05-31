@@ -12,7 +12,7 @@ class TestSkmultiflowDriftDetector(unittest.TestCase):
 
     def test_init(self):
         self.assertIsInstance(self.skmultiflow_drift_detector.detector, BaseDriftDetector,
-                              msg='attribute detector of type skmultiflow BaseDriftDetector')
+                              msg='attribute detector is intialized correctly')
 
     def test_reset(self):
         self.skmultiflow_drift_detector.detector.in_concept_change = True

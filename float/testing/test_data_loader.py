@@ -10,7 +10,7 @@ class TestDataLoader(unittest.TestCase):
         self.data_loader = DataLoader(file_path='../data/datasets/spambase.csv', target_col=0)
 
     def test_init(self):
-        self.assertIsInstance(self.data_loader.stream, Stream, msg='attribute stream of type Stream')
+        self.assertIsInstance(self.data_loader.stream, Stream, msg='attribute stream is initialized correctly')
 
     def test_get_data(self):
         n_samples = 3
