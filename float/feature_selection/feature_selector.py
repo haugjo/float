@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import warnings
-from float.evaluation.time_metric import TimeMetric
 
 
 class FeatureSelector(metaclass=ABCMeta):
@@ -16,7 +15,7 @@ class FeatureSelector(metaclass=ABCMeta):
         raw_weight_vector (np.ndarray): current weights (as produced by feature selection model)
         weights (list): absolute weights in all time steps
         selection (list): indices of selected features in all time steps
-        comp_time (TimeMetric): computation time in all time steps
+        comp_times (list): computation time in all time steps
     """
 
     def __init__(self, n_total_features, n_selected_features, supports_multi_class=False,
@@ -40,7 +39,7 @@ class FeatureSelector(metaclass=ABCMeta):
         self.raw_weight_vector = np.zeros(self.n_total_features)
         self.weights = []
         self.selection = []
-        self.comp_time = TimeMetric()
+        self.comp_times = []
         self.selected_features = []
         self._auto_scale = False
 
@@ -91,6 +90,10 @@ class FeatureSelector(metaclass=ABCMeta):
         X_new = np.full(X.shape, self._get_reference_value())
         X_new[:, self.selected_features] = X[:, self.selected_features]
         return X_new
+
+    def evaluate(self):
+        # TODO
+        raise NotImplementedError
 
     def _get_reference_value(self):
         """

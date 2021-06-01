@@ -1,6 +1,5 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
-from float.evaluation.time_metric import TimeMetric
 
 
 class Predictor(metaclass=ABCMeta):
@@ -10,8 +9,8 @@ class Predictor(metaclass=ABCMeta):
 
     Attributes:
         predictions (list): predicted labels per time step
-        testing_time (TimeMetric): testing times per time step
-        training_time (TimeMetric): training times per time step
+        testing_times (list): testing times per time step
+        training_times (list): training times per time step
     """
     @abstractmethod
     def __init__(self):
@@ -19,8 +18,8 @@ class Predictor(metaclass=ABCMeta):
         Initializes the predictor.
         """
         self.predictions = []
-        self.testing_time = TimeMetric()
-        self.training_time = TimeMetric()
+        self.testing_times = []
+        self.training_times = []
 
     def fit(self, X, y, sample_weight=None):
         """
@@ -79,8 +78,12 @@ class Predictor(metaclass=ABCMeta):
         """
         raise NotImplementedError
 
+    def evaluate(self):
+        # TODO
+        raise NotImplementedError
+
     @abstractmethod
-    def score(self, X, y):
+    def _score(self, X, y):
         """
         Returns the accuracy based on the given test samples and true values.
 

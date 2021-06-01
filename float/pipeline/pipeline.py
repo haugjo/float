@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-import warnings
+import numpy as np
 import time
 import copy
 import sys
@@ -8,7 +8,6 @@ from float.data.data_loader import DataLoader
 from float.feature_selection import FeatureSelector
 from float.concept_drift_detection import ConceptDriftDetector
 from float.prediction import Predictor
-from float.evaluation.evaluator import Evaluator
 
 
 class Pipeline(metaclass=ABCMeta):
@@ -16,7 +15,7 @@ class Pipeline(metaclass=ABCMeta):
     Abstract base class which triggers events for different kinds of training procedures.
     """
 
-    def __init__(self, data_loader, feature_selector, concept_drift_detector, predictor, evaluators, max_n_samples,
+    def __init__(self, data_loader, feature_selector, concept_drift_detector, predictor, max_n_samples,
                  batch_size, n_pretrain_samples):
         """
         Initializes the pipeline.
@@ -26,7 +25,6 @@ class Pipeline(metaclass=ABCMeta):
             feature_selector (FeatureSelector): FeatureSelector object
             concept_drift_detector (ConceptDriftDetector): ConceptDriftDetector object
             predictor (Predictor): Predictor object
-            evaluators (list[Evaluator]): list of Evaluator objects
             max_n_samples (int): maximum number of observations used in the evaluation
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
@@ -35,7 +33,6 @@ class Pipeline(metaclass=ABCMeta):
         self.feature_selector = feature_selector
         self.concept_drift_detector = concept_drift_detector
         self.predictor = predictor
-        self.evaluators = evaluators
 
         self.max_n_samples = max_n_samples
         self.batch_size = batch_size
@@ -60,8 +57,6 @@ class Pipeline(metaclass=ABCMeta):
                 type(self.concept_drift_detector) is not ConceptDriftDetector and \
                 type(self.predictor) is not Predictor:
             raise AttributeError('No valid FeatureSelector, ConceptDriftDetector or Predictor object was provided.')
-        if not self.evaluators:
-            warnings.warn('No valid Evaluator object was provided.')
 
     def _start_evaluation(self):
         """
@@ -113,17 +108,19 @@ class Pipeline(metaclass=ABCMeta):
         if self.concept_drift_detector:
             start_time = time.time()
             self.concept_drift_detector.partial_fit(X)
-            self.concept_drift_detector.comp_time.compute(start_time, time.time())
+            self.concept_drift_detector.comp_times.append(time.time() - start_time)
             change_detected = self.concept_drift_detector.detected_global_change()
             self.concept_drift_detector.change_detections.compute(change_detected)
+            self.concept_drift_detector.evaluate()
             if change_detected:
                 print(f"Change detected at {self.time_step}.")
 
         if self.feature_selector:
             start_time = time.time()
             self.feature_selector.weight_features(copy.copy(X), copy.copy(y))
-            self.feature_selector.comp_time.compute(start_time, time.time())
+            self.feature_selector.comp_times.append(time.time() - start_time)
             X = self.feature_selector.select_features(X, self.time_step)
+            self.feature_selector.evaluate()
             if self.feature_selector.supports_streaming_features and \
                     self.time_step in self.feature_selector.streaming_features:
                 print('New streaming features {} at t={}'.format(
@@ -132,15 +129,13 @@ class Pipeline(metaclass=ABCMeta):
         if self.predictor:
             start_time = time.time()
             prediction = self.predictor.predict(X).tolist()
-            self.predictor.testing_time.compute(start_time, time.time())
+            self.predictor.testing_times.append(time.time() - start_time)
             self.predictor.predictions.append(prediction)
 
             start_time = time.time()
             self.predictor.partial_fit(X, y)
-            self.predictor.training_time.compute(start_time, time.time())
-
-        for evaluator in self.evaluators:
-            evaluator.compute()
+            self.predictor.training_times.append(time.time() - start_time)
+            self.predictor.evaluate()
 
         self._finish_iteration(n_samples)
 
@@ -167,7 +162,7 @@ class Pipeline(metaclass=ABCMeta):
                                                                self.feature_selector.n_total_features))
             print(tabulate({
                 'Model': [type(self.feature_selector)],
-                'Avg. Time': [self.feature_selector.comp_time.mean],
+                'Avg. Time': [np.mean(self.feature_selector.comp_times)],
                 # 'Avg. {}'.format(self.fs_metrics[0].name): [self.fs_metrics[0].mean] TODO: update
             }, headers="keys", tablefmt='github'))
 
@@ -176,7 +171,7 @@ class Pipeline(metaclass=ABCMeta):
             print('Concept Drift Detection:')
             print(tabulate({
                 'Model': [type(self.concept_drift_detector)],
-                'Avg. Time': [self.concept_drift_detector.comp_time.mean],
+                'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
                 'Number of Detected Changes:': [self.concept_drift_detector.change_detections.n_changes],
             }, headers="keys", tablefmt='github'))
 
@@ -185,8 +180,8 @@ class Pipeline(metaclass=ABCMeta):
             print('Prediction:')
             print(tabulate({
                 'Model': [type(self.predictor)],
-                'Avg. Test Time': [self.predictor.testing_time.mean],
-                'Avg. Train Time': [self.predictor.training_time.mean],
+                'Avg. Test Time': [np.mean(self.predictor.testing_times)],
+                'Avg. Train Time': [np.mean(self.predictor.training_times)],
                 # 'Avg. {}'.format(self.pred_metrics[0].name): [self.pred_metrics[0].mean] TODO: update
             }, headers="keys", tablefmt='github'))
         print('#############################################################################')

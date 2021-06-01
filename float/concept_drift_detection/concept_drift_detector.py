@@ -1,6 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from float.evaluation.change_detection_metric import ChangeDetectionMetric
-from float.evaluation.time_metric import TimeMetric
 
 
 class ConceptDriftDetector(metaclass=ABCMeta):
@@ -8,15 +6,15 @@ class ConceptDriftDetector(metaclass=ABCMeta):
     Abstract base class for concept drift detection models.
 
     Attributes:
-        change_detections (ChangeDetectionMetric): monitors if there was detected change at each time step
-        comp_time (TimeMetric): computation time in all time steps
+        change_detections (list): monitors if there was detected change at each time step
+        comp_times (list): computation time in all time steps
     """
     def __init__(self):
         """
         Initializes the concept drift detector.
         """
-        self.change_detections = ChangeDetectionMetric()
-        self.comp_time = TimeMetric()
+        self.change_detections = []
+        self.comp_times = []
 
     @abstractmethod
     def reset(self):
@@ -71,4 +69,8 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         """
         Update the parameters of the concept drift detection model.
         """
+        raise NotImplementedError
+
+    def evaluate(self):
+        # TODO
         raise NotImplementedError

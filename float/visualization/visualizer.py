@@ -1,22 +1,21 @@
-from float.evaluation.evaluator import Evaluator
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
-import warnings
 
 
+# TODO figure out how to check if measures can be visualized with that specific plot
 class Visualizer:
     """
     Class for creating plots to visualize information.
     """
-    def __init__(self, evaluator, fig_size):
+    def __init__(self, measures, fig_size):
         """
         Initialize the visualizer using a uniform style.
 
         Args:
-            evaluator (Evaluator): the evaluator object
+            measures (list): the list of measures to be visualized
             fig_size (float, float): the size of the plots
         """
-        self.evaluator = evaluator
+        self.measures = measures
         self.fig_size = fig_size
 
     def plot(self):
@@ -26,12 +25,9 @@ class Visualizer:
         Returns:
             Axes: the Axes object containing the line plot
         """
-        if self.evaluator.line_plot:
-            fig, ax = plt.subplots(figsize=self.fig_size)
-            ax.plot(range(len(self.evaluator.measures)), self.evaluator.measures)
-            return ax
-        else:
-            warnings.warn("This metric cannot be visualized with a line plot.")
+        fig, ax = plt.subplots(figsize=self.fig_size)
+        ax.plot(range(len(self.measures)), self.measures)
+        return ax
 
     def scatter(self):
         """
@@ -40,12 +36,9 @@ class Visualizer:
         Returns:
             Axes: the Axes object containing the scatter plot
         """
-        if self.evaluator.scatter_plot:
-            fig, ax = plt.subplots(figsize=self.fig_size)
-            ax.scatter(range(len(self.evaluator.measures)), self.evaluator.measures)
-            return ax
-        else:
-            warnings.warn("This metric cannot be visualized with a scatter plot.")
+        fig, ax = plt.subplots(figsize=self.fig_size)
+        ax.scatter(range(len(self.measures)), self.measures)
+        return ax
 
     def bar(self):
         """
@@ -54,9 +47,6 @@ class Visualizer:
         Returns:
             Axes: the Axes object containing the bar plot
         """
-        if self.evaluator.bar_plot:
-            fig, ax = plt.subplots(figsize=self.fig_size)
-            ax.bar(range(len(self.evaluator.measures)), self.evaluator.measures)
-            return ax
-        else:
-            warnings.warn("This metric cannot be visualized with a bar plot.")
+        fig, ax = plt.subplots(figsize=self.fig_size)
+        ax.bar(range(len(self.measures)), self.measures)
+        return ax
