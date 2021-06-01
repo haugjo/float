@@ -72,5 +72,8 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         raise NotImplementedError
 
     def evaluate(self):
-        # TODO
-        raise NotImplementedError
+        """
+        Evaluates the concept drift detector at one time step.
+        """
+        self.change_detections.append(self.detected_global_change())
+

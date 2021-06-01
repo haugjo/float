@@ -17,7 +17,6 @@ class FeatureSelector(metaclass=ABCMeta):
         selection (list): indices of selected features in all time steps
         comp_times (list): computation time in all time steps
     """
-
     def __init__(self, n_total_features, n_selected_features, supports_multi_class=False,
                  supports_streaming_features=False, streaming_features=None):
         """
@@ -92,8 +91,11 @@ class FeatureSelector(metaclass=ABCMeta):
         return X_new
 
     def evaluate(self):
+        """
+        Evaluates the feature selector at one time step.
+        """
         # TODO
-        raise NotImplementedError
+        pass
 
     def _get_reference_value(self):
         """

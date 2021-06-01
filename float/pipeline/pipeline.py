@@ -109,18 +109,21 @@ class Pipeline(metaclass=ABCMeta):
             start_time = time.time()
             self.concept_drift_detector.partial_fit(X)
             self.concept_drift_detector.comp_times.append(time.time() - start_time)
-            change_detected = self.concept_drift_detector.detected_global_change()
-            self.concept_drift_detector.change_detections.compute(change_detected)
+
             self.concept_drift_detector.evaluate()
-            if change_detected:
+
+            if self.concept_drift_detector.detected_global_change():
                 print(f"Change detected at {self.time_step}.")
 
         if self.feature_selector:
             start_time = time.time()
             self.feature_selector.weight_features(copy.copy(X), copy.copy(y))
             self.feature_selector.comp_times.append(time.time() - start_time)
+
             X = self.feature_selector.select_features(X, self.time_step)
+
             self.feature_selector.evaluate()
+
             if self.feature_selector.supports_streaming_features and \
                     self.time_step in self.feature_selector.streaming_features:
                 print('New streaming features {} at t={}'.format(
@@ -135,7 +138,8 @@ class Pipeline(metaclass=ABCMeta):
             start_time = time.time()
             self.predictor.partial_fit(X, y)
             self.predictor.training_times.append(time.time() - start_time)
-            self.predictor.evaluate()
+
+            self.predictor.evaluate(X, y)
 
         self._finish_iteration(n_samples)
 
@@ -172,7 +176,7 @@ class Pipeline(metaclass=ABCMeta):
             print(tabulate({
                 'Model': [type(self.concept_drift_detector)],
                 'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
-                'Number of Detected Changes:': [self.concept_drift_detector.change_detections.n_changes],
+                'Number of Detected Changes:': [np.sum(self.concept_drift_detector.change_detections)],
             }, headers="keys", tablefmt='github'))
 
         if self.predictor:
