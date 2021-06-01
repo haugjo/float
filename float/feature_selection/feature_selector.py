@@ -73,7 +73,6 @@ class FeatureSelector(metaclass=ABCMeta):
                     'Simulate streaming features: No active features provided at t=0. All features are used instead.')
             elif time_step in self.streaming_features:
                 self.selected_features = self.streaming_features[time_step]
-                print('New streaming features {} at t={}'.format(self.streaming_features[time_step], time_step))
         else:
             if np.any(self.raw_weight_vector < 0):
                 abs_weights = abs(self.raw_weight_vector)

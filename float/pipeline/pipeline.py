@@ -15,6 +15,7 @@ class Pipeline(metaclass=ABCMeta):
     """
     Abstract base class which triggers events for different kinds of training procedures.
     """
+
     def __init__(self, data_loader, feature_selector, concept_drift_detector, predictor, evaluators, max_n_samples,
                  batch_size, n_pretrain_samples):
         """
@@ -123,6 +124,10 @@ class Pipeline(metaclass=ABCMeta):
             self.feature_selector.weight_features(copy.copy(X), copy.copy(y))
             self.feature_selector.comp_time.compute(start_time, time.time())
             X = self.feature_selector.select_features(X, self.time_step)
+            if self.feature_selector.supports_streaming_features and \
+                    self.time_step in self.feature_selector.streaming_features:
+                print('New streaming features {} at t={}'.format(
+                    self.feature_selector.streaming_features[self.time_step], self.time_step))
 
         if self.predictor:
             start_time = time.time()
