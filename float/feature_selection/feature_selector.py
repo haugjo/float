@@ -15,10 +15,11 @@ class FeatureSelector(metaclass=ABCMeta):
         raw_weight_vector (np.ndarray): current weights (as produced by feature selection model)
         weights (list): absolute weights in all time steps
         selection (list): indices of selected features in all time steps
+        nogueira_stability_measures (list): scores of Nogueira stability in all time steps
         comp_times (list): computation time in all time steps
     """
     def __init__(self, n_total_features, n_selected_features, supports_multi_class=False,
-                 supports_streaming_features=False, streaming_features=None):
+                 supports_streaming_features=False, streaming_features=None, nogueira_window_size=None):
         """
         Receives parameters of feature selection model.
 
@@ -38,6 +39,8 @@ class FeatureSelector(metaclass=ABCMeta):
         self.raw_weight_vector = np.zeros(self.n_total_features)
         self.weights = []
         self.selection = []
+        self.nogueira_stability_measures = []
+        self.nogueira_window_size = nogueira_window_size
         self.comp_times = []
         self.selected_features = []
         self._auto_scale = False
@@ -94,8 +97,30 @@ class FeatureSelector(metaclass=ABCMeta):
         """
         Evaluates the feature selector at one time step.
         """
-        # TODO
-        pass
+        if self.nogueira_window_size:
+            self.nogueira_stability_measures.append(self._get_nogueira_stability())
+
+    def _get_nogueira_stability(self):
+        """
+        Returns the Nogueira measure for feature selection stability.
+
+        Returns:
+            float: the stability measure
+        """
+        Z = np.zeros([min(len(self.selection), self.nogueira_window_size), self.n_total_features])
+        for row, col in enumerate(self.selection[-self.nogueira_window_size:]):
+            Z[row, col] = 1
+
+        try:
+            M, d = Z.shape
+            hatPF = np.mean(Z, axis=0)
+            kbar = np.sum(hatPF)
+            denom = (kbar / d) * (1 - kbar / d)
+            stability_measure = 1 - (M / (M - 1)) * np.mean(np.multiply(hatPF, 1 - hatPF)) / denom
+        except ZeroDivisionError:
+            stability_measure = 0  # metric requires at least 2 measurements and thus runs an error at t=1
+
+        return stability_measure
 
     def _get_reference_value(self):
         """
