@@ -48,7 +48,7 @@ class FeatureSelector(metaclass=ABCMeta):
     @abstractmethod
     def weight_features(self, X, y):
         """
-        Weights features.
+        Given a batch of observations and corresponding labels, computes feature weights.
 
         Args:
             X (np.ndarray): samples of current batch

@@ -53,20 +53,20 @@ class FIRES(FeatureSelector):
             else:
                 raise ValueError('The target variable y must be binary.')
 
-    def weight_features(self, x, y):
+    def weight_features(self, X, y):
         """
         Given a batch of observations and corresponding labels, computes feature weights.
 
         Args:
-            x: (np.ndarray) Batch of observations
-            y: (np.ndarray) Batch of labels
+            X (np.ndarray): samples of current batch
+            y (np.ndarray): labels of current batch
 
         Returns:
             np.ndarray: feature weights
         """
         # Update estimates of mu and sigma given the predictive model
         if self.model == 'probit':
-            self.__probit(x, y)
+            self.__probit(X, y)
         # ### ADD YOUR OWN MODEL HERE ##################################################
         # elif self.model == 'your_model':
         #    self.__yourModel(x, y)
@@ -80,23 +80,23 @@ class FIRES(FeatureSelector):
             warn('Sigma has automatically been rescaled to [0, inf], because it contained negative values.')
 
         # Compute feature weights
-        return self.__compute_weights()
+        self.raw_weight_vector = self.__compute_weights()
 
-    def __probit(self, x, y):
+    def __probit(self, X, y):
         """
         Updates the distribution parameters mu and sigma by optimizing them in terms of the (log) likelihood.
         Here we assume a Bernoulli distributed target variable. We use a Probit model as our base model.
         This corresponds to the FIRES-GLM model in the paper.
 
         Args:
-            x (np.ndarray): batch of observations (numeric values only, consider normalizing data for better results)
+            X (np.ndarray): batch of observations (numeric values only, consider normalizing data for better results)
             y (np.ndarray): batch of labels: type binary, i.e. {-1,1} (bool, int or str will be encoded accordingly)
         """
 
         for epoch in range(self.epochs):
             # Shuffle the observations
             random_idx = np.random.permutation(len(y))
-            x = x[random_idx]
+            X = X[random_idx]
             y = y[random_idx]
 
             # Encode target as {-1,1}
@@ -107,13 +107,13 @@ class FIRES(FeatureSelector):
             # Iterative update of mu and sigma
             try:
                 # Helper functions
-                dot_mu_x = np.dot(x, self.mu)
-                rho = np.sqrt(1 + np.dot(x ** 2, self.sigma ** 2))
+                dot_mu_x = np.dot(X, self.mu)
+                rho = np.sqrt(1 + np.dot(X ** 2, self.sigma ** 2))
 
                 # Gradients
-                nabla_mu = norm.pdf(y / rho * dot_mu_x) * (y / rho * x.T)
+                nabla_mu = norm.pdf(y / rho * dot_mu_x) * (y / rho * X.T)
                 nabla_sigma = norm.pdf(y / rho * dot_mu_x) * (
-                            - y / (2 * rho ** 3) * 2 * (x ** 2 * self.sigma).T * dot_mu_x)
+                        - y / (2 * rho ** 3) * 2 * (X ** 2 * self.sigma).T * dot_mu_x)
 
                 # Marginal Likelihood
                 marginal = norm.cdf(y / rho * dot_mu_x)
