@@ -10,19 +10,23 @@ class FSDS(FeatureSelector):
     Based on a paper by Huang et al. (2015). Feature Selection for unsupervised Learning.
     This code is copied from the Python implementation of the authors with minor reductions and adaptations.
     """
-    def __init__(self, n_total_features, n_selected_features, ell=0, m=None, B=None, k=2):
+    def __init__(self, n_total_features, n_selected_features, l=0, m=None, B=None, k=2):
+        """
+        Initializes the FSDS feature selector.
+
+        Args:
+            n_total_features (int): total number of features
+            n_selected_features (int): number of selected features
+            l (int): size of the matrix sketch with l << m
+            m (int): size of the feature space
+            B (list/np.ndarray): matrix sketch
+            k (int): number of singular vectors with k <= ell
+        """
         super().__init__(n_total_features, n_selected_features, supports_multi_class=False, supports_streaming_features=False)
 
-        if m is None:
-            self.m = n_total_features
-        else:
-            self.m = m
-        if B is None:
-            self.B = []
-        else:
-            self.B = B
-
-        self.ell = ell
+        self.m = n_total_features if m is None else m
+        self.B = [] if B is None else B
+        self.l = l
         self.k = k
 
     def weight_features(self, X, y):
@@ -35,14 +39,14 @@ class FSDS(FeatureSelector):
         """
         Yt = X.T  # algorithm assumes rows to represent features
 
-        if self.ell < 1:
-            self.ell = int(np.sqrt(self.m))
+        if self.l < 1:
+            self.l = int(np.sqrt(self.m))
 
         if len(self.B) == 0:
             # for Y0, we need to first create an initial sketched matrix
-            self.B = Yt[:, :self.ell]
-            C = np.hstack((self.B, Yt[:, self.ell:]))
-            n = Yt.shape[1] - self.ell
+            self.B = Yt[:, :self.l]
+            C = np.hstack((self.B, Yt[:, self.l:]))
+            n = Yt.shape[1] - self.l
         else:
             # combine current sketched matrix with input at time t
             # C: m-by-(n+ell) matrix
@@ -50,9 +54,9 @@ class FSDS(FeatureSelector):
             n = Yt.shape[1]
 
         U, s, V = ln.svd(C, full_matrices=False)
-        U = U[:, :self.ell]
-        s = s[:self.ell]
-        V = V[:, :self.ell]
+        U = U[:, :self.l]
+        s = s[:self.l]
+        V = V[:, :self.l]
 
         # shrink step in Frequent Directions algorithm
         # (shrink singular values based on the squared smallest singular value)

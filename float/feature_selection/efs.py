@@ -10,22 +10,29 @@ class EFS(FeatureSelector):
     Based on a paper by Carvalho et al. 2005. This Feature Selection algorithm is based on the weights of a
     Modified Balanced Winnow classifier (as introduced in the paper).
     """
-    def __init__(self, n_total_features, n_selected_features, u=None, v=None, threshold=1, M=1, alpha=1.5, beta=0.5):
+    def __init__(self, n_total_features, n_selected_features, u=None, v=None, theta=1, M=1, alpha=1.5, beta=0.5):
+        """
+        Initializes the EFS feature selector.
+
+        Args:
+            n_total_features (int): total number of features
+            n_selected_features (int): number of selected features
+            u (np.ndarray): initial positive model with weights set to 2
+            v (np.ndarray): initial negative model with weights
+            theta (float): threshold parameter
+            M (float): margin parameter
+            alpha (float): promotion parameter
+            beta (float): demotion parameter
+        """
         super().__init__(n_total_features, n_selected_features, supports_multi_class=False, supports_streaming_features=False)
 
-        if u is None:
-            self.u = np.ones(n_total_features) * 2  # initial positive model with weights 2
-        else:
-            self.u = u
-        if v is None:
-            self.v = np.ones(n_total_features)  # initial negative model with weights
-        else:
-            self.v = v
+        self.u = np.ones(n_total_features) * 2 if u is None else u
+        self.v = np.ones(n_total_features) if v is None else v
 
-        self.threshold = threshold  # threshold parameter
-        self.M = M  # margin
-        self.alpha = alpha  # promotion parameter
-        self.beta = beta  # demotion parameter
+        self.theta = theta
+        self.M = M
+        self.alpha = alpha
+        self.beta = beta
 
     def weight_features(self, X, y):
         """
@@ -47,7 +54,7 @@ class EFS(FeatureSelector):
             x_b = MinMaxScaler().fit_transform(x_b.reshape(-1, 1)).flatten()
 
             # Calculate score
-            score = np.dot(x_b, self.u) - np.dot(x_b, self.v) - self.threshold
+            score = np.dot(x_b, self.u) - np.dot(x_b, self.v) - self.theta
 
             # If prediction was mistaken
             if score * y_b <= self.M:

@@ -6,18 +6,22 @@ from float.feature_selection.feature_selector import FeatureSelector
 
 
 class FIRES(FeatureSelector):
-    def __init__(self, n_total_features, n_selected_features, target_values, mu_init=0, sigma_init=1, penalty_s=0.01, penalty_r=0.01, epochs=1,
+    """
+    FIRES: Fast, Interpretable and Robust Evaluation and Selection of features
+
+    cite: Haug et al. 2020. Leveraging Model Inherent Variable Importance for Stable Online Feature Selection.
+    In Proceedings of the 26th ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD ’20),
+    August 23–27, 2020, Virtual Event, CA, USA.
+    """
+    def __init__(self, n_total_features, n_selected_features, classes, mu_init=0, sigma_init=1, penalty_s=0.01, penalty_r=0.01, epochs=1,
                  lr_mu=0.01, lr_sigma=0.01, scale_weights=True, model='probit'):
         """
-        FIRES: Fast, Interpretable and Robust Evaluation and Selection of features
-        cite: Haug et al. 2020. Leveraging Model Inherent Variable Importance for Stable Online Feature Selection.
-        In Proceedings of the 26th ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD ’20),
-        August 23–27, 2020, Virtual Event, CA, USA.
+        Initializes the FIRES feature selector.
 
         Args:
             n_total_features (int): total number of features
             n_selected_features (int): number of selected features
-            target_values (np.ndarray): unique target values (class labels)
+            classes (np.ndarray): unique target values (class labels)
             mu_init (int/np.ndarray): initial importance parameter
             sigma_init (int/np.ndarray): initial uncertainty parameter
             penalty_s (float): penalty factor for the uncertainty (corresponds to gamma_s in the paper)
@@ -30,7 +34,7 @@ class FIRES(FeatureSelector):
         """
         super().__init__(n_total_features, n_selected_features, supports_multi_class=False, supports_streaming_features=False)
         self.n_total_ftr = n_total_features
-        self.target_values = target_values
+        self.classes = classes
         self.mu = np.ones(n_total_features) * mu_init
         self.sigma = np.ones(n_total_features) * sigma_init
         self.penalty_s = penalty_s
@@ -45,11 +49,11 @@ class FIRES(FeatureSelector):
         self.model_param = {}
 
         # Probit model
-        if self.model == 'probit' and tuple(target_values) != (-1, 1):
-            if len(np.unique(target_values)) == 2:
+        if self.model == 'probit' and tuple(classes) != (-1, 1):
+            if len(np.unique(classes)) == 2:
                 self.model_param['probit'] = True  # Indicates that we need to encode the target variable into {-1,1}
                 warn('FIRES WARNING: The target variable will be encoded as: {} = -1, {} = 1'.format(
-                    self.target_values[0], self.target_values[1]))
+                    self.classes[0], self.classes[1]))
             else:
                 raise ValueError('The target variable y must be binary.')
 
@@ -101,8 +105,8 @@ class FIRES(FeatureSelector):
 
             # Encode target as {-1,1}
             if 'probit' in self.model_param:
-                y[y == self.target_values[0]] = -1
-                y[y == self.target_values[1]] = 1
+                y[y == self.classes[0]] = -1
+                y[y == self.classes[1]] = 1
 
             # Iterative update of mu and sigma
             try:
