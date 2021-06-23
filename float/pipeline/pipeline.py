@@ -53,9 +53,9 @@ class Pipeline(metaclass=ABCMeta):
         """
         if type(self.data_loader) is not DataLoader:
             raise AttributeError('No valid DataLoader object was provided.')
-        if type(self.feature_selector) is not FeatureSelector and \
-                type(self.concept_drift_detector) is not ConceptDriftDetector and \
-                type(self.predictor) is not Predictor:
+        if not issubclass(type(self.feature_selector), FeatureSelector) and \
+                not issubclass(type(self.concept_drift_detector), ConceptDriftDetector) and \
+                not issubclass(type(self.predictor), Predictor):
             raise AttributeError('No valid FeatureSelector, ConceptDriftDetector or Predictor object was provided.')
 
     def _start_evaluation(self):
