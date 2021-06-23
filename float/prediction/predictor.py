@@ -18,9 +18,12 @@ class Predictor(metaclass=ABCMeta):
         training_times (list): training times per time step
     """
     @abstractmethod
-    def __init__(self):
+    def __init__(self, classes):
         """
         Initializes the predictor.
+
+        Args:
+            classes (list): the list of classes in the data
         """
         self.predictions = []
         self.accuracy_scores = []
@@ -29,6 +32,7 @@ class Predictor(metaclass=ABCMeta):
         self.f1_scores = []
         self.testing_times = []
         self.training_times = []
+        self.classes = classes
 
     def fit(self, X, y, sample_weight=None):
         """
