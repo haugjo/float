@@ -53,7 +53,7 @@ class Visualizer:
         ax.bar(range(len(self.measures)), self.measures)
         return ax
 
-    def _draw_top_features_plot(self, feature_names):
+    def draw_top_features_plot(self, feature_names):
         """
         Draws the most selected features over time.
 
@@ -69,7 +69,7 @@ class Visualizer:
         counts = np.bincount(y)
         top_ftr_idx = counts.argsort()[-10:][::-1]
         ax.bar(np.arange(10), counts[top_ftr_idx], width=0.3, zorder=100)
-        ax.set_xticklabels(np.asarray(feature_names)[top_ftr_idx])
+        ax.set_xticklabels(np.asarray(feature_names)[top_ftr_idx], rotation=20, ha='right')
         ax.set_ylabel('Times Selected', size=self.font_size, labelpad=1.5)
         ax.set_xlabel('Top 10 Features', size=self.font_size, labelpad=1.6)
         ax.tick_params(axis='both', labelsize=self.font_size * 0.7, length=0)

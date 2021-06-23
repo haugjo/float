@@ -10,7 +10,7 @@ class FSDS(FeatureSelector):
     Based on a paper by Huang et al. (2015). Feature Selection for unsupervised Learning.
     This code is copied from the Python implementation of the authors with minor reductions and adaptations.
     """
-    def __init__(self, n_total_features, n_selected_features, l=0, m=None, B=None, k=2):
+    def __init__(self, n_total_features, n_selected_features, l=0, m=None, B=None, k=2, nogueira_window_size=None):
         """
         Initializes the FSDS feature selector.
 
@@ -21,8 +21,10 @@ class FSDS(FeatureSelector):
             m (int): size of the feature space
             B (list/np.ndarray): matrix sketch
             k (int): number of singular vectors with k <= ell
+            nogueira_window_size (int): window size for the Nogueira stability measure
         """
-        super().__init__(n_total_features, n_selected_features, supports_multi_class=False, supports_streaming_features=False)
+        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
+                         supports_streaming_features=False, nogueira_window_size=nogueira_window_size)
 
         self.m = n_total_features if m is None else m
         self.B = [] if B is None else B

@@ -54,5 +54,5 @@ class PrequentialPipeline(Pipeline):
             try:
                 self._run_single_training_iteration()
             except BaseException as e:
-                print(e)
+                print("Aborted with exception:", e)
                 break

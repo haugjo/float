@@ -14,7 +14,7 @@ class FIRES(FeatureSelector):
     August 23–27, 2020, Virtual Event, CA, USA.
     """
     def __init__(self, n_total_features, n_selected_features, classes, mu_init=0, sigma_init=1, penalty_s=0.01, penalty_r=0.01, epochs=1,
-                 lr_mu=0.01, lr_sigma=0.01, scale_weights=True, model='probit'):
+                 lr_mu=0.01, lr_sigma=0.01, scale_weights=True, model='probit', nogueira_window_size=None):
         """
         Initializes the FIRES feature selector.
 
@@ -31,8 +31,10 @@ class FIRES(FeatureSelector):
             lr_sigma (float): learning rate for the gradient update of the uncertainty
             scale_weights (bool): if True, scale feature weights into the range [0,1]
             model (str): name of the base model to compute the likelihood (default is 'probit')
+            nogueira_window_size (int): window size for the Nogueira stability measure
         """
-        super().__init__(n_total_features, n_selected_features, supports_multi_class=False, supports_streaming_features=False)
+        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
+                         supports_streaming_features=False, nogueira_window_size=nogueira_window_size)
         self.n_total_ftr = n_total_features
         self.classes = classes
         self.mu = np.ones(n_total_features) * mu_init

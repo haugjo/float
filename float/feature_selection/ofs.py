@@ -10,8 +10,9 @@ class OFS(FeatureSelector):
     Based on a paper by Wang et al. 2014. Feature Selection for binary classification.
     This code is an adaptation of the official Matlab implementation.
     """
-    def __init__(self, n_total_features, n_selected_features):
-        super().__init__(n_total_features, n_selected_features, supports_multi_class=False, supports_streaming_features=False)
+    def __init__(self, n_total_features, n_selected_features, nogueira_window_size=None):
+        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
+                         supports_streaming_features=False, nogueira_window_size=nogueira_window_size)
 
     def weight_features(self, X, y):
         """

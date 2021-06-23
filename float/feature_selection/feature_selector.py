@@ -29,6 +29,7 @@ class FeatureSelector(metaclass=ABCMeta):
             supports_multi_class (bool): True if model support multi-class classification, False otherwise
             supports_streaming_features (bool): True if model supports streaming features, False otherwise
             streaming_features (dict): (time, feature index) tuples to simulate streaming features
+            nogueira_window_size (int): window size for the Nogueira stability measure
         """
         self.n_total_features = n_total_features
         self.n_selected_features = n_selected_features

@@ -105,15 +105,26 @@ class Pipeline(metaclass=ABCMeta):
             n_samples = self.max_n_samples - self.n_global_samples
         X, y = self.data_loader.get_data(n_samples)
 
+        if self.predictor:
+            start_time = time.time()
+            prediction = self.predictor.predict(X).tolist()
+            self.predictor.testing_times.append(time.time() - start_time)
+            self.predictor.predictions.append(prediction)
+
+            start_time = time.time()
+            self.predictor.partial_fit(X, y)
+            self.predictor.training_times.append(time.time() - start_time)
+
+            self.predictor.evaluate(X, y)
+
         if self.concept_drift_detector:
             start_time = time.time()
-            self.concept_drift_detector.partial_fit(X)
+            for val in (prediction == y):
+                self.concept_drift_detector.partial_fit(val)
+                if self.concept_drift_detector.detected_global_change():
+                    print(f"Change detected at time step {self.time_step}")
+                self.concept_drift_detector.evaluate()
             self.concept_drift_detector.comp_times.append(time.time() - start_time)
-
-            self.concept_drift_detector.evaluate()
-
-            if self.concept_drift_detector.detected_global_change():
-                print(f"Change detected at {self.time_step}.")
 
         if self.feature_selector:
             start_time = time.time()
@@ -128,18 +139,6 @@ class Pipeline(metaclass=ABCMeta):
                     self.time_step in self.feature_selector.streaming_features:
                 print('New streaming features {} at t={}'.format(
                     self.feature_selector.streaming_features[self.time_step], self.time_step))
-
-        if self.predictor:
-            start_time = time.time()
-            prediction = self.predictor.predict(X).tolist()
-            self.predictor.testing_times.append(time.time() - start_time)
-            self.predictor.predictions.append(prediction)
-
-            start_time = time.time()
-            self.predictor.partial_fit(X, y)
-            self.predictor.training_times.append(time.time() - start_time)
-
-            self.predictor.evaluate(X, y)
 
         self._finish_iteration(n_samples)
 
@@ -165,16 +164,16 @@ class Pipeline(metaclass=ABCMeta):
             print('Feature Selection ({}/{} features):'.format(self.feature_selector.n_selected_features,
                                                                self.feature_selector.n_total_features))
             print(tabulate({
-                'Model': [type(self.feature_selector)],
+                'Model': [type(self.feature_selector).__name__.split('.')[-1]],
                 'Avg. Time': [np.mean(self.feature_selector.comp_times)],
-                # 'Avg. {}'.format(self.fs_metrics[0].name): [self.fs_metrics[0].mean] TODO: update
+                'Avg. Stability Measure': [np.mean(self.feature_selector.nogueira_stability_measures)],
             }, headers="keys", tablefmt='github'))
 
         if self.concept_drift_detector:
             print('----------------------')
             print('Concept Drift Detection:')
             print(tabulate({
-                'Model': [type(self.concept_drift_detector)],
+                'Model': [type(self.concept_drift_detector).__name__.split('.')[-1]],
                 'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
                 'Number of Detected Changes:': [np.sum(self.concept_drift_detector.change_detections)],
             }, headers="keys", tablefmt='github'))
@@ -183,10 +182,10 @@ class Pipeline(metaclass=ABCMeta):
             print('----------------------')
             print('Prediction:')
             print(tabulate({
-                'Model': [type(self.predictor)],
+                'Model': [type(self.predictor).__name__.split('.')[-1]],
                 'Avg. Test Time': [np.mean(self.predictor.testing_times)],
                 'Avg. Train Time': [np.mean(self.predictor.training_times)],
-                # 'Avg. {}'.format(self.pred_metrics[0].name): [self.pred_metrics[0].mean] TODO: update
+                'Avg. Accuracy': [np.mean(self.predictor.accuracy_scores)],
             }, headers="keys", tablefmt='github'))
         print('#############################################################################')
 
