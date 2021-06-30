@@ -130,7 +130,7 @@ class Predictor(metaclass=ABCMeta):
             float: precision based on test data and target values
         """
         y_pred = self.predict(X)
-        return precision_score(y, y_pred)
+        return precision_score(y, y_pred, labels=self.classes, average='weighted', zero_division=0)
 
     def _get_recall(self, X, y):
         """
@@ -144,7 +144,7 @@ class Predictor(metaclass=ABCMeta):
             float: recall based on test data and target values
         """
         y_pred = self.predict(X)
-        return recall_score(y, y_pred)
+        return recall_score(y, y_pred, labels=self.classes, average='weighted', zero_division=0)
 
     def _get_f1_score(self, X, y):
         """
@@ -158,4 +158,4 @@ class Predictor(metaclass=ABCMeta):
             float: f1 score based on test data and target values
         """
         y_pred = self.predict(X)
-        return f1_score(y, y_pred)
+        return f1_score(y, y_pred, labels=self.classes, average='weighted', zero_division=0)

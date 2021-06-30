@@ -186,6 +186,9 @@ class Pipeline(metaclass=ABCMeta):
                 'Avg. Test Time': [np.mean(self.predictor.testing_times)],
                 'Avg. Train Time': [np.mean(self.predictor.training_times)],
                 'Avg. Accuracy': [np.mean(self.predictor.accuracy_scores)],
+                'Avg. Precision': [np.mean(self.predictor.precision_scores)],
+                'Avg. Recall': [np.mean(self.predictor.recall_scores)],
+                'Avg. F1 Score': [np.mean(self.predictor.f1_scores)]
             }, headers="keys", tablefmt='github'))
         print('#############################################################################')
 
