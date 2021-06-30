@@ -17,9 +17,11 @@ pipeline = pipeline.prequential_pipeline.PrequentialPipeline(data_loader, featur
 pipeline.run()
 
 visualizer = visualization.visualizer.Visualizer(predictor.accuracy_scores)
-ax = visualizer.plot()
+visualizer.plot(metric_name='Accuracy')
 plt.show()
 
 visualizer = visualization.visualizer.Visualizer(feature_selector.selection)
-ax = visualizer.draw_top_features_plot(data_loader.stream.feature_names)
+visualizer.draw_top_features(data_loader.stream.feature_names)
+plt.show()
+visualizer.draw_selected_features()
 plt.show()
