@@ -1,6 +1,6 @@
 # Here we may test code informally
 from skmultiflow.drift_detection.adwin import ADWIN
-from sklearn.linear_model import Perceptron
+from skmultiflow.neural_networks.perceptron import PerceptronMask
 import matplotlib.pyplot as plt
 from float import *
 
@@ -9,8 +9,8 @@ feature_selector = feature_selection.ofs.OFS(n_total_features=data_loader.stream
                                              nogueira_window_size=10)
 adwin = ADWIN()
 concept_drift_detector = concept_drift_detection.SkmultiflowDriftDetector(adwin)
-perceptron = Perceptron()
-predictor = prediction.sklearn_perceptron.SklearnPerceptron(perceptron, data_loader.stream.target_values)
+perceptron = PerceptronMask()
+predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(perceptron, data_loader.stream.target_values)
 
 pipeline = pipeline.prequential_pipeline.PrequentialPipeline(data_loader, feature_selector, concept_drift_detector,
                                                              predictor, max_n_samples=data_loader.stream.n_samples)
