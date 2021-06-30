@@ -113,11 +113,11 @@ class Visualizer:
         fig, ax = plt.subplots(figsize=self.fig_size)
         ax.grid(True, axis='y')
         ax.bar(np.arange(n_selected_features), counts[top_ftr_idx], width=0.3, zorder=100)
+        ax.set_xticks(np.arange(n_selected_features))
         ax.set_xticklabels(np.asarray(feature_names)[top_ftr_idx], rotation=20, ha='right')
         ax.set_ylabel('Times Selected', size=self.font_size, labelpad=1.5)
         ax.set_xlabel('Top 10 Features', size=self.font_size, labelpad=1.6)
         ax.tick_params(axis='both', labelsize=self.font_size * 0.7, length=0)
-        ax.set_xticks(np.arange(n_selected_features))
         ax.set_xlim(-0.2, 9.2)
         plt.title(f'Top {n_selected_features} Most Selected Features', size=self.font_size)
         return ax

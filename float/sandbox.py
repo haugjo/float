@@ -7,7 +7,7 @@ from float import *
 data_loader = data.DataLoader(None, 'data/datasets/spambase.csv', 0)
 feature_selector = feature_selection.ofs.OFS(n_total_features=data_loader.stream.n_features, n_selected_features=10,
                                              nogueira_window_size=10)
-adwin = ADWIN()
+adwin = ADWIN(delta=2)
 concept_drift_detector = concept_drift_detection.SkmultiflowDriftDetector(adwin)
 perceptron = PerceptronMask()
 predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(perceptron, data_loader.stream.target_values)

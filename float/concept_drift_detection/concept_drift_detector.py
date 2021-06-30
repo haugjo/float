@@ -6,14 +6,14 @@ class ConceptDriftDetector(metaclass=ABCMeta):
     Abstract base class for concept drift detection models.
 
     Attributes:
-        change_detections (list): monitors if there was detected change at each time step
+        drift_detections (list): monitors if there was detected change at each time step
         comp_times (list): computation time in all time steps
     """
     def __init__(self):
         """
         Initializes the concept drift detector.
         """
-        self.change_detections = []
+        self.drift_detections = []
         self.comp_times = []
 
     @abstractmethod
@@ -71,9 +71,13 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    def evaluate(self):
+    def evaluate(self, time_step):
         """
         Evaluates the concept drift detector at one time step.
-        """
-        self.change_detections.append(self.detected_global_change())
 
+        Args:
+            time_step (int): the current time step
+        """
+        if self.detected_global_change():
+            if time_step not in self.drift_detections:
+                self.drift_detections.append(time_step)

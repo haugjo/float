@@ -123,7 +123,7 @@ class Pipeline(metaclass=ABCMeta):
                 self.concept_drift_detector.partial_fit(val)
                 if self.concept_drift_detector.detected_global_change():
                     print(f"Change detected at time step {self.time_step}")
-                self.concept_drift_detector.evaluate()
+                self.concept_drift_detector.evaluate(self.time_step)
             self.concept_drift_detector.comp_times.append(time.time() - start_time)
 
         if self.feature_selector:
@@ -175,7 +175,7 @@ class Pipeline(metaclass=ABCMeta):
             print(tabulate({
                 'Model': [type(self.concept_drift_detector).__name__.split('.')[-1]],
                 'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
-                'Number of Detected Changes:': [np.sum(self.concept_drift_detector.change_detections)],
+                'Detected Changes': [self.concept_drift_detector.drift_detections] if len(self.concept_drift_detector.drift_detections) <= 5 else [f'{self.concept_drift_detector.drift_detections[:5]}, ...'],
             }, headers="keys", tablefmt='github'))
 
         if self.predictor:
