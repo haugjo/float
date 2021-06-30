@@ -7,17 +7,18 @@ class Visualizer:
     """
     Class for creating plots to visualize information.
 
-    TODO: figure out how to check if measures can be visualized with that specific plot
     """
-    def __init__(self, measures, fig_size=(10, 5)):
+    def __init__(self, measures, measure_type, fig_size=(10, 5)):
         """
         Initialize the visualizer using a uniform style.
 
         Args:
             measures (list): the list of measures to be visualized
+            measure_type (str): the type of the measures passed, one of 'prediction', 'feature_selection, or 'drift_detection'
             fig_size (float, float): the size of the plots
         """
         self.measures = measures
+        self.measure_type = measure_type
         self.fig_size = fig_size
         self.font_size = 12
 
@@ -31,6 +32,8 @@ class Visualizer:
         Returns:
             Axes: the Axes object containing the line plot
         """
+        if not self.measure_type == 'prediction':
+            raise TypeError(f'Only measures of type prediction can be visualized with method plot.')
         fig, ax = plt.subplots(figsize=self.fig_size)
         ax.plot(range(len(self.measures)), self.measures)
         ax.set_xlabel('Time Step $t$', size=self.font_size, labelpad=1.6)
@@ -48,6 +51,8 @@ class Visualizer:
         Returns:
             Axes: the Axes object containing the scatter plot
         """
+        if not self.measure_type == 'prediction':
+            raise TypeError(f'Only measures of type prediction can be visualized with method scatter.')
         fig, ax = plt.subplots(figsize=self.fig_size)
         ax.scatter(range(len(self.measures)), self.measures)
         ax.set_xlabel('Time Step $t$', size=self.font_size, labelpad=1.6)
@@ -65,6 +70,8 @@ class Visualizer:
         Returns:
             Axes: the Axes object containing the bar plot
         """
+        if not self.measure_type == 'prediction':
+            raise TypeError(f'Only measures of type prediction can be visualized with method bar.')
         fig, ax = plt.subplots(figsize=self.fig_size)
         ax.bar(range(len(self.measures)), self.measures)
         ax.set_xlabel('Time Step $t$', size=self.font_size, labelpad=1.6)
@@ -79,6 +86,9 @@ class Visualizer:
         Returns:
             Axes: the Axes object containing the scatter plot
         """
+        if not self.measure_type == 'feature_selection':
+            raise TypeError(f'Only measures of type feature_selection can be visualized with method draw_selected_features.')
+
         x, y = [], []
         for i, val in enumerate(self.measures):
             x.extend(np.ones(len(val), dtype=int) * i)
@@ -105,6 +115,9 @@ class Visualizer:
         Returns:
             Axes: the Axes object containing the bar plot
         """
+        if not self.measure_type == 'feature_selection':
+            raise TypeError(f'Only measures of type feature_selection can be visualized with method draw_top_features.')
+
         n_selected_features = len(self.measures[0])
         y = [feature for features in self.measures for feature in features]
         counts = np.bincount(y)
