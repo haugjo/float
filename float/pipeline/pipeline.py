@@ -175,7 +175,7 @@ class Pipeline(metaclass=ABCMeta):
             print(tabulate({
                 'Model': [type(self.concept_drift_detector).__name__.split('.')[-1]],
                 'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
-                'Detected Changes': [self.concept_drift_detector.drift_detections] if len(self.concept_drift_detector.drift_detections) <= 5 else [f'{self.concept_drift_detector.drift_detections[:5]}, ...'],
+                'Detected Changes': [self.concept_drift_detector.drift_detections] if len(self.concept_drift_detector.drift_detections) <= 5 else [str(self.concept_drift_detector.drift_detections[:5])[:-1] + ', ...]']
             }, headers="keys", tablefmt='github'))
 
         if self.predictor:
