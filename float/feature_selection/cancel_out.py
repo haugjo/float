@@ -11,164 +11,67 @@ class CancelOutFeatureSelector(FeatureSelector):
                          supports_streaming_features=False, nogueira_window_size=nogueira_window_size)
 
     def weight_features(self, X, y):
-        """
-        Given a batch of observations and corresponding labels, computes feature weights.
-
-        Args:
-            X (np.ndarray): samples of current batch
-            y (np.ndarray): labels of current batch
-        """
-        self.raw_weight_vector = self._train_ann(X, y, 50)
+        self.raw_weight_vector = self.train_ann(X, y, 50, 128)
 
     @staticmethod
-    def _train_ann(X, y, num_epochs):
-        model = NeuralNet(X.shape[1], X.shape[1] + 1, 2)
-
-        n_features = X.shape[1]
-        mydataset = MyDataset(X, y)
-        batch_size = int(n_features / 5)
-
-        train_loader = torch.utils.data.DataLoader(dataset=mydataset,
+    def train_ann(X, y, num_epochs, batch_size):
+        model = NeuralNet(X.shape[1], X.shape[1] + 10, 2)
+        data_loader = DataLoader(X, y)
+        batch_size = batch_size
+        train_loader = torch.utils.data.DataLoader(dataset=data_loader,
                                                    batch_size=batch_size,
                                                    shuffle=True)
         criterion = nn.CrossEntropyLoss()
 
-        optimizer = torch.optim.Adam([
-            {"params": model.CancelOut.parameters(), "lr": 0.01},
-            {"params": model.fc1.parameters(), "lr": 0.003},
-            {"params": model.fc2.parameters(), "lr": 0.003},
-        ])
-        patience = 3
-
-        early_stopping = EarlyStopping(patience=patience, verbose=False)
-
-        avg_train_losses = []
-        train_losses = []
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
         for epoch in range(num_epochs):
             for i, (sample, labels) in enumerate(train_loader):
                 # Forward pass
                 outputs = model(sample.float())
 
-                weights_co = list(model.CancelOut.parameters())[0]
-                reg = torch.var(weights_co)
-                nrm = torch.norm(weights_co, 1)  # torch.sum(torch.abs(weights_co))
-
-                loss = criterion(outputs, labels.long()) - 0.001 * (reg / n_features) + 0.0001 * (nrm / n_features)
-                train_losses.append(loss.item())
-
+                # cancelout regularization
+                weights_co = torch.sigmoid(list(model.cancelout.parameters())[0])
+                l1_norm = torch.norm(weights_co, 1)
+                l2_norm = torch.norm(weights_co, 2)
+                lambda_1 = 0.001
+                lambda_2 = 0.001
+                loss = criterion(outputs, labels) + lambda_1 * l1_norm + lambda_2 * l2_norm
                 # Backward and optimize
                 optimizer.zero_grad()
                 loss.backward()
+
                 optimizer.step()
 
-            # data for early stoping
-            train_loss = np.average(train_losses)
-            avg_train_losses.append(train_loss)
-            early_stopping(train_loss, model)
-            if early_stopping.early_stop:
-                # print("Early stopping")
-                break
-
-        return list(model.CancelOut.parameters())[0].detach().numpy()
-
-    def detect_concept_drift(self, x, y):
-        raise NotImplementedError
+        return list(model.cancelout.parameters())[0].detach().numpy() / np.sum(
+            list(model.cancelout.parameters())[0].detach().numpy())
 
 
 class NeuralNet(nn.Module):
-    """ANN"""
-
+    """
+    A simple DL model.
+    """
     def __init__(self, input_size, hidden_size, num_classes):
-        """
-        Initializes the neural network.
-
-        Args:
-            input_size (int): size of the input layer
-            hidden_size (int): hidden size of ANN
-            num_classes (int): output size of ANN
-        """
-
         super(NeuralNet, self).__init__()
-        self.relu = nn.ReLU6()
-        self.CancelOut = CancelOut(input_size)
+        self.cancelout = CancelOut(input_size)
         self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, num_classes)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.fc3 = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x):
-        x1 = self.CancelOut(x)
-        x2 = self.fc1(x1)
-        x3 = self.relu(x2)
-        x4 = self.fc2(x3)
-        return x4
+        x = self.cancelout(x)
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        x = self.relu(x)
+        x = self.fc3(x)
+        return x
 
 
-class EarlyStopping:
-    """Early stops the training if validation loss doesn't improve after a given patience."""
-    # https: // github.com / Bjarten / early - stopping - pytorch
-
-    def __init__(self, patience=7, verbose=False):
-        """
-        Args:
-            patience (int): How long to wait after last time validation loss improved.
-                            Default: 7
-            verbose (bool): If True, prints a message for each validation loss improvement.
-                            Default: False
-        """
-        self.patience = patience
-        self.verbose = verbose
-        self.counter = 0
-        self.best_score = None
-        self.early_stop = False
-        self.val_loss_min = np.Inf
-
-    def __call__(self, val_loss, model):
-
-        score = -val_loss
-
-        if self.best_score is None:
-            self.best_score = score
-        elif score < self.best_score:
-            self.counter += 1
-            # if self.verbose:
-            # print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
-            if self.counter >= self.patience:
-                self.early_stop = True
-        else:
-            self.best_score = score
-            self.counter = 0
-
-
-class CancelOut(nn.Module):
+class DataLoader(Dataset):
     """
-    CancelOut layer.
-    """
-    def __init__(self, input_size, *args, **kwargs):
-        """
-        Initializes the Cancel Out layer.
-
-        Args:
-            input_size (int): size of the input layer
-        """
-        super(CancelOut, self).__init__()
-        self.weights = nn.Parameter(torch.zeros(input_size, requires_grad=True))
-
-    def forward(self, X):
-        """
-        Performs a forward pass.
-
-        Args:
-            X (np.ndarray): samples of the current batch
-
-        Returns:
-            np.ndarray: X * sigmoid(weights)
-        """
-        return X * torch.sigmoid(self.weights.float() + 2)
-
-
-class MyDataset(Dataset):
-    """
-    Dataset Class for PyTorch model.
+    A dataset loader.
     """
     def __init__(self, X, y):
         self.X = X
@@ -179,3 +82,20 @@ class MyDataset(Dataset):
 
     def __len__(self):
         return len(self.X)
+
+
+class CancelOut(nn.Module):
+    """
+    A CancelOut Layer.
+    """
+    def __init__(self, X, *args, **kwargs):
+        """
+
+        Args:
+            X: an input data (vector, matrix, tensor)
+        """
+        super(CancelOut, self).__init__()
+        self.weights = nn.Parameter(torch.zeros(X, requires_grad=True) + 4)
+
+    def forward(self, X):
+        return X * torch.sigmoid(self.weights.float())
