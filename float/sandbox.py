@@ -10,8 +10,9 @@ feature_selectors = [feature_selection.ofs.OFS(n_total_features=data_loader.stre
                      feature_selection.fires.FIRES(n_total_features=data_loader.stream.n_features,
                                                    n_selected_features=10, classes=data_loader.stream.target_values,
                                                    nogueira_window_size=10)]
-adwin = ADWIN(delta=2)
-concept_drift_detector = concept_drift_detection.SkmultiflowDriftDetector(adwin)
+# adwin = ADWIN(delta=2)
+# concept_drift_detector = concept_drift_detection.SkmultiflowDriftDetector(adwin)
+concept_drift_detector = concept_drift_detection.erics.ERICS(data_loader.stream.n_features)
 perceptron = PerceptronMask()
 predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(perceptron, data_loader.stream.target_values)
 

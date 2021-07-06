@@ -105,6 +105,20 @@ class Pipeline(metaclass=ABCMeta):
             n_samples = self.max_n_samples - self.n_global_samples
         X, y = self.data_loader.get_data(n_samples)
 
+        if self.feature_selector:
+            start_time = time.time()
+            self.feature_selector.weight_features(copy.copy(X), copy.copy(y))
+            self.feature_selector.comp_times.append(time.time() - start_time)
+
+            X = self.feature_selector.select_features(X, self.time_step)
+
+            self.feature_selector.evaluate()
+
+            if self.feature_selector.supports_streaming_features and \
+                    self.time_step in self.feature_selector.streaming_features:
+                print('New streaming features {} at t={}'.format(
+                    self.feature_selector.streaming_features[self.time_step], self.time_step))
+
         if self.predictor:
             start_time = time.time()
             prediction = self.predictor.predict(X).tolist()
@@ -119,26 +133,16 @@ class Pipeline(metaclass=ABCMeta):
 
         if self.concept_drift_detector:
             start_time = time.time()
-            for val in (prediction == y):
-                self.concept_drift_detector.partial_fit(val)
-                if self.concept_drift_detector.detected_global_change():
-                    print(f"Change detected at time step {self.time_step}")
-                self.concept_drift_detector.evaluate(self.time_step)
+            # for val in (prediction == y):
+            #     self.concept_drift_detector.partial_fit(val)
+            #     if self.concept_drift_detector.detected_global_change():
+            #         print(f"Global change detected at time step {self.time_step}")
+            #     self.concept_drift_detector.evaluate(self.time_step)
+            self.concept_drift_detector.partial_fit(X, y)
+            if self.concept_drift_detector.detected_global_change():
+                print(f"Global change detected at time step {self.time_step}")
+            self.concept_drift_detector.evaluate(self.time_step)
             self.concept_drift_detector.comp_times.append(time.time() - start_time)
-
-        if self.feature_selector:
-            start_time = time.time()
-            self.feature_selector.weight_features(copy.copy(X), copy.copy(y))
-            self.feature_selector.comp_times.append(time.time() - start_time)
-
-            X = self.feature_selector.select_features(X, self.time_step)
-
-            self.feature_selector.evaluate()
-
-            if self.feature_selector.supports_streaming_features and \
-                    self.time_step in self.feature_selector.streaming_features:
-                print('New streaming features {} at t={}'.format(
-                    self.feature_selector.streaming_features[self.time_step], self.time_step))
 
         self._finish_iteration(n_samples)
 
@@ -175,7 +179,10 @@ class Pipeline(metaclass=ABCMeta):
             print(tabulate({
                 'Model': [type(self.concept_drift_detector).__name__.split('.')[-1]],
                 'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
-                'Detected Changes': [self.concept_drift_detector.drift_detections] if len(self.concept_drift_detector.drift_detections) <= 5 else [str(self.concept_drift_detector.drift_detections[:5])[:-1] + ', ...]']
+                'Detected Global Drifts': [self.concept_drift_detector.global_drifts] if len(self.concept_drift_detector.global_drifts) <= 5 else [str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]'],
+                'Detected Partial Drifts': [self.concept_drift_detector.partial_drifts] if len(
+                    self.concept_drift_detector.partial_drifts) <= 5 else [
+                    str(self.concept_drift_detector.partial_drifts[:5])[:-1] + ', ...]'],
             }, headers="keys", tablefmt='github'))
 
         if self.predictor:
