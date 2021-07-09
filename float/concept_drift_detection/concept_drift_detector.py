@@ -14,7 +14,6 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Initializes the concept drift detector.
         """
         self.global_drifts = []
-        self.partial_drifts = []
         self.comp_times = []
 
     @abstractmethod
@@ -82,7 +81,3 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         if self.detected_global_change():
             if time_step not in self.global_drifts:
                 self.global_drifts.append(time_step)
-
-        if self.detected_partial_change():
-            if time_step not in self.partial_drifts:
-                self.partial_drifts.append(time_step)

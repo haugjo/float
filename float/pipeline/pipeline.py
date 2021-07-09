@@ -133,12 +133,11 @@ class Pipeline(metaclass=ABCMeta):
 
         if self.concept_drift_detector:
             start_time = time.time()
-            # for val in (prediction == y):
-            #     self.concept_drift_detector.partial_fit(val)
-            #     if self.concept_drift_detector.detected_global_change():
-            #         print(f"Global change detected at time step {self.time_step}")
-            #     self.concept_drift_detector.evaluate(self.time_step)
-            self.concept_drift_detector.partial_fit(X, y)
+            if self.concept_drift_detector.prediction_based:
+                for val in (prediction == y):
+                    self.concept_drift_detector.partial_fit(val)
+            else:
+                self.concept_drift_detector.partial_fit(X, y)
             if self.concept_drift_detector.detected_global_change():
                 print(f"Global change detected at time step {self.time_step}")
             self.concept_drift_detector.evaluate(self.time_step)
@@ -180,9 +179,6 @@ class Pipeline(metaclass=ABCMeta):
                 'Model': [type(self.concept_drift_detector).__name__.split('.')[-1]],
                 'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
                 'Detected Global Drifts': [self.concept_drift_detector.global_drifts] if len(self.concept_drift_detector.global_drifts) <= 5 else [str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]'],
-                'Detected Partial Drifts': [self.concept_drift_detector.partial_drifts] if len(
-                    self.concept_drift_detector.partial_drifts) <= 5 else [
-                    str(self.concept_drift_detector.partial_drifts[:5])[:-1] + ', ...]'],
             }, headers="keys", tablefmt='github'))
 
         if self.predictor:

@@ -61,6 +61,11 @@ class ERICS(ConceptDriftDetector):
 
         self.global_drift_detected = False
         self.partial_drift_detected = False
+
+        self.partial_drifts = []
+
+        self.prediction_based = False
+
         # ### ADD YOUR OWN MODEL PARAMETERS HERE ############################
         # if self.base_model == 'your_model':
         #   # define parameters
@@ -282,3 +287,16 @@ class ERICS(ConceptDriftDetector):
     # def __update_your_model(x,y):
     #   # update the parameters of your model
     #####################################################################
+
+    def evaluate(self, time_step):
+        """
+        Evaluates the concept drift detector at one time step.
+
+        Args:
+            time_step (int): the current time step
+        """
+        super().evaluate(time_step)
+
+        if self.detected_partial_change():
+            if time_step not in self.partial_drifts:
+                self.partial_drifts.append(time_step)

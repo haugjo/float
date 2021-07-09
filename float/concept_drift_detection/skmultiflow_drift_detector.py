@@ -1,6 +1,8 @@
 from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
 from skmultiflow.drift_detection.base_drift_detector import BaseDriftDetector
-
+from skmultiflow.drift_detection.kswin import KSWIN
+import numpy as np
+import scipy.stats as stats
 
 class SkmultiflowDriftDetector(ConceptDriftDetector):
     """
@@ -18,6 +20,7 @@ class SkmultiflowDriftDetector(ConceptDriftDetector):
         """
         super().__init__()
         self.detector = detector
+        self.prediction_based = False if type(self.detector) is KSWIN else True
 
     def reset(self):
         """
@@ -62,7 +65,7 @@ class SkmultiflowDriftDetector(ConceptDriftDetector):
         """
         return self.detector.estimation
 
-    def partial_fit(self, input_value):
+    def partial_fit(self, input_value, *args, **kwargs):
         """
         Update the parameters of the concept drift detection model.
 
