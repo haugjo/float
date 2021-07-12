@@ -177,14 +177,66 @@ class Visualizer:
             for j in range(layout[1]):
                 n_selected_features = len(self.measures[i+j][0])
                 y = [feature for features in self.measures[i+j] for feature in features]
-                counts = np.bincount(y)
-                top_ftr_idx = counts.argsort()[-n_selected_features:][::-1]
+                counts = [(x, y.count(x)) for x in np.unique(y)]
+                top_features = sorted(counts, key=lambda x: x[1])[-n_selected_features:][::-1]
+                top_features_idx = [x[0] for x in top_features]
+                top_features_vals = [x[1] for x in top_features]
 
                 ax = axes if n_measures == 1 else (axes[i + j] if layout[0] == 1 or layout[1] == 1 else axes[i, j])
                 ax.grid(True, axis='y')
-                ax.bar(np.arange(n_selected_features), counts[top_ftr_idx], width=0.3, zorder=100, color=self.palette[i+j], label=self.labels[i+j])
+                ax.bar(np.arange(n_selected_features), top_features_vals, width=0.3, zorder=100, color=self.palette[i+j], label=self.labels[i+j])
                 ax.set_xticks(np.arange(n_selected_features))
-                ax.set_xticklabels(np.asarray(feature_names)[top_ftr_idx], rotation=20, ha='right')
+                ax.set_xticklabels(np.asarray(feature_names)[top_features_idx], rotation=20, ha='right')
+                ax.set_ylabel('Times Selected', size=self.font_size, labelpad=1.5)
+                ax.set_xlabel('Top 10 Features', size=self.font_size, labelpad=1.6)
+                ax.tick_params(axis='both', labelsize=self.font_size * 0.7, length=0)
+                ax.set_xlim(-0.2, 9.2)
+                ax.legend()
+        plt.suptitle(f'Most Selected Features', size=self.font_size)
+        return axes
+
+    def draw_top_features_with_reference(self, feature_names, layout, fig_size=(10, 5), share_x=True, share_y=True):
+        """
+        Draws the most selected features over time as a bar plot.
+
+        Args:
+            feature_names (list): the list of feature names
+            layout (int, int): the layout of the figure (nrows, ncols)
+            fig_size (float, float): the figure size of the plot
+            share_x (bool): True if the x axis should be shared among plots in the figure, False otherwise
+            share_y (bool): True if the y axis among plots in the figure, False otherwise
+
+        Returns:
+            Axes: the Axes object containing the bar plot
+        """
+        if not self.measure_type == 'feature_selection':
+            warnings.warn(f'Only measures of type "feature_selection" can be visualized with method draw_top_features.')
+            return
+
+        n_measures = len(self.measures)
+        if layout[0] * layout[1] < n_measures:
+            warnings.warn('The number of measures cannot be plotted in such a layout.')
+            return
+
+        fig, axes = plt.subplots(layout[0], layout[1], figsize=fig_size, sharex=share_x, sharey=share_y)
+        for i in range(layout[0]):
+            for j in range(layout[1]):
+                n_selected_features = len(self.measures[i+j][0])
+                y = [feature for features in self.measures[i+j] for feature in features]
+                counts = [(x, y.count(x)) for x in np.unique(y)]
+                if i+j == 0:
+                    top_features = sorted(counts, key=lambda x: x[1])[-n_selected_features:][::-1]
+                    top_features_idx = [x[0] for x in top_features]
+                    top_features_vals = [x[1] for x in top_features]
+                else:
+                    top_features_vals = [dict(counts)[x] if x in dict(counts).keys() else 0 for x in top_features_idx]
+                    print(f"Top {self.labels[i+j]} features not in reference {self.labels[0]}: {np.asarray(feature_names)[[x for x in top_features_idx if x not in dict(counts).keys()]]}")
+
+                ax = axes if n_measures == 1 else (axes[i + j] if layout[0] == 1 or layout[1] == 1 else axes[i, j])
+                ax.grid(True, axis='y')
+                ax.bar(np.arange(n_selected_features), top_features_vals, width=0.3, zorder=100, color=self.palette[i+j], label=self.labels[i+j])
+                ax.set_xticks(np.arange(n_selected_features))
+                ax.set_xticklabels(np.asarray(feature_names)[top_features_idx], rotation=20, ha='right')
                 ax.set_ylabel('Times Selected', size=self.font_size, labelpad=1.5)
                 ax.set_xlabel('Top 10 Features', size=self.font_size, labelpad=1.6)
                 ax.tick_params(axis='both', labelsize=self.font_size * 0.7, length=0)

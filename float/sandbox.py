@@ -27,7 +27,7 @@ visualizer.scatter(plot_title='Predictor', layout=(2, 2))
 plt.show()
 
 visualizer = visualization.visualizer.Visualizer([feature_selectors[0].selection, feature_selectors[1].selection], ['OFS', 'FIRES'], 'feature_selection')
-visualizer.draw_top_features(data_loader.stream.feature_names, layout=(1, 2), fig_size=(15, 5))
+visualizer.draw_top_features_with_reference(data_loader.stream.feature_names, layout=(1, 2), fig_size=(15, 5))
 plt.show()
 visualizer.draw_selected_features(layout=(2, 1), fig_size=(10, 8))
 plt.show()
