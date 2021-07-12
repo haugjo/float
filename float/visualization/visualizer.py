@@ -49,13 +49,16 @@ class Visualizer:
         plt.title(plot_title)
         return ax
 
-    def scatter(self, plot_title, fig_size=(10, 5)):
+    def scatter(self, plot_title, layout, fig_size=(10, 5), share_x=True, share_y=True):
         """
         Creates a scatter plot.
 
         Args:
             plot_title (str): the title of the plot
+            layout (int, int): the layout of the figure (nrows, ncols)
             fig_size (float, float): the figure size of the plot
+            share_x (bool): True if the x axis should be shared among plots in the figure, False otherwise
+            share_y (bool): True if the y axis among plots in the figure, False otherwise
 
         Returns:
             Axes: the Axes object(s) containing the scatter plot(s)
@@ -65,13 +68,18 @@ class Visualizer:
             return
 
         n_measures = len(self.measures)
-        fig, axes = plt.subplots(n_measures, 1, sharex=True, figsize=fig_size)
-        for i, (measure, label) in enumerate(zip(self.measures, self.labels)):
-            ax = axes[i] if n_measures > 1 else axes
-            ax.scatter(np.arange(len(measure)), measure, color=self.palette[i], label=label)
-            ax.set_xlabel('Time Step $t$', size=self.font_size, labelpad=1.6)
-            ax.set_ylabel('Metric Value', size=self.font_size, labelpad=1.6)
-            ax.legend()
+        if layout[0] * layout[1] < n_measures:
+            warnings.warn('The number of measures cannot be plotted in such a layout.')
+            return
+
+        fig, axes = plt.subplots(layout[0], layout[1], figsize=fig_size, sharex=share_x, sharey=share_y)
+        for i in range(layout[0]):
+            for j in range(layout[1]):
+                ax = axes if n_measures == 1 else (axes[i+j] if layout[0] == 1 or layout[1] == 1 else axes[i, j])
+                ax.scatter(np.arange(len(self.measures[i+j])), self.measures[i+j], color=self.palette[i+j], label=self.labels[i+j])
+                ax.set_xlabel('Time Step $t$', size=self.font_size, labelpad=1.6)
+                ax.set_ylabel('Metric Value', size=self.font_size, labelpad=1.6)
+                ax.legend()
         plt.suptitle(plot_title)
         return axes
 
@@ -101,12 +109,15 @@ class Visualizer:
         plt.title(plot_title)
         return ax
 
-    def draw_selected_features(self, fig_size=(10, 5)):
+    def draw_selected_features(self, layout, fig_size=(10, 5), share_x=True, share_y=True):
         """
         Draws the selected features at each time step in a scatter plot.
 
         Args:
+            layout (int, int): the layout of the figure (nrows, ncols)
             fig_size (float, float): the figure size of the plot
+            share_x (bool): True if the x axis should be shared among plots in the figure, False otherwise
+            share_y (bool): True if the y axis among plots in the figure, False otherwise
 
         Returns:
             Axes: the Axes object containing the scatter plot
@@ -116,30 +127,38 @@ class Visualizer:
             return
 
         n_measures = len(self.measures)
-        fig, axes = plt.subplots(n_measures, 1, sharex=True, figsize=fig_size)
-        for i, (measure, label) in enumerate(zip(self.measures, self.labels)):
-            x, y = [], []
-            for j, val in enumerate(measure):
-                x.extend(np.ones(len(val), dtype=int) * j)
-                y.extend(val)
+        if layout[0] * layout[1] < n_measures:
+            warnings.warn('The number of measures cannot be plotted in such a layout.')
+            return
 
-            ax = axes[i] if n_measures > 1 else axes
-            ax.grid(True)
-            ax.set_xlabel('Time Step $t$', size=self.font_size, labelpad=1.6)
-            ax.set_ylabel('Feature Index', size=self.font_size, labelpad=1.5)
-            ax.tick_params(axis='both', labelsize=self.font_size * 0.7, length=0)
-            ax.scatter(x, y, marker='.', zorder=100, color=self.palette[i], label=label)
-            ax.legend(frameon=True, loc='best', fontsize=self.font_size * 0.7, borderpad=0.2, handletextpad=0.2)
+        fig, axes = plt.subplots(layout[0], layout[1], figsize=fig_size, sharex=share_x, sharey=share_y)
+        for i in range(layout[0]):
+            for j in range(layout[1]):
+                x, y = [], []
+                for k, val in enumerate(self.measures[i+j]):
+                    x.extend(np.ones(len(val), dtype=int) * k)
+                    y.extend(val)
+
+                ax = axes if n_measures == 1 else (axes[i + j] if layout[0] == 1 or layout[1] == 1 else axes[i, j])
+                ax.grid(True)
+                ax.set_xlabel('Time Step $t$', size=self.font_size, labelpad=1.6)
+                ax.set_ylabel('Feature Index', size=self.font_size, labelpad=1.5)
+                ax.tick_params(axis='both', labelsize=self.font_size * 0.7, length=0)
+                ax.scatter(x, y, marker='.', zorder=100, color=self.palette[i+j], label=self.labels[i+j])
+                ax.legend(frameon=True, loc='best', fontsize=self.font_size * 0.7, borderpad=0.2, handletextpad=0.2)
         plt.suptitle('Selected Features At Each Time Step', size=self.font_size)
         return axes
 
-    def draw_top_features(self, feature_names, fig_size=(10, 5)):
+    def draw_top_features(self, feature_names, layout, fig_size=(10, 5), share_x=True, share_y=True):
         """
         Draws the most selected features over time as a bar plot.
 
         Args:
             feature_names (list): the list of feature names
+            layout (int, int): the layout of the figure (nrows, ncols)
             fig_size (float, float): the figure size of the plot
+            share_x (bool): True if the x axis should be shared among plots in the figure, False otherwise
+            share_y (bool): True if the y axis among plots in the figure, False otherwise
 
         Returns:
             Axes: the Axes object containing the bar plot
@@ -149,22 +168,38 @@ class Visualizer:
             return
 
         n_measures = len(self.measures)
-        fig, axes = plt.subplots(1, n_measures, sharey=True, figsize=fig_size)
-        for i, (measure, label) in enumerate(zip(self.measures, self.labels)):
-            n_selected_features = len(measure[0])
-            y = [feature for features in measure for feature in features]
-            counts = np.bincount(y)
-            top_ftr_idx = counts.argsort()[-n_selected_features:][::-1]
+        if layout[0] * layout[1] < n_measures:
+            warnings.warn('The number of measures cannot be plotted in such a layout.')
+            return
 
-            ax = axes[i] if n_measures > 1 else axes
-            ax.grid(True, axis='y')
-            ax.bar(np.arange(n_selected_features), counts[top_ftr_idx], width=0.3, zorder=100, color=self.palette[i], label=label)
-            ax.set_xticks(np.arange(n_selected_features))
-            ax.set_xticklabels(np.asarray(feature_names)[top_ftr_idx], rotation=20, ha='right')
-            ax.set_ylabel('Times Selected', size=self.font_size, labelpad=1.5)
-            ax.set_xlabel('Top 10 Features', size=self.font_size, labelpad=1.6)
-            ax.tick_params(axis='both', labelsize=self.font_size * 0.7, length=0)
-            ax.set_xlim(-0.2, 9.2)
-            ax.legend()
+        fig, axes = plt.subplots(layout[0], layout[1], figsize=fig_size, sharex=share_x, sharey=share_y)
+        for i in range(layout[0]):
+            for j in range(layout[1]):
+                n_selected_features = len(self.measures[i+j][0])
+                y = [feature for features in self.measures[i+j] for feature in features]
+                counts = np.bincount(y)
+                top_ftr_idx = counts.argsort()[-n_selected_features:][::-1]
+
+                ax = axes if n_measures == 1 else (axes[i + j] if layout[0] == 1 or layout[1] == 1 else axes[i, j])
+                ax.grid(True, axis='y')
+                ax.bar(np.arange(n_selected_features), counts[top_ftr_idx], width=0.3, zorder=100, color=self.palette[i+j], label=self.labels[i+j])
+                ax.set_xticks(np.arange(n_selected_features))
+                ax.set_xticklabels(np.asarray(feature_names)[top_ftr_idx], rotation=20, ha='right')
+                ax.set_ylabel('Times Selected', size=self.font_size, labelpad=1.5)
+                ax.set_xlabel('Top 10 Features', size=self.font_size, labelpad=1.6)
+                ax.tick_params(axis='both', labelsize=self.font_size * 0.7, length=0)
+                ax.set_xlim(-0.2, 9.2)
+                ax.legend()
         plt.suptitle(f'Most Selected Features', size=self.font_size)
         return axes
+
+    def draw_concept_drifts(self, known_drifts):
+        """
+
+        Args:
+            known_drifts (dict):
+
+        Returns:
+
+        """
+        raise NotImplementedError

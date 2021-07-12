@@ -1,8 +1,7 @@
 from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
 from skmultiflow.drift_detection.base_drift_detector import BaseDriftDetector
 from skmultiflow.drift_detection.kswin import KSWIN
-import numpy as np
-import scipy.stats as stats
+
 
 class SkmultiflowDriftDetector(ConceptDriftDetector):
     """
