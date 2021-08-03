@@ -3,6 +3,7 @@ from matplotlib.axes import Axes
 import numpy as np
 import warnings
 from scipy.signal import savgol_filter
+from skmultiflow.data.data_stream import Stream
 
 
 class Visualizer:
@@ -32,7 +33,8 @@ class Visualizer:
 
         Args:
             plot_title (str): the title of the plot
-            fig_size (float, float):
+            fig_size (float, float): the figure size of the plot
+            smooth_curve (bool): True if the plotted curve should be smoothed, False otherwise
 
         Returns:
             Axes: the Axes object containing the line plot
@@ -51,13 +53,13 @@ class Visualizer:
         plt.title(plot_title)
         return ax
 
-    def scatter(self, plot_title, layout, fig_size=(10, 5), share_x=True, share_y=True):
+    def scatter(self, layout, plot_title, fig_size=(10, 5), share_x=True, share_y=True):
         """
         Creates a scatter plot.
 
         Args:
-            plot_title (str): the title of the plot
             layout (int, int): the layout of the figure (nrows, ncols)
+            plot_title (str): the title of the plot
             fig_size (float, float): the figure size of the plot
             share_x (bool): True if the x axis should be shared among plots in the figure, False otherwise
             share_y (bool): True if the y axis among plots in the figure, False otherwise
@@ -113,12 +115,13 @@ class Visualizer:
         plt.title(plot_title)
         return ax
 
-    def draw_selected_features(self, layout, fig_size=(10, 5), share_x=True, share_y=True):
+    def draw_selected_features(self, layout, plot_title, fig_size=(10, 5), share_x=True, share_y=True):
         """
         Draws the selected features at each time step in a scatter plot.
 
         Args:
             layout (int, int): the layout of the figure (nrows, ncols)
+            plot_title (str): the title of the plot
             fig_size (float, float): the figure size of the plot
             share_x (bool): True if the x axis should be shared among plots in the figure, False otherwise
             share_y (bool): True if the y axis among plots in the figure, False otherwise
@@ -151,16 +154,17 @@ class Visualizer:
                 ax.tick_params(axis='both', labelsize=self.font_size * 0.7, length=0)
                 ax.scatter(x, y, marker='.', zorder=100, color=self.palette[i + j], label=self.labels[i + j])
                 ax.legend(frameon=True, loc='best', fontsize=self.font_size * 0.7, borderpad=0.2, handletextpad=0.2)
-        plt.suptitle('Selected Features At Each Time Step', size=self.font_size)
+        plt.suptitle(plot_title, size=self.font_size)
         return axes
 
-    def draw_top_features(self, feature_names, layout, fig_size=(10, 5), share_x=True, share_y=True):
+    def draw_top_features(self, feature_names, layout, plot_title, fig_size=(10, 5), share_x=True, share_y=True):
         """
         Draws the most selected features over time as a bar plot.
 
         Args:
             feature_names (list): the list of feature names
             layout (int, int): the layout of the figure (nrows, ncols)
+            plot_title (str): the title of the plot
             fig_size (float, float): the figure size of the plot
             share_x (bool): True if the x axis should be shared among plots in the figure, False otherwise
             share_y (bool): True if the y axis among plots in the figure, False otherwise
@@ -198,15 +202,16 @@ class Visualizer:
                 ax.tick_params(axis='both', labelsize=self.font_size * 0.7, length=0)
                 ax.set_xlim(-0.2, 9.2)
                 ax.legend()
-        plt.suptitle(f'Most Selected Features', size=self.font_size)
+        plt.suptitle(plot_title, size=self.font_size)
         return axes
 
-    def draw_top_features_with_reference(self, feature_names, fig_size=(10, 5)):
+    def draw_top_features_with_reference(self, feature_names, plot_title, fig_size=(10, 5)):
         """
         Draws the most selected features over time as a bar plot.
 
         Args:
             feature_names (list): the list of feature names
+            plot_title (str): the title of the plot
             fig_size (float, float): the figure size of the plot
 
         Returns:
@@ -241,45 +246,54 @@ class Visualizer:
         plt.xlabel('Top 10 Features', size=self.font_size, labelpad=1.6)
         plt.tick_params(axis='both', labelsize=self.font_size * 0.7, length=0)
         plt.legend()
-        plt.title(f'Most Selected Features', size=self.font_size)
+        plt.title(plot_title, size=self.font_size)
         return ax
 
-    def draw_concept_drifts(self, data, known_drifts, batch_sizes, data_labels, cdd_labels):
+    def draw_concept_drifts(self, data_stream, known_drift, batch_size, plot_title):
+        """
+        Draws the known and the detected concept drifts for all concept drift detectors.
+
+        Args:
+            data_stream (Stream): the data set as a stream
+            known_drift (list): the known concept drifts for this data set
+            batch_size (int): the batch size used for evaluation of the data stream
+            plot_title (str): the title of the plot
+
+        Returns:
+            Axes: the Axes object containing the bar plot
+        """
         if not self.measure_type == 'drift_detection':
             warnings.warn(f'Only measures of type "drift_detection" can be visualized with method draw_concept_drifts.')
             return
 
         drifts = []
-        for i, (stream, known_drift, batch_size, data_label) in enumerate(
-                zip(data, known_drifts, batch_sizes, data_labels)):
-            drifts.append([])
-            for measure, cdd_label in zip(self.measures, cdd_labels):
-                drifts[i].append((cdd_label, np.asarray(measure) * batch_size + batch_size))
+        for measure, cdd_label in zip(self.measures, self.labels):
+            drifts.append((cdd_label, np.asarray(measure) * batch_size + batch_size))
 
-            fig = plt.figure(figsize=(10, 5))
-            y_loc = 0  # y-coordinate of scatter points
+        fig, ax = plt.subplots(figsize=(10, 5))
+        y_loc = 0  # y-coordinate of scatter points
 
-            # Draw known drifts
-            for true in known_drift:
-                if isinstance(true, tuple):
-                    plt.axvspan(true[0], true[1], facecolor='#eff3ff', edgecolor='#9ecae1', hatch="//")
-                else:
-                    plt.axvline(true, color='#9ecae1', lw=3, zorder=0)
+        # Draw known drifts
+        for true in known_drift:
+            if isinstance(true, tuple):
+                plt.axvspan(true[0], true[1], facecolor='#eff3ff', edgecolor='#9ecae1', hatch="//")
+            else:
+                plt.axvline(true, color='#9ecae1', lw=3, zorder=0)
 
-            # Draw detected drifts
-            y_tick_labels = []
+        # Draw detected drifts
+        y_tick_labels = []
 
-            for model in drifts[i]:
-                plt.axhline(y_loc, color='black', zorder=5)
-                plt.scatter(model[1], np.repeat(y_loc, len(model[1])), marker='|', color='black', s=300, zorder=10)
-                y_loc += 0.5
-                y_tick_labels.append(model[0].upper())  # save model name
+        for model in drifts:
+            ax.axhline(y_loc, color='black', zorder=5)
+            ax.scatter(model[1], np.repeat(y_loc, len(model[1])), marker='|', color='black', s=300, zorder=10)
+            y_loc += 0.5
+            y_tick_labels.append(model[0].upper())  # save model name
 
-            plt.yticks(np.arange(0, 1, 0.5), y_tick_labels, fontsize=12)
-            tx = np.arange(0, stream.n_samples - 10, round(stream.n_samples * 0.1))
-            plt.xticks(tx, tx, fontsize=12)
-            plt.xlim(-stream.n_samples * 0.005,
-                     stream.n_samples + stream.n_samples * 0.005)
-            plt.xlabel('# Observations', fontsize=14)
-            plt.title(data_label)
-            plt.show()
+        plt.yticks(np.arange(0, 1, 0.5), y_tick_labels, fontsize=12)
+        tx = np.arange(0, data_stream.n_samples - 10, round(data_stream.n_samples * 0.1))
+        plt.xticks(tx, tx, fontsize=12)
+        plt.xlim(-data_stream.n_samples * 0.005,
+                 data_stream.n_samples + data_stream.n_samples * 0.005)
+        plt.xlabel('# Observations', fontsize=14)
+        plt.title(plot_title)
+        return ax

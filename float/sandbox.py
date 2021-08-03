@@ -15,8 +15,13 @@ def get_kdd_conceptdrift_feature_names():
             "dst_host_srv_rerror_rate"]
 
 
+data_set_names = ['spambase', 'adult_conceptdrift', 'har', 'kdd_conceptdrift']
+feature_selector_names = ['OFS', 'FIRES']
+predictor_names = ['Perceptron']
+concept_drift_detector_names = ['ADWIN', 'ERICS']
+
 data_loaders = []
-for file_name in ['spambase', 'adult_conceptdrift', 'har', 'kdd_conceptdrift']:
+for file_name in data_set_names:
     data_loader = data.DataLoader(None, f'data/datasets/{file_name}.csv', 0)
     data_loaders.append(data_loader)
 
@@ -26,8 +31,8 @@ known_drifts = [[round(data_loader.stream.n_samples * 0.2), round(data_loader.st
 batch_sizes = [10, 50, 10, 100]
 
 pipelines = []
-for i, data_loader in enumerate(data_loaders):
-    feature_names = get_kdd_conceptdrift_feature_names() if i == 3 else data_loader.stream.feature_names
+for data_set_name, data_loader, batch_size, known_drift in zip(data_set_names, data_loaders, batch_sizes, known_drifts):
+    feature_names = get_kdd_conceptdrift_feature_names() if data_set_name == 'kdd_conceptdrift' else data_loader.stream.feature_names
     feature_selectors = [
         feature_selection.ofs.OFS(n_total_features=data_loader.stream.n_features, n_selected_features=10,
                                   nogueira_window_size=10),
@@ -35,36 +40,39 @@ for i, data_loader in enumerate(data_loaders):
                                       n_selected_features=10, classes=data_loader.stream.target_values,
                                       nogueira_window_size=10)]
 
-    concept_drift_detectors = [concept_drift_detection.SkmultiflowDriftDetector(ADWIN()),
+    concept_drift_detectors = [concept_drift_detection.SkmultiflowDriftDetector(ADWIN(delta=0.6)),
                                concept_drift_detection.erics.ERICS(data_loader.stream.n_features)]
     predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
                                                                         data_loader.stream.target_values)
-    for feature_selector in feature_selectors:
-        for concept_drift_detector in concept_drift_detectors:
+    for feature_selector_name, feature_selector in zip(feature_selector_names, feature_selectors):
+        for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names,
+                                                                       concept_drift_detectors):
             prequential_pipeline = pipeline.prequential_pipeline.PrequentialPipeline(data_loader, feature_selector,
                                                                                      concept_drift_detector,
                                                                                      predictor,
-                                                                                     batch_size=batch_sizes[i],
+                                                                                     batch_size=batch_size,
                                                                                      max_n_samples=data_loader.stream.n_samples)
             prequential_pipeline.run()
             pipelines.append(prequential_pipeline)
 
-    visualizer = visualization.visualizer.Visualizer(
-        [predictor.accuracy_scores, predictor.precision_scores, predictor.f1_scores, predictor.recall_scores],
-        ['Accuracy', 'Precision', 'F1', 'Recall'],
-        'prediction')
-    visualizer.plot(plot_title='Predictor')
-    plt.show()
+        visualizer = visualization.visualizer.Visualizer(
+            [predictor.accuracy_scores, predictor.precision_scores, predictor.f1_scores, predictor.recall_scores],
+            ['Accuracy', 'Precision', 'F1', 'Recall'],
+            'prediction')
+        visualizer.plot(plot_title=f'Metrics For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}', smooth_curve=True)
+        plt.show()
+
+        visualizer = visualization.visualizer.Visualizer(
+            [concept_drift_detectors[0].global_drifts, concept_drift_detectors[1].global_drifts],
+            concept_drift_detector_names, 'drift_detection')
+        visualizer.draw_concept_drifts(data_loader.stream, known_drift, batch_size,
+                                       plot_title=f'Concept Drifts For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}')
+        plt.show()
 
     visualizer = visualization.visualizer.Visualizer(
-        [feature_selectors[0].selection, feature_selectors[1].selection], ['OFS', 'FIRES'], 'feature_selection')
-    print('DATA FEATURES:', feature_names)
-    visualizer.draw_top_features_with_reference(feature_names, fig_size=(15, 5))
+        [feature_selectors[0].selection, feature_selectors[1].selection], feature_selector_names, 'feature_selection')
+    visualizer.draw_top_features_with_reference(feature_names, f'Most Selected Features For Data Set {data_set_name}, Predictor {predictor_names[0]}', fig_size=(15, 5))
     plt.show()
-    visualizer.draw_selected_features(layout=(2, 1), fig_size=(10, 8))
+    visualizer.draw_selected_features((2, 1), f'Selected Features At Each Time Step For Data Set {data_set_name}, Predictor {predictor_names[0]}', fig_size=(10, 8))
     plt.show()
-
-visualizer = visualization.visualizer.Visualizer(
-    [concept_drift_detectors[0].global_drifts, concept_drift_detectors[1].global_drifts], ['ERICS'], 'drift_detection')
-visualizer.draw_concept_drifts([data_loader.stream for data_loader in data_loaders], known_drifts, batch_sizes,
-                               ['spambase', 'adult', 'har', 'kdd'], ['adwin', 'erics'])
+    break
