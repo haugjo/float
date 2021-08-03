@@ -249,15 +249,16 @@ class Visualizer:
         plt.title(plot_title, size=self.font_size)
         return ax
 
-    def draw_concept_drifts(self, data_stream, known_drift, batch_size, plot_title):
+    def draw_concept_drifts(self, data_stream, known_drifts, batch_size, plot_title, fig_size=(10, 5)):
         """
         Draws the known and the detected concept drifts for all concept drift detectors.
 
         Args:
             data_stream (Stream): the data set as a stream
-            known_drift (list): the known concept drifts for this data set
+            known_drifts (list): the known concept drifts for this data set
             batch_size (int): the batch size used for evaluation of the data stream
             plot_title (str): the title of the plot
+            fig_size (float, float): the figure size of the plot
 
         Returns:
             Axes: the Axes object containing the bar plot
@@ -266,34 +267,30 @@ class Visualizer:
             warnings.warn(f'Only measures of type "drift_detection" can be visualized with method draw_concept_drifts.')
             return
 
-        drifts = []
-        for measure, cdd_label in zip(self.measures, self.labels):
-            drifts.append((cdd_label, np.asarray(measure) * batch_size + batch_size))
-
-        fig, ax = plt.subplots(figsize=(10, 5))
-        y_loc = 0  # y-coordinate of scatter points
+        n_measures = len(self.measures)
+        fig, ax = plt.subplots(figsize=fig_size)
 
         # Draw known drifts
-        for true in known_drift:
-            if isinstance(true, tuple):
-                plt.axvspan(true[0], true[1], facecolor='#eff3ff', edgecolor='#9ecae1', hatch="//")
+        for known_drift in known_drifts:
+            if isinstance(known_drift, tuple):
+                ax.axvspan(known_drift[0], known_drift[1], facecolor='#eff3ff', edgecolor='#9ecae1', hatch="//")
             else:
-                plt.axvline(true, color='#9ecae1', lw=3, zorder=0)
+                ax.axvline(known_drift, color=self.palette[1], lw=3, zorder=0)
 
         # Draw detected drifts
+        y_loc = 0
         y_tick_labels = []
+        for measure, label in zip(self.measures, self.labels):
+            detected_drifts = np.asarray(measure) * batch_size + batch_size
+            ax.axhline(y_loc, color=self.palette[0], zorder=5)
+            ax.scatter(detected_drifts, np.repeat(y_loc, len(detected_drifts)), marker='|', color=self.palette[0], s=300,
+                       zorder=10)
+            y_loc += (1 / n_measures)
+            y_tick_labels.append(label)
 
-        for model in drifts:
-            ax.axhline(y_loc, color='black', zorder=5)
-            ax.scatter(model[1], np.repeat(y_loc, len(model[1])), marker='|', color='black', s=300, zorder=10)
-            y_loc += 0.5
-            y_tick_labels.append(model[0].upper())  # save model name
-
-        plt.yticks(np.arange(0, 1, 0.5), y_tick_labels, fontsize=12)
-        tx = np.arange(0, data_stream.n_samples - 10, round(data_stream.n_samples * 0.1))
-        plt.xticks(tx, tx, fontsize=12)
-        plt.xlim(-data_stream.n_samples * 0.005,
-                 data_stream.n_samples + data_stream.n_samples * 0.005)
+        plt.yticks(np.arange(0, 1, 1 / n_measures), y_tick_labels, fontsize=12)
+        plt.xticks(np.arange(0, data_stream.n_samples - 10, round(data_stream.n_samples * 0.1)), fontsize=12)
+        plt.xlim(-data_stream.n_samples * 0.005, data_stream.n_samples + data_stream.n_samples * 0.005)
         plt.xlabel('# Observations', fontsize=14)
         plt.title(plot_title)
         return ax

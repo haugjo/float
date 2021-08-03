@@ -1,4 +1,6 @@
 from skmultiflow.drift_detection.adwin import ADWIN
+from skmultiflow.drift_detection.eddm import EDDM
+from skmultiflow.drift_detection.ddm import DDM
 from skmultiflow.neural_networks.perceptron import PerceptronMask
 import matplotlib.pyplot as plt
 from float import *
@@ -18,20 +20,20 @@ def get_kdd_conceptdrift_feature_names():
 data_set_names = ['spambase', 'adult_conceptdrift', 'har', 'kdd_conceptdrift']
 feature_selector_names = ['OFS', 'FIRES']
 predictor_names = ['Perceptron']
-concept_drift_detector_names = ['ADWIN', 'ERICS']
+concept_drift_detector_names = ['ADWIN', 'EDDM', 'DDM', 'ERICS']
 
 data_loaders = []
 for file_name in data_set_names:
     data_loader = data.DataLoader(None, f'data/datasets/{file_name}.csv', 0)
     data_loaders.append(data_loader)
 
-known_drifts = [[round(data_loader.stream.n_samples * 0.2), round(data_loader.stream.n_samples * 0.4),
-                 round(data_loader.stream.n_samples * 0.6), round(data_loader.stream.n_samples * 0.8)] for data_loader
-                in data_loaders]
+all_known_drifts = [[round(data_loader.stream.n_samples * 0.2), round(data_loader.stream.n_samples * 0.4),
+                     round(data_loader.stream.n_samples * 0.6), round(data_loader.stream.n_samples * 0.8)] for data_loader
+                    in data_loaders]
 batch_sizes = [10, 50, 10, 100]
 
 pipelines = []
-for data_set_name, data_loader, batch_size, known_drift in zip(data_set_names, data_loaders, batch_sizes, known_drifts):
+for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, data_loaders, batch_sizes, all_known_drifts):
     feature_names = get_kdd_conceptdrift_feature_names() if data_set_name == 'kdd_conceptdrift' else data_loader.stream.feature_names
     feature_selectors = [
         feature_selection.ofs.OFS(n_total_features=data_loader.stream.n_features, n_selected_features=10,
@@ -41,6 +43,8 @@ for data_set_name, data_loader, batch_size, known_drift in zip(data_set_names, d
                                       nogueira_window_size=10)]
 
     concept_drift_detectors = [concept_drift_detection.SkmultiflowDriftDetector(ADWIN(delta=0.6)),
+                               concept_drift_detection.SkmultiflowDriftDetector(EDDM()),
+                               concept_drift_detection.SkmultiflowDriftDetector(DDM()),
                                concept_drift_detection.erics.ERICS(data_loader.stream.n_features)]
     predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
                                                                         data_loader.stream.target_values)
@@ -63,9 +67,9 @@ for data_set_name, data_loader, batch_size, known_drift in zip(data_set_names, d
         plt.show()
 
         visualizer = visualization.visualizer.Visualizer(
-            [concept_drift_detectors[0].global_drifts, concept_drift_detectors[1].global_drifts],
+            [concept_drift_detector.global_drifts for concept_drift_detector in concept_drift_detectors],
             concept_drift_detector_names, 'drift_detection')
-        visualizer.draw_concept_drifts(data_loader.stream, known_drift, batch_size,
+        visualizer.draw_concept_drifts(data_loader.stream, known_drifts, batch_size,
                                        plot_title=f'Concept Drifts For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}')
         plt.show()
 
