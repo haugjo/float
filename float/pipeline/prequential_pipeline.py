@@ -1,4 +1,5 @@
 import warnings
+import traceback
 from float.pipeline.pipeline import Pipeline
 from float.data.data_loader import DataLoader
 from float.feature_selection import FeatureSelector
@@ -53,6 +54,6 @@ class PrequentialPipeline(Pipeline):
         while self.n_global_samples < self.max_n_samples:
             try:
                 self._run_single_training_iteration()
-            except BaseException as e:
-                print("Aborted with exception:", e)
+            except BaseException:
+                traceback.print_exc()
                 break
