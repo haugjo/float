@@ -55,7 +55,8 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
                                                                                      concept_drift_detector,
                                                                                      predictor,
                                                                                      batch_size=batch_size,
-                                                                                     max_n_samples=data_loader.stream.n_samples)
+                                                                                     max_n_samples=data_loader.stream.n_samples,
+                                                                                     known_drifts=known_drifts)
             prequential_pipeline.run()
             pipelines.append(prequential_pipeline)
 

@@ -288,14 +288,17 @@ class ERICS(ConceptDriftDetector):
     #   # update the parameters of your model
     #####################################################################
 
-    def evaluate(self, time_step):
+    def evaluate(self, time_step, max_n_samples, known_drifts, batch_size):
         """
         Evaluates the concept drift detector at one time step.
 
         Args:
             time_step (int): the current time step
+            max_n_samples (int): the maximum number of samples used for the evaluation
+            known_drifts (list): the known drifts for the data stream
+            batch_size (int, int): the batch size used for the data stream
         """
-        super().evaluate(time_step)
+        super().evaluate(time_step, max_n_samples, known_drifts, batch_size)
 
         if self.detected_partial_change():
             if time_step not in self.partial_drifts:

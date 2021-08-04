@@ -16,7 +16,7 @@ class Pipeline(metaclass=ABCMeta):
     """
 
     def __init__(self, data_loader, feature_selector, concept_drift_detector, predictor, max_n_samples,
-                 batch_size, n_pretrain_samples):
+                 batch_size, n_pretrain_samples, known_drifts):
         """
         Initializes the pipeline.
 
@@ -28,6 +28,7 @@ class Pipeline(metaclass=ABCMeta):
             max_n_samples (int): maximum number of observations used in the evaluation
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
+            known_drifts (list): list of known concept drifts for this stream
         """
         self.data_loader = data_loader
         self.feature_selector = feature_selector
@@ -37,6 +38,8 @@ class Pipeline(metaclass=ABCMeta):
         self.max_n_samples = max_n_samples
         self.batch_size = batch_size
         self.n_pretrain_samples = n_pretrain_samples
+
+        self.known_drifts = known_drifts
 
         self.start_time = 0
         self.time_step = 0
@@ -140,7 +143,7 @@ class Pipeline(metaclass=ABCMeta):
                 self.concept_drift_detector.partial_fit(X, y)
             if self.concept_drift_detector.detected_global_change():
                 print(f"Global change detected at time step {self.time_step}")
-            self.concept_drift_detector.evaluate(self.time_step)
+            self.concept_drift_detector.evaluate(self.time_step, self.max_n_samples, self.known_drifts, self.batch_size)
             self.concept_drift_detector.comp_times.append(time.time() - start_time)
 
         self._finish_iteration(n_samples)
@@ -160,6 +163,7 @@ class Pipeline(metaclass=ABCMeta):
         """
         print('\n################################## SUMMARY ##################################')
         print('Evaluation finished after {}s'.format(time.time() - self.start_time))
+        print(f'Data Set {self.data_loader.file_path}')
         print('Processed {} instances in batches of {}'.format(self.n_global_samples, self.batch_size))
 
         if self.feature_selector:
@@ -179,6 +183,7 @@ class Pipeline(metaclass=ABCMeta):
                 'Model': [type(self.concept_drift_detector).__name__.split('.')[-1]],
                 'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
                 'Detected Global Drifts': [self.concept_drift_detector.global_drifts] if len(self.concept_drift_detector.global_drifts) <= 5 else [str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]'],
+                'Avg. Delay': [self.concept_drift_detector.average_delay]
             }, headers="keys", tablefmt='github'))
 
         if self.predictor:

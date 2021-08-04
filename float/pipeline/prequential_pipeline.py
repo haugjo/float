@@ -11,7 +11,7 @@ class PrequentialPipeline(Pipeline):
     Pipeline which implements the test-then-train evaluation.
     """
     def __init__(self, data_loader=None, feature_selector=None, concept_drift_detector=None, predictor=None,
-                 max_n_samples=100000, batch_size=100, n_pretrain_samples=100):
+                 max_n_samples=100000, batch_size=100, n_pretrain_samples=100, known_drifts=None):
         """
         Initializes the pipeline.
 
@@ -25,7 +25,7 @@ class PrequentialPipeline(Pipeline):
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
         """
         super().__init__(data_loader, feature_selector, concept_drift_detector, predictor, max_n_samples,
-                         batch_size, n_pretrain_samples)
+                         batch_size, n_pretrain_samples, known_drifts)
 
     def run(self):
         """
