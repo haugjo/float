@@ -39,7 +39,7 @@ class Visualizer:
         Returns:
             Axes: the Axes object containing the line plot
         """
-        if not self.measure_type == 'prediction':
+        if self.measure_type == 'prediction' or self.measure_type == 'concept_drift_detection':
             warnings.warn(f'Only measures of type "prediction" can be visualized with method plot.')
             return
 
