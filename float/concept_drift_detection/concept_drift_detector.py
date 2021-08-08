@@ -73,7 +73,7 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    def evaluate(self, time_step, max_n_samples, known_drifts, batch_size):
+    def evaluate(self, time_step, max_n_samples, known_drifts, batch_size, last_iteration):
         """
         Evaluates the concept drift detector at one time step.
 
@@ -82,12 +82,15 @@ class ConceptDriftDetector(metaclass=ABCMeta):
             max_n_samples (int): the maximum number of samples used for the evaluation
             known_drifts (list): the known drifts for the data stream
             batch_size (int, int): the batch size used for the data stream
+            last_iteration (bool): True if this is the last iteration of the pipeline, False otherwise
         """
         if self.detected_global_change():
             if time_step not in self.global_drifts:
                 self.global_drifts.append(time_step)
 
-        self.average_delay = self.get_average_delay(max_n_samples, known_drifts, batch_size)
+        if known_drifts and last_iteration:
+            self.average_delay = self.get_average_delay(max_n_samples, known_drifts, batch_size)
+            self.recall, self.precision = self.get_recall_and_precision(known_drifts, batch_size)
 
     def get_average_delay(self, max_n_samples, known_drifts, batch_size):
         """

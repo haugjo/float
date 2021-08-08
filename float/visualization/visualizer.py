@@ -9,7 +9,6 @@ from skmultiflow.data.data_stream import Stream
 class Visualizer:
     """
     Class for creating plots to visualize information.
-
     """
     def __init__(self, measures, labels, measure_type):
         """
@@ -39,8 +38,8 @@ class Visualizer:
         Returns:
             Axes: the Axes object containing the line plot
         """
-        if not self.measure_type == 'prediction':
-            warnings.warn(f'Only measures of type "prediction" can be visualized with method plot.')
+        if not self.measure_type in ['prediction', 'concept_drift_detection']:
+            warnings.warn(f'Only measures of type "prediction" or "concept_drift_detection" can be visualized with method plot.')
             return
 
         fig, ax = plt.subplots(figsize=fig_size)

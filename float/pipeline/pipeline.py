@@ -102,10 +102,16 @@ class Pipeline(metaclass=ABCMeta):
         """
         Executes a single training iteration.
         """
+        last_iteration = False
+
         if self.n_global_samples + self.batch_size <= self.max_n_samples:
             n_samples = self.batch_size
         else:
             n_samples = self.max_n_samples - self.n_global_samples
+
+        if self.n_global_samples + n_samples >= self.max_n_samples:
+            last_iteration = True
+
         X, y = self.data_loader.get_data(n_samples)
 
         if self.feature_selector:
@@ -143,7 +149,7 @@ class Pipeline(metaclass=ABCMeta):
                 self.concept_drift_detector.partial_fit(X, y)
             if self.concept_drift_detector.detected_global_change():
                 print(f"Global change detected at time step {self.time_step}")
-            self.concept_drift_detector.evaluate(self.time_step, self.max_n_samples, self.known_drifts, self.batch_size)
+            self.concept_drift_detector.evaluate(self.time_step, self.max_n_samples, self.known_drifts, self.batch_size, last_iteration)
             self.concept_drift_detector.comp_times.append(time.time() - start_time)
 
         self._finish_iteration(n_samples)
