@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, zero_one_loss
 
 
 class Predictor(metaclass=ABCMeta):
@@ -30,6 +30,7 @@ class Predictor(metaclass=ABCMeta):
         self.precision_scores = []
         self.recall_scores = []
         self.f1_scores = []
+        self.losses = []
         self.testing_times = []
         self.training_times = []
         self.classes = classes
@@ -99,63 +100,76 @@ class Predictor(metaclass=ABCMeta):
             X (np.ndarray): test data samples
             y (np.ndarray): true values for all samples in X
         """
-        self.accuracy_scores.append(self._get_accuracy(X, y))
-        self.precision_scores.append(self._get_precision(X, y))
-        self.recall_scores.append(self._get_recall(X, y))
-        self.f1_scores.append(self._get_f1_score(X, y))
+        y_pred = self.predict(X)
+        self.accuracy_scores.append(self._get_accuracy(y, y_pred))
+        self.precision_scores.append(self._get_precision(y, y_pred))
+        self.recall_scores.append(self._get_recall(y, y_pred))
+        self.f1_scores.append(self._get_f1_score(y, y_pred))
+        self.losses.append(self._get_loss(y, y_pred))
 
-    def _get_accuracy(self, X, y):
+    @staticmethod
+    def _get_accuracy(y_true, y_pred):
         """
         Returns the accuracy based on the given test samples and true values.
 
         Args:
-            X (np.ndarray): test data samples
-            y (np.ndarray): true values for all samples in X
+            y_true (np.ndarray): true values for all samples in X
+            y_pred (np.ndarray): predicted values for all samples in X
 
         Returns:
             float: accuracy based on test data and target values
         """
-        y_pred = self.predict(X)
-        return accuracy_score(y, y_pred)
+        return accuracy_score(y_true, y_pred)
 
-    def _get_precision(self, X, y):
+    def _get_precision(self, y_true, y_pred):
         """
         Returns the precision based on the given test samples and true values.
 
         Args:
-            X (np.ndarray): test data samples
-            y (np.ndarray): true values for all samples in X
+            y_true (np.ndarray): true values for all samples in X
+            y_pred (np.ndarray): predicted values for all samples in X
 
         Returns:
             float: precision based on test data and target values
         """
-        y_pred = self.predict(X)
-        return precision_score(y, y_pred, labels=self.classes, average='weighted', zero_division=0)
+        return precision_score(y_true, y_pred, labels=self.classes, average='weighted', zero_division=0)
 
-    def _get_recall(self, X, y):
+    def _get_recall(self, y_true, y_pred):
         """
         Returns the recall based on the given test samples and true values.
 
         Args:
-            X (np.ndarray): test data samples
-            y (np.ndarray): true values for all samples in X
+            y_true (np.ndarray): true values for all samples in X
+            y_pred (np.ndarray): predicted values for all samples in X
 
         Returns:
             float: recall based on test data and target values
         """
-        y_pred = self.predict(X)
-        return recall_score(y, y_pred, labels=self.classes, average='weighted', zero_division=0)
+        return recall_score(y_true, y_pred, labels=self.classes, average='weighted', zero_division=0)
 
-    def _get_f1_score(self, X, y):
+    def _get_f1_score(self, y_true, y_pred):
         """
         Returns the f1 score based on the given test samples and true values.
 
         Args:
-            X (np.ndarray): test data samples
-            y (np.ndarray): true values for all samples in X
+            y_true (np.ndarray): true values for all samples in X
+            y_pred (np.ndarray): predicted values for all samples in X
 
         Returns:
             float: f1 score based on test data and target values
         """
-        y_pred = self.predict(X)
-        return f1_score(y, y_pred, labels=self.classes, average='weighted', zero_division=0)
+        return f1_score(y_true, y_pred, labels=self.classes, average='weighted', zero_division=0)
+
+    @staticmethod
+    def _get_loss(y_true, y_pred):
+        """
+        Returns the 0-1 loss based on the given test samples and true values.
+
+        Args:
+            y_true (np.ndarray): true values for all samples in X
+            y_pred (np.ndarray): predicted values for all samples in X
+
+        Returns:
+            float: loss based on test data and target values
+        """
+        return zero_one_loss(y_true, y_pred)
