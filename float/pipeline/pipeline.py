@@ -109,7 +109,7 @@ class Pipeline(metaclass=ABCMeta):
         else:
             n_samples = self.max_n_samples - self.n_global_samples
 
-        if self.n_global_samples + n_samples <= self.max_n_samples:
+        if self.n_global_samples + n_samples >= self.max_n_samples:
             last_iteration = True
 
         X, y = self.data_loader.get_data(n_samples)
