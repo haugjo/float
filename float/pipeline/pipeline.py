@@ -6,7 +6,7 @@ import sys
 from tabulate import tabulate
 from float.data.data_loader import DataLoader
 from float.feature_selection import FeatureSelector
-from float.concept_drift_detection import ConceptDriftDetector
+from float.concept_drift_detection import ConceptDriftDetector, SkmultiflowDriftDetector
 from float.prediction import Predictor
 
 
@@ -186,7 +186,7 @@ class Pipeline(metaclass=ABCMeta):
             print('----------------------')
             print('Concept Drift Detection:')
             print(tabulate({
-                'Model': [type(self.concept_drift_detector).__name__.split('.')[-1]],
+                'Model': [type(self.concept_drift_detector.detector).__name__ if type(self.concept_drift_detector) is SkmultiflowDriftDetector else type(self.concept_drift_detector).__name__.split('.')[-1]],
                 'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
                 'Detected Global Drifts': [self.concept_drift_detector.global_drifts] if len(self.concept_drift_detector.global_drifts) <= 5 else [str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]'],
                 'Avg. Delay': [self.concept_drift_detector.average_delay]
