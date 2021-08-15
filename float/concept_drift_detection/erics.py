@@ -14,7 +14,7 @@ class ERICS(ConceptDriftDetector):
     Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2020.
     """
     def __init__(self, n_param, window_mvg_average=50, window_drift_detect=50, beta=0.0001, base_model='probit',
-                 init_mu=0, init_sigma=1, epochs=10, lr_mu=0.01, lr_sigma=0.01):
+                 init_mu=0, init_sigma=1, epochs=10, lr_mu=0.01, lr_sigma=0.01, max_delay_range=100):
         """
 
         Args:
@@ -28,8 +28,9 @@ class ERICS(ConceptDriftDetector):
             epochs (int): number of epochs for optimization of parameter distributions (according to [2])
             lr_mu (float): learning rate for the gradient update of the mean (according to [2])
             lr_sigma (float): learning rate for the gradient update of the variance (according to [2])
+            max_delay_range (int): maximum delay for which TPR, FDR and precision should be computed
         """
-        super().__init__()
+        super().__init__(max_delay_range)
         # User-set ERICS-hyperparameters
         self.n_param = n_param
         self.M = window_mvg_average
@@ -288,7 +289,7 @@ class ERICS(ConceptDriftDetector):
     #   # update the parameters of your model
     #####################################################################
 
-    def evaluate(self, time_step, max_n_samples, known_drifts, batch_size):
+    def evaluate(self, time_step, max_n_samples, known_drifts, batch_size, last_iteration):
         """
         Evaluates the concept drift detector at one time step.
 
@@ -297,8 +298,9 @@ class ERICS(ConceptDriftDetector):
             max_n_samples (int): the maximum number of samples used for the evaluation
             known_drifts (list): the known drifts for the data stream
             batch_size (int, int): the batch size used for the data stream
+            last_iteration (bool): True if this is the last iteration of the pipeline, False otherwise
         """
-        super().evaluate(time_step, max_n_samples, known_drifts, batch_size)
+        super().evaluate(time_step, max_n_samples, known_drifts, batch_size, last_iteration)
 
         if self.detected_partial_change():
             if time_step not in self.partial_drifts:

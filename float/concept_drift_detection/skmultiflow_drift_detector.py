@@ -10,14 +10,15 @@ class SkmultiflowDriftDetector(ConceptDriftDetector):
     Attributes:
         detector (BaseDriftDetector): the concept drift detector
     """
-    def __init__(self, detector):
+    def __init__(self, detector, max_delay_range=100):
         """
         Receives a skmultiflow BaseDriftDetector object.
 
         Args:
             detector (BaseDriftDetector): the concept drift detector
+            max_delay_range (int): maximum delay for which TPR, FDR and precision should be computed
         """
-        super().__init__()
+        super().__init__(max_delay_range)
         self.detector = detector
         self.prediction_based = False if type(self.detector) is KSWIN else True
 

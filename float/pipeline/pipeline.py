@@ -189,7 +189,10 @@ class Pipeline(metaclass=ABCMeta):
                 'Model': [type(self.concept_drift_detector.detector).__name__ if type(self.concept_drift_detector) is SkmultiflowDriftDetector else type(self.concept_drift_detector).__name__.split('.')[-1]],
                 'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
                 'Detected Global Drifts': [self.concept_drift_detector.global_drifts] if len(self.concept_drift_detector.global_drifts) <= 5 else [str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]'],
-                'Avg. Delay': [self.concept_drift_detector.average_delay]
+                'Avg. Delay': [self.concept_drift_detector.average_delay],
+                'Avg. True Positive Rate': [np.mean([x[1] for x in self.concept_drift_detector.true_positive_rates])],
+                'Avg. False Discovery Rate': [np.mean([x[1] for x in self.concept_drift_detector.false_discovery_rates if x[1] is not None]) if len([x[1] for x in self.concept_drift_detector.false_discovery_rates if x[1] is not None]) > 0 else 'N/A'],
+                'Avg. Precision': [np.mean([x[1] for x in self.concept_drift_detector.precision_scores if x[1] is not None]) if len([x[1] for x in self.concept_drift_detector.precision_scores if x[1] is not None]) > 0 else 'N/A']
             }, headers="keys", tablefmt='github'))
 
         if self.predictor:
