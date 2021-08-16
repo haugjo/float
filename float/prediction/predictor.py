@@ -14,26 +14,51 @@ class Predictor(metaclass=ABCMeta):
         precision_scores (list): precision scores per time step
         recall_scores (list): recall scores per time step
         f1_scores (list): f1 scores per time step
+        accuracy_scores_decay (list): accuracy scores decayed per time step
+        precision_scores_decay (list): precision scores decayed per time step
+        recall_scores_decay (list): recall scores decayed per time step
+        f1_scores_decay (list): f1 scores decayed per time step
+        accuracy_scores_window (list): accuracy scores decayed for a sliding window
+        precision_scores_window (list): precision scores decayed for a sliding window
+        recall_scores_window (list): recall scores decayed for a sliding window
+        f1_scores_window (list): f1 scores decayed for a sliding window
+        losses (list): 0-1-losses per time step
         testing_times (list): testing times per time step
         training_times (list): training times per time step
     """
+
     @abstractmethod
-    def __init__(self, classes):
+    def __init__(self, classes, decay_rate, window_size):
         """
         Initializes the predictor.
 
         Args:
             classes (list): the list of classes in the data
         """
+        self.classes = classes
+        self.decay_rate = decay_rate
+        self.window_size = window_size
+
         self.predictions = []
         self.accuracy_scores = []
         self.precision_scores = []
         self.recall_scores = []
         self.f1_scores = []
+
+        if self.decay_rate:
+            self.accuracy_scores_decay = []
+            self.precision_scores_decay = []
+            self.recall_scores_decay = []
+            self.f1_scores_decay = []
+        if self.window_size:
+            self.accuracy_scores_window = []
+            self.precision_scores_window = []
+            self.recall_scores_window = []
+            self.f1_scores_window = []
+
         self.losses = []
         self.testing_times = []
         self.training_times = []
-        self.classes = classes
 
     def fit(self, X, y, sample_weight=None):
         """
@@ -101,10 +126,21 @@ class Predictor(metaclass=ABCMeta):
             y (np.ndarray): true values for all samples in X
         """
         y_pred = self.predict(X)
-        self.accuracy_scores.append(self._get_accuracy(y, y_pred))
-        self.precision_scores.append(self._get_precision(y, y_pred))
-        self.recall_scores.append(self._get_recall(y, y_pred))
-        self.f1_scores.append(self._get_f1_score(y, y_pred))
+        accuracy = self._get_accuracy(y, y_pred)
+        self.accuracy_scores.append(accuracy)
+        precision = self._get_precision(y, y_pred)
+        self.precision_scores.append(precision)
+        recall = self._get_recall(y, y_pred)
+        self.recall_scores.append(recall)
+        f1 = self._get_f1_score(y, y_pred)
+        self.f1_scores.append(f1)
+
+        if self.decay_rate:
+            self.evaluate_decay(accuracy, f1, precision, recall)
+
+        if self.window_size:
+            self.evaluate_window()
+
         self.losses.append(self._get_loss(y, y_pred))
 
     @staticmethod
@@ -173,3 +209,24 @@ class Predictor(metaclass=ABCMeta):
             float: loss based on test data and target values
         """
         return zero_one_loss(y_true, y_pred)
+
+    def evaluate_decay(self, accuracy, f1, precision, recall):
+        if len(self.accuracy_scores_decay) == 0:
+            self.accuracy_scores_decay.append(accuracy)
+            self.precision_scores_decay.append(precision)
+            self.recall_scores_decay.append(recall)
+            self.f1_scores_decay.append(f1)
+        else:
+            self.accuracy_scores_decay.append(
+                self.decay_rate * accuracy + (1 - self.decay_rate) * self.accuracy_scores_decay[-1])
+            self.precision_scores_decay.append(
+                self.decay_rate * precision + (1 - self.decay_rate) * self.precision_scores_decay[-1])
+            self.recall_scores_decay.append(
+                self.decay_rate * recall + (1 - self.decay_rate) * self.recall_scores_decay[-1])
+            self.f1_scores_decay.append(self.decay_rate * f1 + (1 - self.decay_rate) * self.f1_scores_decay[-1])
+
+    def evaluate_window(self):
+        self.accuracy_scores_window.append(np.mean(self.accuracy_scores[-self.window_size:]))
+        self.precision_scores_window.append(np.mean(self.precision_scores[-self.window_size:]))
+        self.recall_scores_window.append(np.mean(self.recall_scores[-self.window_size:]))
+        self.f1_scores_window.append(np.mean(self.f1_scores[-self.window_size:]))

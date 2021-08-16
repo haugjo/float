@@ -47,7 +47,7 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
                                concept_drift_detection.SkmultiflowDriftDetector(DDM()),
                                concept_drift_detection.erics.ERICS(data_loader.stream.n_features)]
     predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
-                                                                        data_loader.stream.target_values)
+                                                                        data_loader.stream.target_values, decay_rate=0.5, window_size=5)
     for feature_selector_name, feature_selector in zip(feature_selector_names, feature_selectors):
         for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names,
                                                                        concept_drift_detectors):
@@ -60,11 +60,20 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
             prequential_pipeline.run()
             pipelines.append(prequential_pipeline)
 
+        # visualizer = visualization.visualizer.Visualizer(
+        #     [predictor.accuracy_scores, predictor.precision_scores, predictor.f1_scores, predictor.recall_scores],
+        #     ['Accuracy', 'Precision', 'F1', 'Recall'],
+        #     'prediction')
+        # visualizer.plot(plot_title=f'Metrics For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}', smooth_curve=True)
+        # plt.show()
+
         visualizer = visualization.visualizer.Visualizer(
-            [predictor.accuracy_scores, predictor.precision_scores, predictor.f1_scores, predictor.recall_scores],
-            ['Accuracy', 'Precision', 'F1', 'Recall'],
+            [predictor.accuracy_scores, predictor.accuracy_scores_decay, predictor.accuracy_scores_window],
+            ['Accuracy', 'Accuracy Decay', 'Accuracy Window'],
             'prediction')
-        visualizer.plot(plot_title=f'Metrics For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}', smooth_curve=True)
+        visualizer.plot(
+            plot_title=f'Metrics For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}',
+            smooth_curve=True)
         plt.show()
 
         visualizer = visualization.visualizer.Visualizer(
@@ -72,6 +81,12 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
             concept_drift_detector_names, 'drift_detection')
         visualizer.draw_concept_drifts(data_loader.stream, known_drifts, batch_size,
                                        plot_title=f'Concept Drifts For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}')
+        plt.show()
+        visualizer = visualization.visualizer.Visualizer(
+            [[x[1] for x in concept_drift_detector.true_positive_rates] for concept_drift_detector in concept_drift_detectors],
+            concept_drift_detector_names, 'concept_drift_detection'
+        )
+        visualizer.plot(plot_title=f'Concept Drift True Positive Rate For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}')
         plt.show()
 
     visualizer = visualization.visualizer.Visualizer(
