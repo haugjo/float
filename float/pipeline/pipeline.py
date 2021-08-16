@@ -132,7 +132,6 @@ class Pipeline(metaclass=ABCMeta):
             start_time = time.time()
             prediction = self.predictor.predict(X).tolist()
             self.predictor.testing_times.append(time.time() - start_time)
-            self.predictor.predictions.append(prediction)
 
             start_time = time.time()
             self.predictor.partial_fit(X, y)
@@ -195,6 +194,7 @@ class Pipeline(metaclass=ABCMeta):
                 'Avg. Precision': [np.mean([x[1] for x in self.concept_drift_detector.precision_scores if x[1] is not None]) if len([x[1] for x in self.concept_drift_detector.precision_scores if x[1] is not None]) > 0 else 'N/A']
             }, headers="keys", tablefmt='github'))
 
+        # TODO add all metrics automatically from dict
         if self.predictor:
             print('----------------------')
             print('Prediction:')
@@ -202,11 +202,11 @@ class Pipeline(metaclass=ABCMeta):
                 'Model': [type(self.predictor).__name__.split('.')[-1]],
                 'Avg. Test Time': [np.mean(self.predictor.testing_times)],
                 'Avg. Train Time': [np.mean(self.predictor.training_times)],
-                'Avg. Accuracy': [np.mean(self.predictor.accuracy_scores)],
-                'Avg. Precision': [np.mean(self.predictor.precision_scores)],
-                'Avg. Recall': [np.mean(self.predictor.recall_scores)],
-                'Avg. F1 Score': [np.mean(self.predictor.f1_scores)],
-                'Avg. Loss': [np.mean(self.predictor.losses)]
+                'Avg. Accuracy': [np.mean(self.predictor.evaluation['accuracy'])],
+                'Avg. Precision': [np.mean(self.predictor.evaluation['precision'])],
+                'Avg. Recall': [np.mean(self.predictor.evaluation['recall'])],
+                'Avg. F1 Score': [np.mean(self.predictor.evaluation['f1'])],
+                'Avg. Loss': [np.mean(self.predictor.evaluation['0-1 loss'])]
             }, headers="keys", tablefmt='github'))
         print('#############################################################################')
 

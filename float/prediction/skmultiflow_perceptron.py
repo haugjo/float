@@ -6,15 +6,18 @@ class SkmultiflowPerceptron(Predictor):
     """
     Wrapper for the skmultiflow PerceptronMask class.
     """
-    def __init__(self, perceptron, classes, decay_rate=None, window_size=None):
+    def __init__(self, perceptron, classes, evaluation_metrics=None, decay_rate=None, window_size=None):
         """
         Initializes the skmultiflow PerceptronMask.
 
         Args:
             perceptron (PerceptronMask): the sklearn perceptron to be used for prediction
             classes (list): the list of classes in the data
+            evaluation_metrics (dict): a dictionary of metric names and their corresponding sklearn function (river metrics tba)
+            decay_rate (float): when this parameter is set, the metric values are additionally stored in a decayed version
+            window_size (int): when this parameter is set, the metric values are additionally stored in a sliding window version
         """
-        super().__init__(classes, decay_rate, window_size)
+        super().__init__(classes, evaluation_metrics, decay_rate, window_size)
         self.perceptron = perceptron
 
     def fit(self, X, y, sample_weight=None):

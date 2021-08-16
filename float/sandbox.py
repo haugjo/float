@@ -3,6 +3,7 @@ from skmultiflow.drift_detection.eddm import EDDM
 from skmultiflow.drift_detection.ddm import DDM
 from skmultiflow.neural_networks.perceptron import PerceptronMask
 import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, zero_one_loss
 from float import *
 
 
@@ -28,12 +29,14 @@ for file_name in data_set_names:
     data_loaders.append(data_loader)
 
 all_known_drifts = [[round(data_loader.stream.n_samples * 0.2), round(data_loader.stream.n_samples * 0.4),
-                     round(data_loader.stream.n_samples * 0.6), round(data_loader.stream.n_samples * 0.8)] for data_loader
+                     round(data_loader.stream.n_samples * 0.6), round(data_loader.stream.n_samples * 0.8)] for
+                    data_loader
                     in data_loaders]
 batch_sizes = [10, 50, 10, 100]
 
 pipelines = []
-for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, data_loaders, batch_sizes, all_known_drifts):
+for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, data_loaders, batch_sizes,
+                                                                all_known_drifts):
     feature_names = get_kdd_conceptdrift_feature_names() if data_set_name == 'kdd_conceptdrift' else data_loader.stream.feature_names
     feature_selectors = [
         feature_selection.ofs.OFS(n_total_features=data_loader.stream.n_features, n_selected_features=10,
@@ -47,7 +50,13 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
                                concept_drift_detection.SkmultiflowDriftDetector(DDM()),
                                concept_drift_detection.erics.ERICS(data_loader.stream.n_features)]
     predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
-                                                                        data_loader.stream.target_values, decay_rate=0.5, window_size=5)
+                                                                        data_loader.stream.target_values,
+                                                                        evaluation_metrics={'accuracy': accuracy_score,
+                                                                                            'precision': precision_score,
+                                                                                            'recall': recall_score,
+                                                                                            'f1': f1_score,
+                                                                                            '0-1 loss': zero_one_loss},
+                                                                        decay_rate=0.5, window_size=5)
     for feature_selector_name, feature_selector in zip(feature_selector_names, feature_selectors):
         for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names,
                                                                        concept_drift_detectors):
@@ -60,15 +69,15 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
             prequential_pipeline.run()
             pipelines.append(prequential_pipeline)
 
-        # visualizer = visualization.visualizer.Visualizer(
-        #     [predictor.accuracy_scores, predictor.precision_scores, predictor.f1_scores, predictor.recall_scores],
-        #     ['Accuracy', 'Precision', 'F1', 'Recall'],
-        #     'prediction')
-        # visualizer.plot(plot_title=f'Metrics For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}', smooth_curve=True)
-        # plt.show()
+        visualizer = visualization.visualizer.Visualizer(
+            [predictor.evaluation['accuracy'], predictor.evaluation['precision'], predictor.evaluation['f1'], predictor.evaluation['recall']],
+            ['Accuracy', 'Precision', 'F1', 'Recall'],
+            'prediction')
+        visualizer.plot(plot_title=f'Metrics For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}', smooth_curve=True)
+        plt.show()
 
         visualizer = visualization.visualizer.Visualizer(
-            [predictor.accuracy_scores_decay, predictor.accuracy_scores_window, predictor.accuracy_scores],
+            [predictor.evaluation_decay['accuracy'], predictor.evaluation_window['accuracy'], predictor.evaluation['accuracy']],
             ['Accuracy Decay', 'Accuracy Window', 'Accuracy'],
             'prediction')
         visualizer.plot(
@@ -83,16 +92,22 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
                                        plot_title=f'Concept Drifts For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}')
         plt.show()
         visualizer = visualization.visualizer.Visualizer(
-            [[x[1] for x in concept_drift_detector.true_positive_rates] for concept_drift_detector in concept_drift_detectors],
+            [[x[1] for x in concept_drift_detector.true_positive_rates] for concept_drift_detector in
+             concept_drift_detectors],
             concept_drift_detector_names, 'concept_drift_detection'
         )
-        visualizer.plot(plot_title=f'Concept Drift True Positive Rate For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}')
+        visualizer.plot(
+            plot_title=f'Concept Drift True Positive Rate For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}')
         plt.show()
 
     visualizer = visualization.visualizer.Visualizer(
         [feature_selectors[0].selection, feature_selectors[1].selection], feature_selector_names, 'feature_selection')
-    visualizer.draw_top_features_with_reference(feature_names, f'Most Selected Features For Data Set {data_set_name}, Predictor {predictor_names[0]}', fig_size=(15, 5))
+    visualizer.draw_top_features_with_reference(feature_names,
+                                                f'Most Selected Features For Data Set {data_set_name}, Predictor {predictor_names[0]}',
+                                                fig_size=(15, 5))
     plt.show()
-    visualizer.draw_selected_features((2, 1), f'Selected Features At Each Time Step For Data Set {data_set_name}, Predictor {predictor_names[0]}', fig_size=(10, 8))
+    visualizer.draw_selected_features((2, 1),
+                                      f'Selected Features At Each Time Step For Data Set {data_set_name}, Predictor {predictor_names[0]}',
+                                      fig_size=(10, 8))
     plt.show()
     break
