@@ -16,7 +16,7 @@ class DataLoader:
         object OR a skmultiflow Stream object.
 
         Args:
-            stream (skmultiflow.data.base_stream.Stream): data stream object
+            stream (skmultiflow.data.base_stream.Stream | None): data stream object
             file_path (str): path to a .csv file containing the data
             target_col (int): index of the target column of the .csv file
         """

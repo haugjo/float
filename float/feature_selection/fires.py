@@ -22,8 +22,8 @@ class FIRES(FeatureSelector):
             n_total_features (int): total number of features
             n_selected_features (int): number of selected features
             classes (np.ndarray): unique target values (class labels)
-            mu_init (int/np.ndarray): initial importance parameter
-            sigma_init (int/np.ndarray): initial uncertainty parameter
+            mu_init (int | np.ndarray): initial importance parameter
+            sigma_init (int | np.ndarray): initial uncertainty parameter
             penalty_s (float): penalty factor for the uncertainty (corresponds to gamma_s in the paper)
             penalty_r (float): penalty factor for the regularization (corresponds to gamma_r in the paper)
             epochs (int): number of epochs that we use each batch of observations to update the parameters

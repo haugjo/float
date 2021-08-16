@@ -68,12 +68,12 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
         # plt.show()
 
         visualizer = visualization.visualizer.Visualizer(
-            [predictor.accuracy_scores, predictor.accuracy_scores_decay, predictor.accuracy_scores_window],
-            ['Accuracy', 'Accuracy Decay', 'Accuracy Window'],
+            [predictor.accuracy_scores_decay, predictor.accuracy_scores_window, predictor.accuracy_scores],
+            ['Accuracy Decay', 'Accuracy Window', 'Accuracy'],
             'prediction')
         visualizer.plot(
             plot_title=f'Metrics For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}',
-            smooth_curve=True)
+            smooth_curve=[False, False, True])
         plt.show()
 
         visualizer = visualization.visualizer.Visualizer(

@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
 import warnings
+from typing import Union
 from scipy.signal import savgol_filter
 from skmultiflow.data.data_stream import Stream
 
@@ -34,7 +35,7 @@ class Visualizer:
         Args:
             plot_title (str): the title of the plot
             fig_size (float, float): the figure size of the plot
-            smooth_curve (bool): True if the plotted curve should be smoothed, False otherwise
+            smooth_curve (bool | list[bool]): True if the plotted curve should be smoothed, False otherwise
 
         Returns:
             Axes: the Axes object containing the line plot
@@ -45,7 +46,8 @@ class Visualizer:
 
         fig, ax = plt.subplots(figsize=fig_size)
         for i, (measure, label) in enumerate(zip(self.measures, self.labels)):
-            y = savgol_filter(measure, 51, 3) if smooth_curve else measure
+            smooth_curve_i = smooth_curve if type(smooth_curve) is bool else smooth_curve[i]
+            y = savgol_filter(measure, 51, 3) if smooth_curve_i else measure
             ax.plot(np.arange(len(measure)), y, color=self.palette[i], label=label)
         ax.set_xlabel('Time Step $t$', size=self.font_size, labelpad=1.6)
         ax.set_ylabel('Metric Value', size=self.font_size, labelpad=1.6)
