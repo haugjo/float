@@ -17,8 +17,9 @@ class SkmultiflowPerceptron(Predictor):
             decay_rate (float): when this parameter is set, the metric values are additionally stored in a decayed version
             window_size (int): when this parameter is set, the metric values are additionally stored in a sliding window version
         """
-        super().__init__(classes, evaluation_metrics, decay_rate, window_size)
+        super().__init__(evaluation_metrics, decay_rate, window_size)
         self.perceptron = perceptron
+        self.classes = classes
 
     def fit(self, X, y, sample_weight=None):
         self.perceptron.fit(X, y, classes=self.classes, sample_weight=sample_weight)

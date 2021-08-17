@@ -52,9 +52,9 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
     predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
                                                                         data_loader.stream.target_values,
                                                                         evaluation_metrics={'accuracy': accuracy_score,
-                                                                                            'precision': precision_score,
-                                                                                            'recall': recall_score,
-                                                                                            'f1': f1_score,
+                                                                                            'precision': (precision_score, {'labels': data_loader.stream.target_values, 'average': 'weighted', 'zero_division': 0}),
+                                                                                            'recall': (recall_score, {'labels': data_loader.stream.target_values, 'average': 'weighted', 'zero_division': 0}),
+                                                                                            'f1': (f1_score, {'labels': data_loader.stream.target_values, 'average': 'weighted', 'zero_division': 0}),
                                                                                             '0-1 loss': zero_one_loss},
                                                                         decay_rate=0.5, window_size=5)
     for feature_selector_name, feature_selector in zip(feature_selector_names, feature_selectors):

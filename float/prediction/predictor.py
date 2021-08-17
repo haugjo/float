@@ -15,17 +15,15 @@ class Predictor(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def __init__(self, classes, evaluation_metrics, decay_rate, window_size):
+    def __init__(self, evaluation_metrics, decay_rate, window_size):
         """
         Initializes the predictor.
 
         Args:
-            classes (list): the list of classes in the data
             evaluation_metrics (dict of str: function): a dictionary of metric names and their corresponding sklearn function (river metrics tba)
             decay_rate (float): when this parameter is set, the metric values are additionally stored in a decayed version
             window_size (int): when this parameter is set, the metric values are additionally stored in a sliding window version
         """
-        self.classes = classes
         self.decay_rate = decay_rate
         self.window_size = window_size
 
@@ -106,8 +104,13 @@ class Predictor(metaclass=ABCMeta):
         """
         y_pred = self.predict(X)
         for metric_name in self.evaluation:
-            # TODO find better solution for extra parameters
-            metric_val = self.evaluation_metrics[metric_name](y, y_pred) if metric_name not in ['precision', 'recall', 'f1'] else self.evaluation_metrics[metric_name](y, y_pred, labels=self.classes, average='weighted', zero_division=0)
+            if isinstance(self.evaluation_metrics[metric_name], tuple):
+                metric_func = self.evaluation_metrics[metric_name][0]
+                metric_params = self.evaluation_metrics[metric_name][1]
+            else:
+                metric_func = self.evaluation_metrics[metric_name]
+                metric_params = {}
+            metric_val = metric_func(y, y_pred, **metric_params)
             self.evaluation[metric_name].append(metric_val)
 
             if self.decay_rate:
