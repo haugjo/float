@@ -148,7 +148,8 @@ class Pipeline(metaclass=ABCMeta):
                 self.concept_drift_detector.partial_fit(X, y)
             if self.concept_drift_detector.detected_global_change():
                 print(f"Global change detected at time step {self.time_step}")
-            self.concept_drift_detector.evaluate(self.time_step, self.max_n_samples, self.known_drifts, self.batch_size, last_iteration)
+            self.concept_drift_detector.evaluate(self.time_step, self.max_n_samples, self.known_drifts, self.batch_size,
+                                                 last_iteration)
             self.concept_drift_detector.comp_times.append(time.time() - start_time)
 
         self._finish_iteration(n_samples)
@@ -185,29 +186,33 @@ class Pipeline(metaclass=ABCMeta):
             print('----------------------')
             print('Concept Drift Detection:')
             print(tabulate({
-                'Model': [type(self.concept_drift_detector.detector).__name__ if type(self.concept_drift_detector) is SkmultiflowDriftDetector else type(self.concept_drift_detector).__name__.split('.')[-1]],
+                'Model': [type(self.concept_drift_detector.detector).__name__ if type(
+                    self.concept_drift_detector) is SkmultiflowDriftDetector else
+                          type(self.concept_drift_detector).__name__.split('.')[-1]],
                 'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
-                'Detected Global Drifts': [self.concept_drift_detector.global_drifts] if len(self.concept_drift_detector.global_drifts) <= 5 else [str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]'],
+                'Detected Global Drifts': [self.concept_drift_detector.global_drifts] if len(
+                    self.concept_drift_detector.global_drifts) <= 5 else [
+                    str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]'],
                 'Avg. Delay': [self.concept_drift_detector.average_delay],
                 'Avg. True Positive Rate': [np.mean([x[1] for x in self.concept_drift_detector.true_positive_rates])],
-                'Avg. False Discovery Rate': [np.mean([x[1] for x in self.concept_drift_detector.false_discovery_rates if x[1] is not None]) if len([x[1] for x in self.concept_drift_detector.false_discovery_rates if x[1] is not None]) > 0 else 'N/A'],
-                'Avg. Precision': [np.mean([x[1] for x in self.concept_drift_detector.precision_scores if x[1] is not None]) if len([x[1] for x in self.concept_drift_detector.precision_scores if x[1] is not None]) > 0 else 'N/A']
+                'Avg. False Discovery Rate': [np.mean(
+                    [x[1] for x in self.concept_drift_detector.false_discovery_rates if x[1] is not None]) if len(
+                    [x[1] for x in self.concept_drift_detector.false_discovery_rates if
+                     x[1] is not None]) > 0 else 'N/A'],
+                'Avg. Precision': [
+                    np.mean([x[1] for x in self.concept_drift_detector.precision_scores if x[1] is not None]) if len(
+                        [x[1] for x in self.concept_drift_detector.precision_scores if
+                         x[1] is not None]) > 0 else 'N/A']
             }, headers="keys", tablefmt='github'))
 
-        # TODO add all metrics automatically from dict
         if self.predictor:
             print('----------------------')
             print('Prediction:')
-            print(tabulate({
-                'Model': [type(self.predictor).__name__.split('.')[-1]],
-                'Avg. Test Time': [np.mean(self.predictor.testing_times)],
-                'Avg. Train Time': [np.mean(self.predictor.training_times)],
-                'Avg. Accuracy': [np.mean(self.predictor.evaluation['accuracy'])],
-                'Avg. Precision': [np.mean(self.predictor.evaluation['precision'])],
-                'Avg. Recall': [np.mean(self.predictor.evaluation['recall'])],
-                'Avg. F1 Score': [np.mean(self.predictor.evaluation['f1'])],
-                'Avg. Loss': [np.mean(self.predictor.evaluation['0-1 loss'])]
-            }, headers="keys", tablefmt='github'))
+            print(tabulate({**{'Model': [type(self.predictor).__name__.split('.')[-1]],
+                               'Avg. Test Time': [np.mean(self.predictor.testing_times)],
+                               'Avg. Train Time': [np.mean(self.predictor.training_times)]},
+                            **{'Avg. ' + key: [np.mean(value)] for key, value in self.predictor.evaluation.items()}
+                            }, headers="keys", tablefmt='github'))
         print('#############################################################################')
 
     @abstractmethod
