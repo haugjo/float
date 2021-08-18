@@ -22,6 +22,7 @@ class FIRES(FeatureSelector):
             n_total_features (int): total number of features
             n_selected_features (int): number of selected features
             classes (np.ndarray): unique target values (class labels)
+            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             mu_init (int | np.ndarray): initial importance parameter
             sigma_init (int | np.ndarray): initial uncertainty parameter
             penalty_s (float): penalty factor for the uncertainty (corresponds to gamma_s in the paper)

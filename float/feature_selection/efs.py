@@ -17,6 +17,7 @@ class EFS(FeatureSelector):
         Args:
             n_total_features (int): total number of features
             n_selected_features (int): number of selected features
+            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             u (np.ndarray): initial positive model with weights set to 2
             v (np.ndarray): initial negative model with weights
             theta (float): threshold parameter

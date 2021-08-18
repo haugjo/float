@@ -20,7 +20,7 @@ class Predictor(metaclass=ABCMeta):
         Initializes the predictor.
 
         Args:
-            evaluation_metrics (dict of str: function): a dictionary of metric names and their corresponding sklearn function (river metrics tba)
+            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             decay_rate (float): when this parameter is set, the metric values are additionally stored in a decayed version
             window_size (int): when this parameter is set, the metric values are additionally stored in a sliding window version
         """

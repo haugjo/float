@@ -7,6 +7,14 @@ import numpy as np
 
 class CancelOutFeatureSelector(FeatureSelector):
     def __init__(self, n_total_features, n_selected_features, evaluation_metrics=None):
+        """
+        Initializes the Cancel Out feature selector.
+
+        Args:
+            n_total_features (int): total number of features
+            n_selected_features (int): number of selected features
+            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
+        """
         super().__init__(n_total_features, n_selected_features, evaluation_metrics, supports_multi_class=False,
                          supports_streaming_features=False)
 

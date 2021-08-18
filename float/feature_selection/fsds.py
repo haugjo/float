@@ -17,6 +17,7 @@ class FSDS(FeatureSelector):
         Args:
             n_total_features (int): total number of features
             n_selected_features (int): number of selected features
+            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             l (int): size of the matrix sketch with l << m
             m (int): size of the feature space
             B (list/np.ndarray): matrix sketch

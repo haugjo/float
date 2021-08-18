@@ -13,7 +13,7 @@ class SkmultiflowPerceptron(Predictor):
         Args:
             perceptron (PerceptronMask): the sklearn perceptron to be used for prediction
             classes (list): the list of classes in the data
-            evaluation_metrics (dict): a dictionary of metric names and their corresponding sklearn function (river metrics tba)
+            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             decay_rate (float): when this parameter is set, the metric values are additionally stored in a decayed version
             window_size (int): when this parameter is set, the metric values are additionally stored in a sliding window version
         """
