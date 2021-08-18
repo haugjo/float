@@ -38,12 +38,17 @@ pipelines = []
 for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, data_loaders, batch_sizes,
                                                                 all_known_drifts):
     feature_names = get_kdd_conceptdrift_feature_names() if data_set_name == 'kdd_conceptdrift' else data_loader.stream.feature_names
+
+    fs_metrics = {'Nogueira Stability Measure': (
+        feature_selection.feature_selector.FeatureSelector.get_nogueira_stability,
+        {'n_total_features': data_loader.stream.n_features, 'nogueira_window_size': 10})}
+
     feature_selectors = [
-        feature_selection.ofs.OFS(n_total_features=data_loader.stream.n_features, n_selected_features=10,
-                                  nogueira_window_size=10),
-        feature_selection.fires.FIRES(n_total_features=data_loader.stream.n_features,
-                                      n_selected_features=10, classes=data_loader.stream.target_values,
-                                      nogueira_window_size=10)]
+        feature_selection.ofs.OFS(evaluation_metrics=fs_metrics,
+                                  n_total_features=data_loader.stream.n_features, n_selected_features=10),
+        feature_selection.fires.FIRES(evaluation_metrics=fs_metrics,
+                                      n_total_features=data_loader.stream.n_features,
+                                      n_selected_features=10, classes=data_loader.stream.target_values)]
 
     concept_drift_detectors = [concept_drift_detection.SkmultiflowDriftDetector(ADWIN(delta=0.6)),
                                concept_drift_detection.SkmultiflowDriftDetector(EDDM()),
@@ -51,11 +56,20 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
                                concept_drift_detection.erics.ERICS(data_loader.stream.n_features)]
     predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
                                                                         data_loader.stream.target_values,
-                                                                        evaluation_metrics={'accuracy': accuracy_score,
-                                                                                            'precision': (precision_score, {'labels': data_loader.stream.target_values, 'average': 'weighted', 'zero_division': 0}),
-                                                                                            'recall': (recall_score, {'labels': data_loader.stream.target_values, 'average': 'weighted', 'zero_division': 0}),
-                                                                                            'f1': (f1_score, {'labels': data_loader.stream.target_values, 'average': 'weighted', 'zero_division': 0}),
-                                                                                            '0-1 loss': zero_one_loss},
+                                                                        evaluation_metrics={'Accuracy': accuracy_score,
+                                                                                            'Precision': (precision_score, {
+                                                                                                'labels': data_loader.stream.target_values,
+                                                                                                'average': 'weighted',
+                                                                                                'zero_division': 0}),
+                                                                                            'Recall': (recall_score, {
+                                                                                                'labels': data_loader.stream.target_values,
+                                                                                                'average': 'weighted',
+                                                                                                'zero_division': 0}),
+                                                                                            'F1 Score': (f1_score, {
+                                                                                                'labels': data_loader.stream.target_values,
+                                                                                                'average': 'weighted',
+                                                                                                'zero_division': 0}),
+                                                                                            '0-1 Loss': zero_one_loss},
                                                                         decay_rate=0.5, window_size=5)
     for feature_selector_name, feature_selector in zip(feature_selector_names, feature_selectors):
         for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names,

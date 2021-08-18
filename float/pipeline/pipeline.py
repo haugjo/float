@@ -177,10 +177,11 @@ class Pipeline(metaclass=ABCMeta):
             print('Feature Selection ({}/{} features):'.format(self.feature_selector.n_selected_features,
                                                                self.feature_selector.n_total_features))
             print(tabulate({
-                'Model': [type(self.feature_selector).__name__.split('.')[-1]],
-                'Avg. Time': [np.mean(self.feature_selector.comp_times)],
-                'Avg. Stability Measure': [np.mean(self.feature_selector.nogueira_stability_measures)],
-            }, headers="keys", tablefmt='github'))
+                **{'Model': [type(self.feature_selector).__name__.split('.')[-1]],
+                   'Avg. Time': [np.mean(self.feature_selector.comp_times)]},
+                **{'Avg. ' + key: [np.mean(value)] for key, value in self.feature_selector.evaluation.items()}
+            }
+                , headers="keys", tablefmt='github'))
 
         if self.concept_drift_detector:
             print('----------------------')
@@ -208,11 +209,12 @@ class Pipeline(metaclass=ABCMeta):
         if self.predictor:
             print('----------------------')
             print('Prediction:')
-            print(tabulate({**{'Model': [type(self.predictor).__name__.split('.')[-1]],
-                               'Avg. Test Time': [np.mean(self.predictor.testing_times)],
-                               'Avg. Train Time': [np.mean(self.predictor.training_times)]},
-                            **{'Avg. ' + key: [np.mean(value)] for key, value in self.predictor.evaluation.items()}
-                            }, headers="keys", tablefmt='github'))
+            print(tabulate({
+                **{'Model': [type(self.predictor).__name__.split('.')[-1]],
+                   'Avg. Test Time': [np.mean(self.predictor.testing_times)],
+                   'Avg. Train Time': [np.mean(self.predictor.training_times)]},
+                **{'Avg. ' + key: [np.mean(value)] for key, value in self.predictor.evaluation.items()}
+            }, headers="keys", tablefmt='github'))
         print('#############################################################################')
 
     @abstractmethod

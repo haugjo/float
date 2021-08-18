@@ -6,9 +6,9 @@ import numpy as np
 
 
 class CancelOutFeatureSelector(FeatureSelector):
-    def __init__(self, n_total_features, n_selected_features, nogueira_window_size=None):
-        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
-                         supports_streaming_features=False, nogueira_window_size=nogueira_window_size)
+    def __init__(self, n_total_features, n_selected_features, evaluation_metrics=None):
+        super().__init__(n_total_features, n_selected_features, evaluation_metrics, supports_multi_class=False,
+                         supports_streaming_features=False)
 
     def weight_features(self, X, y):
         self.raw_weight_vector = self.train_ann(X, y, 50, 128)

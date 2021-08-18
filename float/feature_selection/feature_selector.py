@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import warnings
+import traceback
 
 
 class FeatureSelector(metaclass=ABCMeta):
@@ -15,11 +16,11 @@ class FeatureSelector(metaclass=ABCMeta):
         raw_weight_vector (np.ndarray): current weights (as produced by feature selection model)
         weights (list): absolute weights in all time steps
         selection (list): indices of selected features in all time steps
-        nogueira_stability_measures (list): scores of Nogueira stability in all time steps
         comp_times (list): computation time in all time steps
     """
-    def __init__(self, n_total_features, n_selected_features, supports_multi_class=False,
-                 supports_streaming_features=False, streaming_features=None, nogueira_window_size=None):
+
+    def __init__(self, n_total_features, n_selected_features, evaluation_metrics, supports_multi_class,
+                 supports_streaming_features, streaming_features=None):
         """
         Receives parameters of feature selection model.
 
@@ -29,10 +30,12 @@ class FeatureSelector(metaclass=ABCMeta):
             supports_multi_class (bool): True if model support multi-class classification, False otherwise
             supports_streaming_features (bool): True if model supports streaming features, False otherwise
             streaming_features (dict): (time, feature index) tuples to simulate streaming features
-            nogueira_window_size (int): window size for the Nogueira stability measure
         """
         self.n_total_features = n_total_features
         self.n_selected_features = n_selected_features
+        self.evaluation_metrics = evaluation_metrics if evaluation_metrics else {'Nogueira Stability Measure': (FeatureSelector.get_nogueira_stability, {'n_total_features': self.n_total_features, 'nogueira_window_size': 10})}
+        self.evaluation = {key: [] for key in self.evaluation_metrics.keys()}
+
         self.supports_multi_class = supports_multi_class
         self.supports_streaming_features = supports_streaming_features
         self.streaming_features = streaming_features if streaming_features else dict()
@@ -40,8 +43,6 @@ class FeatureSelector(metaclass=ABCMeta):
         self.raw_weight_vector = np.zeros(self.n_total_features)
         self.weights = []
         self.selection = []
-        self.nogueira_stability_measures = []
-        self.nogueira_window_size = nogueira_window_size
         self.comp_times = []
         self.selected_features = []
         self._auto_scale = False
@@ -98,18 +99,32 @@ class FeatureSelector(metaclass=ABCMeta):
         """
         Evaluates the feature selector at one time step.
         """
-        if self.nogueira_window_size:
-            self.nogueira_stability_measures.append(self._get_nogueira_stability())
+        for metric_name in self.evaluation:
+            if isinstance(self.evaluation_metrics[metric_name], tuple):
+                metric_func = self.evaluation_metrics[metric_name][0]
+                metric_params = self.evaluation_metrics[metric_name][1]
+            else:
+                metric_func = self.evaluation_metrics[metric_name]
+                metric_params = {}
+            try:
+                metric_val = metric_func(self.selection, **metric_params)
+            except TypeError:
+                # TODO include names of missing parameters in warning message
+                warnings.warn(f'{metric_name} will not be evaluated because of one or more missing function parameters.')
+                continue
 
-    def _get_nogueira_stability(self):
+            self.evaluation[metric_name].append(metric_val)
+
+    @staticmethod
+    def get_nogueira_stability(selection, n_total_features, nogueira_window_size=10):
         """
         Returns the Nogueira measure for feature selection stability.
 
         Returns:
             float: the stability measure
         """
-        Z = np.zeros([min(len(self.selection), self.nogueira_window_size), self.n_total_features])
-        for row, col in enumerate(self.selection[-self.nogueira_window_size:]):
+        Z = np.zeros([min(len(selection), nogueira_window_size), n_total_features])
+        for row, col in enumerate(selection[-nogueira_window_size:]):
             Z[row, col] = 1
 
         try:

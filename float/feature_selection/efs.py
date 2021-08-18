@@ -10,8 +10,7 @@ class EFS(FeatureSelector):
     Based on a paper by Carvalho et al. 2005. This Feature Selection algorithm is based on the weights of a
     Modified Balanced Winnow classifier (as introduced in the paper).
     """
-    def __init__(self, n_total_features, n_selected_features, u=None, v=None, theta=1, M=1, alpha=1.5, beta=0.5,
-                 nogueira_window_size=None):
+    def __init__(self, n_total_features, n_selected_features, evaluation_metrics=None, u=None, v=None, theta=1, M=1, alpha=1.5, beta=0.5):
         """
         Initializes the EFS feature selector.
 
@@ -24,10 +23,9 @@ class EFS(FeatureSelector):
             M (float): margin parameter
             alpha (float): promotion parameter
             beta (float): demotion parameter
-            nogueira_window_size (int): window size for the Nogueira stability measure
         """
-        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
-                         supports_streaming_features=False, nogueira_window_size=nogueira_window_size)
+        super().__init__(n_total_features, n_selected_features, evaluation_metrics, supports_multi_class=False,
+                         supports_streaming_features=False)
 
         self.u = np.ones(n_total_features) * 2 if u is None else u
         self.v = np.ones(n_total_features) if v is None else v
