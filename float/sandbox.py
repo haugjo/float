@@ -84,14 +84,14 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
             pipelines.append(prequential_pipeline)
 
         visualizer = visualization.visualizer.Visualizer(
-            [predictor.evaluation['accuracy'], predictor.evaluation['precision'], predictor.evaluation['f1'], predictor.evaluation['recall']],
+            [predictor.evaluation['Accuracy'], predictor.evaluation['Precision'], predictor.evaluation['F1 Score'], predictor.evaluation['Recall']],
             ['Accuracy', 'Precision', 'F1', 'Recall'],
             'prediction')
         visualizer.plot(plot_title=f'Metrics For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}', smooth_curve=True)
         plt.show()
 
         visualizer = visualization.visualizer.Visualizer(
-            [predictor.evaluation_decay['accuracy'], predictor.evaluation_window['accuracy'], predictor.evaluation['accuracy']],
+            [predictor.evaluation_decay['Accuracy'], predictor.evaluation_window['Accuracy'], predictor.evaluation['Accuracy']],
             ['Accuracy Decay', 'Accuracy Window', 'Accuracy'],
             'prediction')
         visualizer.plot(

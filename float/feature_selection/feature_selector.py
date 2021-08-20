@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 import numpy as np
 import warnings
 import traceback
+import sys
 
 
 class FeatureSelector(metaclass=ABCMeta):
@@ -97,7 +98,7 @@ class FeatureSelector(metaclass=ABCMeta):
         X_new[:, self.selected_features] = X[:, self.selected_features]
         return X_new
 
-    def evaluate(self):
+    def evaluate(self, time_step):
         """
         Evaluates the feature selector at one time step.
         """
@@ -111,8 +112,8 @@ class FeatureSelector(metaclass=ABCMeta):
             try:
                 metric_val = metric_func(self.selection, **metric_params)
             except TypeError:
-                # TODO include names of missing parameters in warning message
-                warnings.warn(f'{metric_name} will not be evaluated because of one or more missing function parameters.')
+                if time_step == 0:
+                    traceback.print_exc()
                 continue
 
             self.evaluation[metric_name].append(metric_val)

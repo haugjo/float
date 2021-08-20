@@ -121,7 +121,7 @@ class Pipeline(metaclass=ABCMeta):
 
             X = self.feature_selector.select_features(X, self.time_step)
 
-            self.feature_selector.evaluate()
+            self.feature_selector.evaluate(self.time_step)
 
             if self.feature_selector.supports_streaming_features and \
                     self.time_step in self.feature_selector.streaming_features:
