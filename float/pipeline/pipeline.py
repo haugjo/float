@@ -185,16 +185,16 @@ class Pipeline(metaclass=ABCMeta):
         if self.concept_drift_detector:
             print('----------------------')
             print('Concept Drift Detection:')
-            print(tabulate({**{
-                'Model': [type(self.concept_drift_detector.detector).__name__ if type(
+            print(tabulate({
+                **{'Model': [type(self.concept_drift_detector.detector).__name__ if type(
                     self.concept_drift_detector) is SkmultiflowDriftDetector else
-                          type(self.concept_drift_detector).__name__.split('.')[-1]],
-                'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
-                'Detected Global Drifts': [self.concept_drift_detector.global_drifts] if len(
-                    self.concept_drift_detector.global_drifts) <= 5 else [
-                    str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]']},
-                # TODO make this more readable
-                **{'Avg. ' + key: [np.mean([x for x in value if x is not None]) if len([x for x in value if x is not None]) > 0 else 'N/A'] if type(value) is list else [value] for key, value in self.concept_drift_detector.evaluation.items()}
+                             type(self.concept_drift_detector).__name__.split('.')[-1]],
+                   'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
+                   'Detected Global Drifts': [self.concept_drift_detector.global_drifts] if len(
+                       self.concept_drift_detector.global_drifts) <= 5 else [
+                       str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]']},
+                **{'Avg. ' + key: [np.mean([x for x in value if x is not None]) if len([x for x in value if x is not None]) > 0 else 'N/A']
+                    if type(value) is list else [value] for key, value in self.concept_drift_detector.evaluation.items()}
             }, headers="keys", tablefmt='github'))
 
         if self.predictor:

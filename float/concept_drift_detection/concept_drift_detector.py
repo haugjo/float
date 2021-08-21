@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import traceback
+from time import time
 
 
 class ConceptDriftDetector(metaclass=ABCMeta):
@@ -11,10 +12,6 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         evaluation (dict of str: list[float]): a dictionary of metric names and their corresponding metric values as lists
         global_drifts (list): monitors if there was detected change at each time step
         comp_times (list): computation time in all time steps
-        average_delay (float): average delay with which a known concept drift is detected
-        true_positive_rates (list): true positive rate for different delay ranges
-        false_discovery_rates (list): false discovery rate for different delay ranges
-        precision_scores (list): precision for different delay ranges
     """
     def __init__(self, evaluation_metrics):
         """
@@ -199,15 +196,51 @@ class ConceptDriftDetector(metaclass=ABCMeta):
 
     @staticmethod
     def get_tpr(global_drifts, known_drifts, batch_size, max_delay_range):
+        """
+        Returns the true positive rates for different delay ranges.
+
+        Args:
+            global_drifts (list): the detected global drifts
+            known_drifts (list): the known drifts for the data stream
+            batch_size (int): the batch size used for the data stream
+            max_delay_range (int): maximum delay for which TPR, FDR and precision should be computed
+
+        Returns:
+            list: the TPR for different delay ranges
+        """
         tpr, _, _ = ConceptDriftDetector.get_tpr_fdr_and_precision(global_drifts, known_drifts, batch_size, max_delay_range)
         return tpr
 
     @staticmethod
     def get_fdr(global_drifts, known_drifts, batch_size, max_delay_range):
+        """
+        Returns the false discovery rates for different delay ranges.
+
+        Args:
+            global_drifts (list): the detected global drifts
+            known_drifts (list): the known drifts for the data stream
+            batch_size (int): the batch size used for the data stream
+            max_delay_range (int): maximum delay for which TPR, FDR and precision should be computed
+
+        Returns:
+            list: the FDR for different delay ranges
+        """
         _, fdr, _ = ConceptDriftDetector.get_tpr_fdr_and_precision(global_drifts, known_drifts, batch_size, max_delay_range)
         return fdr
 
     @staticmethod
     def get_precision(global_drifts, known_drifts, batch_size, max_delay_range):
+        """
+        Returns the precision scores for different delay ranges.
+
+        Args:
+            global_drifts (list): the detected global drifts
+            known_drifts (list): the known drifts for the data stream
+            batch_size (int): the batch size used for the data stream
+            max_delay_range (int): maximum delay for which TPR, FDR and precision should be computed
+
+        Returns:
+            list: the precision for different delay ranges
+        """
         _, _, precision = ConceptDriftDetector.get_tpr_fdr_and_precision(global_drifts, known_drifts, batch_size, max_delay_range)
         return precision
