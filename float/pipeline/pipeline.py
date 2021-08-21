@@ -148,8 +148,7 @@ class Pipeline(metaclass=ABCMeta):
                 self.concept_drift_detector.partial_fit(X, y)
             if self.concept_drift_detector.detected_global_change():
                 print(f"Global change detected at time step {self.time_step}")
-            self.concept_drift_detector.evaluate(self.time_step, self.max_n_samples, self.known_drifts, self.batch_size,
-                                                 last_iteration)
+            self.concept_drift_detector.evaluate(self.time_step, last_iteration)
             self.concept_drift_detector.comp_times.append(time.time() - start_time)
 
         self._finish_iteration(n_samples)
@@ -186,24 +185,16 @@ class Pipeline(metaclass=ABCMeta):
         if self.concept_drift_detector:
             print('----------------------')
             print('Concept Drift Detection:')
-            print(tabulate({
+            print(tabulate({**{
                 'Model': [type(self.concept_drift_detector.detector).__name__ if type(
                     self.concept_drift_detector) is SkmultiflowDriftDetector else
                           type(self.concept_drift_detector).__name__.split('.')[-1]],
                 'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
                 'Detected Global Drifts': [self.concept_drift_detector.global_drifts] if len(
                     self.concept_drift_detector.global_drifts) <= 5 else [
-                    str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]'],
-                'Avg. Delay': [self.concept_drift_detector.average_delay],
-                'Avg. True Positive Rate': [np.mean([x[1] for x in self.concept_drift_detector.true_positive_rates])],
-                'Avg. False Discovery Rate': [np.mean(
-                    [x[1] for x in self.concept_drift_detector.false_discovery_rates if x[1] is not None]) if len(
-                    [x[1] for x in self.concept_drift_detector.false_discovery_rates if
-                     x[1] is not None]) > 0 else 'N/A'],
-                'Avg. Precision': [
-                    np.mean([x[1] for x in self.concept_drift_detector.precision_scores if x[1] is not None]) if len(
-                        [x[1] for x in self.concept_drift_detector.precision_scores if
-                         x[1] is not None]) > 0 else 'N/A']
+                    str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]']},
+                # TODO make this more readable
+                **{'Avg. ' + key: [np.mean([x for x in value if x is not None]) if len([x for x in value if x is not None]) > 0 else 'N/A'] if type(value) is list else [value] for key, value in self.concept_drift_detector.evaluation.items()}
             }, headers="keys", tablefmt='github'))
 
         if self.predictor:

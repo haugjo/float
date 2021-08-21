@@ -9,16 +9,18 @@ class ERICS(ConceptDriftDetector):
     """
     ERICS: Effective and Robust Identification of Concept Shift
     please cite:
-    [1] ERICS Paper (Todo)
-    [2] Haug, Johannes, et al. "Leveraging Model Inherent Variable Importance for Stable Online Feature Selection."
+    [1] Haug, Johannes and Kasneci, Gjergji. "Learning Parameter Distributions to Detect Concept Drift in Data Streams".
+    CoRR. 2020.
+    [2] Haug, Johannes, et al. "Leveraging Model Inherent Variable Importance for Stable Online Feature Selection".
     Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2020.
     """
-    def __init__(self, n_param, window_mvg_average=50, window_drift_detect=50, beta=0.0001, base_model='probit',
-                 init_mu=0, init_sigma=1, epochs=10, lr_mu=0.01, lr_sigma=0.01, max_delay_range=100):
+    def __init__(self, n_param, evaluation_metrics=None, window_mvg_average=50, window_drift_detect=50, beta=0.0001, base_model='probit',
+                 init_mu=0, init_sigma=1, epochs=10, lr_mu=0.01, lr_sigma=0.01):
         """
 
         Args:
             n_param (int): total no. of parameters (corresponds to no. of features for probit model)
+            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             window_mvg_average (int): window Size for computation of moving average
             window_drift_detect (int): window Size for Drift Detection
             beta (float): update rate for the alpha-threshold
@@ -28,9 +30,8 @@ class ERICS(ConceptDriftDetector):
             epochs (int): number of epochs for optimization of parameter distributions (according to [2])
             lr_mu (float): learning rate for the gradient update of the mean (according to [2])
             lr_sigma (float): learning rate for the gradient update of the variance (according to [2])
-            max_delay_range (int): maximum delay for which TPR, FDR and precision should be computed
         """
-        super().__init__(max_delay_range)
+        super().__init__(evaluation_metrics)
         # User-set ERICS-hyperparameters
         self.n_param = n_param
         self.M = window_mvg_average
@@ -289,18 +290,15 @@ class ERICS(ConceptDriftDetector):
     #   # update the parameters of your model
     #####################################################################
 
-    def evaluate(self, time_step, max_n_samples, known_drifts, batch_size, last_iteration):
+    def evaluate(self, time_step, last_iteration):
         """
         Evaluates the concept drift detector at one time step.
 
         Args:
             time_step (int): the current time step
-            max_n_samples (int): the maximum number of samples used for the evaluation
-            known_drifts (list): the known drifts for the data stream
-            batch_size (int, int): the batch size used for the data stream
             last_iteration (bool): True if this is the last iteration of the pipeline, False otherwise
         """
-        super().evaluate(time_step, max_n_samples, known_drifts, batch_size, last_iteration)
+        super().evaluate(time_step, last_iteration)
 
         if self.detected_partial_change():
             if time_step not in self.partial_drifts:
