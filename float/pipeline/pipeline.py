@@ -3,6 +3,7 @@ import numpy as np
 import time
 import copy
 import sys
+import traceback
 from tabulate import tabulate
 from float.data.data_loader import DataLoader
 from float.feature_selection import FeatureSelector
@@ -22,9 +23,9 @@ class Pipeline(metaclass=ABCMeta):
 
         Args:
             data_loader (DataLoader): DataLoader object
-            feature_selector (FeatureSelector): FeatureSelector object
-            concept_drift_detector (ConceptDriftDetector): ConceptDriftDetector object
-            predictor (Predictor): Predictor object
+            feature_selector (FeatureSelector | None): FeatureSelector object
+            concept_drift_detector (ConceptDriftDetector | None): ConceptDriftDetector object
+            predictor (Predictor | None): Predictor object
             max_n_samples (int): maximum number of observations used in the evaluation
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
@@ -45,7 +46,13 @@ class Pipeline(metaclass=ABCMeta):
         self.time_step = 0
         self.n_global_samples = 0
 
-        self._check_input()
+        try:
+            self._check_input()
+        except AttributeError:
+            traceback.print_exc(limit=1)
+            return
+
+        self.run()
 
     def _check_input(self):
         """
@@ -55,11 +62,13 @@ class Pipeline(metaclass=ABCMeta):
             AttributeError: if a crucial parameter is missing
         """
         if type(self.data_loader) is not DataLoader:
-            raise AttributeError('No valid DataLoader object was provided.')
+           raise AttributeError('No valid DataLoader object was provided.')
         if not issubclass(type(self.feature_selector), FeatureSelector) and \
                 not issubclass(type(self.concept_drift_detector), ConceptDriftDetector) and \
                 not issubclass(type(self.predictor), Predictor):
             raise AttributeError('No valid FeatureSelector, ConceptDriftDetector or Predictor object was provided.')
+        if self.concept_drift_detector.prediction_based and not issubclass(type(self.predictor), Predictor):
+            raise AttributeError('A prediction based Concept Drift Detector cannot be used without a valid Predictor object.')
 
     def _start_evaluation(self):
         """
@@ -93,10 +102,11 @@ class Pipeline(metaclass=ABCMeta):
         """
         print('Pretrain predictor with {} observation(s).'.format(self.n_pretrain_samples))
 
-        X, y = self.data_loader.get_data(self.n_pretrain_samples)
+        if self.predictor:
+            X, y = self.data_loader.get_data(self.n_pretrain_samples)
 
-        self.predictor.partial_fit(X=X, y=y)
-        self.n_global_samples += self.n_pretrain_samples
+            self.predictor.partial_fit(X=X, y=y)
+            self.n_global_samples += self.n_pretrain_samples
 
     def _run_single_training_iteration(self):
         """

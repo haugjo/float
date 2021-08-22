@@ -34,7 +34,6 @@ all_known_drifts = [[round(data_loader.stream.n_samples * 0.2), round(data_loade
                     in data_loaders]
 batch_sizes = [10, 50, 10, 100]
 
-pipelines = []
 for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, data_loaders, batch_sizes,
                                                                 all_known_drifts):
     feature_names = get_kdd_conceptdrift_feature_names() if data_set_name == 'kdd_conceptdrift' else data_loader.stream.feature_names
@@ -85,6 +84,7 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
                                                                                                 'zero_division': 0}),
                                                                                             '0-1 Loss': zero_one_loss},
                                                                         decay_rate=0.5, window_size=5)
+
     for feature_selector_name, feature_selector in zip(feature_selector_names, feature_selectors):
         for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names,
                                                                        concept_drift_detectors):
@@ -94,8 +94,6 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
                                                                                      batch_size=batch_size,
                                                                                      max_n_samples=data_loader.stream.n_samples,
                                                                                      known_drifts=known_drifts)
-            prequential_pipeline.run()
-            pipelines.append(prequential_pipeline)
 
         visualizer = visualization.visualizer.Visualizer(
             [predictor.evaluation['Accuracy'], predictor.evaluation['Precision'], predictor.evaluation['F1 Score'], predictor.evaluation['Recall']],

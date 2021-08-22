@@ -18,12 +18,13 @@ class PrequentialPipeline(Pipeline):
 
         Args:
             data_loader (DataLoader): DataLoader object
-            feature_selector (FeatureSelector): FeatureSelector object
-            concept_drift_detector (ConceptDriftDetector): ConceptDriftDetector object
-            predictor (Predictor): Predictor object
+            feature_selector (FeatureSelector | None): FeatureSelector object
+            concept_drift_detector (ConceptDriftDetector | None): ConceptDriftDetector object
+            predictor (Predictor | None): Predictor object
             max_n_samples (int): maximum number of observations used in the evaluation
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
+            known_drifts (list): list of known concept drifts for this stream
         """
         super().__init__(data_loader, feature_selector, concept_drift_detector, predictor, max_n_samples,
                          batch_size, n_pretrain_samples, known_drifts)
