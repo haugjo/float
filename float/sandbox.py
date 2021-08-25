@@ -88,18 +88,23 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
     for feature_selector_name, feature_selector in zip(feature_selector_names, feature_selectors):
         for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names,
                                                                        concept_drift_detectors):
-            prequential_pipeline = pipeline.prequential_pipeline.PrequentialPipeline(data_loader, feature_selector,
-                                                                                     concept_drift_detector,
-                                                                                     predictor,
-                                                                                     batch_size=batch_size,
-                                                                                     max_n_samples=data_loader.stream.n_samples,
-                                                                                     known_drifts=known_drifts)
+            # prequential_pipeline = pipeline.prequential_pipeline.PrequentialPipeline(data_loader, feature_selector,
+            #                                                                          concept_drift_detector,
+            #                                                                          predictor,
+            #                                                                          batch_size=batch_size,
+            #                                                                          max_n_samples=data_loader.stream.n_samples,
+            #                                                                          known_drifts=known_drifts)
+            test_size = 50
+            holdout_pipeline = pipeline.holdout_pipeline.HoldoutPipeline(data_loader, data_loader.get_data(test_size), 10, feature_selector,
+                                                                         concept_drift_detector, predictor, batch_size=batch_size,
+                                                                         max_n_samples=data_loader.stream.n_samples - test_size,
+                                                                         known_drifts=known_drifts)
 
         visualizer = visualization.visualizer.Visualizer(
             [predictor.evaluation['Accuracy'], predictor.evaluation['Precision'], predictor.evaluation['F1 Score'], predictor.evaluation['Recall']],
             ['Accuracy', 'Precision', 'F1', 'Recall'],
             'prediction')
-        visualizer.plot(plot_title=f'Metrics For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}', smooth_curve=True)
+        visualizer.plot(plot_title=f'Metrics For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}', smooth_curve=False)
         plt.show()
 
         visualizer = visualization.visualizer.Visualizer(

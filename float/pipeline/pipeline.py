@@ -17,7 +17,7 @@ class Pipeline(metaclass=ABCMeta):
     """
 
     def __init__(self, data_loader, feature_selector, concept_drift_detector, predictor, max_n_samples,
-                 batch_size, n_pretrain_samples, known_drifts):
+                 batch_size, n_pretrain_samples, known_drifts, evaluation_interval=None):
         """
         Initializes the pipeline.
 
@@ -30,6 +30,7 @@ class Pipeline(metaclass=ABCMeta):
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
             known_drifts (list): list of known concept drifts for this stream
+            evaluation_interval (int): the interval at which the predictor should be evaluated using the test set
         """
         self.data_loader = data_loader
         self.feature_selector = feature_selector
@@ -41,6 +42,8 @@ class Pipeline(metaclass=ABCMeta):
         self.n_pretrain_samples = n_pretrain_samples
 
         self.known_drifts = known_drifts
+
+        self.evaluation_interval = evaluation_interval if evaluation_interval else 1
 
         self.start_time = 0
         self.time_step = 0
@@ -108,6 +111,13 @@ class Pipeline(metaclass=ABCMeta):
             self.predictor.partial_fit(X=X, y=y)
             self.n_global_samples += self.n_pretrain_samples
 
+    def get_n_samples(self):
+        if self.n_global_samples + self.batch_size <= self.max_n_samples:
+            n_samples = self.batch_size
+        else:
+            n_samples = self.max_n_samples - self.n_global_samples
+        return n_samples
+
     def _run_single_training_iteration(self, train_set, test_set=None, last_iteration=False):
         """
         Executes a single training iteration.
@@ -139,7 +149,8 @@ class Pipeline(metaclass=ABCMeta):
             y_pred = self.predictor.predict(X_test)
             self.predictor.testing_times.append(time.time() - start_time)
 
-            self.predictor.evaluate(y_pred, y_test)
+            if not self.time_step == 0 and not self.time_step % self.evaluation_interval:
+                self.predictor.evaluate(y_pred, y_test)
 
             start_time = time.time()
             self.predictor.partial_fit(X_train, y_train)

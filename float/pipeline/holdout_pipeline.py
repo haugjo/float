@@ -3,19 +3,23 @@ from float.data.data_loader import DataLoader
 from float.feature_selection import FeatureSelector
 from float.concept_drift_detection import ConceptDriftDetector
 from float.prediction import Predictor
+import warnings
+import traceback
 
 
 class HoldoutPipeline(Pipeline):
     """
     Pipeline which implements the holdout evaluation.
     """
-    def __init__(self, data_loader=None, feature_selector=None, concept_drift_detector=None, predictor=None,
+    def __init__(self, data_loader, test_set, evaluation_interval, feature_selector=None, concept_drift_detector=None, predictor=None,
                  max_n_samples=100000, batch_size=100, n_pretrain_samples=100, known_drifts=None):
         """
         Initializes the pipeline.
 
         Args:
             data_loader (DataLoader): DataLoader object
+            test_set (np.ndarray, np.ndarray): the test samples and their labels to be used for the holdout evaluation
+            evaluation_interval (int): the interval at which the predictor should be evaluated using the test set
             feature_selector (FeatureSelector | None): FeatureSelector object
             concept_drift_detector (ConceptDriftDetector | None): ConceptDriftDetector object
             predictor (Predictor | None): Predictor object
@@ -24,8 +28,42 @@ class HoldoutPipeline(Pipeline):
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
             known_drifts (list): list of known concept drifts for this stream
         """
+        self.test_set = test_set
+
         super().__init__(data_loader, feature_selector, concept_drift_detector, predictor, max_n_samples,
-                         batch_size, n_pretrain_samples, known_drifts)
+                         batch_size, n_pretrain_samples, known_drifts, evaluation_interval)
 
     def run(self):
-        raise NotImplementedError
+        """
+        Runs the pipeline.
+        """
+        if (self.data_loader.stream.n_remaining_samples() > 0) and \
+                (self.data_loader.stream.n_remaining_samples() < self.max_n_samples):
+            self.max_n_samples = self.data_loader.stream.n_samples
+            warnings.warn('Parameter max_n_samples exceeds the size of data_loader and will be automatically reset.',
+                          stacklevel=2)
+
+        self._start_evaluation()
+        self._holdout()
+        self._finish_evaluation()
+
+    def _holdout(self):
+        """
+        Holdout evaluation.
+        """
+        while self.n_global_samples < self.max_n_samples:
+            last_iteration = False
+
+            n_samples = self.get_n_samples()
+
+            if self.n_global_samples + n_samples >= self.max_n_samples:
+                last_iteration = True
+
+            train_set = self.data_loader.get_data(n_samples)
+            try:
+                self._run_single_training_iteration(train_set, self.test_set, last_iteration)
+            except BaseException:
+                traceback.print_exc()
+                break
+
+            self._finish_iteration(n_samples)
