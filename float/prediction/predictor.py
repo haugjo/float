@@ -94,15 +94,14 @@ class Predictor(metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    def evaluate(self, X, y):
+    def evaluate(self, y_pred, y):
         """
         Evaluates the predictor at one time step.
 
         Args:
-            X (np.ndarray): test data samples
-            y (np.ndarray): true values for all samples in X
+            y_pred (np.ndarray): predicted labels for the data samples
+            y (np.ndarray): true values for the data samples
         """
-        y_pred = self.predict(X)
         for metric_name in self.evaluation:
             if isinstance(self.evaluation_metrics[metric_name], tuple):
                 metric_func = self.evaluation_metrics[metric_name][0]

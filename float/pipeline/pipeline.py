@@ -62,7 +62,7 @@ class Pipeline(metaclass=ABCMeta):
             AttributeError: if a crucial parameter is missing
         """
         if type(self.data_loader) is not DataLoader:
-           raise AttributeError('No valid DataLoader object was provided.')
+            raise AttributeError('No valid DataLoader object was provided.')
         if not issubclass(type(self.feature_selector), FeatureSelector) and \
                 not issubclass(type(self.concept_drift_detector), ConceptDriftDetector) and \
                 not issubclass(type(self.predictor), Predictor):
@@ -108,28 +108,24 @@ class Pipeline(metaclass=ABCMeta):
             self.predictor.partial_fit(X=X, y=y)
             self.n_global_samples += self.n_pretrain_samples
 
-    def _run_single_training_iteration(self):
+    def _run_single_training_iteration(self, train_set, test_set=None, last_iteration=False):
         """
         Executes a single training iteration.
+
+        Args:
+            train_set (np.ndarray, np.ndarray): the samples and their labels used for training
+            test_set ((np.ndarray, np.ndarray) | None): the samples and their labels used for testing
+            last_iteration (bool): True if this is the last iteration, False otherwise
         """
-        last_iteration = False
-
-        if self.n_global_samples + self.batch_size <= self.max_n_samples:
-            n_samples = self.batch_size
-        else:
-            n_samples = self.max_n_samples - self.n_global_samples
-
-        if self.n_global_samples + n_samples >= self.max_n_samples:
-            last_iteration = True
-
-        X, y = self.data_loader.get_data(n_samples)
+        X_train, y_train = train_set
+        X_test, y_test = test_set if test_set else train_set
 
         if self.feature_selector:
             start_time = time.time()
-            self.feature_selector.weight_features(copy.copy(X), copy.copy(y))
+            self.feature_selector.weight_features(copy.copy(X_train), copy.copy(y_train))
             self.feature_selector.comp_times.append(time.time() - start_time)
 
-            X = self.feature_selector.select_features(X, self.time_step)
+            X = self.feature_selector.select_features(X_train, self.time_step)
 
             self.feature_selector.evaluate(self.time_step)
 
@@ -140,28 +136,26 @@ class Pipeline(metaclass=ABCMeta):
 
         if self.predictor:
             start_time = time.time()
-            prediction = self.predictor.predict(X).tolist()
+            y_pred = self.predictor.predict(X_test)
             self.predictor.testing_times.append(time.time() - start_time)
 
-            start_time = time.time()
-            self.predictor.partial_fit(X, y)
-            self.predictor.training_times.append(time.time() - start_time)
+            self.predictor.evaluate(y_pred, y_test)
 
-            self.predictor.evaluate(X, y)
+            start_time = time.time()
+            self.predictor.partial_fit(X_train, y_train)
+            self.predictor.training_times.append(time.time() - start_time)
 
         if self.concept_drift_detector:
             start_time = time.time()
             if self.concept_drift_detector.prediction_based:
-                for val in (prediction == y):
+                for val in (y_pred == y_test):
                     self.concept_drift_detector.partial_fit(val)
             else:
-                self.concept_drift_detector.partial_fit(X, y)
+                self.concept_drift_detector.partial_fit(X_train, y_train)
             if self.concept_drift_detector.detected_global_change():
                 print(f"Global change detected at time step {self.time_step}")
             self.concept_drift_detector.evaluate(self.time_step, last_iteration)
             self.concept_drift_detector.comp_times.append(time.time() - start_time)
-
-        self._finish_iteration(n_samples)
 
     def _update_progress_bar(self):
         """
@@ -204,7 +198,7 @@ class Pipeline(metaclass=ABCMeta):
                        self.concept_drift_detector.global_drifts) <= 5 else [
                        str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]']},
                 **{'Avg. ' + key: [np.mean([x for x in value if x is not None]) if len([x for x in value if x is not None]) > 0 else 'N/A']
-                    if type(value) is list else [value] for key, value in self.concept_drift_detector.evaluation.items()}
+                if type(value) is list else [value] for key, value in self.concept_drift_detector.evaluation.items()}
             }, headers="keys", tablefmt='github'))
 
         if self.predictor:

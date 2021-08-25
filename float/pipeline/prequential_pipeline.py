@@ -11,7 +11,7 @@ class PrequentialPipeline(Pipeline):
     """
     Pipeline which implements the test-then-train evaluation.
     """
-    def __init__(self, data_loader=None, feature_selector=None, concept_drift_detector=None, predictor=None,
+    def __init__(self, data_loader, feature_selector=None, concept_drift_detector=None, predictor=None,
                  max_n_samples=100000, batch_size=100, n_pretrain_samples=100, known_drifts=None):
         """
         Initializes the pipeline.
@@ -46,15 +46,27 @@ class PrequentialPipeline(Pipeline):
         self._test_then_train()
         self._finish_evaluation()
 
-        return self.feature_selector, self.concept_drift_detector, self.predictor
-
     def _test_then_train(self):
         """
         Test-then-train evaluation
         """
         while self.n_global_samples < self.max_n_samples:
+            last_iteration = False
+
+            if self.n_global_samples + self.batch_size <= self.max_n_samples:
+                n_samples = self.batch_size
+            else:
+                n_samples = self.max_n_samples - self.n_global_samples
+
+            if self.n_global_samples + n_samples >= self.max_n_samples:
+                last_iteration = True
+
+            train_set = self.data_loader.get_data(n_samples)
+
             try:
-                self._run_single_training_iteration()
+                self._run_single_training_iteration(train_set, last_iteration=last_iteration)
             except BaseException:
                 traceback.print_exc()
                 break
+
+            self._finish_iteration(n_samples)
