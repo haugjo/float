@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import traceback
-from time import time
 
 
 class ConceptDriftDetector(metaclass=ABCMeta):
@@ -21,7 +20,7 @@ class ConceptDriftDetector(metaclass=ABCMeta):
             evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
         """
         self.evaluation_metrics = evaluation_metrics
-        self.evaluation = {key: [] for key in self.evaluation_metrics.keys()}
+        self.evaluation = {key: [] for key in self.evaluation_metrics.keys()} if evaluation_metrics else {}
 
         self.global_drifts = []
         self.comp_times = []

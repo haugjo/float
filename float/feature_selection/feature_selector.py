@@ -35,8 +35,8 @@ class FeatureSelector(metaclass=ABCMeta):
         """
         self.n_total_features = n_total_features
         self.n_selected_features = n_selected_features
-        self.evaluation_metrics = evaluation_metrics if evaluation_metrics else {'Nogueira Stability Measure': (FeatureSelector.get_nogueira_stability, {'n_total_features': self.n_total_features, 'nogueira_window_size': 10})}
-        self.evaluation = {key: [] for key in self.evaluation_metrics.keys()}
+        self.evaluation_metrics = evaluation_metrics
+        self.evaluation = {key: [] for key in self.evaluation_metrics.keys()} if evaluation_metrics else {}
 
         self.supports_multi_class = supports_multi_class
         self.supports_streaming_features = supports_streaming_features

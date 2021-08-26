@@ -27,12 +27,12 @@ class Predictor(metaclass=ABCMeta):
         self.decay_rate = decay_rate
         self.window_size = window_size
 
-        self.evaluation_metrics = evaluation_metrics if evaluation_metrics else {'Accuracy': accuracy_score, '0-1 Loss': zero_one_loss}
-        self.evaluation = {key: [] for key in self.evaluation_metrics.keys()}
+        self.evaluation_metrics = evaluation_metrics
+        self.evaluation = {key: [] for key in self.evaluation_metrics.keys()} if evaluation_metrics else {}
         if self.decay_rate:
-            self.evaluation_decay = {key: [] for key in self.evaluation_metrics.keys()}
+            self.evaluation_decay = {key: [] for key in self.evaluation_metrics.keys()} if evaluation_metrics else {}
         if self.window_size:
-            self.evaluation_window = {key: [] for key in self.evaluation_metrics.keys()}
+            self.evaluation_window = {key: [] for key in self.evaluation_metrics.keys()} if evaluation_metrics else {}
 
         self.testing_times = []
         self.training_times = []
