@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>float.feature_selection.fires API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>float.feature_selection.fires</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import numpy as np
+from warnings import warn
+from scipy.stats import norm
+from sklearn.preprocessing import MinMaxScaler
+from float.feature_selection.feature_selector import FeatureSelector
+
+
+class FIRES(FeatureSelector):
+    &#34;&#34;&#34;
+    FIRES: Fast, Interpretable and Robust Evaluation and Selection of features
+
+    cite: Haug et al. 2020. Leveraging Model Inherent Variable Importance for Stable Online Feature Selection.
+    In Proceedings of the 26th ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD ’20),
+    August 23–27, 2020, Virtual Event, CA, USA.
+    &#34;&#34;&#34;
+    def __init__(self, n_total_features, n_selected_features, classes, evaluation_metrics=None, mu_init=0, sigma_init=1, penalty_s=0.01, penalty_r=0.01, epochs=1,
+                 lr_mu=0.01, lr_sigma=0.01, scale_weights=True, model=&#39;probit&#39;):
+        &#34;&#34;&#34;
+        Initializes the FIRES feature selector.
+
+        Args:
+            n_total_features (int): total number of features
+            n_selected_features (int): number of selected features
+            classes (np.ndarray): unique target values (class labels)
+            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
+            mu_init (int | np.ndarray): initial importance parameter
+            sigma_init (int | np.ndarray): initial uncertainty parameter
+            penalty_s (float): penalty factor for the uncertainty (corresponds to gamma_s in the paper)
+            penalty_r (float): penalty factor for the regularization (corresponds to gamma_r in the paper)
+            epochs (int): number of epochs that we use each batch of observations to update the parameters
+            lr_mu (float): learning rate for the gradient update of the importance
+            lr_sigma (float): learning rate for the gradient update of the uncertainty
+            scale_weights (bool): if True, scale feature weights into the range [0,1]
+            model (str): name of the base model to compute the likelihood (default is &#39;probit&#39;)
+        &#34;&#34;&#34;
+        super().__init__(n_total_features, n_selected_features, evaluation_metrics, supports_multi_class=False,
+                         supports_streaming_features=False)
+        self.n_total_ftr = n_total_features
+        self.classes = classes
+        self.mu = np.ones(n_total_features) * mu_init
+        self.sigma = np.ones(n_total_features) * sigma_init
+        self.penalty_s = penalty_s
+        self.penalty_r = penalty_r
+        self.epochs = epochs
+        self.lr_mu = lr_mu
+        self.lr_sigma = lr_sigma
+        self.scale_weights = scale_weights
+        self.model = model
+
+        # Additional model-specific parameters
+        self.model_param = {}
+
+        # Probit model
+        if self.model == &#39;probit&#39; and tuple(classes) != (-1, 1):
+            if len(np.unique(classes)) == 2:
+                self.model_param[&#39;probit&#39;] = True  # Indicates that we need to encode the target variable into {-1,1}
+                warn(&#39;FIRES WARNING: The target variable will be encoded as: {} = -1, {} = 1&#39;.format(
+                    self.classes[0], self.classes[1]))
+            else:
+                raise ValueError(&#39;The target variable y must be binary.&#39;)
+
+    def weight_features(self, X, y):
+        &#34;&#34;&#34;
+        Given a batch of observations and corresponding labels, computes feature weights.
+
+        Args:
+            X (np.ndarray): samples of current batch
+            y (np.ndarray): labels of current batch
+
+        Returns:
+            np.ndarray: feature weights
+        &#34;&#34;&#34;
+        # Update estimates of mu and sigma given the predictive model
+        if self.model == &#39;probit&#39;:
+            self.__probit(X, y)
+        # ### ADD YOUR OWN MODEL HERE ##################################################
+        # elif self.model == &#39;your_model&#39;:
+        #    self.__yourModel(x, y)
+        ################################################################################
+        else:
+            raise NotImplementedError(&#39;The given model name does not exist&#39;)
+
+        # Limit sigma to range [0, inf]
+        if sum(n &lt; 0 for n in self.sigma) &gt; 0:
+            self.sigma[self.sigma &lt; 0] = 0
+            warn(&#39;Sigma has automatically been rescaled to [0, inf], because it contained negative values.&#39;)
+
+        # Compute feature weights
+        self.raw_weight_vector = self.__compute_weights()
+
+    def __probit(self, X, y):
+        &#34;&#34;&#34;
+        Updates the distribution parameters mu and sigma by optimizing them in terms of the (log) likelihood.
+        Here we assume a Bernoulli distributed target variable. We use a Probit model as our base model.
+        This corresponds to the FIRES-GLM model in the paper.
+
+        Args:
+            X (np.ndarray): batch of observations (numeric values only, consider normalizing data for better results)
+            y (np.ndarray): batch of labels: type binary, i.e. {-1,1} (bool, int or str will be encoded accordingly)
+        &#34;&#34;&#34;
+
+        for epoch in range(self.epochs):
+            # Shuffle the observations
+            random_idx = np.random.permutation(len(y))
+            X = X[random_idx]
+            y = y[random_idx]
+
+            # Encode target as {-1,1}
+            if &#39;probit&#39; in self.model_param:
+                y[y == self.classes[0]] = -1
+                y[y == self.classes[1]] = 1
+
+            # Iterative update of mu and sigma
+            try:
+                # Helper functions
+                dot_mu_x = np.dot(X, self.mu)
+                rho = np.sqrt(1 + np.dot(X ** 2, self.sigma ** 2))
+
+                # Gradients
+                nabla_mu = norm.pdf(y / rho * dot_mu_x) * (y / rho * X.T)
+                nabla_sigma = norm.pdf(y / rho * dot_mu_x) * (
+                        - y / (2 * rho ** 3) * 2 * (X ** 2 * self.sigma).T * dot_mu_x)
+
+                # Marginal Likelihood
+                marginal = norm.cdf(y / rho * dot_mu_x)
+
+                # Update parameters
+                self.mu += self.lr_mu * np.mean(nabla_mu / marginal, axis=1)
+                self.sigma += self.lr_sigma * np.mean(nabla_sigma / marginal, axis=1)
+            except TypeError as e:
+                raise TypeError(&#39;All features must be a numeric data type.&#39;) from e
+
+    def __compute_weights(self):
+        &#34;&#34;&#34;
+        Computes optimal weights according to the objective function proposed in the paper.
+        We compute feature weights in a trade-off between feature importance and uncertainty.
+        Thereby, we aim to maximize both the discriminative power and the stability/robustness of feature weights.
+
+        Returns:
+            np.ndarray: feature weights
+        &#34;&#34;&#34;
+        # Compute optimal weights
+        weights = (self.mu ** 2 - self.penalty_s * self.sigma ** 2) / (2 * self.penalty_r)
+
+        if self.scale_weights:  # Scale weights to [0,1]
+            weights = MinMaxScaler().fit_transform(weights.reshape(-1, 1)).flatten()
+
+        return weights</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="float.feature_selection.fires.FIRES"><code class="flex name class">
+<span>class <span class="ident">FIRES</span></span>
+<span>(</span><span>n_total_features, n_selected_features, classes, evaluation_metrics=None, mu_init=0, sigma_init=1, penalty_s=0.01, penalty_r=0.01, epochs=1, lr_mu=0.01, lr_sigma=0.01, scale_weights=True, model='probit')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>FIRES: Fast, Interpretable and Robust Evaluation and Selection of features</p>
+<p>cite: Haug et al. 2020. Leveraging Model Inherent Variable Importance for Stable Online Feature Selection.
+In Proceedings of the 26th ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD ’20),
+August 23–27, 2020, Virtual Event, CA, USA.</p>
+<p>Initializes the FIRES feature selector.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>n_total_features</code></strong> :&ensp;<code>int</code></dt>
+<dd>total number of features</dd>
+<dt><strong><code>n_selected_features</code></strong> :&ensp;<code>int</code></dt>
+<dd>number of selected features</dd>
+<dt><strong><code>classes</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>unique target values (class labels)</dd>
+<dt>evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, &hellip;})} a dictionary of metrics to be used</dt>
+<dt>mu_init (int | np.ndarray): initial importance parameter</dt>
+<dt>sigma_init (int | np.ndarray): initial uncertainty parameter</dt>
+<dt><strong><code>penalty_s</code></strong> :&ensp;<code><a title="float" href="../index.html">float</a></code></dt>
+<dd>penalty factor for the uncertainty (corresponds to gamma_s in the paper)</dd>
+<dt><strong><code>penalty_r</code></strong> :&ensp;<code><a title="float" href="../index.html">float</a></code></dt>
+<dd>penalty factor for the regularization (corresponds to gamma_r in the paper)</dd>
+<dt><strong><code>epochs</code></strong> :&ensp;<code>int</code></dt>
+<dd>number of epochs that we use each batch of observations to update the parameters</dd>
+<dt><strong><code>lr_mu</code></strong> :&ensp;<code><a title="float" href="../index.html">float</a></code></dt>
+<dd>learning rate for the gradient update of the importance</dd>
+<dt><strong><code>lr_sigma</code></strong> :&ensp;<code><a title="float" href="../index.html">float</a></code></dt>
+<dd>learning rate for the gradient update of the uncertainty</dd>
+<dt><strong><code>scale_weights</code></strong> :&ensp;<code>bool</code></dt>
+<dd>if True, scale feature weights into the range [0,1]</dd>
+<dt><strong><code>model</code></strong> :&ensp;<code>str</code></dt>
+<dd>name of the base model to compute the likelihood (default is 'probit')</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FIRES(FeatureSelector):
+    &#34;&#34;&#34;
+    FIRES: Fast, Interpretable and Robust Evaluation and Selection of features
+
+    cite: Haug et al. 2020. Leveraging Model Inherent Variable Importance for Stable Online Feature Selection.
+    In Proceedings of the 26th ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD ’20),
+    August 23–27, 2020, Virtual Event, CA, USA.
+    &#34;&#34;&#34;
+    def __init__(self, n_total_features, n_selected_features, classes, evaluation_metrics=None, mu_init=0, sigma_init=1, penalty_s=0.01, penalty_r=0.01, epochs=1,
+                 lr_mu=0.01, lr_sigma=0.01, scale_weights=True, model=&#39;probit&#39;):
+        &#34;&#34;&#34;
+        Initializes the FIRES feature selector.
+
+        Args:
+            n_total_features (int): total number of features
+            n_selected_features (int): number of selected features
+            classes (np.ndarray): unique target values (class labels)
+            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
+            mu_init (int | np.ndarray): initial importance parameter
+            sigma_init (int | np.ndarray): initial uncertainty parameter
+            penalty_s (float): penalty factor for the uncertainty (corresponds to gamma_s in the paper)
+            penalty_r (float): penalty factor for the regularization (corresponds to gamma_r in the paper)
+            epochs (int): number of epochs that we use each batch of observations to update the parameters
+            lr_mu (float): learning rate for the gradient update of the importance
+            lr_sigma (float): learning rate for the gradient update of the uncertainty
+            scale_weights (bool): if True, scale feature weights into the range [0,1]
+            model (str): name of the base model to compute the likelihood (default is &#39;probit&#39;)
+        &#34;&#34;&#34;
+        super().__init__(n_total_features, n_selected_features, evaluation_metrics, supports_multi_class=False,
+                         supports_streaming_features=False)
+        self.n_total_ftr = n_total_features
+        self.classes = classes
+        self.mu = np.ones(n_total_features) * mu_init
+        self.sigma = np.ones(n_total_features) * sigma_init
+        self.penalty_s = penalty_s
+        self.penalty_r = penalty_r
+        self.epochs = epochs
+        self.lr_mu = lr_mu
+        self.lr_sigma = lr_sigma
+        self.scale_weights = scale_weights
+        self.model = model
+
+        # Additional model-specific parameters
+        self.model_param = {}
+
+        # Probit model
+        if self.model == &#39;probit&#39; and tuple(classes) != (-1, 1):
+            if len(np.unique(classes)) == 2:
+                self.model_param[&#39;probit&#39;] = True  # Indicates that we need to encode the target variable into {-1,1}
+                warn(&#39;FIRES WARNING: The target variable will be encoded as: {} = -1, {} = 1&#39;.format(
+                    self.classes[0], self.classes[1]))
+            else:
+                raise ValueError(&#39;The target variable y must be binary.&#39;)
+
+    def weight_features(self, X, y):
+        &#34;&#34;&#34;
+        Given a batch of observations and corresponding labels, computes feature weights.
+
+        Args:
+            X (np.ndarray): samples of current batch
+            y (np.ndarray): labels of current batch
+
+        Returns:
+            np.ndarray: feature weights
+        &#34;&#34;&#34;
+        # Update estimates of mu and sigma given the predictive model
+        if self.model == &#39;probit&#39;:
+            self.__probit(X, y)
+        # ### ADD YOUR OWN MODEL HERE ##################################################
+        # elif self.model == &#39;your_model&#39;:
+        #    self.__yourModel(x, y)
+        ################################################################################
+        else:
+            raise NotImplementedError(&#39;The given model name does not exist&#39;)
+
+        # Limit sigma to range [0, inf]
+        if sum(n &lt; 0 for n in self.sigma) &gt; 0:
+            self.sigma[self.sigma &lt; 0] = 0
+            warn(&#39;Sigma has automatically been rescaled to [0, inf], because it contained negative values.&#39;)
+
+        # Compute feature weights
+        self.raw_weight_vector = self.__compute_weights()
+
+    def __probit(self, X, y):
+        &#34;&#34;&#34;
+        Updates the distribution parameters mu and sigma by optimizing them in terms of the (log) likelihood.
+        Here we assume a Bernoulli distributed target variable. We use a Probit model as our base model.
+        This corresponds to the FIRES-GLM model in the paper.
+
+        Args:
+            X (np.ndarray): batch of observations (numeric values only, consider normalizing data for better results)
+            y (np.ndarray): batch of labels: type binary, i.e. {-1,1} (bool, int or str will be encoded accordingly)
+        &#34;&#34;&#34;
+
+        for epoch in range(self.epochs):
+            # Shuffle the observations
+            random_idx = np.random.permutation(len(y))
+            X = X[random_idx]
+            y = y[random_idx]
+
+            # Encode target as {-1,1}
+            if &#39;probit&#39; in self.model_param:
+                y[y == self.classes[0]] = -1
+                y[y == self.classes[1]] = 1
+
+            # Iterative update of mu and sigma
+            try:
+                # Helper functions
+                dot_mu_x = np.dot(X, self.mu)
+                rho = np.sqrt(1 + np.dot(X ** 2, self.sigma ** 2))
+
+                # Gradients
+                nabla_mu = norm.pdf(y / rho * dot_mu_x) * (y / rho * X.T)
+                nabla_sigma = norm.pdf(y / rho * dot_mu_x) * (
+                        - y / (2 * rho ** 3) * 2 * (X ** 2 * self.sigma).T * dot_mu_x)
+
+                # Marginal Likelihood
+                marginal = norm.cdf(y / rho * dot_mu_x)
+
+                # Update parameters
+                self.mu += self.lr_mu * np.mean(nabla_mu / marginal, axis=1)
+                self.sigma += self.lr_sigma * np.mean(nabla_sigma / marginal, axis=1)
+            except TypeError as e:
+                raise TypeError(&#39;All features must be a numeric data type.&#39;) from e
+
+    def __compute_weights(self):
+        &#34;&#34;&#34;
+        Computes optimal weights according to the objective function proposed in the paper.
+        We compute feature weights in a trade-off between feature importance and uncertainty.
+        Thereby, we aim to maximize both the discriminative power and the stability/robustness of feature weights.
+
+        Returns:
+            np.ndarray: feature weights
+        &#34;&#34;&#34;
+        # Compute optimal weights
+        weights = (self.mu ** 2 - self.penalty_s * self.sigma ** 2) / (2 * self.penalty_r)
+
+        if self.scale_weights:  # Scale weights to [0,1]
+            weights = MinMaxScaler().fit_transform(weights.reshape(-1, 1)).flatten()
+
+        return weights</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="float.feature_selection.feature_selector.FeatureSelector" href="feature_selector.html#float.feature_selection.feature_selector.FeatureSelector">FeatureSelector</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="float.feature_selection.fires.FIRES.weight_features"><code class="name flex">
+<span>def <span class="ident">weight_features</span></span>(<span>self, X, y)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Given a batch of observations and corresponding labels, computes feature weights.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>X</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>samples of current batch</dd>
+<dt><strong><code>y</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>labels of current batch</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>np.ndarray</code></dt>
+<dd>feature weights</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def weight_features(self, X, y):
+    &#34;&#34;&#34;
+    Given a batch of observations and corresponding labels, computes feature weights.
+
+    Args:
+        X (np.ndarray): samples of current batch
+        y (np.ndarray): labels of current batch
+
+    Returns:
+        np.ndarray: feature weights
+    &#34;&#34;&#34;
+    # Update estimates of mu and sigma given the predictive model
+    if self.model == &#39;probit&#39;:
+        self.__probit(X, y)
+    # ### ADD YOUR OWN MODEL HERE ##################################################
+    # elif self.model == &#39;your_model&#39;:
+    #    self.__yourModel(x, y)
+    ################################################################################
+    else:
+        raise NotImplementedError(&#39;The given model name does not exist&#39;)
+
+    # Limit sigma to range [0, inf]
+    if sum(n &lt; 0 for n in self.sigma) &gt; 0:
+        self.sigma[self.sigma &lt; 0] = 0
+        warn(&#39;Sigma has automatically been rescaled to [0, inf], because it contained negative values.&#39;)
+
+    # Compute feature weights
+    self.raw_weight_vector = self.__compute_weights()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="float.feature_selection.feature_selector.FeatureSelector" href="feature_selector.html#float.feature_selection.feature_selector.FeatureSelector">FeatureSelector</a></b></code>:
+<ul class="hlist">
+<li><code><a title="float.feature_selection.feature_selector.FeatureSelector.evaluate" href="feature_selector.html#float.feature_selection.feature_selector.FeatureSelector.evaluate">evaluate</a></code></li>
+<li><code><a title="float.feature_selection.feature_selector.FeatureSelector.get_nogueira_stability" href="feature_selector.html#float.feature_selection.feature_selector.FeatureSelector.get_nogueira_stability">get_nogueira_stability</a></code></li>
+<li><code><a title="float.feature_selection.feature_selector.FeatureSelector.select_features" href="feature_selector.html#float.feature_selection.feature_selector.FeatureSelector.select_features">select_features</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="float.feature_selection" href="index.html">float.feature_selection</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="float.feature_selection.fires.FIRES" href="#float.feature_selection.fires.FIRES">FIRES</a></code></h4>
+<ul class="">
+<li><code><a title="float.feature_selection.fires.FIRES.weight_features" href="#float.feature_selection.fires.FIRES.weight_features">weight_features</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>
