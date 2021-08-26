@@ -50,14 +50,14 @@ class Pipeline(metaclass=ABCMeta):
         self.n_global_samples = 0
 
         try:
-            self._check_input()
+            self.__check_input()
         except AttributeError:
             traceback.print_exc(limit=1)
             return
 
         self.run()
 
-    def _check_input(self):
+    def __check_input(self):
         """
         Checks if the provided parameter values are sufficient to run a pipeline.
 
@@ -111,7 +111,7 @@ class Pipeline(metaclass=ABCMeta):
             self.predictor.partial_fit(X=X, y=y)
             self.n_global_samples += self.n_pretrain_samples
 
-    def get_n_samples(self):
+    def _get_n_samples(self):
         if self.n_global_samples + self.batch_size <= self.max_n_samples:
             n_samples = self.batch_size
         else:

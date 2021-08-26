@@ -40,17 +40,17 @@ class PrequentialPipeline(Pipeline):
                           stacklevel=2)
 
         self._start_evaluation()
-        self._test_then_train()
+        self.__test_then_train()
         self._finish_evaluation()
 
-    def _test_then_train(self):
+    def __test_then_train(self):
         """
         Test-then-train evaluation.
         """
         while self.n_global_samples < self.max_n_samples:
             last_iteration = False
 
-            n_samples = self.get_n_samples()
+            n_samples = self._get_n_samples()
 
             if self.n_global_samples + n_samples >= self.max_n_samples:
                 last_iteration = True

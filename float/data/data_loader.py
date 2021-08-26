@@ -23,7 +23,7 @@ class DataLoader:
         self.stream = stream
         self.target_col = target_col
         self.file_path = file_path
-        self._check_input()
+        self.__check_input()
         self.stream = stream if stream else FileStream(self.file_path, self.target_col)
 
     def get_data(self, n_samples):
@@ -39,7 +39,7 @@ class DataLoader:
         """
         return self.stream.next_sample(n_samples)
 
-    def _check_input(self):
+    def __check_input(self):
         """
         Evaluates the input data to check if it is in a valid format, i.e. if either a Stream object or a valid .csv
         file is provided. May be extended by further checks.

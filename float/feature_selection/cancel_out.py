@@ -19,10 +19,10 @@ class CancelOutFeatureSelector(FeatureSelector):
                          supports_streaming_features=False)
 
     def weight_features(self, X, y):
-        self.raw_weight_vector = self.train_ann(X, y, 50, 128)
+        self.raw_weight_vector = self.__train_ann(X, y, 50, 128)
 
     @staticmethod
-    def train_ann(X, y, num_epochs, batch_size):
+    def __train_ann(X, y, num_epochs, batch_size):
         model = NeuralNet(X.shape[1], X.shape[1] + 10, 2)
         data_loader = DataLoader(X, y)
         batch_size = batch_size
