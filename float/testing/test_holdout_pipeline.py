@@ -1,13 +1,14 @@
 import unittest
 from float.data.data_loader import DataLoader
-from float.pipeline.prequential_pipeline import PrequentialPipeline
+from float.pipeline.holdout_pipeline import HoldoutPipeline
 
 
-class TestPrequentialPipeline(unittest.TestCase):
+class TestHoldoutPipeline(unittest.TestCase):
     def __init__(self, method_name):
         super().__init__(method_name)
         data_loader = DataLoader(file_path='../data/datasets/spambase.csv', target_col=0)
-        self.prequential_pipeline = PrequentialPipeline(data_loader)
+        test_set = ()
+        self.holdout_pipeline = HoldoutPipeline(data_loader, test_set, 10)
 
     def test_init(self):
         pass
@@ -15,7 +16,7 @@ class TestPrequentialPipeline(unittest.TestCase):
     def test_run(self):
         pass
 
-    def test_test_then_train(self):
+    def test_holdout(self):
         pass
 
     def test_check_input(self):

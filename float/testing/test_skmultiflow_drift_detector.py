@@ -61,3 +61,21 @@ class TestSkmultiflowDriftDetector(unittest.TestCase):
                          "partial_fit() increases sample_count by 1")
         self.assertNotEqual(self.skmultiflow_drift_detector.detector.miss_prob, miss_prob,
                             "partial_fit() updates miss_prob")
+
+    def test_evaluate(self):
+        pass
+
+    def test_get_average_delay(self):
+        pass
+
+    def test_get_tpr_fdr_and_precision(self):
+        pass
+
+    def test_get_tpr(self):
+        pass
+
+    def test_get_fdr(self):
+        pass
+
+    def test_get_precision(self):
+        pass

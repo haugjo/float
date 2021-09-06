@@ -43,11 +43,8 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
         {'n_total_features': data_loader.stream.n_features, 'nogueira_window_size': 10})}
 
     feature_selectors = [
-        feature_selection.ofs.OFS(evaluation_metrics=fs_metrics,
-                                  n_total_features=data_loader.stream.n_features, n_selected_features=10),
-        feature_selection.fires.FIRES(evaluation_metrics=fs_metrics,
-                                      n_total_features=data_loader.stream.n_features,
-                                      n_selected_features=10, classes=data_loader.stream.target_values)]
+        feature_selection.ofs.OFS(n_total_features=data_loader.stream.n_features, n_selected_features=10, evaluation_metrics=fs_metrics),
+        feature_selection.fires.FIRES(n_total_features=data_loader.stream.n_features, n_selected_features=10, classes=data_loader.stream.target_values, evaluation_metrics=fs_metrics)]
 
     cdd_metrics = {
         'Delay': (

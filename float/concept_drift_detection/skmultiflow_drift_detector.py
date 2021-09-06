@@ -12,7 +12,7 @@ class SkmultiflowDriftDetector(ConceptDriftDetector):
     """
     def __init__(self, detector, evaluation_metrics=None):
         """
-        Receives a skmultiflow BaseDriftDetector object.
+        Initializes the skmultiflow drift detector.
 
         Args:
             detector (BaseDriftDetector): the concept drift detector

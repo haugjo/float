@@ -23,8 +23,8 @@ class CancelOutFeatureSelector(FeatureSelector):
 
     @staticmethod
     def __train_ann(X, y, num_epochs, batch_size):
-        model = NeuralNet(X.shape[1], X.shape[1] + 10, 2)
-        data_loader = DataLoader(X, y)
+        model = CancelOutNeuralNet(X.shape[1], X.shape[1] + 10, 2)
+        data_loader = CancelOutDataLoader(X, y)
         batch_size = batch_size
         train_loader = torch.utils.data.DataLoader(dataset=data_loader,
                                                    batch_size=batch_size,
@@ -55,12 +55,12 @@ class CancelOutFeatureSelector(FeatureSelector):
             list(model.cancelout.parameters())[0].detach().numpy())
 
 
-class NeuralNet(nn.Module):
+class CancelOutNeuralNet(nn.Module):
     """
     A simple DL model.
     """
     def __init__(self, input_size, hidden_size, num_classes):
-        super(NeuralNet, self).__init__()
+        super(CancelOutNeuralNet, self).__init__()
         self.cancelout = CancelOut(input_size)
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.relu = nn.ReLU()
@@ -77,7 +77,7 @@ class NeuralNet(nn.Module):
         return x
 
 
-class DataLoader(Dataset):
+class CancelOutDataLoader(Dataset):
     """
     A dataset loader.
     """

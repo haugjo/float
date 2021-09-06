@@ -17,6 +17,7 @@ class ERICS(ConceptDriftDetector):
     def __init__(self, n_param, evaluation_metrics=None, window_mvg_average=50, window_drift_detect=50, beta=0.0001, base_model='probit',
                  init_mu=0, init_sigma=1, epochs=10, lr_mu=0.01, lr_sigma=0.01):
         """
+        Initializes the ERICS concept drift detector.
 
         Args:
             n_param (int): total no. of parameters (corresponds to no. of features for probit model)
