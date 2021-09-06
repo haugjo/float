@@ -12,7 +12,7 @@ class HoldoutPipeline(Pipeline):
     Pipeline which implements the holdout evaluation.
     """
     def __init__(self, data_loader, test_set, evaluation_interval, feature_selector=None, concept_drift_detector=None, predictor=None,
-                 max_n_samples=100000, batch_size=100, n_pretrain_samples=100, known_drifts=None):
+                 max_n_samples=100000, batch_size=100, n_pretrain_samples=100, known_drifts=None, run=False):
         """
         Initializes the pipeline.
 
@@ -27,11 +27,12 @@ class HoldoutPipeline(Pipeline):
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
             known_drifts (list): list of known concept drifts for this stream
+            run (bool): True if the run method should be executed on initialization, False otherwise
         """
         self.test_set = test_set
 
         super().__init__(data_loader, feature_selector, concept_drift_detector, predictor, max_n_samples,
-                         batch_size, n_pretrain_samples, known_drifts, evaluation_interval)
+                         batch_size, n_pretrain_samples, known_drifts, run, evaluation_interval)
 
     def run(self):
         """

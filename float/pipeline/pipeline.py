@@ -17,7 +17,7 @@ class Pipeline(metaclass=ABCMeta):
     """
 
     def __init__(self, data_loader, feature_selector, concept_drift_detector, predictor, max_n_samples,
-                 batch_size, n_pretrain_samples, known_drifts, evaluation_interval=None):
+                 batch_size, n_pretrain_samples, known_drifts, run, evaluation_interval=None):
         """
         Initializes the pipeline.
 
@@ -30,6 +30,7 @@ class Pipeline(metaclass=ABCMeta):
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
             known_drifts (list): list of known concept drifts for this stream
+            run (bool): True if the run method should be executed on initialization, False otherwise
             evaluation_interval (int): the interval at which the predictor should be evaluated using the test set
         """
         self.data_loader = data_loader
@@ -55,7 +56,8 @@ class Pipeline(metaclass=ABCMeta):
             traceback.print_exc(limit=1)
             return
 
-        self.run()
+        if run:
+            self.run()
 
     def __check_input(self):
         """
@@ -135,7 +137,7 @@ class Pipeline(metaclass=ABCMeta):
             self.feature_selector.weight_features(copy.copy(X_train), copy.copy(y_train))
             self.feature_selector.comp_times.append(time.time() - start_time)
 
-            X = self.feature_selector.select_features(X_train, self.time_step)
+            X_train = self.feature_selector.select_features(X_train, self.time_step)
 
             self.feature_selector.evaluate(self.time_step)
 

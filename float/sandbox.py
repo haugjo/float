@@ -98,7 +98,7 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
             holdout_pipeline = pipeline.holdout_pipeline.HoldoutPipeline(data_loader, data_loader.get_data(test_size), 10, feature_selector,
                                                                          concept_drift_detector, predictor, batch_size=batch_size,
                                                                          max_n_samples=data_loader.stream.n_samples - test_size,
-                                                                         known_drifts=known_drifts)
+                                                                         known_drifts=known_drifts, run=True)
 
         visualizer = visualization.visualizer.Visualizer(
             [predictor.evaluation['Accuracy'], predictor.evaluation['Precision'], predictor.evaluation['F1 Score'], predictor.evaluation['Recall']],
