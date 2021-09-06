@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
 import warnings
-from typing import Union
 from scipy.signal import savgol_filter
 from skmultiflow.data.data_stream import Stream
 
@@ -78,6 +77,7 @@ class Visualizer:
             warnings.warn('The number of measures cannot be plotted in such a layout.')
             return
 
+        # noinspection PyTypeChecker
         fig, axes = plt.subplots(layout[0], layout[1], figsize=fig_size, sharex=share_x, sharey=share_y)
         for i in range(layout[0]):
             for j in range(layout[1]):
@@ -141,6 +141,7 @@ class Visualizer:
             warnings.warn('The number of measures cannot be plotted in such a layout.')
             return
 
+        # noinspection PyTypeChecker
         fig, axes = plt.subplots(layout[0], layout[1], figsize=fig_size, sharex=share_x, sharey=share_y)
         for i in range(layout[0]):
             for j in range(layout[1]):
@@ -183,6 +184,7 @@ class Visualizer:
             warnings.warn('The number of measures cannot be plotted in such a layout.')
             return
 
+        # noinspection PyTypeChecker
         fig, axes = plt.subplots(layout[0], layout[1], figsize=fig_size, sharex=share_x, sharey=share_y)
         for i in range(layout[0]):
             for j in range(layout[1]):

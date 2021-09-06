@@ -1,6 +1,5 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
-from sklearn.metrics import accuracy_score, zero_one_loss
 
 
 class Predictor(metaclass=ABCMeta):
