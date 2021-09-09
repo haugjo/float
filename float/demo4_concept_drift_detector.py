@@ -1,6 +1,9 @@
+from skmultiflow.drift_detection.adwin import ADWIN
+from skmultiflow.drift_detection.eddm import EDDM
+from skmultiflow.drift_detection.ddm import DDM
 from skmultiflow.neural_networks.perceptron import PerceptronMask
 import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, zero_one_loss
+from sklearn.metrics import accuracy_score, zero_one_loss
 from float import *
 
 ### Initialize Data Loader ###
@@ -11,46 +14,37 @@ known_drifts = [round(data_loader.stream.n_samples * 0.2), round(data_loader.str
 batch_size = 10
 feature_names = data_loader.stream.feature_names
 
-### Initialize Feature Selectors ###
-fs_metrics = {'Nogueira Stability Measure': (
-    feature_selection.feature_selector.FeatureSelector.get_nogueira_stability,
-    {'n_total_features': data_loader.stream.n_features, 'nogueira_window_size': 10})}
-
-feature_selector_names = ['OFS', 'FIRES']
-feature_selectors = [
-    feature_selection.ofs.OFS(n_total_features=data_loader.stream.n_features, n_selected_features=10, evaluation_metrics=fs_metrics),
-    feature_selection.fires.FIRES(n_total_features=data_loader.stream.n_features, n_selected_features=10, classes=data_loader.stream.target_values, evaluation_metrics=fs_metrics)]
-
 ### Initialize Concept Drift Detector ###
 cdd_metrics = {
-    'Delay': (
-        concept_drift_detection.concept_drift_detector.ConceptDriftDetector.get_average_delay,
-        {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_n_samples': data_loader.stream.n_samples})
-}
-concept_drift_detector = concept_drift_detection.erics.ERICS(data_loader.stream.n_features, evaluation_metrics=cdd_metrics)
+        'Delay': (
+            concept_drift_detection.concept_drift_detector.ConceptDriftDetector.get_average_delay,
+            {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_n_samples': data_loader.stream.n_samples}),
+        'TPR': (
+            concept_drift_detection.concept_drift_detector.ConceptDriftDetector.get_tpr,
+            {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_delay_range': 100}),
+        'FDR': (
+            concept_drift_detection.concept_drift_detector.ConceptDriftDetector.get_fdr,
+            {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_delay_range': 100}),
+        'Precision': (
+            concept_drift_detection.concept_drift_detector.ConceptDriftDetector.get_precision,
+            {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_delay_range': 100})
+    }
+
+concept_drift_detector_names = ['ADWIN', 'EDDM', 'DDM', 'ERICS']
+concept_drift_detectors = [concept_drift_detection.SkmultiflowDriftDetector(ADWIN(delta=0.6), evaluation_metrics=cdd_metrics),
+                           concept_drift_detection.SkmultiflowDriftDetector(EDDM(), evaluation_metrics=cdd_metrics),
+                           concept_drift_detection.SkmultiflowDriftDetector(DDM(), evaluation_metrics=cdd_metrics),
+                           concept_drift_detection.erics.ERICS(data_loader.stream.n_features, evaluation_metrics=cdd_metrics)]
 
 ### Initialize Predictor ###
 predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
                                                                     data_loader.stream.target_values,
                                                                     evaluation_metrics={'Accuracy': accuracy_score,
-                                                                                        'Precision': (precision_score, {
-                                                                                            'labels': data_loader.stream.target_values,
-                                                                                            'average': 'weighted',
-                                                                                            'zero_division': 0}),
-                                                                                        'Recall': (recall_score, {
-                                                                                            'labels': data_loader.stream.target_values,
-                                                                                            'average': 'weighted',
-                                                                                            'zero_division': 0}),
-                                                                                        'F1 Score': (f1_score, {
-                                                                                            'labels': data_loader.stream.target_values,
-                                                                                            'average': 'weighted',
-                                                                                            'zero_division': 0}),
                                                                                         '0-1 Loss': zero_one_loss},
                                                                     decay_rate=0.5, window_size=5)
-
-for feature_selector_name, feature_selector in zip(feature_selector_names, feature_selectors):
+for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names, concept_drift_detectors):
     ### Initialize and run Prequential Pipeline ###
-    prequential_pipeline = pipeline.prequential_pipeline.PrequentialPipeline(data_loader, feature_selector,
+    prequential_pipeline = pipeline.prequential_pipeline.PrequentialPipeline(data_loader, None,
                                                                              concept_drift_detector,
                                                                              predictor,
                                                                              batch_size=batch_size,
@@ -58,31 +52,18 @@ for feature_selector_name, feature_selector in zip(feature_selector_names, featu
                                                                              known_drifts=known_drifts)
     prequential_pipeline.run()
 
-    ### Predictor plots ###
-    visualizer = visualization.visualizer.Visualizer(
-        [predictor.evaluation['Accuracy'], predictor.evaluation['Precision'], predictor.evaluation['F1 Score'], predictor.evaluation['Recall']],
-        ['Accuracy', 'Precision', 'F1', 'Recall'],
-        'prediction')
-    visualizer.plot(plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector {feature_selector_name}', smooth_curve=True)
-    plt.show()
-
-    visualizer = visualization.visualizer.Visualizer(
-        [predictor.evaluation_decay['Accuracy'], predictor.evaluation_window['Accuracy'], predictor.evaluation['Accuracy']],
-        ['Accuracy Decay', 'Accuracy Window', 'Accuracy'],
-        'prediction')
-    visualizer.plot(
-        plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector {feature_selector_name}',
-        smooth_curve=True)
-plt.show()
-
-### Feature Selector plots ###
 visualizer = visualization.visualizer.Visualizer(
-    [feature_selectors[0].selection, feature_selectors[1].selection], feature_selector_names, 'feature_selection')
-visualizer.draw_top_features_with_reference(feature_names,
-                                            f'Most Selected Features For Data Set spambase, Predictor Perceptron',
-                                            fig_size=(15, 5))
+    [concept_drift_detector.global_drifts for concept_drift_detector in concept_drift_detectors],
+    concept_drift_detector_names, 'drift_detection')
+visualizer.draw_concept_drifts(data_loader.stream, known_drifts, batch_size,
+                               plot_title=f'Concept Drifts For Data Set spambase, Predictor Perceptron, Feature Selector FIRES')
 plt.show()
-visualizer.draw_selected_features((2, 1),
-                                  f'Selected Features At Each Time Step For Data Set spambase, Predictor Perceptron',
-                                  fig_size=(10, 8))
+
+visualizer = visualization.visualizer.Visualizer(
+    [concept_drift_detector.evaluation['TPR'] for concept_drift_detector in
+     concept_drift_detectors],
+    concept_drift_detector_names, 'concept_drift_detection'
+)
+visualizer.plot(
+    plot_title=f'Concept Drift True Positive Rate For Data Set spambase, Predictor Perceptron, Feature Selector FIRES')
 plt.show()

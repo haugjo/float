@@ -1,9 +1,9 @@
 from skmultiflow.neural_networks.perceptron import PerceptronMask
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, zero_one_loss
+from sklearn.metrics import accuracy_score, zero_one_loss
 from float import *
 
 ### Initialize Data Loader ###
-data_loader = data.DataLoader(None, f'data/datasets/adult_conceptdrift.csv', target_col=0)
+data_loader = data.DataLoader(None, f'data/datasets/spambase.csv', target_col=0)
 
 known_drifts = [round(data_loader.stream.n_samples * 0.2), round(data_loader.stream.n_samples * 0.4),
                 round(data_loader.stream.n_samples * 0.6), round(data_loader.stream.n_samples * 0.8)]
@@ -34,7 +34,7 @@ predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMa
                                                                                         '0-1 Loss': zero_one_loss},
                                                                     decay_rate=0.5, window_size=5)
 
-### Initialize and run Prequential Pipeline ###
+### Initialize and run Holdout Pipeline ###
 test_size = 50
 holdout_pipeline = pipeline.holdout_pipeline.HoldoutPipeline(data_loader, data_loader.get_data(test_size), 10, feature_selector,
                                                              concept_drift_detector, predictor, batch_size=batch_size,

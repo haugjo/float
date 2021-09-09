@@ -11,20 +11,6 @@ known_drifts = [round(data_loader.stream.n_samples * 0.2), round(data_loader.str
 batch_size = 10
 feature_names = data_loader.stream.feature_names
 
-fs_metrics = {'Nogueira Stability Measure': (
-    feature_selection.feature_selector.FeatureSelector.get_nogueira_stability,
-    {'n_total_features': data_loader.stream.n_features, 'nogueira_window_size': 10})}
-
-feature_selector = feature_selection.fires.FIRES(n_total_features=data_loader.stream.n_features, n_selected_features=10, classes=data_loader.stream.target_values, evaluation_metrics=fs_metrics)
-
-### Initialize Concept Drift Detector ###
-cdd_metrics = {
-    'Delay': (
-        concept_drift_detection.concept_drift_detector.ConceptDriftDetector.get_average_delay,
-        {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_n_samples': data_loader.stream.n_samples})
-}
-concept_drift_detector = concept_drift_detection.erics.ERICS(data_loader.stream.n_features, evaluation_metrics=cdd_metrics)
-
 ### Initialize Predictor ###
 predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
                                                                     data_loader.stream.target_values,
@@ -45,8 +31,8 @@ predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMa
                                                                     decay_rate=0.5, window_size=5)
 
 ### Initialize and run Prequential Pipeline ###
-prequential_pipeline = pipeline.prequential_pipeline.PrequentialPipeline(data_loader, feature_selector,
-                                                                         concept_drift_detector,
+prequential_pipeline = pipeline.prequential_pipeline.PrequentialPipeline(data_loader, None,
+                                                                         None,
                                                                          predictor,
                                                                          batch_size=batch_size,
                                                                          max_n_samples=data_loader.stream.n_samples,
