@@ -72,8 +72,9 @@ class Pipeline(metaclass=ABCMeta):
                 not issubclass(type(self.concept_drift_detector), ConceptDriftDetector) and \
                 not issubclass(type(self.predictor), Predictor):
             raise AttributeError('No valid FeatureSelector, ConceptDriftDetector or Predictor object was provided.')
-        if self.concept_drift_detector.prediction_based and not issubclass(type(self.predictor), Predictor):
-            raise AttributeError('A prediction based Concept Drift Detector cannot be used without a valid Predictor object.')
+        if self.concept_drift_detector:
+            if self.concept_drift_detector.prediction_based and not issubclass(type(self.predictor), Predictor):
+                raise AttributeError('A prediction based Concept Drift Detector cannot be used without a valid Predictor object.')
 
     def _start_evaluation(self):
         """
