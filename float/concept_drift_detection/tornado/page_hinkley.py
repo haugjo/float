@@ -25,7 +25,7 @@ class PageHinkley(ConceptDriftDetector):
         prediction_based (bool):
     """
     def __init__(self, evaluation_metrics=None, min_instance=30, delta=0.005, lambda_=50, alpha=1 - 0.0001):
-        """ Initialize the Page Hinkley concept drift detector
+        """ Initialize the concept drift detector
 
         Todo: add remaining param descriptions
         Args:
@@ -36,15 +36,16 @@ class PageHinkley(ConceptDriftDetector):
             alpha (float):
         """
         super().__init__(evaluation_metrics)
+        self.prediction_based = True  # Todo: this parameter should be part of the super class
+        self.active_change = False
 
-        self.MIN_NUMBER_INSTANCE = min_instance
+        self.MINIMUM_NUM_INSTANCES = min_instance
         self.m_n = 1
         self.x_mean = 0.0
         self.sum = 0.0
         self.delta = delta
         self.lambda_ = lambda_
         self.alpha = alpha
-        self.prediction_based = True  # Todo: this parameter should be part of the super class
 
     def reset(self):
         """ Resets the concept drift detector parameters.
@@ -54,16 +55,24 @@ class PageHinkley(ConceptDriftDetector):
         self.sum = 0.0
 
     def partial_fit(self, pr):
-        """ Update the Page Hinkley test
+        """ Update the concept drift detector
 
         Args:
             pr (bool): indicator of correct prediction (i.e. pr=True) and incorrect prediction (i.e. pr=False)
         """
         pr = 1 if pr is False else 0
 
+        self.active_change = False
+
+        # 1. UPDATING STATS
         self.x_mean = self.x_mean + (pr - self.x_mean) / self.m_n
         self.sum = self.alpha * self.sum + (pr - self.x_mean - self.delta)
         self.m_n += 1
+
+        # 2. UPDATING WARNING AND DRIFT STATUSES
+        if self.m_n >= self.MINIMUM_NUM_INSTANCES:
+            if self.sum > self.lambda_:
+                self.active_change = True
 
     def detected_global_change(self):
         """ Checks whether global concept drift was detected or not.
@@ -71,11 +80,7 @@ class PageHinkley(ConceptDriftDetector):
         Returns:
             bool: whether global concept drift was detected or not.
         """
-        if self.m_n >= self.MIN_NUMBER_INSTANCE:
-            if self.sum > self.lambda_:
-                return True
-            else:
-                return False
+        return self.active_change
 
     def detected_partial_change(self):
         pass

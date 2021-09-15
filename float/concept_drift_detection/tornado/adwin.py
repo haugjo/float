@@ -22,27 +22,26 @@ class Adwin(ConceptDriftDetector):
         active_change (bool): indicates whether there is a change ongoing
     """
     def __init__(self, evaluation_metrics=None, delta=0.002):
-        """ Initialize the Adwin concept drift detector
+        """ Initialize the concept drift detector
 
         Todo: add remaining param descriptions
         Args:
             delta (float):
         """
         super().__init__(evaluation_metrics)
+        self.prediction_based = True  # Todo: this parameter should be part of the super class
+        self.active_change = False
 
         self.delta = delta
         self.adaptive_windowing = _AdaptiveWindowing(self.delta)
-        self.prediction_based = True  # Todo: this parameter should be part of the super class
-        self.active_change = False
 
     def reset(self):
         """ Resets the concept drift detector parameters.
         """
-        super().reset()
         self.adaptive_windowing = _AdaptiveWindowing(self.delta)
 
     def partial_fit(self, pr):
-        """ Update the Page Hinkley test
+        """ Update the drift detector
 
         Args:
             pr (bool): indicator of correct prediction (i.e. pr=True) and incorrect prediction (i.e. pr=False)
