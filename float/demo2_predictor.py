@@ -41,7 +41,8 @@ prequential_pipeline.run()
 
 ### Predictor plots ###
 visualizer = visualization.visualizer.Visualizer(
-    [predictor.evaluation['Accuracy'], predictor.evaluation['Precision'], predictor.evaluation['F1 Score'], predictor.evaluation['Recall']],
+    [predictor.evaluation['Accuracy'], predictor.evaluation['Precision'],
+     predictor.evaluation['F1 Score'], predictor.evaluation['Recall']],
     ['Accuracy', 'Precision', 'F1', 'Recall'],
     'prediction')
 visualizer.plot(plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES', smooth_curve=False)

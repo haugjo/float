@@ -18,8 +18,10 @@ fs_metrics = {'Nogueira Stability Measure': (
 
 feature_selector_names = ['FIRES', 'OFS']
 feature_selectors = [
-    feature_selection.fires.FIRES(n_total_features=data_loader.stream.n_features, n_selected_features=10, classes=data_loader.stream.target_values, evaluation_metrics=fs_metrics),
-    feature_selection.ofs.OFS(n_total_features=data_loader.stream.n_features, n_selected_features=10, evaluation_metrics=fs_metrics)]
+    feature_selection.fires.FIRES(n_total_features=data_loader.stream.n_features, n_selected_features=10,
+                                  classes=data_loader.stream.target_values, evaluation_metrics=fs_metrics),
+    feature_selection.ofs.OFS(n_total_features=data_loader.stream.n_features, n_selected_features=10,
+                              evaluation_metrics=fs_metrics)]
 
 ### Initialize Predictor ###
 predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
