@@ -2,10 +2,10 @@ import numpy as np
 from scipy.stats import norm
 from warnings import warn
 import copy
-from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
+from float.change_detection.base_change_detector import BaseChangeDetector
 
 
-class ERICS(ConceptDriftDetector):
+class ERICS(BaseChangeDetector):
     """
     ERICS: Effective and Robust Identification of Concept Shift
     please cite:
@@ -14,8 +14,8 @@ class ERICS(ConceptDriftDetector):
     [2] Haug, Johannes, et al. "Leveraging Model Inherent Variable Importance for Stable Online Feature Selection".
     Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2020.
     """
-    def __init__(self, n_param, evaluation_metrics=None, window_mvg_average=50, window_drift_detect=50, beta=0.0001, base_model='probit',
-                 init_mu=0, init_sigma=1, epochs=10, lr_mu=0.01, lr_sigma=0.01):
+    def __init__(self, n_param, evaluation_metrics=None, window_mvg_average=50, window_drift_detect=50, beta=0.0001,
+                 base_model='probit', init_mu=0, init_sigma=1, epochs=10, lr_mu=0.01, lr_sigma=0.01):
         """
         Initializes the ERICS concept drift detector.
 
@@ -32,7 +32,7 @@ class ERICS(ConceptDriftDetector):
             lr_mu (float): learning rate for the gradient update of the mean (according to [2])
             lr_sigma (float): learning rate for the gradient update of the variance (according to [2])
         """
-        super().__init__(evaluation_metrics)
+        super().__init__(evaluation_metrics, error_based=False)
         # User-set ERICS-hyperparameters
         self.n_param = n_param
         self.M = window_mvg_average
@@ -67,13 +67,6 @@ class ERICS(ConceptDriftDetector):
 
         self.partial_drifts = []
 
-        self.prediction_based = False
-
-        # ### ADD YOUR OWN MODEL PARAMETERS HERE ############################
-        # if self.base_model == 'your_model':
-        #   # define parameters
-        #####################################################################
-
     def reset(self):
         pass
 
@@ -105,10 +98,6 @@ class ERICS(ConceptDriftDetector):
         # Update Parameter distribution
         if self.base_model == 'probit':
             self.__update_probit(X, y)  # Probit model
-        # ### ADD YOUR OWN MODEL HERE #######################################
-        # elif(self.base_model == 'your_model':
-        #   self.__update_your_model(x,y)
-        #####################################################################
         else:
             raise NotImplementedError('The base model {} has not been implemented.'.format(self.base_model))
 
@@ -119,6 +108,35 @@ class ERICS(ConceptDriftDetector):
         # Update time step
         self.time_step += 1
 
+    def detected_global_change(self):
+        return self.global_drift_detected
+
+    def detected_partial_change(self):
+        return self.partial_drift_detected
+
+    def detected_warning_zone(self):
+        pass
+
+    def get_length_estimation(self):
+        pass
+
+    def evaluate(self, time_step, last_iteration):
+        """
+        Evaluates the concept drift detector at one time step.
+
+        Args:
+            time_step (int): the current time step
+            last_iteration (bool): True if this is the last iteration of the pipeline, False otherwise
+        """
+        super().evaluate(time_step, last_iteration)
+
+        if self.detected_partial_change():
+            if time_step not in self.partial_drifts:
+                self.partial_drifts.append(time_step)
+
+    # ----------------------------------------
+    # ERICS Functionality (left unchanged)
+    # ----------------------------------------
     def __update_param_sum(self):
         """
         Retrieve current parameter distribution and compute sum expression according to Eq. (8) in the ERICS paper [1]
@@ -127,11 +145,6 @@ class ERICS(ConceptDriftDetector):
         if self.base_model == 'probit':
             new_mu = copy.copy(self.fires_mu).reshape(1, -1)
             new_sigma = copy.copy(self.fires_sigma).reshape(1, -1)
-        # ### ADD YOUR OWN MODEL HERE #######################################
-        # elif(self.base_model == 'your_model':
-        #   new_mu = your_model.mu
-        #   new_sigma = your_model.sigma
-        #####################################################################
         else:
             raise NotImplementedError('The base model {} has not been implemented.'.format(self.base_model))
 
@@ -219,9 +232,9 @@ class ERICS(ConceptDriftDetector):
 
         return g_drift, p_drift
 
-    ###########################################
+    # ----------------------------------------
     # BASE MODELS
-    ##########################################
+    # ----------------------------------------
     def __update_probit(self, x, y):
         """
         Update parameters of the Probit model
@@ -273,34 +286,3 @@ class ERICS(ConceptDriftDetector):
                 self.fires_sigma += self.fires_lr_sigma * np.mean(nabla_sigma / marginal, axis=1)
             except TypeError as e:
                 raise TypeError('All features must be a numeric data type.') from e
-
-    def detected_global_change(self):
-        return self.global_drift_detected
-
-    def detected_partial_change(self):
-        return self.partial_drift_detected
-
-    def detected_warning_zone(self):
-        pass
-
-    def get_length_estimation(self):
-        pass
-
-    # ### ADD YOUR OWN MODEL HERE #######################################
-    # def __update_your_model(x,y):
-    #   # update the parameters of your model
-    #####################################################################
-
-    def evaluate(self, time_step, last_iteration):
-        """
-        Evaluates the concept drift detector at one time step.
-
-        Args:
-            time_step (int): the current time step
-            last_iteration (bool): True if this is the last iteration of the pipeline, False otherwise
-        """
-        super().evaluate(time_step, last_iteration)
-
-        if self.detected_partial_change():
-            if time_step not in self.partial_drifts:
-                self.partial_drifts.append(time_step)

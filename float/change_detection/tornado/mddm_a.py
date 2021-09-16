@@ -1,9 +1,9 @@
-from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
+from float.change_detection.base_change_detector import BaseChangeDetector
 import math
 
 
-class MDDME(ConceptDriftDetector):
-    """ McDiarmid Drift Detection Method - Euler Scheme (MDDME)
+class MDDMA(BaseChangeDetector):
+    """ McDiarmid Drift Detection Method - Arithmetic Scheme (MDDMA)
 
     Code adopted from https://github.com/alipsgh/tornado, please cite:
     The Tornado Framework
@@ -18,23 +18,22 @@ class MDDME(ConceptDriftDetector):
     Attributes:  # Todo: add attribute descriptions
         min_instance (int):
     """
-    def __init__(self, evaluation_metrics=None, n=100, lambda_=0.01, delta=0.000001):
+    def __init__(self, evaluation_metrics=None, n=100, difference=0.01, delta=0.000001):
         """ Initialize the concept drift detector
 
         Todo: add remaining param descriptions
         Args:
             evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             n (int):
-            lambda_ (float):
+            difference (float):
             delta (float):
         """
-        super().__init__(evaluation_metrics)
-        self.prediction_based = True  # Todo: this parameter should be part of the super class
+        super().__init__(evaluation_metrics, error_based=True)
         self.active_change = False
 
         self.win = []
         self.n = n
-        self.lambda_ = lambda_
+        self.difference = difference
         self.delta = delta
 
         self.e = math.sqrt(0.5 * self._cal_sigma() * (math.log(1 / self.delta, math.e)))
@@ -80,27 +79,26 @@ class MDDME(ConceptDriftDetector):
     def get_length_estimation(self):
         pass
 
+    # ----------------------------------------
+    # Tornado Functionality (left unchanged)
+    # ----------------------------------------
     def _cal_sigma(self):
         """
         Tornado-function (left unchanged)
         """
-        sum_, bound_sum, r, ratio = 0, 0, 1, math.pow(math.e, self.lambda_)
+        sum_, sigma = 0, 0
         for i in range(self.n):
-            sum_ += r
-            r *= ratio
-        r = 1
+            sum_ += (1 + i * self.difference)
         for i in range(self.n):
-            bound_sum += math.pow(r / sum_, 2)
-            r *= ratio
-        return bound_sum
+            sigma += math.pow((1 + i * self.difference) / sum_, 2)
+        return sigma
 
     def _cal_w_sigma(self):
         """
         Tornado-function (left unchanged)
         """
-        total_sum, win_sum, r, ratio = 0, 0, 1, math.pow(math.e, self.lambda_)
+        total_sum, win_sum = 0, 0
         for i in range(self.n):
-            total_sum += r
-            win_sum += self.win[i] * r
-            r *= ratio
+            total_sum += 1 + i * self.difference
+            win_sum += self.win[i] * (1 + i * self.difference)
         return win_sum / total_sum

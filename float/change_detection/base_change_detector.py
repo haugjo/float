@@ -3,24 +3,26 @@ import numpy as np
 import traceback
 
 
-class ConceptDriftDetector(metaclass=ABCMeta):
+class BaseChangeDetector(metaclass=ABCMeta):
     """
-    Abstract base class for concept drift detection models.
+    Abstract base class for change detection models.
 
     Attributes:
         evaluation (dict of str: list[float]): a dictionary of metric names and their corresponding metric values as lists
         global_drifts (list): monitors if there was detected change at each time step
         comp_times (list): computation time in all time steps
     """
-    def __init__(self, evaluation_metrics):
+    def __init__(self, evaluation_metrics, error_based=False):
         """
         Initializes the concept drift detector.
 
         Args:
             evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
+            error_based (bool): indicates whether change detector relies on error measures obtained from a predictor
         """
         self.evaluation_metrics = evaluation_metrics
         self.evaluation = {key: [] for key in self.evaluation_metrics.keys()} if evaluation_metrics else {}
+        self.error_based = error_based
 
         self.global_drifts = []
         self.comp_times = []
@@ -207,7 +209,7 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             list: the TPR for different delay ranges
         """
-        tpr, _, _ = ConceptDriftDetector.get_tpr_fdr_and_precision(global_drifts, known_drifts, batch_size, max_delay_range)
+        tpr, _, _ = BaseChangeDetector.get_tpr_fdr_and_precision(global_drifts, known_drifts, batch_size, max_delay_range)
         return tpr
 
     @staticmethod
@@ -224,7 +226,7 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             list: the FDR for different delay ranges
         """
-        _, fdr, _ = ConceptDriftDetector.get_tpr_fdr_and_precision(global_drifts, known_drifts, batch_size, max_delay_range)
+        _, fdr, _ = BaseChangeDetector.get_tpr_fdr_and_precision(global_drifts, known_drifts, batch_size, max_delay_range)
         return fdr
 
     @staticmethod
@@ -241,5 +243,5 @@ class ConceptDriftDetector(metaclass=ABCMeta):
         Returns:
             list: the precision for different delay ranges
         """
-        _, _, precision = ConceptDriftDetector.get_tpr_fdr_and_precision(global_drifts, known_drifts, batch_size, max_delay_range)
+        _, _, precision = BaseChangeDetector.get_tpr_fdr_and_precision(global_drifts, known_drifts, batch_size, max_delay_range)
         return precision

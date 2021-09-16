@@ -3,7 +3,7 @@ import traceback
 from float.pipeline.pipeline import Pipeline
 from float.data.data_loader import DataLoader
 from float.feature_selection import FeatureSelector
-from float.concept_drift_detection import ConceptDriftDetector
+from float.change_detection import BaseChangeDetector
 from float.prediction import Predictor
 
 

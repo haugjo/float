@@ -7,7 +7,7 @@ import traceback
 from tabulate import tabulate
 from float.data.data_loader import DataLoader
 from float.feature_selection import FeatureSelector
-from float.concept_drift_detection import ConceptDriftDetector, SkmultiflowDriftDetector
+from float.change_detection import BaseChangeDetector, SkmultiflowDriftDetector
 from float.prediction import Predictor
 
 
@@ -69,12 +69,12 @@ class Pipeline(metaclass=ABCMeta):
         if type(self.data_loader) is not DataLoader:
             raise AttributeError('No valid DataLoader object was provided.')
         if not issubclass(type(self.feature_selector), FeatureSelector) and \
-                not issubclass(type(self.concept_drift_detector), ConceptDriftDetector) and \
+                not issubclass(type(self.concept_drift_detector), BaseChangeDetector) and \
                 not issubclass(type(self.predictor), Predictor):
             raise AttributeError('No valid FeatureSelector, ConceptDriftDetector or Predictor object was provided.')
         if self.concept_drift_detector:
-            if self.concept_drift_detector.prediction_based and not issubclass(type(self.predictor), Predictor):
-                raise AttributeError('A prediction based Concept Drift Detector cannot be used without a valid Predictor object.')
+            if self.concept_drift_detector.error_based and not issubclass(type(self.predictor), Predictor):
+                raise AttributeError('An error-based Concept Drift Detector cannot be used without a valid Predictor object.')
 
     def _start_evaluation(self):
         """
@@ -161,7 +161,7 @@ class Pipeline(metaclass=ABCMeta):
 
         if self.concept_drift_detector:
             start_time = time.time()
-            if self.concept_drift_detector.prediction_based:
+            if self.concept_drift_detector.error_based:
                 for val in (y_pred == y_test):
                     self.concept_drift_detector.partial_fit(val)
             else:

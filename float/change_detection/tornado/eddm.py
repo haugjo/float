@@ -1,8 +1,8 @@
-from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
+from float.change_detection.base_change_detector import BaseChangeDetector
 import math
 
 
-class EDDM(ConceptDriftDetector):
+class EDDM(BaseChangeDetector):
     """ Early Drift Detection Method (DDM)
 
     Code adopted from https://github.com/alipsgh/tornado, please cite:
@@ -22,8 +22,7 @@ class EDDM(ConceptDriftDetector):
         Args:
             evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
         """
-        super().__init__(evaluation_metrics)
-        self.prediction_based = True  # Todo: this parameter should be part of the super class
+        super().__init__(evaluation_metrics, error_based=True)
         self.active_change = False
         self.active_warning = False
 

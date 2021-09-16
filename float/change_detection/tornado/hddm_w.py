@@ -1,9 +1,9 @@
-from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
+from float.change_detection.base_change_detector import BaseChangeDetector
 import math
 import sys
 
 
-class HDDMW(ConceptDriftDetector):
+class HDDMW(BaseChangeDetector):
     """ Hoeffding's Bound based Drift Detection Method - W_test Scheme (HDDMW)
 
     Code adopted from https://github.com/alipsgh/tornado, please cite:
@@ -28,8 +28,7 @@ class HDDMW(ConceptDriftDetector):
             lambda_ (float):
             test_type (str):
         """
-        super().__init__(evaluation_metrics)
-        self.prediction_based = True  # Todo: this parameter should be part of the super class
+        super().__init__(evaluation_metrics, error_based=True)
         self.active_change = False
         self.active_warning = False
 
@@ -105,6 +104,9 @@ class HDDMW(ConceptDriftDetector):
     def get_length_estimation(self):
         pass
 
+    # ----------------------------------------
+    # Tornado Functionality (left unchanged
+    # ----------------------------------------
     def _update_incr_statistics(self, pr):
         """
         Tornado-function (left unchanged)
@@ -174,6 +176,9 @@ class HDDMW(ConceptDriftDetector):
         self.decr_cut_point = sys.float_info.min
 
 
+# ----------------------------------------
+# Tornado Functionality (left unchanged)
+# ----------------------------------------
 class _SampleInfo:
     """
     Tornado-Class (left unchanged)

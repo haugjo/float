@@ -1,8 +1,8 @@
-from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
+from float.change_detection.base_change_detector import BaseChangeDetector
 import math
 
 
-class MDDMG(ConceptDriftDetector):
+class MDDMG(BaseChangeDetector):
     """ McDiarmid Drift Detection Method - Geometric Scheme (MDDMG)
 
     Code adopted from https://github.com/alipsgh/tornado, please cite:
@@ -28,8 +28,7 @@ class MDDMG(ConceptDriftDetector):
             ratio (float):
             delta (float):
         """
-        super().__init__(evaluation_metrics)
-        self.prediction_based = True  # Todo: this parameter should be part of the super class
+        super().__init__(evaluation_metrics, error_based=True)
         self.active_change = False
 
         self.win = []
@@ -80,6 +79,9 @@ class MDDMG(ConceptDriftDetector):
     def get_length_estimation(self):
         pass
 
+    # ----------------------------------------
+    # Tornado Functionality (left unchanged)
+    # ----------------------------------------
     def _cal_sigma(self):
         """
         Tornado-function (left unchanged)

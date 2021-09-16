@@ -1,10 +1,9 @@
-from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
-import sys
+from float.change_detection.base_change_detector import BaseChangeDetector
 import math
 
 
-class DDM(ConceptDriftDetector):
-    """ Drift Detection Method (DDM)
+class EWMA(BaseChangeDetector):
+    """ Exponentially Weigthed Moving Average (EWMA) Drift Detection Method
 
     Code adopted from https://github.com/alipsgh/tornado, please cite:
     The Tornado Framework
@@ -12,42 +11,41 @@ class DDM(ConceptDriftDetector):
     University of Ottawa, Ontario, Canada
     E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com
     ---
-    Paper: Gama, Joao, et al. "Learning with drift detection."
-    Published in: Brazilian Symposium on Artificial Intelligence. Springer, Berlin, Heidelberg, 2004.
-    URL: https://link.springer.com/chapter/10.1007/978-3-540-28645-5_29
+    Paper: Ross, Gordon J., et al. "Exponentially weighted moving average charts for detecting concept drift."
+    Published in: Pattern Recognition Letters 33.2 (2012): 191-198.
+    URL: https://arxiv.org/pdf/1212.6018.pdf
 
     Attributes:  # Todo: add attribute descriptions
-        min_instance (int):
     """
-    def __init__(self, evaluation_metrics=None, min_instance=30):
+    def __init__(self, evaluation_metrics=None, min_instance=30, lambda_=0.2):
         """ Initialize the concept drift detector
 
-        Todo: add remaining param descriptions
         Args:
             evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             min_instance (int):
+            lambda_ (float):
         """
-        super().__init__(evaluation_metrics)
-        self.prediction_based = True  # Todo: this parameter should be part of the super class
+        super().__init__(evaluation_metrics, error_based=True)
         self.active_change = False
         self.active_warning = False
 
         self.MINIMUM_NUM_INSTANCES = min_instance
-        self.NUM_INSTANCES_SEEN = 1
 
-        self.__P = 1
-        self.__S = 0
-        self.__P_min = sys.maxsize
-        self.__S_min = sys.maxsize
+        self.m_n = 1.0
+        self.m_sum = 0.0
+        self.m_p = 0.0
+        self.m_s = 0.0
+        self.z_t = 0.0
+        self.lambda_ = lambda_
 
     def reset(self):
         """ Resets the concept drift detector parameters.
         """
-        self.NUM_INSTANCES_SEEN = 1
-        self.__P = 1
-        self.__S = 0
-        self.__P_min = sys.maxsize
-        self.__S_min = sys.maxsize
+        self.m_n = 1
+        self.m_sum = 0
+        self.m_p = 0
+        self.m_s = 0
+        self.z_t = 0
 
     def partial_fit(self, pr):
         """ Update the concept drift detector
@@ -55,34 +53,31 @@ class DDM(ConceptDriftDetector):
         Args:
             pr (bool): indicator of correct prediction (i.e. pr=True) and incorrect prediction (i.e. pr=False)
         """
+        pr = 1 if pr is False else 0
+
         self.active_change = False
         self.active_warning = False
 
-        pr = 1 if pr is False else 0
-
         # 1. UPDATING STATS
-        self.__P += (pr - self.__P) / self.NUM_INSTANCES_SEEN
-        self.__S = math.sqrt(self.__P * (1 - self.__P) / self.NUM_INSTANCES_SEEN)
+        self.m_sum += pr
+        self.m_p = self.m_sum / self.m_n
+        self.m_s = math.sqrt(
+            self.m_p * (1.0 - self.m_p) * self.lambda_ * (1.0 - math.pow(1.0 - self.lambda_, 2.0 * self.m_n)) / (
+                        2.0 - self.lambda_))
+        self.m_n += 1
 
-        self.NUM_INSTANCES_SEEN += 1
-
-        if self.NUM_INSTANCES_SEEN < self.MINIMUM_NUM_INSTANCES:
-            return
-
-        if self.__P + self.__S <= self.__P_min + self.__S_min:
-            self.__P_min = self.__P
-            self.__S_min = self.__S
+        self.z_t += self.lambda_ * (pr - self.z_t)
+        L_t = 3.97 - 6.56 * self.m_p + 48.73 * math.pow(self.m_p, 3) - 330.13 * math.pow(self.m_p, 5) \
+              + 848.18 * math.pow(self.m_p, 7)
 
         # 2. UPDATING WARNING AND DRIFT STATUSES
-        current_level = self.__P + self.__S
-        warning_level = self.__P_min + 2 * self.__S_min
-        drift_level = self.__P_min + 3 * self.__S_min
+        if self.m_n < self.MINIMUM_NUM_INSTANCES:
+            return
 
-        if current_level > warning_level:
-            self.active_warning = True
-
-        if current_level > drift_level:
+        if self.z_t > self.m_p + L_t * self.m_s:
             self.active_change = True
+        elif self.z_t > self.m_p + 0.5 * L_t * self.m_s:
+            self.active_warning = True
 
     def detected_global_change(self):
         """ Checks whether global concept drift was detected or not.

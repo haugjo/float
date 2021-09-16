@@ -1,7 +1,7 @@
 import unittest
 from float.data.data_loader import DataLoader
-from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
-from float.concept_drift_detection.erics import ERICS
+from float.change_detection.base_change_detector import BaseChangeDetector
+from float.change_detection.erics import ERICS
 
 
 class TestERICS(unittest.TestCase):
@@ -12,16 +12,16 @@ class TestERICS(unittest.TestCase):
         batch_size = 10
         evaluation_metrics = {
             'Delay': (
-                ConceptDriftDetector.get_average_delay,
+                BaseChangeDetector.get_average_delay,
                 {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_n_samples': data_loader.stream.n_samples}),
             'TPR': (
-                ConceptDriftDetector.get_tpr,
+                BaseChangeDetector.get_tpr,
                 {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_delay_range': 100}),
             'FDR': (
-                ConceptDriftDetector.get_fdr,
+                BaseChangeDetector.get_fdr,
                 {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_delay_range': 100}),
             'Precision': (
-                ConceptDriftDetector.get_precision,
+                BaseChangeDetector.get_precision,
                 {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_delay_range': 100})
         }
         self.erics = ERICS(data_loader.stream.n_features, evaluation_metrics)

@@ -1,7 +1,7 @@
-from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
+from float.change_detection.base_change_detector import BaseChangeDetector
 
 
-class PageHinkley(ConceptDriftDetector):
+class PageHinkley(BaseChangeDetector):
     """ Page Hinkley Drift Detection Method
 
     Code adopted from https://github.com/alipsgh/tornado, please cite:
@@ -35,8 +35,7 @@ class PageHinkley(ConceptDriftDetector):
             lambda_ (int):
             alpha (float):
         """
-        super().__init__(evaluation_metrics)
-        self.prediction_based = True  # Todo: this parameter should be part of the super class
+        super().__init__(evaluation_metrics, error_based=True)
         self.active_change = False
 
         self.MINIMUM_NUM_INSTANCES = min_instance

@@ -1,8 +1,8 @@
-from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
+from float.change_detection.base_change_detector import BaseChangeDetector
 import math
 
 
-class HDDMA(ConceptDriftDetector):
+class HDDMA(BaseChangeDetector):
     """ Hoeffding's Bound based Drift Detection Method - A_test Scheme (HDDMA)
 
     Code adopted from https://github.com/alipsgh/tornado, please cite:
@@ -26,8 +26,7 @@ class HDDMA(ConceptDriftDetector):
             warning_confidence (float):
             test_type (str):
         """
-        super().__init__(evaluation_metrics)
-        self.prediction_based = True  # Todo: this parameter should be part of the super class
+        super().__init__(evaluation_metrics, error_based=True)
         self.active_change = False
         self.active_warning = False
 
@@ -120,6 +119,9 @@ class HDDMA(ConceptDriftDetector):
     def get_length_estimation(self):
         pass
 
+    # ----------------------------------------
+    # Tornado Functionality (left unchanged)
+    # ----------------------------------------
     def _mean_incr(self, confidence_level):
         """
         Tornado-function (left unchanged)

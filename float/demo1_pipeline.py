@@ -22,10 +22,10 @@ feature_selector = feature_selection.fires.FIRES(n_total_features=data_loader.st
 ### Initialize Concept Drift Detector ###
 cdd_metrics = {
     'Delay': (
-        concept_drift_detection.concept_drift_detector.ConceptDriftDetector.get_average_delay,
+        change_detection.concept_drift_detector.ConceptDriftDetector.get_average_delay,
         {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_n_samples': data_loader.stream.n_samples})
 }
-concept_drift_detector = concept_drift_detection.erics.ERICS(data_loader.stream.n_features, evaluation_metrics=cdd_metrics)
+concept_drift_detector = change_detection.erics.ERICS(data_loader.stream.n_features, evaluation_metrics=cdd_metrics)
 
 ### Initialize Predictor ###
 predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),

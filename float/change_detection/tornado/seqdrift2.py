@@ -1,10 +1,10 @@
-from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
+from float.change_detection.base_change_detector import BaseChangeDetector
 import math
 import random
 import sys
 
 
-class SeqDrift2(ConceptDriftDetector):
+class SeqDrift2(BaseChangeDetector):
     """ SeqDrift2 Drift Detection Method
 
     Code adopted from https://github.com/alipsgh/tornado, please cite:
@@ -29,18 +29,17 @@ class SeqDrift2(ConceptDriftDetector):
             delta (float):
             lambda_ (int):
         """
-        super().__init__(evaluation_metrics)
-        self.prediction_based = True  # Todo: this parameter should be part of the super class
+        super().__init__(evaluation_metrics, error_based=True)
         self.active_change = False
 
         self.DELTA = delta
         self.BLOCK_SIZE = block_size
-        self.seq_drift2 = _SeqDrift2_Tornado(self.DELTA, self.BLOCK_SIZE)
+        self.seq_drift2 = _SeqDrift2Tornado(self.DELTA, self.BLOCK_SIZE)
 
     def reset(self):
         """ Resets the concept drift detector parameters.
         """
-        self.seq_drift2 = _SeqDrift2_Tornado(self.DELTA, self.BLOCK_SIZE)
+        self.seq_drift2 = _SeqDrift2Tornado(self.DELTA, self.BLOCK_SIZE)
 
     def partial_fit(self, pr):
         """ Update the concept drift detector
@@ -68,9 +67,12 @@ class SeqDrift2(ConceptDriftDetector):
         pass
 
 
-class _SeqDrift2_Tornado:
+# ----------------------------------------
+# Tornado Functionality (left unchanged)
+# ----------------------------------------
+class _SeqDrift2Tornado:
     """
-    Tornado-class (SeqDrift2 renamed to _SeqDrift2_Tornado, otherwise left unchanged)
+    Tornado-class (SeqDrift2 renamed to _SeqDrift2Tornado, otherwise left unchanged)
     """
     def __init__(self, _significanceLevel, _blockSize):
 

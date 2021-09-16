@@ -1,8 +1,8 @@
-from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
+from float.change_detection.base_change_detector import BaseChangeDetector
 import math
 
 
-class FHDDMSAdd(ConceptDriftDetector):
+class FHDDMSAdd(BaseChangeDetector):
     """ Additive Stacking Fast Hoeffding Drift Detection Method (FHDDSMAdd)
 
     Code adopted from https://github.com/alipsgh/tornado, please cite:
@@ -25,8 +25,7 @@ class FHDDMSAdd(ConceptDriftDetector):
             n (int):
             delta (float):
         """
-        super().__init__(evaluation_metrics)
-        self.prediction_based = True  # Todo: this parameter should be part of the super class
+        super().__init__(evaluation_metrics, error_based=True)
         self.active_change = False
 
         self._ELEMENT_SIZE = n
@@ -113,6 +112,9 @@ class FHDDMSAdd(ConceptDriftDetector):
     def get_length_estimation(self):
         pass
 
+    # ----------------------------------------
+    # Tornado Functionality (left unchanged)
+    # ----------------------------------------
     def _init_stack(self, size):
         """
         Tornado-function (left unchanged)

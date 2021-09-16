@@ -48,22 +48,22 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
 
     cdd_metrics = {
         'Delay': (
-            concept_drift_detection.concept_drift_detector.ConceptDriftDetector.get_average_delay,
+            change_detection.concept_drift_detector.ConceptDriftDetector.get_average_delay,
             {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_n_samples': data_loader.stream.n_samples}),
         'TPR': (
-            concept_drift_detection.concept_drift_detector.ConceptDriftDetector.get_tpr,
+            change_detection.concept_drift_detector.ConceptDriftDetector.get_tpr,
             {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_delay_range': 100}),
         'FDR': (
-            concept_drift_detection.concept_drift_detector.ConceptDriftDetector.get_fdr,
+            change_detection.concept_drift_detector.ConceptDriftDetector.get_fdr,
             {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_delay_range': 100}),
         'Precision': (
-            concept_drift_detection.concept_drift_detector.ConceptDriftDetector.get_precision,
+            change_detection.concept_drift_detector.ConceptDriftDetector.get_precision,
             {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_delay_range': 100})
     }
-    concept_drift_detectors = [concept_drift_detection.SkmultiflowDriftDetector(ADWIN(delta=0.6), evaluation_metrics=cdd_metrics),
-                               concept_drift_detection.SkmultiflowDriftDetector(EDDM(), evaluation_metrics=cdd_metrics),
-                               concept_drift_detection.SkmultiflowDriftDetector(DDM(), evaluation_metrics=cdd_metrics),
-                               concept_drift_detection.erics.ERICS(data_loader.stream.n_features, evaluation_metrics=cdd_metrics)]
+    concept_drift_detectors = [change_detection.SkmultiflowDriftDetector(ADWIN(delta=0.6), evaluation_metrics=cdd_metrics),
+                               change_detection.SkmultiflowDriftDetector(EDDM(), evaluation_metrics=cdd_metrics),
+                               change_detection.SkmultiflowDriftDetector(DDM(), evaluation_metrics=cdd_metrics),
+                               change_detection.erics.ERICS(data_loader.stream.n_features, evaluation_metrics=cdd_metrics)]
     predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
                                                                         data_loader.stream.target_values,
                                                                         evaluation_metrics={'Accuracy': accuracy_score,
@@ -123,7 +123,7 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
         visualizer = visualization.visualizer.Visualizer(
             [concept_drift_detector.evaluation['TPR'] for concept_drift_detector in
              concept_drift_detectors],
-            concept_drift_detector_names, 'concept_drift_detection'
+            concept_drift_detector_names, 'change_detection'
         )
         visualizer.plot(
             plot_title=f'Concept Drift True Positive Rate For Data Set {data_set_name}, Predictor {predictor_names[0]}, Feature Selector {feature_selector_name}')

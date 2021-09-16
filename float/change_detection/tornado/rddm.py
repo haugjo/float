@@ -1,9 +1,9 @@
-from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
+from float.change_detection.base_change_detector import BaseChangeDetector
 import math
 import sys
 
 
-class RDDM(ConceptDriftDetector):
+class RDDM(BaseChangeDetector):
     """ Reactive Drift Detection Method (RDDM)
 
     Code adopted from https://github.com/alipsgh/tornado, please cite:
@@ -33,8 +33,7 @@ class RDDM(ConceptDriftDetector):
             min_size_stable_concept (int):
             warn_limit (int):
         """
-        super().__init__(evaluation_metrics)
-        self.prediction_based = True  # Todo: this parameter should be part of the super class
+        super().__init__(evaluation_metrics, error_based=True)
         self.active_change = False
         self.active_warning = False
 
@@ -184,6 +183,9 @@ class RDDM(ConceptDriftDetector):
     def get_length_estimation(self):
         pass
 
+    # ----------------------------------------
+    # Tornado Functionality (left unchanged)
+    # ----------------------------------------
     def _reset_rddm(self):
         """
         Tornado-function (left unchanged)

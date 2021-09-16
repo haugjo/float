@@ -1,9 +1,9 @@
-from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
+from float.change_detection.base_change_detector import BaseChangeDetector
 from skmultiflow.drift_detection.base_drift_detector import BaseDriftDetector
 from skmultiflow.drift_detection.kswin import KSWIN
 
 
-class SkmultiflowDriftDetector(ConceptDriftDetector):
+class SkmultiflowDriftDetector(BaseChangeDetector):
     """
     Serves as a wrapper for the skmultiflow drift_detection module.
 
@@ -18,9 +18,9 @@ class SkmultiflowDriftDetector(ConceptDriftDetector):
             detector (BaseDriftDetector): the concept drift detector
             evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
         """
-        super().__init__(evaluation_metrics)
         self.detector = detector
-        self.prediction_based = False if type(self.detector) is KSWIN else True
+        error_based = False if type(self.detector) is KSWIN else True
+        super().__init__(evaluation_metrics, error_based=error_based)
 
     def reset(self):
         """

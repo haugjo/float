@@ -1,8 +1,8 @@
-from float.concept_drift_detection.concept_drift_detector import ConceptDriftDetector
+from float.change_detection.base_change_detector import BaseChangeDetector
 import math
 
 
-class Adwin(ConceptDriftDetector):
+class Adwin(BaseChangeDetector):
     """ Adaptive Windowing (Adwin) Drift Detection Method
 
     Code adopted from https://github.com/alipsgh/tornado, please cite:
@@ -28,8 +28,7 @@ class Adwin(ConceptDriftDetector):
         Args:
             delta (float):
         """
-        super().__init__(evaluation_metrics)
-        self.prediction_based = True  # Todo: this parameter should be part of the super class
+        super().__init__(evaluation_metrics, error_based=True)
         self.active_change = False
 
         self.delta = delta
@@ -66,6 +65,9 @@ class Adwin(ConceptDriftDetector):
         pass
 
 
+# ----------------------------------------
+# Tornado Functionality (left unchanged)
+# ----------------------------------------
 class _AdaptiveWindowing:
     """ Adaptive Windowing
     Class implementation from the tornado package (name changed from ADWIN to _AdaptiveWindowing, otherwise left unchanged)
