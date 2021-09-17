@@ -8,6 +8,7 @@ from tabulate import tabulate
 from float.data.data_loader import DataLoader
 from float.feature_selection import FeatureSelector
 from float.change_detection import BaseChangeDetector, SkmultiflowDriftDetector
+from float.change_detection.measures import ChangeDetectionEvaluator
 from float.prediction import Predictor
 
 
@@ -16,8 +17,8 @@ class Pipeline(metaclass=ABCMeta):
     Abstract base class which triggers events for different kinds of training procedures.
     """
 
-    def __init__(self, data_loader, feature_selector, concept_drift_detector, predictor, max_n_samples,
-                 batch_size, n_pretrain_samples, known_drifts, run, evaluation_interval=None):
+    def __init__(self, data_loader, feature_selector, concept_drift_detector, change_detection_evaluator, predictor,
+                 max_n_samples, batch_size, n_pretrain_samples, known_drifts, run, evaluation_interval=None):
         """
         Initializes the pipeline.
 
@@ -25,6 +26,7 @@ class Pipeline(metaclass=ABCMeta):
             data_loader (DataLoader): DataLoader object
             feature_selector (FeatureSelector | None): FeatureSelector object
             concept_drift_detector (ConceptDriftDetector | None): ConceptDriftDetector object
+            change_detection_evaluator (ChangeDetectionEvaluator | None): ChangeDetectionEvaluator object
             predictor (Predictor | None): Predictor object
             max_n_samples (int): maximum number of observations used in the evaluation
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
@@ -36,6 +38,7 @@ class Pipeline(metaclass=ABCMeta):
         self.data_loader = data_loader
         self.feature_selector = feature_selector
         self.concept_drift_detector = concept_drift_detector
+        self.change_detection_evaluator = change_detection_evaluator
         self.predictor = predictor
 
         self.max_n_samples = max_n_samples
@@ -162,13 +165,17 @@ class Pipeline(metaclass=ABCMeta):
         if self.concept_drift_detector:
             start_time = time.time()
             if self.concept_drift_detector.error_based:
-                for val in (y_pred == y_test):
+                for val in (y_pred == y_test):  # Todo: make sure that y_pred is available
                     self.concept_drift_detector.partial_fit(val)
             else:
                 self.concept_drift_detector.partial_fit(X_train, y_train)
             if self.concept_drift_detector.detected_global_change():
                 print(f"Global change detected at time step {self.time_step}")
-            self.concept_drift_detector.evaluate(self.time_step, last_iteration)
+                if self.time_step not in self.concept_drift_detector.global_drifts:  # Todo: is this if-clause really necessary?
+                    self.concept_drift_detector.global_drifts.append(self.time_step)
+
+            if last_iteration:
+                self.change_detection_evaluator.run(self.concept_drift_detector.global_drifts)
             self.concept_drift_detector.comp_times.append(time.time() - start_time)
 
     def _update_progress_bar(self):
@@ -212,7 +219,7 @@ class Pipeline(metaclass=ABCMeta):
                        self.concept_drift_detector.global_drifts) <= 5 else [
                        str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]']},
                 **{'Avg. ' + key: [np.mean([x for x in value if x is not None]) if len([x for x in value if x is not None]) > 0 else 'N/A']
-                if type(value) is list else [value] for key, value in self.concept_drift_detector.evaluation.items()}
+                if type(value) is list else [value] for key, value in self.change_detection_evaluator.result.items()}
             }, headers="keys", tablefmt='github'))
 
         if self.predictor:

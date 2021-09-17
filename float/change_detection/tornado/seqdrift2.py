@@ -19,17 +19,15 @@ class SeqDrift2(BaseChangeDetector):
 
     Attributes:  # Todo: add attribute descriptions
     """
-    def __init__(self, evaluation_metrics=None, delta=0.01, block_size=200):
+    def __init__(self, delta=0.01, block_size=200):
         """ Initialize the concept drift detector
 
         Todo: add remaining param descriptions
         Args:
-            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
-            min_instance (int):
             delta (float):
-            lambda_ (int):
+            block_size (int):
         """
-        super().__init__(evaluation_metrics, error_based=True)
+        super().__init__(error_based=True)
         self.active_change = False
 
         self.DELTA = delta

@@ -21,14 +21,14 @@ class Adwin(BaseChangeDetector):
         prediction_based (bool): indicates whether drift detector requires predictions
         active_change (bool): indicates whether there is a change ongoing
     """
-    def __init__(self, evaluation_metrics=None, delta=0.002):
+    def __init__(self, delta=0.002):
         """ Initialize the concept drift detector
 
         Todo: add remaining param descriptions
         Args:
             delta (float):
         """
-        super().__init__(evaluation_metrics, error_based=True)
+        super().__init__(error_based=True)
         self.active_change = False
 
         self.delta = delta

@@ -14,14 +14,13 @@ class ERICS(BaseChangeDetector):
     [2] Haug, Johannes, et al. "Leveraging Model Inherent Variable Importance for Stable Online Feature Selection".
     Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2020.
     """
-    def __init__(self, n_param, evaluation_metrics=None, window_mvg_average=50, window_drift_detect=50, beta=0.0001,
+    def __init__(self, n_param, window_mvg_average=50, window_drift_detect=50, beta=0.0001,
                  base_model='probit', init_mu=0, init_sigma=1, epochs=10, lr_mu=0.01, lr_sigma=0.01):
         """
         Initializes the ERICS concept drift detector.
 
         Args:
             n_param (int): total no. of parameters (corresponds to no. of features for probit model)
-            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             window_mvg_average (int): window Size for computation of moving average
             window_drift_detect (int): window Size for Drift Detection
             beta (float): update rate for the alpha-threshold
@@ -32,7 +31,7 @@ class ERICS(BaseChangeDetector):
             lr_mu (float): learning rate for the gradient update of the mean (according to [2])
             lr_sigma (float): learning rate for the gradient update of the variance (according to [2])
         """
-        super().__init__(evaluation_metrics, error_based=False)
+        super().__init__(error_based=False)
         # User-set ERICS-hyperparameters
         self.n_param = n_param
         self.M = window_mvg_average

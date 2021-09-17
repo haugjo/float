@@ -19,13 +19,12 @@ class RDDM(BaseChangeDetector):
     Attributes:  # Todo: add attribute descriptions
         min_instance (int):
     """
-    def __init__(self, evaluation_metrics=None, min_instance=129, warning_level=1.773, drift_level=2.258,
+    def __init__(self, min_instance=129, warning_level=1.773, drift_level=2.258,
                  max_size_concept=40000, min_size_stable_concept=7000, warn_limit=1400):
         """ Initialize the concept drift detector
 
         Todo: add remaining param descriptions
         Args:
-            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             min_instance (int):
             warning_level (float):
             drift_level (float):
@@ -33,7 +32,7 @@ class RDDM(BaseChangeDetector):
             min_size_stable_concept (int):
             warn_limit (int):
         """
-        super().__init__(evaluation_metrics, error_based=True)
+        super().__init__(error_based=True)
         self.active_change = False
         self.active_warning = False
 

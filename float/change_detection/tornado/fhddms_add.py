@@ -16,16 +16,15 @@ class FHDDMSAdd(BaseChangeDetector):
 
     Attributes:  # Todo: add attribute descriptions
     """
-    def __init__(self, evaluation_metrics=None, m=4, n=25, delta=0.000001):
+    def __init__(self, m=4, n=25, delta=0.000001):
         """ Initialize the concept drift detector
 
         Args:  # Todo: add argument descriptions
-            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             m (int):
             n (int):
             delta (float):
         """
-        super().__init__(evaluation_metrics, error_based=True)
+        super().__init__(error_based=True)
         self.active_change = False
 
         self._ELEMENT_SIZE = n

@@ -17,16 +17,15 @@ class HDDMA(BaseChangeDetector):
 
     Attributes:  # Todo: add attribute descriptions
     """
-    def __init__(self, evaluation_metrics=None, drift_confidence=0.001, warning_confidence=0.005, test_type='two-sided'):
+    def __init__(self, drift_confidence=0.001, warning_confidence=0.005, test_type='two-sided'):
         """ Initialize the concept drift detector
 
         Args:  # Todo: add argument descriptions
-            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             drift_confidence (float):
             warning_confidence (float):
             test_type (str):
         """
-        super().__init__(evaluation_metrics, error_based=True)
+        super().__init__(error_based=True)
         self.active_change = False
         self.active_warning = False
 

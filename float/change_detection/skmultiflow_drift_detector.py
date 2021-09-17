@@ -10,17 +10,16 @@ class SkmultiflowDriftDetector(BaseChangeDetector):
     Attributes:
         detector (BaseDriftDetector): the concept drift detector
     """
-    def __init__(self, detector, evaluation_metrics=None):
+    def __init__(self, detector):
         """
         Initializes the skmultiflow drift detector.
 
         Args:
             detector (BaseDriftDetector): the concept drift detector
-            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
         """
         self.detector = detector
         error_based = False if type(self.detector) is KSWIN else True
-        super().__init__(evaluation_metrics, error_based=error_based)
+        super().__init__(error_based=error_based)
 
     def reset(self):
         """
