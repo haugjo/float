@@ -49,14 +49,16 @@ class ChangeDetectionEvaluator(metaclass=ABCMeta):
             try:
                 if isinstance(self.n_delay, int):  # run single delay parameter
                     mean = measure(self, global_drifts, self.n_delay)
+                    mes = [mean]
                     std = 0
                 else:  # run multiple delay parameters
-                    res = []
+                    mes = []
                     for ndel in self.n_delay:
-                        res.append(measure(self, global_drifts, ndel))
-                    mean = np.mean(res)
-                    std = np.std(res)
+                        mes.append(measure(self, global_drifts, ndel))
+                    mean = np.mean(mes)
+                    std = np.std(mes)
 
+                self.result[measure.__name__]['measures'] = mes
                 self.result[measure.__name__]['mean'] = mean
                 self.result[measure.__name__]['std'] = std
             except TypeError:

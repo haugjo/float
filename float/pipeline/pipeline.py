@@ -219,7 +219,7 @@ class Pipeline(metaclass=ABCMeta):
                        self.concept_drift_detector.global_drifts) <= 5 else [
                        str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]']},
                 **{'Avg. ' + key: [np.mean([x for x in value if x is not None]) if len([x for x in value if x is not None]) > 0 else 'N/A']
-                if type(value) is list else [value] for key, value in self.change_detection_evaluator.result.items()}
+                if type(value) is list else [value['mean']] for key, value in self.change_detection_evaluator.result.items()}
             }, headers="keys", tablefmt='github'))
 
         if self.predictor:
