@@ -8,7 +8,8 @@ from sklearn.metrics import accuracy_score, zero_one_loss
 from float.data import DataLoader
 from float.change_detection import SkmultiflowDriftDetector, ERICS
 from float.change_detection.tornado import PageHinkley
-from float.change_detection.measures import ChangeDetectionEvaluator, delay, recall, false_discovery_rate
+from float.change_detection.measures import ChangeDetectionEvaluator, time_to_detection, detected_change_rate, \
+    false_discovery_rate, time_between_false_alarms, mean_time_ratio, missed_detection_rate
 from float.pipeline import PrequentialPipeline
 from float.prediction import SkmultiflowPerceptron
 from float.visualization import Visualizer
@@ -42,7 +43,12 @@ cd_evaluator = dict()
 
 for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names, concept_drift_detectors):
     ### Initialize Concept Drift Detector ###
-    cd_evaluator[concept_drift_detector_name] = ChangeDetectionEvaluator(measures=[delay, recall, false_discovery_rate],
+    cd_evaluator[concept_drift_detector_name] = ChangeDetectionEvaluator(measures=[detected_change_rate,
+                                                                                   missed_detection_rate,
+                                                                                   false_discovery_rate,
+                                                                                   time_between_false_alarms,
+                                                                                   time_to_detection,
+                                                                                   mean_time_ratio],
                                                                          known_drifts=known_drifts,
                                                                          batch_size=batch_size,
                                                                          n_samples=data_loader.stream.n_samples,
@@ -68,7 +74,7 @@ visualizer.draw_concept_drifts(data_loader.stream, known_drifts, batch_size,
 plt.show()
 
 visualizer = Visualizer(
-    [cd_eval.result['recall']['measures'] for cd_eval in cd_evaluator.values()],
+    [cd_eval.result['detected_change_rate']['measures'] for cd_eval in cd_evaluator.values()],
     concept_drift_detector_names, 'change_detection'
 )
 visualizer.plot(

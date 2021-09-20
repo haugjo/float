@@ -1,9 +1,14 @@
 import numpy as np
 
 
-def delay(evaluator, global_drifts, n_delay):
+def time_to_detection(evaluator, global_drifts, n_delay):
     """
-    Get the average delay between the start of a known drift and the first detection.
+    Get the mean Time to Detection,
+    i.e. the average delay between the beginning of a known drift and the first detection.
+
+    This measure is introduced in
+    Bifet, Albert, et al. "CD-MOA: Change detection framework for massive online analysis."
+    International Symposium on Intelligent Data Analysis. Springer, Berlin, Heidelberg, 2013.
 
     Args:
         evaluator (ChangeDetectionEvaluator): evaluator object

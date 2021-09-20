@@ -1,19 +1,20 @@
 import numpy as np
 
 
-def recall(evaluator, global_drifts, n_delay):
+def detected_change_rate(evaluator, global_drifts, n_delay):
     """
-    Get the recall of known concept drifts
+    Get the Rate of Detected Drifts, i.e. the fraction of correctly detected known drifts.
+    (this measure is sometimes also called recall or false positive rate)
 
     Args:
         evaluator (ChangeDetectionEvaluator): evaluator object
         global_drifts (list): time steps where a global concept drift was detected
         n_delay (int): no. of observations after a known concept drift in which to count detections as true positive
     Returns:
-        float: recall of known concept drifts
+        float: rate of detected known concept drifts (recall)
     """
     if len(global_drifts) == 0:  # if there is no detected drift, the recall is zero
-        return 0, 0
+        return 0
 
     iter_drifts = iter(evaluator.known_drifts)
     detections = np.asarray(global_drifts) * evaluator.batch_size  # translate drifts to relative position in dataset

@@ -3,7 +3,7 @@ import numpy as np
 
 def false_discovery_rate(evaluator, global_drifts, n_delay):
     """
-    Get the False Discovery Rate of the detected drifts
+    Get the False Discovery Rate of the detected drifts, i.e. the fraction of false positive drift detections
 
     Args:
         evaluator (ChangeDetectionEvaluator): evaluator object
@@ -13,7 +13,7 @@ def false_discovery_rate(evaluator, global_drifts, n_delay):
         float: false discovery rate of detected concept drifts
     """
     if len(global_drifts) == 0:  # if there is no detected drift, the FDR is zero
-        return 0, 0
+        return 0
 
     iter_drifts = iter(evaluator.known_drifts)
     detections = np.asarray(global_drifts) * evaluator.batch_size  # translate drifts to relative position in dataset
