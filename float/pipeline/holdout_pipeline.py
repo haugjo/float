@@ -2,7 +2,7 @@ from float.pipeline.pipeline import Pipeline
 from float.data.data_loader import DataLoader
 from float.feature_selection import FeatureSelector
 from float.change_detection import BaseChangeDetector
-from float.change_detection.measures import ChangeDetectionEvaluator
+from float.change_detection.evaluation import ChangeDetectionEvaluator
 from float.prediction import Predictor
 import warnings
 import traceback

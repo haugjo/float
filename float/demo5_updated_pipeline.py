@@ -8,7 +8,8 @@ from sklearn.metrics import accuracy_score, zero_one_loss
 from float.data import DataLoader
 from float.change_detection import ERICS, SkmultiflowChangeDetector
 from float.change_detection.tornado import PageHinkley, DDM
-from float.change_detection.measures import ChangeDetectionEvaluator, time_to_detection, detected_change_rate, \
+from float.change_detection.evaluation import ChangeDetectionEvaluator
+from float.change_detection.evaluation.measures import time_to_detection, detected_change_rate, \
     false_discovery_rate, time_between_false_alarms, mean_time_ratio, missed_detection_rate
 from float.pipeline import PrequentialPipeline
 from float.prediction import SkmultiflowPerceptron

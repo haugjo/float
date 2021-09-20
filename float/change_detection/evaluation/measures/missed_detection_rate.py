@@ -1,4 +1,4 @@
-from float.change_detection.measures.detected_change_rate import detected_change_rate
+from float.change_detection.evaluation.measures.detected_change_rate import detected_change_rate
 
 
 def missed_detection_rate(evaluator, global_drifts, n_delay):

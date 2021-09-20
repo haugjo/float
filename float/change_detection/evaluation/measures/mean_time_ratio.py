@@ -1,6 +1,6 @@
-from float.change_detection.measures.detected_change_rate import detected_change_rate
-from float.change_detection.measures.time_between_false_alarms import time_between_false_alarms
-from float.change_detection.measures.time_to_detection import time_to_detection
+from float.change_detection.evaluation.measures.detected_change_rate import detected_change_rate
+from float.change_detection.evaluation.measures.time_between_false_alarms import time_between_false_alarms
+from float.change_detection.evaluation.measures.time_to_detection import time_to_detection
 
 
 def mean_time_ratio(evaluator, global_drifts, n_delay):
