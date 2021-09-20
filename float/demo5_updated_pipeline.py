@@ -1,13 +1,13 @@
 from skmultiflow.drift_detection.adwin import ADWIN
 from skmultiflow.drift_detection.eddm import EDDM
-from skmultiflow.drift_detection.ddm import DDM
+from skmultiflow.drift_detection.ddm import DDM as DDM_scikit
 from skmultiflow.neural_networks.perceptron import PerceptronMask
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, zero_one_loss
 
 from float.data import DataLoader
-from float.change_detection import SkmultiflowDriftDetector, ERICS
-from float.change_detection.tornado import PageHinkley
+from float.change_detection import ERICS, SkmultiflowChangeDetector
+from float.change_detection.tornado import PageHinkley, DDM
 from float.change_detection.measures import ChangeDetectionEvaluator, time_to_detection, detected_change_rate, \
     false_discovery_rate, time_between_false_alarms, mean_time_ratio, missed_detection_rate
 from float.pipeline import PrequentialPipeline
@@ -22,12 +22,11 @@ known_drifts = [round(data_loader.stream.n_samples * 0.2), round(data_loader.str
 batch_size = 10
 feature_names = data_loader.stream.feature_names
 
-# evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
-
-concept_drift_detector_names = ['ADWIN', 'EDDM', 'DDM', 'ERICS', 'Page Hinkley']
-concept_drift_detectors = [SkmultiflowDriftDetector(ADWIN(delta=0.6)),
-                           SkmultiflowDriftDetector(EDDM()),
-                           SkmultiflowDriftDetector(DDM()),
+concept_drift_detector_names = ['ADWIN', 'EDDM', 'DDM_sk', 'DDM', 'ERICS', 'Page Hinkley']  # Todo: Remove, and use class names instead?
+concept_drift_detectors = [SkmultiflowChangeDetector(ADWIN(delta=0.6)),
+                           SkmultiflowChangeDetector(EDDM()),
+                           SkmultiflowChangeDetector(DDM_scikit()),
+                           DDM(),
                            ERICS(data_loader.stream.n_features),
                            PageHinkley()]
 

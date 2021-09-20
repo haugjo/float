@@ -1,14 +1,14 @@
 import unittest
 from skmultiflow.drift_detection.base_drift_detector import BaseDriftDetector
 from skmultiflow.drift_detection.ddm import DDM
-from float.change_detection.skmultiflow_drift_detector import SkmultiflowDriftDetector
+from float.change_detection.skmultiflow.skmultiflow_change_detector import SkmultiflowChangeDetector
 
 
 class TestSkmultiflowDriftDetector(unittest.TestCase):
     def __init__(self, method_name):
         super().__init__(method_name)
         ddm = DDM()
-        self.skmultiflow_drift_detector = SkmultiflowDriftDetector(ddm)
+        self.skmultiflow_drift_detector = SkmultiflowChangeDetector(ddm)
 
     def test_init(self):
         self.assertIsInstance(self.skmultiflow_drift_detector.detector, BaseDriftDetector,

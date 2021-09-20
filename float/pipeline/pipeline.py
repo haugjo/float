@@ -7,7 +7,7 @@ import traceback
 from tabulate import tabulate
 from float.data.data_loader import DataLoader
 from float.feature_selection import FeatureSelector
-from float.change_detection import BaseChangeDetector, SkmultiflowDriftDetector
+from float.change_detection import BaseChangeDetector, SkmultiflowChangeDetector
 from float.change_detection.measures import ChangeDetectionEvaluator
 from float.prediction import Predictor
 
@@ -212,7 +212,7 @@ class Pipeline(metaclass=ABCMeta):
             print('Concept Drift Detection:')
             print(tabulate({
                 **{'Model': [type(self.concept_drift_detector.detector).__name__ if type(
-                    self.concept_drift_detector) is SkmultiflowDriftDetector else
+                    self.concept_drift_detector) is SkmultiflowChangeDetector else
                              type(self.concept_drift_detector).__name__.split('.')[-1]],
                    'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
                    'Detected Global Drifts': [self.concept_drift_detector.global_drifts] if len(
