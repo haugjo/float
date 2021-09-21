@@ -35,7 +35,7 @@ class ChangeDetectionEvaluator(metaclass=ABCMeta):
         self.n_init_tolerance = n_init_tolerance
 
         self.result = dict()
-        for measure in measures:
+        for measure in measures:  # todo: do we need a _validate_func routine for measures from skmultiflow or river?
             self.result[measure.__name__] = dict()
 
     def run(self, global_drifts):
@@ -50,17 +50,17 @@ class ChangeDetectionEvaluator(metaclass=ABCMeta):
                 if isinstance(self.n_delay, int):  # run single delay parameter
                     mean = measure(self, global_drifts, self.n_delay)
                     mes = [mean]
-                    std = 0
+                    var = 0
                 else:  # run multiple delay parameters
                     mes = []
                     for ndel in self.n_delay:
                         mes.append(measure(self, global_drifts, ndel))
                     mean = np.mean(mes)
-                    std = np.std(mes)
+                    var = np.var(mes)
 
                 self.result[measure.__name__]['measures'] = mes
                 self.result[measure.__name__]['mean'] = mean
-                self.result[measure.__name__]['std'] = std
+                self.result[measure.__name__]['var'] = var
             except TypeError:
                 traceback.print_exc()
                 continue

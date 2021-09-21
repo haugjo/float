@@ -28,11 +28,11 @@ cdd_metrics = {
 concept_drift_detector = change_detection.erics.ERICS(data_loader.stream.n_features, evaluation_metrics=cdd_metrics)
 
 ### Initialize Predictor ###
-predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
-                                                                    data_loader.stream.target_values,
-                                                                    evaluation_metrics={'Accuracy': accuracy_score,
+predictor = float.prediction.evaluation.skmultiflow.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
+                                                                                                 data_loader.stream.target_values,
+                                                                                                 evaluation_metrics={'Accuracy': accuracy_score,
                                                                                         '0-1 Loss': zero_one_loss},
-                                                                    decay_rate=0.5, window_size=5)
+                                                                                                 decay_rate=0.5, window_size=5)
 
 ### Initialize and run Holdout Pipeline ###
 test_size = 50

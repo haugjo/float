@@ -12,7 +12,8 @@ from float.change_detection.evaluation import ChangeDetectionEvaluator
 from float.change_detection.evaluation.measures import time_to_detection, detected_change_rate, \
     false_discovery_rate, time_between_false_alarms, mean_time_ratio, missed_detection_rate
 from float.pipeline import PrequentialPipeline
-from float.prediction import SkmultiflowPerceptron
+from float.prediction import SkmultiflowClassifier
+from float.prediction.evaluation import PredictionEvaluator
 from float.visualization import Visualizer
 
 ### Initialize Data Loader ###
@@ -31,17 +32,13 @@ concept_drift_detectors = [SkmultiflowChangeDetector(ADWIN(delta=0.6)),
                            ERICS(data_loader.stream.n_features),
                            PageHinkley()]
 
-### Initialize Predictor ###
-predictor = SkmultiflowPerceptron(PerceptronMask(),
-                                  data_loader.stream.target_values,
-                                  evaluation_metrics={'Accuracy': accuracy_score,
-                                                      '0-1 Loss': zero_one_loss},
-                                  decay_rate=0.5, window_size=5)
-
-# Todo: allow to provide multiple change detectors at once?
 cd_evaluator = dict()
 
 for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names, concept_drift_detectors):
+    ### Initialize Predictor ### # Todo: add reset functions to all modules (to avoid the need to create new objects in loops like this one)
+    predictor = SkmultiflowClassifier(PerceptronMask(), data_loader.stream.target_values)  # todo: can we get rid of the target values parameter?
+    pred_evaluator = PredictionEvaluator([accuracy_score, zero_one_loss], decay_rate=0.1, window_size=10)
+
     ### Initialize Concept Drift Detector ###
     cd_evaluator[concept_drift_detector_name] = ChangeDetectionEvaluator(measures=[detected_change_rate,
                                                                                    missed_detection_rate,
@@ -61,11 +58,13 @@ for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_det
                                                concept_drift_detector=concept_drift_detector,
                                                change_detection_evaluator=cd_evaluator[concept_drift_detector_name],
                                                predictor=predictor,
+                                               prediction_evaluator=pred_evaluator,
                                                batch_size=batch_size,
                                                max_n_samples=data_loader.stream.n_samples,
                                                known_drifts=known_drifts)
     prequential_pipeline.run()
 
+"""
 visualizer = Visualizer(
     [concept_drift_detector.global_drifts for concept_drift_detector in concept_drift_detectors],
     concept_drift_detector_names, 'drift_detection')
@@ -80,3 +79,14 @@ visualizer = Visualizer(
 visualizer.plot(
     plot_title=f'Concept Drift True Positive Rate For Data Set spambase, Predictor Perceptron, Feature Selector FIRES')
 plt.show()
+"""
+
+visualizer = Visualizer(
+    [pred_evaluator.result['accuracy_score']['measures'], pred_evaluator.result['accuracy_score']['mean_decay'], pred_evaluator.result['accuracy_score']['mean_window']],
+    ['Accuracy Measures', 'Accuracy Decay', 'Accuracy Window'],
+    'prediction')
+visualizer.plot(
+    plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',
+    smooth_curve=[False, False, True])
+plt.show()
+

@@ -2,7 +2,7 @@
 The float.prediction module includes methods for predicting using defined models.
 """
 
-from .predictor import Predictor
-from .skmultiflow_perceptron import SkmultiflowPerceptron
+from .base_predictor import BasePredictor
+from .skmultiflow.skmultiflow_classifier import SkmultiflowClassifier
 
-__all__ = ['Predictor', 'SkmultiflowPerceptron']
+__all__ = ['BasePredictor', 'SkmultiflowClassifier']

@@ -5,7 +5,8 @@ from float.data.data_loader import DataLoader
 from float.feature_selection import FeatureSelector
 from float.change_detection import BaseChangeDetector
 from float.change_detection.evaluation import ChangeDetectionEvaluator
-from float.prediction import Predictor
+from float.prediction import BasePredictor
+from float.prediction.evaluation import PredictionEvaluator
 
 
 class PrequentialPipeline(Pipeline):
@@ -13,7 +14,8 @@ class PrequentialPipeline(Pipeline):
     Pipeline which implements the test-then-train evaluation.
     """
     def __init__(self, data_loader, feature_selector=None, concept_drift_detector=None, change_detection_evaluator=None,
-                 predictor=None, max_n_samples=100000, batch_size=100, n_pretrain_samples=100, known_drifts=None, run=False):
+                 predictor=None, prediction_evaluator=None, max_n_samples=100000, batch_size=100, n_pretrain_samples=100,
+                 known_drifts=None, run=False):
         """
         Initializes the pipeline.
 
@@ -22,7 +24,8 @@ class PrequentialPipeline(Pipeline):
             feature_selector (FeatureSelector | None): FeatureSelector object
             concept_drift_detector (BaseChangeDetector | None): BaseChangeDetector object
             change_detection_evaluator (ChangeDetectionEvaluator | None): ChangeDetectionEvaluator object
-            predictor (Predictor | None): Predictor object
+            predictor (BasePredictor | None): Predictor object
+            prediction_evaluator (PredictionEvaluator | None): PredictionEvaluator object
             max_n_samples (int): maximum number of observations used in the evaluation
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
@@ -30,7 +33,7 @@ class PrequentialPipeline(Pipeline):
             run (bool): True if the run method should be executed on initialization, False otherwise
         """
         super().__init__(data_loader, feature_selector, concept_drift_detector, change_detection_evaluator, predictor,
-                         max_n_samples, batch_size, n_pretrain_samples, known_drifts, run)
+                         prediction_evaluator, max_n_samples, batch_size, n_pretrain_samples, known_drifts, run)
 
     def run(self):
         """

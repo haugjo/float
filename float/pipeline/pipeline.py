@@ -9,7 +9,8 @@ from float.data.data_loader import DataLoader
 from float.feature_selection import FeatureSelector
 from float.change_detection import BaseChangeDetector, SkmultiflowChangeDetector
 from float.change_detection.evaluation import ChangeDetectionEvaluator
-from float.prediction import Predictor
+from float.prediction import BasePredictor
+from float.prediction.evaluation import PredictionEvaluator
 
 
 class Pipeline(metaclass=ABCMeta):
@@ -18,7 +19,8 @@ class Pipeline(metaclass=ABCMeta):
     """
 
     def __init__(self, data_loader, feature_selector, concept_drift_detector, change_detection_evaluator, predictor,
-                 max_n_samples, batch_size, n_pretrain_samples, known_drifts, run, evaluation_interval=None):
+                 prediction_evaluator, max_n_samples, batch_size, n_pretrain_samples, known_drifts, run,
+                 evaluation_interval=None):
         """
         Initializes the pipeline.
 
@@ -27,7 +29,8 @@ class Pipeline(metaclass=ABCMeta):
             feature_selector (FeatureSelector | None): FeatureSelector object
             concept_drift_detector (ConceptDriftDetector | None): ConceptDriftDetector object
             change_detection_evaluator (ChangeDetectionEvaluator | None): ChangeDetectionEvaluator object
-            predictor (Predictor | None): Predictor object
+            predictor (BasePredictor | None): Predictor object
+            prediction_evaluator (PredictionEvaluator | None): PredictionEvaluator object
             max_n_samples (int): maximum number of observations used in the evaluation
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
@@ -40,6 +43,7 @@ class Pipeline(metaclass=ABCMeta):
         self.concept_drift_detector = concept_drift_detector
         self.change_detection_evaluator = change_detection_evaluator
         self.predictor = predictor
+        self.prediction_evaluator = prediction_evaluator
 
         self.max_n_samples = max_n_samples
         self.batch_size = batch_size
@@ -73,10 +77,10 @@ class Pipeline(metaclass=ABCMeta):
             raise AttributeError('No valid DataLoader object was provided.')
         if not issubclass(type(self.feature_selector), FeatureSelector) and \
                 not issubclass(type(self.concept_drift_detector), BaseChangeDetector) and \
-                not issubclass(type(self.predictor), Predictor):
+                not issubclass(type(self.predictor), BasePredictor):
             raise AttributeError('No valid FeatureSelector, ConceptDriftDetector or Predictor object was provided.')
         if self.concept_drift_detector:
-            if self.concept_drift_detector.error_based and not issubclass(type(self.predictor), Predictor):
+            if self.concept_drift_detector.error_based and not issubclass(type(self.predictor), BasePredictor):
                 raise AttributeError('An error-based Concept Drift Detector cannot be used without a valid Predictor object.')
 
     def _start_evaluation(self):
@@ -155,8 +159,8 @@ class Pipeline(metaclass=ABCMeta):
             y_pred = self.predictor.predict(X_test)
             self.predictor.testing_times.append(time.time() - start_time)
 
-            if not self.time_step == 0 and not self.time_step % self.evaluation_interval:
-                self.predictor.evaluate(y_pred, y_test)
+            if not self.time_step == 0 and not self.time_step % self.evaluation_interval:  # Todo: why not evaluate at time step t=0?
+                self.prediction_evaluator.run(y_test, y_pred)
 
             start_time = time.time()
             self.predictor.partial_fit(X_train, y_train)
@@ -229,7 +233,7 @@ class Pipeline(metaclass=ABCMeta):
                 **{'Model': [type(self.predictor).__name__.split('.')[-1]],
                    'Avg. Test Time': [np.mean(self.predictor.testing_times)],
                    'Avg. Train Time': [np.mean(self.predictor.training_times)]},
-                **{'Avg. ' + key: [np.mean(value)] for key, value in self.predictor.evaluation.items()}
+                **{'Avg. ' + key: [value['mean']] for key, value in self.prediction_evaluator.result.items()}
             }, headers="keys", tablefmt='github'))
         print('#############################################################################')
 

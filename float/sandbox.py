@@ -64,9 +64,9 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
                                change_detection.SkmultiflowDriftDetector(EDDM(), evaluation_metrics=cdd_metrics),
                                change_detection.SkmultiflowDriftDetector(DDM(), evaluation_metrics=cdd_metrics),
                                change_detection.erics.ERICS(data_loader.stream.n_features, evaluation_metrics=cdd_metrics)]
-    predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
-                                                                        data_loader.stream.target_values,
-                                                                        evaluation_metrics={'Accuracy': accuracy_score,
+    predictor = float.prediction.evaluation.skmultiflow.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
+                                                                                                     data_loader.stream.target_values,
+                                                                                                     evaluation_metrics={'Accuracy': accuracy_score,
                                                                                             'Precision': (precision_score, {
                                                                                                 'labels': data_loader.stream.target_values,
                                                                                                 'average': 'weighted',
@@ -80,7 +80,7 @@ for data_set_name, data_loader, batch_size, known_drifts in zip(data_set_names, 
                                                                                                 'average': 'weighted',
                                                                                                 'zero_division': 0}),
                                                                                             '0-1 Loss': zero_one_loss},
-                                                                        decay_rate=0.5, window_size=5)
+                                                                                                     decay_rate=0.5, window_size=5)
 
     for feature_selector_name, feature_selector in zip(feature_selector_names, feature_selectors):
         for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names,

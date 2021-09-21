@@ -37,11 +37,11 @@ concept_drift_detectors = [change_detection.SkmultiflowDriftDetector(ADWIN(delta
                            change_detection.erics.ERICS(data_loader.stream.n_features, evaluation_metrics=cdd_metrics)]
 
 ### Initialize Predictor ###
-predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
-                                                                    data_loader.stream.target_values,
-                                                                    evaluation_metrics={'Accuracy': accuracy_score,
+predictor = float.prediction.evaluation.skmultiflow.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
+                                                                                                 data_loader.stream.target_values,
+                                                                                                 evaluation_metrics={'Accuracy': accuracy_score,
                                                                                         '0-1 Loss': zero_one_loss},
-                                                                    decay_rate=0.5, window_size=5)
+                                                                                                 decay_rate=0.5, window_size=5)
 for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names, concept_drift_detectors):
     ### Initialize and run Prequential Pipeline ###
     prequential_pipeline = pipeline.prequential_pipeline.PrequentialPipeline(data_loader, None,

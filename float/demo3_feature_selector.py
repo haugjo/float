@@ -22,11 +22,11 @@ feature_selectors = [
     feature_selection.ofs.OFS(n_total_features=data_loader.stream.n_features, n_selected_features=10, evaluation_metrics=fs_metrics)]
 
 ### Initialize Predictor ###
-predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
-                                                                    data_loader.stream.target_values,
-                                                                    evaluation_metrics={'Accuracy': accuracy_score,
+predictor = float.prediction.evaluation.skmultiflow.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
+                                                                                                 data_loader.stream.target_values,
+                                                                                                 evaluation_metrics={'Accuracy': accuracy_score,
                                                                                         '0-1 Loss': zero_one_loss},
-                                                                    decay_rate=0.5, window_size=5)
+                                                                                                 decay_rate=0.5, window_size=5)
 
 for feature_selector_name, feature_selector in zip(feature_selector_names, feature_selectors):
     ### Initialize and run Prequential Pipeline ###
