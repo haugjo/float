@@ -13,7 +13,7 @@ feature_names = data_loader.stream.feature_names
 ### Initialize Feature Selector ###
 fs_metrics = {
     'Nogueira Stability Measure': (
-        feature_selection.feature_selector.FeatureSelector.get_nogueira_stability,
+        feature_selection.base_feature_selector.FeatureSelector.get_nogueira_stability,
         {'n_total_features': data_loader.stream.n_features, 'nogueira_window_size': 10})
 }
 

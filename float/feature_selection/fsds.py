@@ -1,9 +1,9 @@
-from float.feature_selection.feature_selector import FeatureSelector
+from float.feature_selection.base_feature_selector import BaseFeatureSelector
 import numpy as np
 import numpy.linalg as ln
 
 
-class FSDS(FeatureSelector):
+class FSDS(BaseFeatureSelector):
     """
     Feature Selection on Data Streams.
 

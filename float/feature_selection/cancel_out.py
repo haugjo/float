@@ -1,11 +1,11 @@
-from float.feature_selection.feature_selector import FeatureSelector
+from float.feature_selection.base_feature_selector import BaseFeatureSelector
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
 import numpy as np
 
 
-class CancelOutFeatureSelector(FeatureSelector):
+class CancelOutFeatureSelector(BaseFeatureSelector):
     def __init__(self, n_total_features, n_selected_features, evaluation_metrics=None):
         """
         Initializes the Cancel Out feature selector.

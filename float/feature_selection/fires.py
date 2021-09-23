@@ -2,10 +2,10 @@ import numpy as np
 from warnings import warn
 from scipy.stats import norm
 from sklearn.preprocessing import MinMaxScaler
-from float.feature_selection.feature_selector import FeatureSelector
+from float.feature_selection.base_feature_selector import BaseFeatureSelector
 
 
-class FIRES(FeatureSelector):
+class FIRES(BaseFeatureSelector):
     """
     FIRES: Fast, Interpretable and Robust Evaluation and Selection of features
 

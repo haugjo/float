@@ -6,7 +6,8 @@ import sys
 import traceback
 from tabulate import tabulate
 from float.data.data_loader import DataLoader
-from float.feature_selection import FeatureSelector
+from float.feature_selection import BaseFeatureSelector
+from float.feature_selection.evaluation import FeatureSelectionEvaluator
 from float.change_detection import BaseChangeDetector, SkmultiflowChangeDetector
 from float.change_detection.evaluation import ChangeDetectionEvaluator
 from float.prediction import BasePredictor
@@ -18,15 +19,16 @@ class Pipeline(metaclass=ABCMeta):
     Abstract base class which triggers events for different kinds of training procedures.
     """
 
-    def __init__(self, data_loader, feature_selector, concept_drift_detector, change_detection_evaluator, predictor,
-                 prediction_evaluator, max_n_samples, batch_size, n_pretrain_samples, known_drifts, run,
-                 evaluation_interval=None):
+    def __init__(self, data_loader, feature_selector, feature_selection_evaluator, concept_drift_detector,
+                 change_detection_evaluator, predictor, prediction_evaluator, max_n_samples, batch_size,
+                 n_pretrain_samples, known_drifts, run, evaluation_interval=None):
         """
         Initializes the pipeline.
 
         Args:
             data_loader (DataLoader): DataLoader object
-            feature_selector (FeatureSelector | None): FeatureSelector object
+            feature_selector (BaseFeatureSelector | None): FeatureSelector object
+            feature_selection_evaluator (FeatureSelectionEvaluator | None): FeatureSelectionEvaluator object
             concept_drift_detector (ConceptDriftDetector | None): ConceptDriftDetector object
             change_detection_evaluator (ChangeDetectionEvaluator | None): ChangeDetectionEvaluator object
             predictor (BasePredictor | None): Predictor object
@@ -40,6 +42,7 @@ class Pipeline(metaclass=ABCMeta):
         """
         self.data_loader = data_loader
         self.feature_selector = feature_selector
+        self.feature_selection_evaluator = feature_selection_evaluator
         self.concept_drift_detector = concept_drift_detector
         self.change_detection_evaluator = change_detection_evaluator
         self.predictor = predictor
@@ -75,7 +78,7 @@ class Pipeline(metaclass=ABCMeta):
         """
         if type(self.data_loader) is not DataLoader:
             raise AttributeError('No valid DataLoader object was provided.')
-        if not issubclass(type(self.feature_selector), FeatureSelector) and \
+        if not issubclass(type(self.feature_selector), BaseFeatureSelector) and \
                 not issubclass(type(self.concept_drift_detector), BaseChangeDetector) and \
                 not issubclass(type(self.predictor), BasePredictor):
             raise AttributeError('No valid FeatureSelector, ConceptDriftDetector or Predictor object was provided.')
@@ -147,7 +150,7 @@ class Pipeline(metaclass=ABCMeta):
 
             X_train = self.feature_selector.select_features(X_train, self.time_step)
 
-            self.feature_selector.evaluate(self.time_step)
+            self.feature_selection_evaluator.run(self.feature_selector.selection, self.feature_selector.n_total_features)
 
             if self.feature_selector.supports_streaming_features and \
                     self.time_step in self.feature_selector.streaming_features:
@@ -207,7 +210,7 @@ class Pipeline(metaclass=ABCMeta):
             print(tabulate({
                 **{'Model': [type(self.feature_selector).__name__.split('.')[-1]],
                    'Avg. Time': [np.mean(self.feature_selector.comp_times)]},
-                **{'Avg. ' + key: [np.mean(value)] for key, value in self.feature_selector.evaluation.items()}
+                **{'Avg. ' + key: [value['mean']] for key, value in self.feature_selection_evaluator.result.items()}
             }
                 , headers="keys", tablefmt='github'))
 

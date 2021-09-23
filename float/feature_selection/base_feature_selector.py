@@ -4,7 +4,7 @@ import warnings
 import traceback
 
 
-class FeatureSelector(metaclass=ABCMeta):
+class BaseFeatureSelector(metaclass=ABCMeta):
     """
     Abstract base class for online feature selection methods.
 
@@ -96,49 +96,6 @@ class FeatureSelector(metaclass=ABCMeta):
         X_new = np.full(X.shape, self._get_reference_value())
         X_new[:, self.selected_features] = X[:, self.selected_features]
         return X_new
-
-    def evaluate(self, time_step):
-        """
-        Evaluates the feature selector at one time step.
-        """
-        for metric_name in self.evaluation:
-            if isinstance(self.evaluation_metrics[metric_name], tuple):
-                metric_func = self.evaluation_metrics[metric_name][0]
-                metric_params = self.evaluation_metrics[metric_name][1]
-            else:
-                metric_func = self.evaluation_metrics[metric_name]
-                metric_params = {}
-            try:
-                metric_val = metric_func(self.selection, **metric_params)
-            except TypeError:
-                if time_step == 0:
-                    traceback.print_exc()
-                continue
-
-            self.evaluation[metric_name].append(metric_val)
-
-    @staticmethod
-    def get_nogueira_stability(selection, n_total_features, nogueira_window_size=10):
-        """
-        Returns the Nogueira measure for feature selection stability.
-
-        Returns:
-            float: the stability measure
-        """
-        Z = np.zeros([min(len(selection), nogueira_window_size), n_total_features])
-        for row, col in enumerate(selection[-nogueira_window_size:]):
-            Z[row, col] = 1
-
-        try:
-            M, d = Z.shape
-            hatPF = np.mean(Z, axis=0)
-            kbar = np.sum(hatPF)
-            denom = (kbar / d) * (1 - kbar / d)
-            stability_measure = 1 - (M / (M - 1)) * np.mean(np.multiply(hatPF, 1 - hatPF)) / denom
-        except ZeroDivisionError:
-            stability_measure = 0  # metric requires at least 2 measurements and thus runs an error at t=1
-
-        return stability_measure
 
     def _get_reference_value(self):
         """

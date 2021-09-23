@@ -11,6 +11,9 @@ from float.change_detection.tornado import PageHinkley, DDM
 from float.change_detection.evaluation import ChangeDetectionEvaluator
 from float.change_detection.evaluation.measures import time_to_detection, detected_change_rate, \
     false_discovery_rate, time_between_false_alarms, mean_time_ratio, missed_detection_rate
+from float.feature_selection.evaluation import FeatureSelectionEvaluator
+from float.feature_selection.evaluation.measures import nogueira_stability
+from float.feature_selection import FIRES
 from float.pipeline import PrequentialPipeline
 from float.prediction import SkmultiflowClassifier
 from float.prediction.evaluation import PredictionEvaluator
@@ -39,6 +42,12 @@ for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_det
     predictor = SkmultiflowClassifier(PerceptronMask(), data_loader.stream.target_values)  # todo: can we get rid of the target values parameter?
     pred_evaluator = PredictionEvaluator([accuracy_score, zero_one_loss], decay_rate=0.1, window_size=10)
 
+    ### Initialize Feature Selection ###
+    f_selector = FIRES(n_total_features=data_loader.stream.n_features,
+                       n_selected_features=10,
+                       classes=data_loader.stream.target_values)
+    fs_evaluator = FeatureSelectionEvaluator([nogueira_stability])
+
     ### Initialize Concept Drift Detector ###
     cd_evaluator[concept_drift_detector_name] = ChangeDetectionEvaluator(measures=[detected_change_rate,
                                                                                    missed_detection_rate,
@@ -54,7 +63,8 @@ for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_det
 
     ### Initialize and run Prequential Pipeline ###
     prequential_pipeline = PrequentialPipeline(data_loader=data_loader,
-                                               feature_selector=None,
+                                               feature_selector=f_selector,
+                                               feature_selection_evaluator=fs_evaluator,
                                                concept_drift_detector=concept_drift_detector,
                                                change_detection_evaluator=cd_evaluator[concept_drift_detector_name],
                                                predictor=predictor,
@@ -79,7 +89,6 @@ visualizer = Visualizer(
 visualizer.plot(
     plot_title=f'Concept Drift True Positive Rate For Data Set spambase, Predictor Perceptron, Feature Selector FIRES')
 plt.show()
-"""
 
 visualizer = Visualizer(
     [pred_evaluator.result['accuracy_score']['measures'], pred_evaluator.result['accuracy_score']['mean_decay'], pred_evaluator.result['accuracy_score']['mean_window']],
@@ -88,5 +97,17 @@ visualizer = Visualizer(
 visualizer.plot(
     plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',
     smooth_curve=[False, False, True])
+plt.show()
+"""
+
+visualizer = Visualizer(
+    [f_selector.selection], ['FIRES'], 'feature_selection')
+visualizer.draw_top_features_with_reference(feature_names,
+                                            f'Most Selected Features For Data Set spambase, Predictor Perceptron',
+                                            fig_size=(15, 5))
+plt.show()
+visualizer.draw_selected_features((1, 1),
+                                  f'Selected Features At Each Time Step For Data Set spambase, Predictor Perceptron',
+                                  fig_size=(10, 8))
 plt.show()
 

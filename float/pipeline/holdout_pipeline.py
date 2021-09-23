@@ -1,6 +1,7 @@
 from float.pipeline.pipeline import Pipeline
 from float.data.data_loader import DataLoader
-from float.feature_selection import FeatureSelector
+from float.feature_selection import BaseFeatureSelector
+from float.feature_selection.evaluation import FeatureSelectionEvaluator
 from float.change_detection import BaseChangeDetector
 from float.change_detection.evaluation import ChangeDetectionEvaluator
 from float.prediction import BasePredictor
@@ -12,9 +13,9 @@ class HoldoutPipeline(Pipeline):
     """
     Pipeline which implements the holdout evaluation.
     """
-    def __init__(self, data_loader, test_set, evaluation_interval, feature_selector=None, concept_drift_detector=None,
-                 change_detection_evaluator=None, predictor=None, prediction_evaluator=None, max_n_samples=100000,
-                 batch_size=100, n_pretrain_samples=100, known_drifts=None, run=False):
+    def __init__(self, data_loader, test_set, evaluation_interval, feature_selector=None, feature_selection_evaluator=None,
+                 concept_drift_detector=None, change_detection_evaluator=None, predictor=None, prediction_evaluator=None,
+                 max_n_samples=100000, batch_size=100, n_pretrain_samples=100, known_drifts=None, run=False):
         """
         Initializes the pipeline.
 
@@ -22,7 +23,8 @@ class HoldoutPipeline(Pipeline):
             data_loader (DataLoader): DataLoader object
             test_set (np.ndarray, np.ndarray): the test samples and their labels to be used for the holdout evaluation
             evaluation_interval (int): the interval at which the predictor should be evaluated using the test set
-            feature_selector (FeatureSelector | None): FeatureSelector object
+            feature_selector (BaseFeatureSelector | None): FeatureSelector object
+            feature_selection_evaluator (FeatureSelectionEvaluator | None): FeatureSelectionEvaluator object
             concept_drift_detector (BaseChangeDetector | None): BaseChangeDetector object
             change_detection_evaluator (ChangeDetectionEvaluator | None): ChangeDetectionEvaluator object
             predictor (BasePredictor | None): Predictor object
@@ -35,9 +37,9 @@ class HoldoutPipeline(Pipeline):
         """
         self.test_set = test_set
 
-        super().__init__(data_loader, feature_selector, concept_drift_detector, change_detection_evaluator, predictor,
-                         prediction_evaluator, max_n_samples, batch_size, n_pretrain_samples, known_drifts, run,
-                         evaluation_interval)
+        super().__init__(data_loader, feature_selector, feature_selection_evaluator, concept_drift_detector,
+                         change_detection_evaluator, predictor, prediction_evaluator, max_n_samples, batch_size,
+                         n_pretrain_samples, known_drifts, run, evaluation_interval)
 
     def run(self):
         """

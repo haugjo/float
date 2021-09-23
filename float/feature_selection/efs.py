@@ -1,9 +1,9 @@
-from float.feature_selection.feature_selector import FeatureSelector
+from float.feature_selection.base_feature_selector import BaseFeatureSelector
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 
 
-class EFS(FeatureSelector):
+class EFS(BaseFeatureSelector):
     """
     Extremal Feature Selection.
 

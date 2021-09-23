@@ -11,18 +11,16 @@ class FeatureSelectionEvaluator(metaclass=ABCMeta):
         measures (list): list of evaluation measure functions
         result (dict): dictionary of results per evaluation measure
     """
-    def __init__(self, measures, decay_rate=None, window_size=None, **kwargs):
+    def __init__(self, measures, decay_rate=None, window_size=None):
         """ Initialize feature selection evaluation measure
 
         Args:
             measures (list): list of evaluation measure functions
             decay_rate (float | None): when this parameter is set, the metric values are additionally aggregated with a decay/fading factor
             window_size (int | None): when this parameter is set, the metric values are additionally aggregated in a sliding window
-            kwargs (dict): additional keyword-arguments provided to the corresponding measures
         """
         self.decay_rate = decay_rate
         self.window_size = window_size
-        self.kwargs = kwargs
 
         self.measures = measures
 
@@ -39,16 +37,17 @@ class FeatureSelectionEvaluator(metaclass=ABCMeta):
                 self.result[measure.__name__]['mean_window'] = []
                 self.result[measure.__name__]['var_window'] = []
 
-    def run(self, selected_features):
+    def run(self, selected_features, n_total_features):
         """
         Compute and save each evaluation measure
 
         Args:
             selected_features (list): vector of selected features per time step
+            n_total_features (int): total number of features
         """
         for measure in self.measures:  # run each evaluation measure
             try:
-                new_measure = measure(selected_features, self.kwargs)
+                new_measure = measure(selected_features, n_total_features)
                 self.result[measure.__name__]['measures'].append(new_measure)
                 self.result[measure.__name__]['mean'] = np.mean(self.result[measure.__name__]['measures'])
                 self.result[measure.__name__]['var'] = np.var(self.result[measure.__name__]['measures'])

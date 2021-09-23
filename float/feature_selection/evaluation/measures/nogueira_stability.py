@@ -1,24 +1,21 @@
 import numpy as np
 
 
-def nogueira_stability(selected_features, n_total_features, **kwargs):
+def nogueira_stability(selected_features, n_total_features):
     """
     Returns the Nogueira measure for feature selection stability.
 
     todo: add reference to paper
-    todo: add kwargs to all remaining measures (i.e. drift detection measures)
 
     Args:
         selected_features (list): vector of selected features per time step
         n_total_features (int): total number of features
-        kwargs (dict): additional keyword-arguments, including the window_size (int), which specifies the sliding window for computation of stability
 
     Returns:
         float: the stability measure due to Nogueira et al.
     """
-    window_size = kwargs['window_size']
-    Z = np.zeros([min(len(selected_features), window_size), n_total_features])
-    for row, col in enumerate(selected_features[-window_size:]):
+    Z = np.zeros([min(len(selected_features), 2), n_total_features])
+    for row, col in enumerate(selected_features[-2:]):  # Todo: we compute stability between last two selections (do we need a larger window here?)
         Z[row, col] = 1
 
     try:
