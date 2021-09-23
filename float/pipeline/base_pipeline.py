@@ -14,7 +14,7 @@ from float.prediction import BasePredictor
 from float.prediction.evaluation import PredictionEvaluator
 
 
-class Pipeline(metaclass=ABCMeta):
+class BasePipeline(metaclass=ABCMeta):
     """
     Abstract base class which triggers events for different kinds of training procedures.
     """

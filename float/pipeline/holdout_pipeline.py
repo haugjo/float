@@ -1,4 +1,4 @@
-from float.pipeline.pipeline import Pipeline
+from float.pipeline.base_pipeline import BasePipeline
 from float.data.data_loader import DataLoader
 from float.feature_selection import BaseFeatureSelector
 from float.feature_selection.evaluation import FeatureSelectionEvaluator
@@ -9,7 +9,7 @@ import warnings
 import traceback
 
 
-class HoldoutPipeline(Pipeline):
+class HoldoutPipeline(BasePipeline):
     """
     Pipeline which implements the holdout evaluation.
     """

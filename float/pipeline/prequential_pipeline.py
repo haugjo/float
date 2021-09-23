@@ -1,6 +1,6 @@
 import warnings
 import traceback
-from float.pipeline.pipeline import Pipeline
+from float.pipeline.base_pipeline import BasePipeline
 from float.data.data_loader import DataLoader
 from float.feature_selection import BaseFeatureSelector
 from float.change_detection import BaseChangeDetector
@@ -9,7 +9,7 @@ from float.prediction import BasePredictor
 from float.prediction.evaluation import PredictionEvaluator
 
 
-class PrequentialPipeline(Pipeline):
+class PrequentialPipeline(BasePipeline):
     """
     Pipeline which implements the test-then-train evaluation.
     """
