@@ -6,20 +6,26 @@ import numpy as np
 
 
 class CancelOutFeatureSelector(BaseFeatureSelector):
-    def __init__(self, n_total_features, n_selected_features, evaluation_metrics=None):
+    def __init__(self, n_total_features, n_selected_features, reset_after_drift=False):
         """
         Initializes the Cancel Out feature selector.
 
         Args:
             n_total_features (int): total number of features
             n_selected_features (int): number of selected features
-            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
+            reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
         """
-        super().__init__(n_total_features, n_selected_features, evaluation_metrics, supports_multi_class=False,
-                         supports_streaming_features=False)
+        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
+                         supports_streaming_features=False, streaming_features=None, reset_after_drift=reset_after_drift)
 
     def weight_features(self, X, y):
         self.raw_weight_vector = self.__train_ann(X, y, 50, 128)
+
+    def reset(self):
+        """
+        CancelOut does not need to be reset, since the DNN is trained at every training iteration
+        """
+        pass
 
     @staticmethod
     def __train_ann(X, y, num_epochs, batch_size):

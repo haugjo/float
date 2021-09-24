@@ -13,8 +13,8 @@ class FIRES(BaseFeatureSelector):
     In Proceedings of the 26th ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD ’20),
     August 23–27, 2020, Virtual Event, CA, USA.
     """
-    def __init__(self, n_total_features, n_selected_features, classes, evaluation_metrics=None, mu_init=0, sigma_init=1, penalty_s=0.01, penalty_r=0.01, epochs=1,
-                 lr_mu=0.01, lr_sigma=0.01, scale_weights=True, model='probit'):
+    def __init__(self, n_total_features, n_selected_features, classes, mu_init=0, sigma_init=1, penalty_s=0.01, penalty_r=0.01, epochs=1,
+                 lr_mu=0.01, lr_sigma=0.01, scale_weights=True, model='probit', reset_after_drift=False):
         """
         Initializes the FIRES feature selector.
 
@@ -22,7 +22,6 @@ class FIRES(BaseFeatureSelector):
             n_total_features (int): total number of features
             n_selected_features (int): number of selected features
             classes (np.ndarray): unique target values (class labels)
-            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             mu_init (int | np.ndarray): initial importance parameter
             sigma_init (int | np.ndarray): initial uncertainty parameter
             penalty_s (float): penalty factor for the uncertainty (corresponds to gamma_s in the paper)
@@ -32,11 +31,14 @@ class FIRES(BaseFeatureSelector):
             lr_sigma (float): learning rate for the gradient update of the uncertainty
             scale_weights (bool): if True, scale feature weights into the range [0,1]
             model (str): name of the base model to compute the likelihood (default is 'probit')
+            reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
         """
-        super().__init__(n_total_features, n_selected_features, evaluation_metrics, supports_multi_class=False,
-                         supports_streaming_features=False)
+        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
+                         supports_streaming_features=False, streaming_features=None, reset_after_drift=reset_after_drift)
         self.n_total_ftr = n_total_features
         self.classes = classes
+        self.mu_init = mu_init
+        self.sigma_init = sigma_init
         self.mu = np.ones(n_total_features) * mu_init
         self.sigma = np.ones(n_total_features) * sigma_init
         self.penalty_s = penalty_s
@@ -73,10 +75,6 @@ class FIRES(BaseFeatureSelector):
         # Update estimates of mu and sigma given the predictive model
         if self.model == 'probit':
             self.__probit(X, y)
-        # ### ADD YOUR OWN MODEL HERE ##################################################
-        # elif self.model == 'your_model':
-        #    self.__yourModel(x, y)
-        ################################################################################
         else:
             raise NotImplementedError('The given model name does not exist')
 
@@ -87,6 +85,13 @@ class FIRES(BaseFeatureSelector):
 
         # Compute feature weights
         self.raw_weight_vector = self.__compute_weights()
+
+    def reset(self):
+        """
+        Reset the parameter distribution
+        """
+        self.mu = np.ones(self.n_total_features) * self.mu_init
+        self.sigma = np.ones(self.n_total_features) * self.sigma_init
 
     def __probit(self, X, y):
         """

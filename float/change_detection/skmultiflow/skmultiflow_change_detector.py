@@ -10,16 +10,17 @@ class SkmultiflowChangeDetector(BaseChangeDetector):
     Attributes:
         detector (BaseDriftDetector): the concept drift detector
     """
-    def __init__(self, detector):
+    def __init__(self, detector, reset_after_drift=False):
         """
         Initializes the skmultiflow drift detector.
 
         Args:
             detector (BaseDriftDetector): the concept drift detector
+            reset_after_drift (bool): indicates whether to reset the change detector after a drift was detected
         """
         self.detector = detector
         error_based = self._validate()
-        super().__init__(error_based=error_based)
+        super().__init__(reset_after_drift=reset_after_drift, error_based=error_based)
 
     def reset(self):
         """
@@ -65,7 +66,7 @@ class SkmultiflowChangeDetector(BaseChangeDetector):
         self.detector.add_element(input_value)
 
     def detected_partial_change(self):
-        pass
+        return False, None
 
     def _validate(self):
         """

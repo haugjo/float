@@ -19,7 +19,7 @@ class Cusum(BaseChangeDetector):
         delta (float):
         lambda_ (int):
     """
-    def __init__(self, min_instance=30, delta=0.005, lambda_=50):
+    def __init__(self, min_instance=30, delta=0.005, lambda_=50, reset_after_drift=False):
         """ Initialize the concept drift detector
 
         Todo: add remaining param descriptions
@@ -27,8 +27,9 @@ class Cusum(BaseChangeDetector):
             min_instance (int):
             delta (float):
             lambda_ (int):
+            reset_after_drift (bool): indicates whether to reset the change detector after a drift was detected
         """
-        super().__init__(error_based=True)
+        super().__init__(reset_after_drift=reset_after_drift, error_based=True)
         self.active_change = False
 
         self.MINIMUM_NUM_INSTANCES = min_instance
@@ -75,10 +76,10 @@ class Cusum(BaseChangeDetector):
         return self.active_change
 
     def detected_partial_change(self):
-        pass
+        return False, None
 
     def detected_warning_zone(self):
-        pass
+        return False
 
     def get_length_estimation(self):
         pass

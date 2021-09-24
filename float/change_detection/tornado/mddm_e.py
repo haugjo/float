@@ -18,7 +18,7 @@ class MDDME(BaseChangeDetector):
     Attributes:  # Todo: add attribute descriptions
         min_instance (int):
     """
-    def __init__(self, n=100, lambda_=0.01, delta=0.000001):
+    def __init__(self, n=100, lambda_=0.01, delta=0.000001, reset_after_drift=False):
         """ Initialize the concept drift detector
 
         Todo: add remaining param descriptions
@@ -26,8 +26,9 @@ class MDDME(BaseChangeDetector):
             n (int):
             lambda_ (float):
             delta (float):
+            reset_after_drift (bool): indicates whether to reset the change detector after a drift was detected
         """
-        super().__init__(error_based=True)
+        super().__init__(reset_after_drift=reset_after_drift, error_based=True)
         self.active_change = False
 
         self.win = []
@@ -70,10 +71,10 @@ class MDDME(BaseChangeDetector):
         return self.active_change
 
     def detected_warning_zone(self):
-        pass
+        return False
 
     def detected_partial_change(self):
-        pass
+        return False, None
 
     def get_length_estimation(self):
         pass

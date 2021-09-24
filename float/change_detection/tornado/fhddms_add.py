@@ -16,15 +16,16 @@ class FHDDMSAdd(BaseChangeDetector):
 
     Attributes:  # Todo: add attribute descriptions
     """
-    def __init__(self, m=4, n=25, delta=0.000001):
+    def __init__(self, m=4, n=25, delta=0.000001, reset_after_drift=False):
         """ Initialize the concept drift detector
 
         Args:  # Todo: add argument descriptions
             m (int):
             n (int):
             delta (float):
+            reset_after_drift (bool): indicates whether to reset the change detector after a drift was detected
         """
-        super().__init__(error_based=True)
+        super().__init__(reset_after_drift=False, error_based=True)
         self.active_change = False
 
         self._ELEMENT_SIZE = n
@@ -103,10 +104,10 @@ class FHDDMSAdd(BaseChangeDetector):
         return self.active_change
 
     def detected_warning_zone(self):
-        pass
+        return False
 
     def detected_partial_change(self):
-        pass
+        return False, None
 
     def get_length_estimation(self):
         pass

@@ -28,24 +28,25 @@ batch_size = 10
 feature_names = data_loader.stream.feature_names
 
 concept_drift_detector_names = ['ADWIN', 'EDDM', 'DDM_sk', 'DDM', 'ERICS', 'Page Hinkley']  # Todo: Remove, and use class names instead?
-concept_drift_detectors = [SkmultiflowChangeDetector(ADWIN(delta=0.6)),
-                           SkmultiflowChangeDetector(EDDM()),
-                           SkmultiflowChangeDetector(DDM_scikit()),
-                           DDM(),
+concept_drift_detectors = [SkmultiflowChangeDetector(ADWIN(delta=0.6), reset_after_drift=False),
+                           SkmultiflowChangeDetector(EDDM(), reset_after_drift=True),
+                           SkmultiflowChangeDetector(DDM_scikit(), reset_after_drift=True),
+                           DDM(reset_after_drift=True),
                            ERICS(data_loader.stream.n_features),
-                           PageHinkley()]
+                           PageHinkley(reset_after_drift=True)]
 
 cd_evaluator = dict()
 
 for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names, concept_drift_detectors):
-    ### Initialize Predictor ### # Todo: add reset functions to all modules (to avoid the need to create new objects in loops like this one)
-    predictor = SkmultiflowClassifier(PerceptronMask(), data_loader.stream.target_values)  # todo: can we get rid of the target values parameter?
+    ### Initialize Predictor ###
+    predictor = SkmultiflowClassifier(PerceptronMask(), data_loader.stream.target_values, reset_after_drift=True)  # todo: can we get rid of the target values parameter?
     pred_evaluator = PredictionEvaluator([accuracy_score, zero_one_loss], decay_rate=0.1, window_size=10)
 
     ### Initialize Feature Selection ###
     f_selector = FIRES(n_total_features=data_loader.stream.n_features,
-                       n_selected_features=10,
-                       classes=data_loader.stream.target_values)
+                       n_selected_features=20,
+                       classes=data_loader.stream.target_values,
+                       reset_after_drift=False)
     fs_evaluator = FeatureSelectionEvaluator([nogueira_stability])
 
     ### Initialize Concept Drift Detector ###

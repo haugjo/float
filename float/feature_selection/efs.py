@@ -10,24 +10,27 @@ class EFS(BaseFeatureSelector):
     Based on a paper by Carvalho et al. 2005. This Feature Selection algorithm is based on the weights of a
     Modified Balanced Winnow classifier (as introduced in the paper).
     """
-    def __init__(self, n_total_features, n_selected_features, evaluation_metrics=None, u=None, v=None, theta=1, M=1, alpha=1.5, beta=0.5):
+    def __init__(self, n_total_features, n_selected_features, u=None, v=None, theta=1, M=1,
+                 alpha=1.5, beta=0.5, reset_after_drift=False):
         """
         Initializes the EFS feature selector.
 
         Args:
             n_total_features (int): total number of features
             n_selected_features (int): number of selected features
-            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             u (np.ndarray): initial positive model with weights set to 2
             v (np.ndarray): initial negative model with weights
             theta (float): threshold parameter
             M (float): margin parameter
             alpha (float): promotion parameter
             beta (float): demotion parameter
+            reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
         """
-        super().__init__(n_total_features, n_selected_features, evaluation_metrics, supports_multi_class=False,
-                         supports_streaming_features=False)
+        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
+                         supports_streaming_features=False, streaming_features=None, reset_after_drift=reset_after_drift)
 
+        self.u_init = u
+        self.v_init = v
         self.u = np.ones(n_total_features) * 2 if u is None else u
         self.v = np.ones(n_total_features) if v is None else v
 
@@ -71,3 +74,10 @@ class EFS(BaseFeatureSelector):
 
         # Compute importance score of features
         self.raw_weight_vector = abs(self.u - self.v)
+
+    def reset(self):
+        """
+        Reset Winnow weights
+        """
+        self.u = np.ones(self.n_total_features) * 2 if self.u_init is None else self.u_init
+        self.v = np.ones(self.n_total_features) if self.v_init is None else self.v_init

@@ -8,24 +8,28 @@ class BaseChangeDetector(metaclass=ABCMeta):
     Attributes:
         error_based (bool): indicates whether change detector relies on error measures obtained from a predictor
         global_drifts (list): time steps where a global concept drift was detected
+        partial_drifts (list): time steps and features where a partial concept drift was detected
         comp_times (list): computation time in all time steps
     """
-    def __init__(self, error_based=False):
+    def __init__(self, reset_after_drift, error_based=False):
         """
         Initializes the concept drift detector.
 
         Args:
+            reset_after_drift (bool): indicates whether to reset the change detector after a drift was detected
             error_based (bool): indicates whether change detector relies on error measures obtained from a predictor
         """
+        self.reset_after_drift = reset_after_drift
         self.error_based = error_based
 
         self.global_drifts = []
+        self.partial_drifts = []
         self.comp_times = []
 
     @abstractmethod
     def reset(self):
         """
-        Resets the concept drift detector parameters.
+        Resets the concept drift detector.
         """
         raise NotImplementedError
 
@@ -46,6 +50,7 @@ class BaseChangeDetector(metaclass=ABCMeta):
 
         Returns:
             bool: whether partial concept drift was detected or not.
+            list: indices of input features with detected drift
         """
         raise NotImplementedError
 

@@ -175,11 +175,24 @@ class BasePipeline(metaclass=ABCMeta):
                 for val in (y_pred == y_test):  # Todo: make sure that y_pred is available
                     self.concept_drift_detector.partial_fit(val)
             else:
-                self.concept_drift_detector.partial_fit(X_train, y_train)
+                self.concept_drift_detector.partial_fit(copy.copy(X_train), copy.copy(y_train))
             if self.concept_drift_detector.detected_global_change():
                 print(f"Global change detected at time step {self.time_step}")
                 if self.time_step not in self.concept_drift_detector.global_drifts:  # Todo: is this if-clause really necessary?
                     self.concept_drift_detector.global_drifts.append(self.time_step)
+
+                # Reset modules
+                if self.feature_selector.reset_after_drift:
+                    self.feature_selector.reset()
+                if self.predictor.reset_after_drift:
+                    self.predictor.reset(X_train, y_train)
+                if self.concept_drift_detector.reset_after_drift:
+                    self.concept_drift_detector.reset()
+
+            partial_change_detected, partial_change_features = self.concept_drift_detector.detected_partial_change()
+            if partial_change_detected:
+                if self.time_step not in self.concept_drift_detector.partial_drifts:  # Todo: is this if-clause really necessary?
+                    self.concept_drift_detector.partial_drifts.append((self.time_step, partial_change_features))
 
             if last_iteration:
                 self.change_detection_evaluator.run(self.concept_drift_detector.global_drifts)

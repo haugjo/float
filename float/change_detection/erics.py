@@ -31,7 +31,8 @@ class ERICS(BaseChangeDetector):
             lr_mu (float): learning rate for the gradient update of the mean (according to [2])
             lr_sigma (float): learning rate for the gradient update of the variance (according to [2])
         """
-        super().__init__(error_based=False)
+        # Todo: should we allow to reset_after_drift for consistency and overwrite with warning?
+        super().__init__(reset_after_drift=False, error_based=False)
         # User-set ERICS-hyperparameters
         self.n_param = n_param
         self.M = window_mvg_average
@@ -63,10 +64,12 @@ class ERICS(BaseChangeDetector):
 
         self.global_drift_detected = False
         self.partial_drift_detected = False
-
-        self.partial_drifts = []
+        self.partial_drift_features = None
 
     def reset(self):
+        """
+        ERICS need not be reset after a drift was detected
+        """
         pass
 
     def partial_fit(self, X, y):
@@ -102,7 +105,7 @@ class ERICS(BaseChangeDetector):
 
         self.__update_param_sum()                   # Update the sum expression for observations in a shifting window
         self.__compute_moving_average()             # Compute moving average in specified window
-        self.global_drift_detected, self.partial_drift_detected = self.__detect_drift()    # Detect concept drift
+        self.global_drift_detected, self.partial_drift_detected, self.partial_drift_features = self.__detect_drift()    # Detect concept drift
 
         # Update time step
         self.time_step += 1
@@ -111,27 +114,20 @@ class ERICS(BaseChangeDetector):
         return self.global_drift_detected
 
     def detected_partial_change(self):
-        return self.partial_drift_detected
+        """
+        Check if partial change was detected.
+
+        Returns:
+             bool: indicator whether partial change was detected
+             list: indices of input features with detected drift
+        """
+        return self.partial_drift_detected, self.partial_drift_features
 
     def detected_warning_zone(self):
         pass
 
     def get_length_estimation(self):
         pass
-
-    def evaluate(self, time_step, last_iteration):
-        """
-        Evaluates the concept drift detector at one time step.
-
-        Args:
-            time_step (int): the current time step
-            last_iteration (bool): True if this is the last iteration of the pipeline, False otherwise
-        """
-        super().evaluate(time_step, last_iteration)
-
-        if self.detected_partial_change():
-            if time_step not in self.partial_drifts:
-                self.partial_drifts.append(time_step)
 
     # ----------------------------------------
     # ERICS Functionality (left unchanged)
@@ -179,8 +175,8 @@ class ERICS(BaseChangeDetector):
     def __detect_drift(self):
         """
         Detect global and partial concept drift using the adaptive alpha-threshold
-        :return: global drift indicator, partial drift indicator
-        :rtype: bool, bool
+        :return: global drift indicator, partial drift indicator, list of features with detected drift
+        :rtype: bool, bool, list
         """
         global_window_delta = None
         partial_window_delta = None
@@ -224,12 +220,13 @@ class ERICS(BaseChangeDetector):
         # Partial Drift Detection
         p_drift = False
         partial_drift_bool = partial_window_delta > self.partial_alpha
-        for k in np.argwhere(partial_drift_bool):
+        partial_drift_features = np.argwhere(partial_drift_bool).tolist()
+        for k in partial_drift_features:
             p_drift = True
             self.time_since_last_partial_drift[k] = 0
             self.partial_alpha[k] = None
 
-        return g_drift, p_drift
+        return g_drift, p_drift, partial_drift_features
 
     # ----------------------------------------
     # BASE MODELS

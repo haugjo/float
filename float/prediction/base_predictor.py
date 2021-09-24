@@ -12,10 +12,14 @@ class BasePredictor(metaclass=ABCMeta):
         training_times (list): training times per time step
     """
 
-    def __init__(self):
+    def __init__(self, reset_after_drift):
         """
         Initializes the predictor.
+
+        Args:
+            reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
         """
+        self.reset_after_drift = reset_after_drift
         self.testing_times = []
         self.training_times = []
 
@@ -57,5 +61,16 @@ class BasePredictor(metaclass=ABCMeta):
 
         Returns:
             np.ndarray: prediction probability for all samples in X
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def reset(self, X, y):
+        """
+        Reset the predictor.
+
+        Args:
+            X (np.ndarray): data samples to train the model with
+            y (np.ndarray): target values for all samples in X
         """
         raise NotImplementedError

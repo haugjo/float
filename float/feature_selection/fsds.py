@@ -10,22 +10,25 @@ class FSDS(BaseFeatureSelector):
     Based on a paper by Huang et al. (2015). Feature Selection for unsupervised Learning.
     This code is copied from the Python implementation of the authors with minor reductions and adaptations.
     """
-    def __init__(self, n_total_features, n_selected_features, evaluation_metrics=None, l=0, m=None, B=None, k=2):
+    def __init__(self, n_total_features, n_selected_features, l=0, m=None, B=None, k=2,
+                 reset_after_drift=False):
         """
         Initializes the FSDS feature selector.
 
         Args:
             n_total_features (int): total number of features
             n_selected_features (int): number of selected features
-            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             l (int): size of the matrix sketch with l << m
             m (int): size of the feature space
             B (list/np.ndarray): matrix sketch
             k (int): number of singular vectors with k <= ell
+            reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
         """
-        super().__init__(n_total_features, n_selected_features, evaluation_metrics, supports_multi_class=False,
-                         supports_streaming_features=False)
+        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
+                         supports_streaming_features=False, streaming_features=None, reset_after_drift=reset_after_drift)
 
+        self.m_init = m
+        self.B_init = B
         self.m = n_total_features if m is None else m
         self.B = [] if B is None else B
         self.l = l
@@ -88,3 +91,10 @@ class FSDS(BaseFeatureSelector):
         X = np.dot(U[:, :self.k], D)
 
         self.raw_weight_vector = np.amax(abs(X), axis=1)
+
+    def reset(self):
+        """
+         Reset matrix sketch
+        """
+        self.m = self.n_total_features if self.m_init is None else self.m_init
+        self.B = [] if self.B_init is None else self.B_init

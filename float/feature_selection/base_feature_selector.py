@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import warnings
-import traceback
 
 
 class BaseFeatureSelector(metaclass=ABCMeta):
@@ -11,7 +10,6 @@ class BaseFeatureSelector(metaclass=ABCMeta):
     Attributes:
         n_total_features (int): total number of features
         n_selected_features (int): number of selected features
-        evaluation (dict of str: list[float]): a dictionary of metric names and their corresponding metric values as lists
         supports_multi_class (bool): True if model support multi-class classification, False otherwise
         supports_streaming_features (bool): True if model supports streaming features, False otherwise
         raw_weight_vector (np.ndarray): current weights (as produced by feature selection model)
@@ -20,23 +18,22 @@ class BaseFeatureSelector(metaclass=ABCMeta):
         comp_times (list): computation time in all time steps
     """
 
-    def __init__(self, n_total_features, n_selected_features, evaluation_metrics, supports_multi_class,
-                 supports_streaming_features, streaming_features=None):
+    def __init__(self, n_total_features, n_selected_features, supports_multi_class, supports_streaming_features,
+                 streaming_features, reset_after_drift):
         """
         Receives parameters of feature selection model.
 
         Args:
             n_total_features (int): total number of features
             n_selected_features (int): number of selected features
-            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
             supports_multi_class (bool): True if model support multi-class classification, False otherwise
             supports_streaming_features (bool): True if model supports streaming features, False otherwise
-            streaming_features (dict): (time, feature index) tuples to simulate streaming features
+            streaming_features (dict | None): (time, feature index) tuples to simulate streaming features
+            reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
         """
+        self.reset_after_drift = reset_after_drift
         self.n_total_features = n_total_features
         self.n_selected_features = n_selected_features
-        self.evaluation_metrics = evaluation_metrics
-        self.evaluation = {key: [] for key in self.evaluation_metrics.keys()} if evaluation_metrics else {}
 
         self.supports_multi_class = supports_multi_class
         self.supports_streaming_features = supports_streaming_features
@@ -57,6 +54,13 @@ class BaseFeatureSelector(metaclass=ABCMeta):
         Args:
             X (np.ndarray): samples of current batch
             y (np.ndarray): labels of current batch
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def reset(self):
+        """
+        Reset the feature selector.
         """
         raise NotImplementedError
 

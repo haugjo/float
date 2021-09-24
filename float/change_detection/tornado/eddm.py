@@ -16,10 +16,13 @@ class EDDM(BaseChangeDetector):
 
     Attributes:  # Todo: add attribute descriptions
     """
-    def __init__(self):
+    def __init__(self, reset_after_drift=False):
         """ Initialize the concept drift detector
+
+        Args:
+            reset_after_drift (bool): indicates whether to reset the change detector after a drift was detected
         """
-        super().__init__(error_based=True)
+        super().__init__(reset_after_drift=reset_after_drift, error_based=True)
         self.active_change = False
         self.active_warning = False
 
@@ -105,7 +108,7 @@ class EDDM(BaseChangeDetector):
         return self.active_warning
 
     def detected_partial_change(self):
-        pass
+        return False, None
 
     def get_length_estimation(self):
         pass
