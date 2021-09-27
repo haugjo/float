@@ -8,8 +8,7 @@ class BasePredictor(metaclass=ABCMeta):
     user-defined predictive models.
 
     Attributes:
-        testing_times (list): testing times per time step
-        training_times (list): training times per time step
+        reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
     """
 
     def __init__(self, reset_after_drift):
@@ -20,8 +19,6 @@ class BasePredictor(metaclass=ABCMeta):
             reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
         """
         self.reset_after_drift = reset_after_drift
-        self.testing_times = []
-        self.training_times = []
 
     @abstractmethod
     def partial_fit(self, X, y, sample_weight=None):

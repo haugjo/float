@@ -21,6 +21,7 @@ class FeatureSelectionEvaluator(metaclass=ABCMeta):
         """
         self.decay_rate = decay_rate
         self.window_size = window_size
+        self.comp_times = []  # Todo: name all computation times in a standardized way
 
         self.measures = measures
 

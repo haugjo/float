@@ -42,7 +42,6 @@ class BaseFeatureSelector(metaclass=ABCMeta):
         self.raw_weight_vector = np.zeros(self.n_total_features)
         self.weights = []
         self.selection = []
-        self.comp_times = []
         self.selected_features = []
         self._auto_scale = False
 

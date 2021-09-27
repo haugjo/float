@@ -14,6 +14,7 @@ class ChangeDetectionEvaluator(metaclass=ABCMeta):
         n_samples (int): total number of observations
         n_delay (int | list): no. of observations after a known concept drift in which to count detections as true positive
         n_init_tolerance (int): no. of observations used for initial training, not counted for measure
+        comp_times (list): computation time in all time steps
         result (dict): dictionary of results per evaluation measure
     """
     def __init__(self, measures, known_drifts, batch_size, n_samples, n_delay=100, n_init_tolerance=100):
@@ -33,6 +34,7 @@ class ChangeDetectionEvaluator(metaclass=ABCMeta):
         self.n_samples = n_samples
         self.n_delay = n_delay
         self.n_init_tolerance = n_init_tolerance
+        self.comp_times = []
 
         self.result = dict()
         for measure in measures:  # todo: do we need a _validate_func routine for measures from skmultiflow or river?

@@ -11,6 +11,8 @@ class PredictionEvaluator(metaclass=ABCMeta):
     Attributes:
         measures (list): list of evaluation measure functions
         result (dict): dictionary of results per evaluation measure
+        testing_times (list): testing times per time step
+        training_times (list): training times per time step
     """
     def __init__(self, measures, decay_rate=None, window_size=None):
         """ Initialize change detection evaluation measure
@@ -22,6 +24,8 @@ class PredictionEvaluator(metaclass=ABCMeta):
         """
         self.decay_rate = decay_rate
         self.window_size = window_size
+        self.testing_times = []
+        self.training_times = []
 
         self.measures = measures
 

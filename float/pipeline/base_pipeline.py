@@ -146,7 +146,7 @@ class BasePipeline(metaclass=ABCMeta):
         if self.feature_selector:
             start_time = time.time()
             self.feature_selector.weight_features(copy.copy(X_train), copy.copy(y_train))
-            self.feature_selector.comp_times.append(time.time() - start_time)
+            self.feature_selection_evaluator.comp_times.append(time.time() - start_time)
 
             X_train = self.feature_selector.select_features(X_train, self.time_step)
 
@@ -160,14 +160,14 @@ class BasePipeline(metaclass=ABCMeta):
         if self.predictor:
             start_time = time.time()
             y_pred = self.predictor.predict(X_test)
-            self.predictor.testing_times.append(time.time() - start_time)
+            self.prediction_evaluator.testing_times.append(time.time() - start_time)
 
             if not self.time_step == 0 and not self.time_step % self.evaluation_interval:  # Todo: why not evaluate at time step t=0?
                 self.prediction_evaluator.run(y_test, y_pred)
 
             start_time = time.time()
             self.predictor.partial_fit(X_train, y_train)
-            self.predictor.training_times.append(time.time() - start_time)
+            self.prediction_evaluator.training_times.append(time.time() - start_time)
 
         if self.concept_drift_detector:
             start_time = time.time()
@@ -196,7 +196,7 @@ class BasePipeline(metaclass=ABCMeta):
 
             if last_iteration:
                 self.change_detection_evaluator.run(self.concept_drift_detector.global_drifts)
-            self.concept_drift_detector.comp_times.append(time.time() - start_time)
+            self.change_detection_evaluator.comp_times.append(time.time() - start_time)
 
     def _update_progress_bar(self):
         """
@@ -222,7 +222,7 @@ class BasePipeline(metaclass=ABCMeta):
                                                                self.feature_selector.n_total_features))
             print(tabulate({
                 **{'Model': [type(self.feature_selector).__name__.split('.')[-1]],
-                   'Avg. Time': [np.mean(self.feature_selector.comp_times)]},
+                   'Avg. Time': [np.mean(self.feature_selection_evaluator.comp_times)]},
                 **{'Avg. ' + key: [value['mean']] for key, value in self.feature_selection_evaluator.result.items()}
             }
                 , headers="keys", tablefmt='github'))
@@ -234,7 +234,7 @@ class BasePipeline(metaclass=ABCMeta):
                 **{'Model': [type(self.concept_drift_detector.detector).__name__ if type(
                     self.concept_drift_detector) is SkmultiflowChangeDetector else
                              type(self.concept_drift_detector).__name__.split('.')[-1]],
-                   'Avg. Time': [np.mean(self.concept_drift_detector.comp_times)],
+                   'Avg. Time': [np.mean(self.change_detection_evaluator.comp_times)],
                    'Detected Global Drifts': [self.concept_drift_detector.global_drifts] if len(
                        self.concept_drift_detector.global_drifts) <= 5 else [
                        str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]']},
@@ -247,8 +247,8 @@ class BasePipeline(metaclass=ABCMeta):
             print('Prediction:')
             print(tabulate({
                 **{'Model': [type(self.predictor).__name__.split('.')[-1]],
-                   'Avg. Test Time': [np.mean(self.predictor.testing_times)],
-                   'Avg. Train Time': [np.mean(self.predictor.training_times)]},
+                   'Avg. Test Time': [np.mean(self.prediction_evaluator.testing_times)],
+                   'Avg. Train Time': [np.mean(self.prediction_evaluator.training_times)]},
                 **{'Avg. ' + key: [value['mean']] for key, value in self.prediction_evaluator.result.items()}
             }, headers="keys", tablefmt='github'))
         print('#############################################################################')
