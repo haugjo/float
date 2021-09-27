@@ -21,7 +21,7 @@ class BasePipeline(metaclass=ABCMeta):
 
     def __init__(self, data_loader, feature_selector, feature_selection_evaluator, concept_drift_detector,
                  change_detection_evaluator, predictor, prediction_evaluator, max_n_samples, batch_size,
-                 n_pretrain_samples, known_drifts, run, evaluation_interval=None):
+                 n_pretrain_samples, known_drifts, evaluation_interval=None):
         """
         Initializes the pipeline.
 
@@ -37,7 +37,6 @@ class BasePipeline(metaclass=ABCMeta):
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
             known_drifts (list): list of known concept drifts for this stream
-            run (bool): True if the run method should be executed on initialization, False otherwise
             evaluation_interval (int): the interval at which the predictor should be evaluated using the test set
         """
         self.data_loader = data_loader
@@ -65,9 +64,6 @@ class BasePipeline(metaclass=ABCMeta):
         except AttributeError:
             traceback.print_exc(limit=1)
             return
-
-        if run:
-            self.run()
 
     def __check_input(self):
         """
@@ -148,14 +144,9 @@ class BasePipeline(metaclass=ABCMeta):
             self.feature_selector.weight_features(copy.copy(X_train), copy.copy(y_train))
             self.feature_selection_evaluator.comp_times.append(time.time() - start_time)
 
-            X_train = self.feature_selector.select_features(X_train, self.time_step)
+            X_train = self.feature_selector.select_features(X_train)
 
             self.feature_selection_evaluator.run(self.feature_selector.selection, self.feature_selector.n_total_features)
-
-            if self.feature_selector.supports_streaming_features and \
-                    self.time_step in self.feature_selector.streaming_features:
-                print('New streaming features {} at t={}'.format(
-                    self.feature_selector.streaming_features[self.time_step], self.time_step))
 
         if self.predictor:
             start_time = time.time()

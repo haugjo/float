@@ -33,8 +33,7 @@ class FIRES(BaseFeatureSelector):
             model (str): name of the base model to compute the likelihood (default is 'probit')
             reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
         """
-        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
-                         supports_streaming_features=False, streaming_features=None, reset_after_drift=reset_after_drift)
+        super().__init__(n_total_features, n_selected_features, supports_multi_class=False, reset_after_drift=reset_after_drift)
         self.n_total_ftr = n_total_features
         self.classes = classes
         self.mu_init = mu_init

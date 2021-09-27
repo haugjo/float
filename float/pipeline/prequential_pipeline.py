@@ -15,7 +15,7 @@ class PrequentialPipeline(BasePipeline):
     """
     def __init__(self, data_loader, feature_selector=None, feature_selection_evaluator=None, concept_drift_detector=None,
                  change_detection_evaluator=None, predictor=None, prediction_evaluator=None, max_n_samples=100000,
-                 batch_size=100, n_pretrain_samples=100, known_drifts=None, run=False):
+                 batch_size=100, n_pretrain_samples=100, known_drifts=None):
         """
         Initializes the pipeline.
 
@@ -31,11 +31,10 @@ class PrequentialPipeline(BasePipeline):
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
             known_drifts (list): list of known concept drifts for this stream
-            run (bool): True if the run method should be executed on initialization, False otherwise
         """
         super().__init__(data_loader, feature_selector, feature_selection_evaluator, concept_drift_detector,
                          change_detection_evaluator, predictor, prediction_evaluator, max_n_samples, batch_size,
-                         n_pretrain_samples, known_drifts, run)
+                         n_pretrain_samples, known_drifts)
 
     def run(self):
         """

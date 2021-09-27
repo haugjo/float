@@ -26,8 +26,7 @@ class EFS(BaseFeatureSelector):
             beta (float): demotion parameter
             reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
         """
-        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
-                         supports_streaming_features=False, streaming_features=None, reset_after_drift=reset_after_drift)
+        super().__init__(n_total_features, n_selected_features, supports_multi_class=False, reset_after_drift=reset_after_drift)
 
         self.u_init = u
         self.v_init = v
