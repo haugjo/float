@@ -31,7 +31,7 @@ class ERICS(BaseChangeDetector):
             lr_mu (float): learning rate for the gradient update of the mean (according to [2])
             lr_sigma (float): learning rate for the gradient update of the variance (according to [2])
         """
-        # Todo: should we allow to reset_after_drift for consistency and overwrite with warning?
+        # Todo: should we allow to provide reset_after_drift parameter for consistency and overwrite with warning?
         super().__init__(reset_after_drift=False, error_based=False)
         # User-set ERICS-hyperparameters
         self.n_param = n_param
@@ -60,7 +60,6 @@ class ERICS(BaseChangeDetector):
             self.fires_lr_mu = lr_mu
             self.fires_lr_sigma = lr_sigma
             self.fires_labels = []                                          # Unique labels (fires requires binary labels)
-            self.fires_encode_labels = True                                 # Indicator for warning message (auto-encoded labels)
 
         self.global_drift_detected = False
         self.partial_drift_detected = False
@@ -124,7 +123,7 @@ class ERICS(BaseChangeDetector):
         return self.partial_drift_detected, self.partial_drift_features
 
     def detected_warning_zone(self):
-        pass
+        return False
 
     def get_length_estimation(self):
         pass
@@ -245,10 +244,6 @@ class ERICS(BaseChangeDetector):
                 self.fires_labels.append(y_val)
 
         if tuple(self.fires_labels) != (-1, 1):  # Check if labels are encoded correctly
-            if self.fires_encode_labels:
-                warn('FIRES WARNING: The target variable will automatically be encoded as {-1, 1}.')
-                self.fires_encode_labels = False  # set indicator to false
-
             if len(self.fires_labels) < 2:
                 y[y == self.fires_labels[0]] = -1
             elif len(self.fires_labels) == 2:

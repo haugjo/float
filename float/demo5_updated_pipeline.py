@@ -75,14 +75,14 @@ for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_det
                                                known_drifts=known_drifts)
     prequential_pipeline.run()
 
-"""
+
 visualizer = Visualizer(
     [concept_drift_detector.global_drifts for concept_drift_detector in concept_drift_detectors],
     concept_drift_detector_names, 'drift_detection')
 visualizer.draw_concept_drifts(data_loader.stream, known_drifts, batch_size,
                                plot_title=f'Concept Drifts For Data Set spambase, Predictor Perceptron, Feature Selector FIRES')
 plt.show()
-
+"""
 visualizer = Visualizer(
     [cd_eval.result['detected_change_rate']['measures'] for cd_eval in cd_evaluator.values()],
     concept_drift_detector_names, 'change_detection'

@@ -167,6 +167,10 @@ class BasePipeline(metaclass=ABCMeta):
                     self.concept_drift_detector.partial_fit(val)
             else:
                 self.concept_drift_detector.partial_fit(copy.copy(X_train), copy.copy(y_train))
+
+            if self.concept_drift_detector.detected_warning_zone():
+                self.concept_drift_detector.warnings.append(self.time_step)
+
             if self.concept_drift_detector.detected_global_change():
                 print(f"Global change detected at time step {self.time_step}")
                 if self.time_step not in self.concept_drift_detector.global_drifts:  # Todo: is this if-clause really necessary?
@@ -185,9 +189,9 @@ class BasePipeline(metaclass=ABCMeta):
                 if self.time_step not in self.concept_drift_detector.partial_drifts:  # Todo: is this if-clause really necessary?
                     self.concept_drift_detector.partial_drifts.append((self.time_step, partial_change_features))
 
+            self.change_detection_evaluator.comp_times.append(time.time() - start_time)
             if last_iteration:
                 self.change_detection_evaluator.run(self.concept_drift_detector.global_drifts)
-            self.change_detection_evaluator.comp_times.append(time.time() - start_time)
 
     def _update_progress_bar(self):
         """

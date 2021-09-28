@@ -21,7 +21,7 @@ class FIRES(BaseFeatureSelector):
         Args:
             n_total_features (int): total number of features
             n_selected_features (int): number of selected features
-            classes (np.ndarray): unique target values (class labels)
+            classes (list): unique target values (class labels)
             mu_init (int | np.ndarray): initial importance parameter
             sigma_init (int | np.ndarray): initial uncertainty parameter
             penalty_s (float): penalty factor for the uncertainty (corresponds to gamma_s in the paper)
@@ -47,18 +47,6 @@ class FIRES(BaseFeatureSelector):
         self.lr_sigma = lr_sigma
         self.scale_weights = scale_weights
         self.model = model
-
-        # Additional model-specific parameters
-        self.model_param = {}
-
-        # Probit model
-        if self.model == 'probit' and tuple(classes) != (-1, 1):
-            if len(np.unique(classes)) == 2:
-                self.model_param['probit'] = True  # Indicates that we need to encode the target variable into {-1,1}
-                warn('FIRES WARNING: The target variable will be encoded as: {} = -1, {} = 1'.format(
-                    self.classes[0], self.classes[1]))
-            else:
-                raise ValueError('The target variable y must be binary.')
 
     def weight_features(self, X, y):
         """
@@ -102,17 +90,25 @@ class FIRES(BaseFeatureSelector):
             X (np.ndarray): batch of observations (numeric values only, consider normalizing data for better results)
             y (np.ndarray): batch of labels: type binary, i.e. {-1,1} (bool, int or str will be encoded accordingly)
         """
+        # Encode labels
+        for y_val in np.unique(y):  # Add newly observed unique labels
+            if y_val not in set(self.classes):
+                self.classes.append(y_val)
+
+        if tuple(self.classes) != (-1, 1):  # Check if labels are encoded correctly
+            if len(self.classes) < 2:
+                y[y == self.classes[0]] = -1
+            elif len(self.classes) == 2:
+                y[y == self.classes[0]] = -1
+                y[y == self.classes[1]] = 1
+            else:
+                raise ValueError('The target variable y must be binary.')
 
         for epoch in range(self.epochs):
             # Shuffle the observations
             random_idx = np.random.permutation(len(y))
             X = X[random_idx]
             y = y[random_idx]
-
-            # Encode target as {-1,1}
-            if 'probit' in self.model_param:
-                y[y == self.classes[0]] = -1
-                y[y == self.classes[1]] = 1
 
             # Iterative update of mu and sigma
             try:

@@ -9,6 +9,7 @@ class BaseChangeDetector(metaclass=ABCMeta):
         error_based (bool): indicates whether change detector relies on error measures obtained from a predictor
         global_drifts (list): time steps where a global concept drift was detected
         partial_drifts (list): time steps and features where a partial concept drift was detected
+        warnings (list): time steps where a global warning was issued
     """
     def __init__(self, reset_after_drift, error_based=False):
         """
@@ -23,6 +24,7 @@ class BaseChangeDetector(metaclass=ABCMeta):
 
         self.global_drifts = []
         self.partial_drifts = []
+        self.warnings = []
 
     @abstractmethod
     def reset(self):
