@@ -17,6 +17,7 @@ from float.feature_selection import FIRES
 from float.pipeline import PrequentialPipeline
 from float.prediction import SkmultiflowClassifier
 from float.prediction.evaluation import PredictionEvaluator
+from float.prediction.evaluation.measures import noise_variability
 from float.visualization import Visualizer
 
 ### Initialize Data Loader ###
@@ -40,7 +41,10 @@ cd_evaluator = dict()
 for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names, concept_drift_detectors):
     ### Initialize Predictor ###
     predictor = SkmultiflowClassifier(PerceptronMask(), data_loader.stream.target_values, reset_after_drift=True)  # todo: can we get rid of the target values parameter?
-    pred_evaluator = PredictionEvaluator([accuracy_score, zero_one_loss], decay_rate=0.1, window_size=10)
+    pred_evaluator = PredictionEvaluator([accuracy_score, noise_variability],
+                                         decay_rate=0.1,
+                                         window_size=10,
+                                         reference_measure=zero_one_loss)
 
     ### Initialize Feature Selection ###
     f_selector = FIRES(n_total_features=data_loader.stream.n_features,

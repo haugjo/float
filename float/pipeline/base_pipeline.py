@@ -154,7 +154,7 @@ class BasePipeline(metaclass=ABCMeta):
             self.prediction_evaluator.testing_times.append(time.time() - start_time)
 
             if not self.time_step == 0 and not self.time_step % self.evaluation_interval:  # Todo: why not evaluate at time step t=0?
-                self.prediction_evaluator.run(y_test, y_pred)
+                self.prediction_evaluator.run(y_test, y_pred, X_test, self.predictor)
 
             start_time = time.time()
             self.predictor.partial_fit(X_train, y_train)

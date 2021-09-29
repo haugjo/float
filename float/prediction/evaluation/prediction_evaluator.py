@@ -2,6 +2,8 @@ from abc import ABCMeta
 import traceback
 import numpy as np
 import inspect
+import copy
+from float.prediction import BasePredictor
 
 
 class PredictionEvaluator(metaclass=ABCMeta):
@@ -14,24 +16,27 @@ class PredictionEvaluator(metaclass=ABCMeta):
         testing_times (list): testing times per time step
         training_times (list): training times per time step
     """
-    def __init__(self, measures, decay_rate=None, window_size=None):
+
+    def __init__(self, measures, decay_rate=None, window_size=None, **kwargs):
         """ Initialize change detection evaluation measure
 
         Args:
             measures (list): list of evaluation measure functions
             decay_rate (float | None): when this parameter is set, the metric values are additionally aggregated with a decay/fading factor
             window_size (int | None): when this parameter is set, the metric values are additionally aggregated in a sliding window
+            kwargs: additional keyword arguments for the given measures
         """
         self.decay_rate = decay_rate
         self.window_size = window_size
+        self.kwargs = kwargs
+        self.measures = measures  # Todo: name measure_funcs
+
         self.testing_times = []
         self.training_times = []
 
-        self.measures = measures
-
         self.result = dict()
         for measure in measures:
-            self._validate_func(measure)
+            self._validate_func(measure, kwargs)
 
             self.result[measure.__name__] = dict()
             self.result[measure.__name__]['measures'] = []
@@ -44,17 +49,31 @@ class PredictionEvaluator(metaclass=ABCMeta):
                 self.result[measure.__name__]['mean_window'] = []
                 self.result[measure.__name__]['var_window'] = []
 
-    def run(self, y_true, y_pred):
+    def run(self, y_true, y_pred, X, predictor):
         """
         Compute and save each evaluation measure
 
         Args:
             y_true (list | np.array): true target label
             y_pred (list | np.array): predicted target label
+            X (np.array): matrix of observations
+            predictor (BasePredictor): predictor object
         """
+        self.kwargs['y_true'] = copy.copy(y_true)
+        self.kwargs['y_pred'] = copy.copy(y_pred)
+        self.kwargs['X'] = copy.copy(X)
+        self.kwargs['predictor'] = copy.deepcopy(predictor)
+
         for measure in self.measures:  # run each evaluation measure
             try:
-                new_measure = measure(y_true, y_pred)
+                # Get relevant keyword arguments
+                call_args = dict()
+                for arg in inspect.signature(measure).parameters.values():
+                    if arg.name in self.kwargs.keys():
+                        call_args[arg.name] = self.kwargs[arg.name]
+
+                # Make function call and save measurement
+                new_measure = measure(**call_args)
                 self.result[measure.__name__]['measures'].append(new_measure)
                 self.result[measure.__name__]['mean'] = np.mean(self.result[measure.__name__]['measures'])
                 self.result[measure.__name__]['var'] = np.var(self.result[measure.__name__]['measures'])
@@ -66,7 +85,8 @@ class PredictionEvaluator(metaclass=ABCMeta):
                             self.result[measure.__name__]['mean_decay'][-1] + self.decay_rate * delta
                         )
                         self.result[measure.__name__]['var_decay'].append(
-                            (1 - self.decay_rate) * (self.result[measure.__name__]['var_decay'][-1] + self.decay_rate * delta ** 2)
+                            (1 - self.decay_rate) * (
+                                        self.result[measure.__name__]['var_decay'][-1] + self.decay_rate * delta ** 2)
                         )
                     else:
                         self.result[measure.__name__]['mean_decay'].append(new_measure)
@@ -84,14 +104,22 @@ class PredictionEvaluator(metaclass=ABCMeta):
                 continue
 
     @staticmethod
-    def _validate_func(func):
+    def _validate_func(func, kwargs):
         """
         Validate the provided metric function
 
         Args:
             func (function): evaluation/metric function
+            kwargs (dict): additional keyword arguments for the given measures
         """
-        args = list(inspect.signature(func).parameters.keys())[:2]
-        if not callable(func) or not args == ['y_true', 'y_pred']:
-            raise TypeError("Metric function {} is not supported. Please provide only valid metric functions "
-                            "with parameters 'y_true' and 'y_pred'.".format(func.__name__))
+        if not callable(func):
+            raise TypeError("Please provide a valid metric function.")
+
+        param_list = list(kwargs.keys())
+        param_list.extend(['y_true', 'y_pred', 'X', 'predictor'])  # Note: arguments will be provided by the evaluator
+
+        for arg in inspect.signature(func).parameters.values():
+            if arg.default is arg.empty and arg.name not in param_list:
+                raise TypeError("The non-keyword argument '{}' of the evaluation measure '{}' has not been provided. "
+                                "Please provide the parameter in the constructor of the PredictionEvaluator object "
+                                "or use another evaluation measure.".format(arg.name, func.__name__, arg.name))
