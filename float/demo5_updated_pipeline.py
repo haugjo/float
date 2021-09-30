@@ -29,7 +29,7 @@ batch_size = 10
 feature_names = data_loader.stream.feature_names
 
 concept_drift_detector_names = ['ADWIN', 'EDDM', 'DDM_sk', 'DDM', 'ERICS', 'Page Hinkley']  # Todo: Remove, and use class names instead?
-concept_drift_detectors = [SkmultiflowChangeDetector(ADWIN(delta=0.6), reset_after_drift=False),
+concept_drift_detectors = [#SkmultiflowChangeDetector(ADWIN(delta=0.6), reset_after_drift=False),
                            #SkmultiflowChangeDetector(EDDM(), reset_after_drift=True),
                            #SkmultiflowChangeDetector(DDM_scikit(), reset_after_drift=True),
                            #DDM(reset_after_drift=True),
@@ -49,10 +49,14 @@ for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_det
                                          interval=10)
 
     ### Initialize Feature Selection ###
+    ref_sample, _ = data_loader.stream.next_sample(50)
+    data_loader.stream.reset()
     f_selector = FIRES(n_total_features=data_loader.stream.n_features,
                        n_selected_features=20,
                        classes=data_loader.stream.target_values,
-                       reset_after_drift=False)
+                       reset_after_drift=False,
+                       baseline='expectation',
+                       ref_sample=ref_sample)
     fs_evaluator = FeatureSelectionEvaluator([nogueira_stability])
 
     ### Initialize Concept Drift Detector ###
@@ -108,7 +112,7 @@ plt.show()
 """
 visualizer = Visualizer(
     [pred_evaluator.result['mean_drift_performance_decay']['measures']],
-    ['Change Performance Decay'],
+    ['Drift Performance Decay'],
     'prediction')
 visualizer.plot(
     plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',

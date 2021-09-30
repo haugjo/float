@@ -10,7 +10,7 @@ class OFS(BaseFeatureSelector):
     Based on a paper by Wang et al. 2014. Feature Selection for binary classification.
     This code is an adaptation of the official Matlab implementation.
     """
-    def __init__(self, n_total_features, n_selected_features, reset_after_drift=False):
+    def __init__(self, n_total_features, n_selected_features, reset_after_drift=False, baseline='constant', ref_sample=0):
         """
         Initializes the OFS feature selector.
 
@@ -18,8 +18,11 @@ class OFS(BaseFeatureSelector):
             n_total_features (int): total number of features
             n_selected_features (int): number of selected features
             reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
+            baseline (str): identifier of baseline method (value to replace non-selected features with)
+            ref_sample (float | np.array): integer (in case of 'constant' baseline) or sample used to obtain the baseline
         """
-        super().__init__(n_total_features, n_selected_features, supports_multi_class=False, reset_after_drift=reset_after_drift)
+        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
+                         reset_after_drift=reset_after_drift, baseline=baseline, ref_sample=ref_sample)
 
     def weight_features(self, X, y):
         """

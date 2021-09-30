@@ -13,8 +13,9 @@ class FIRES(BaseFeatureSelector):
     In Proceedings of the 26th ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD ’20),
     August 23–27, 2020, Virtual Event, CA, USA.
     """
-    def __init__(self, n_total_features, n_selected_features, classes, mu_init=0, sigma_init=1, penalty_s=0.01, penalty_r=0.01, epochs=1,
-                 lr_mu=0.01, lr_sigma=0.01, scale_weights=True, model='probit', reset_after_drift=False):
+    def __init__(self, n_total_features, n_selected_features, classes, mu_init=0, sigma_init=1, penalty_s=0.01,
+                 penalty_r=0.01, epochs=1, lr_mu=0.01, lr_sigma=0.01, scale_weights=True, model='probit',
+                 reset_after_drift=False, baseline='constant', ref_sample=0):
         """
         Initializes the FIRES feature selector.
 
@@ -32,8 +33,11 @@ class FIRES(BaseFeatureSelector):
             scale_weights (bool): if True, scale feature weights into the range [0,1]
             model (str): name of the base model to compute the likelihood (default is 'probit')
             reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
+            baseline (str): identifier of baseline method (value to replace non-selected features with)
+            ref_sample (float | np.array): sample used to obtain the baseline (not required for 'zero' baseline)
         """
-        super().__init__(n_total_features, n_selected_features, supports_multi_class=False, reset_after_drift=reset_after_drift)
+        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
+                         reset_after_drift=reset_after_drift, baseline=baseline, ref_sample=ref_sample)
         self.n_total_ftr = n_total_features
         self.classes = classes
         self.mu_init = mu_init
