@@ -1,9 +1,10 @@
 import numpy as np
 import copy
+from sklearn.metrics import zero_one_loss
 
 
-def noise_variability(y_true, y_pred, X, predictor, reference_measure, cont_noise_loc=0, cont_noise_scale=0.1,
-                    cat_features=None, cat_noise_dist=None, n_samples=10):
+def noise_variability(y_true, y_pred, X, predictor, reference_measure=zero_one_loss, cont_noise_loc=0,
+                      cont_noise_scale=0.1, cat_features=None, cat_noise_dist=None, n_samples=10):
     """
     Variability Under Input Noise (as indication of algorithmic stability).
     Return the mean divergence (difference) from the original loss for n input perturbations.
@@ -12,7 +13,7 @@ def noise_variability(y_true, y_pred, X, predictor, reference_measure, cont_nois
         y_true (list | np.array): true target label
         y_pred (list | np.array): predicted target label
         X (np.array): matrix of observations
-        reference_measure (function): loss measure function
+        reference_measure (function): evaluation measure function
         predictor (BasePredictor): predictor object
         cont_noise_loc (float): location (mean) of normal distribution from which to sample noise for continuous features
         cont_noise_scale (float): scale (variance) of normal distribution from which to sample noise for continuous features

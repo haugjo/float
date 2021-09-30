@@ -63,6 +63,7 @@ class PredictionEvaluator(metaclass=ABCMeta):
         self.kwargs['y_pred'] = copy.copy(y_pred)
         self.kwargs['X'] = copy.copy(X)
         self.kwargs['predictor'] = copy.deepcopy(predictor)
+        self.kwargs['result'] = copy.deepcopy(self.result)
 
         for measure in self.measures:  # run each evaluation measure
             try:
@@ -116,10 +117,10 @@ class PredictionEvaluator(metaclass=ABCMeta):
             raise TypeError("Please provide a valid metric function.")
 
         param_list = list(kwargs.keys())
-        param_list.extend(['y_true', 'y_pred', 'X', 'predictor'])  # Note: arguments will be provided by the evaluator
+        param_list.extend(['y_true', 'y_pred', 'X', 'predictor', 'result'])  # Note: arguments will be provided by the evaluator
 
         for arg in inspect.signature(func).parameters.values():
             if arg.default is arg.empty and arg.name not in param_list:
-                raise TypeError("The non-keyword argument '{}' of the evaluation measure '{}' has not been provided. "
-                                "Please provide the parameter in the constructor of the PredictionEvaluator object "
-                                "or use another evaluation measure.".format(arg.name, func.__name__, arg.name))
+                raise AttributeError("The non-keyword argument '{}' of the evaluation measure '{}' has not been provided. "
+                                     "Please provide the parameter in the constructor of the PredictionEvaluator object "
+                                     "or use another evaluation measure.".format(arg.name, func.__name__, arg.name))

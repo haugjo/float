@@ -17,7 +17,7 @@ from float.feature_selection import FIRES
 from float.pipeline import PrequentialPipeline
 from float.prediction import SkmultiflowClassifier
 from float.prediction.evaluation import PredictionEvaluator
-from float.prediction.evaluation.measures import noise_variability
+from float.prediction.evaluation.measures import noise_variability, mean_drift_performance_decay
 from float.visualization import Visualizer
 
 ### Initialize Data Loader ###
@@ -30,10 +30,10 @@ feature_names = data_loader.stream.feature_names
 
 concept_drift_detector_names = ['ADWIN', 'EDDM', 'DDM_sk', 'DDM', 'ERICS', 'Page Hinkley']  # Todo: Remove, and use class names instead?
 concept_drift_detectors = [SkmultiflowChangeDetector(ADWIN(delta=0.6), reset_after_drift=False),
-                           SkmultiflowChangeDetector(EDDM(), reset_after_drift=True),
-                           SkmultiflowChangeDetector(DDM_scikit(), reset_after_drift=True),
-                           DDM(reset_after_drift=True),
-                           ERICS(data_loader.stream.n_features),
+                           #SkmultiflowChangeDetector(EDDM(), reset_after_drift=True),
+                           #SkmultiflowChangeDetector(DDM_scikit(), reset_after_drift=True),
+                           #DDM(reset_after_drift=True),
+                           #ERICS(data_loader.stream.n_features),
                            PageHinkley(reset_after_drift=True)]
 
 cd_evaluator = dict()
@@ -41,10 +41,12 @@ cd_evaluator = dict()
 for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names, concept_drift_detectors):
     ### Initialize Predictor ###
     predictor = SkmultiflowClassifier(PerceptronMask(), data_loader.stream.target_values, reset_after_drift=True)  # todo: can we get rid of the target values parameter?
-    pred_evaluator = PredictionEvaluator([accuracy_score, noise_variability],
+    pred_evaluator = PredictionEvaluator([zero_one_loss, mean_drift_performance_decay],  #   noise_variability
                                          decay_rate=0.1,
                                          window_size=10,
-                                         reference_measure=zero_one_loss)
+                                         known_drifts=known_drifts,
+                                         batch_size=batch_size,
+                                         interval=25)
 
     ### Initialize Feature Selection ###
     f_selector = FIRES(n_total_features=data_loader.stream.n_features,
@@ -79,14 +81,14 @@ for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_det
                                                known_drifts=known_drifts)
     prequential_pipeline.run()
 
-
+"""
 visualizer = Visualizer(
     [concept_drift_detector.global_drifts for concept_drift_detector in concept_drift_detectors],
     concept_drift_detector_names, 'drift_detection')
 visualizer.draw_concept_drifts(data_loader.stream, known_drifts, batch_size,
                                plot_title=f'Concept Drifts For Data Set spambase, Predictor Perceptron, Feature Selector FIRES')
 plt.show()
-"""
+
 visualizer = Visualizer(
     [cd_eval.result['detected_change_rate']['measures'] for cd_eval in cd_evaluator.values()],
     concept_drift_detector_names, 'change_detection'
@@ -104,6 +106,23 @@ visualizer.plot(
     smooth_curve=[False, False, True])
 plt.show()
 """
+visualizer = Visualizer(
+    [pred_evaluator.result['mean_drift_performance_decay']['measures']],
+    ['Change Performance Decay'],
+    'prediction')
+visualizer.plot(
+    plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',
+    smooth_curve=[False])
+plt.show()
+
+visualizer = Visualizer(
+    [pred_evaluator.result['zero_one_loss']['measures']],
+    ['Zero One Loss'],
+    'prediction')
+visualizer.plot(
+    plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',
+    smooth_curve=[False])
+plt.show()
 
 visualizer = Visualizer(
     [f_selector.selection], ['FIRES'], 'feature_selection')
