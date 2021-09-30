@@ -17,7 +17,7 @@ from float.feature_selection import FIRES
 from float.pipeline import PrequentialPipeline
 from float.prediction import SkmultiflowClassifier
 from float.prediction.evaluation import PredictionEvaluator
-from float.prediction.evaluation.measures import noise_variability, mean_drift_performance_decay
+from float.prediction.evaluation.measures import noise_variability, mean_drift_performance_decay, mean_drift_recovery_time
 from float.visualization import Visualizer
 
 ### Initialize Data Loader ###
@@ -41,12 +41,12 @@ cd_evaluator = dict()
 for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names, concept_drift_detectors):
     ### Initialize Predictor ###
     predictor = SkmultiflowClassifier(PerceptronMask(), data_loader.stream.target_values, reset_after_drift=True)  # todo: can we get rid of the target values parameter?
-    pred_evaluator = PredictionEvaluator([zero_one_loss, mean_drift_performance_decay],  #   noise_variability
+    pred_evaluator = PredictionEvaluator([zero_one_loss, mean_drift_performance_decay, mean_drift_recovery_time],  #   noise_variability
                                          decay_rate=0.1,
                                          window_size=10,
                                          known_drifts=known_drifts,
                                          batch_size=batch_size,
-                                         interval=25)
+                                         interval=10)
 
     ### Initialize Feature Selection ###
     f_selector = FIRES(n_total_features=data_loader.stream.n_features,
@@ -116,8 +116,8 @@ visualizer.plot(
 plt.show()
 
 visualizer = Visualizer(
-    [pred_evaluator.result['zero_one_loss']['measures']],
-    ['Zero One Loss'],
+    [pred_evaluator.result['mean_drift_recovery_time']['measures']],
+    ['Drift Recovery Time'],
     'prediction')
 visualizer.plot(
     plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',

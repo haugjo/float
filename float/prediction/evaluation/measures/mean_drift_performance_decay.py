@@ -16,7 +16,7 @@ def mean_drift_performance_decay(result, known_drifts, batch_size, reference_mea
         interval (int): interval after known conept drifts to investigate performance decay
 
     Returns:
-        float: mean performance decay after current (known) concept drifts regarding the reference measure
+        float: current mean performance decay after (known) concept drifts regarding the reference measure
     """
     init_interval = interval
     len_result = len(result[reference_measure.__name__]['measures'])
