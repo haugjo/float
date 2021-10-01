@@ -177,6 +177,8 @@ class BasePipeline(metaclass=ABCMeta):
                     self.concept_drift_detector.global_drifts.append(self.time_step)
 
                 # Reset modules
+                if self.data_loader.scaler.reset_after_drift:
+                    self.data_loader.scaler.reset()
                 if self.feature_selector.reset_after_drift:
                     self.feature_selector.reset()
                 if self.predictor.reset_after_drift:

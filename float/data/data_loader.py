@@ -1,5 +1,6 @@
 from skmultiflow.data.file_stream import FileStream
 from skmultiflow.data.base_stream import Stream
+from float.data.scaling import BaseScaler
 import numpy as np
 
 
@@ -9,8 +10,11 @@ class DataLoader:
 
     Attributes:
         stream (Stream): data stream object
+        file_path (str): path to a .csv file containing the data
+        target_col (int): index of the target column of the .csv file
+        scaler (None | BaseScaler): identifier of a normalization/standardization technique
     """
-    def __init__(self, stream=None, file_path=None, target_col=-1):
+    def __init__(self, stream=None, file_path=None, target_col=-1, scaler=None):
         """
         Receives either the path to a csv file (+ a target index) which is then mapped to a skmultiflow FileStream
         object OR a skmultiflow Stream object.
@@ -19,10 +23,12 @@ class DataLoader:
             stream (skmultiflow.data.base_stream.Stream | None): data stream object
             file_path (str): path to a .csv file containing the data
             target_col (int): index of the target column of the .csv file
+            scaler (None | BaseScaler): identifier of a normalization/standardization technique
         """
         self.stream = stream
         self.target_col = target_col
         self.file_path = file_path
+        self.scaler = scaler
         self.__check_input()
         self.stream = stream if stream else FileStream(self.file_path, self.target_col)
 
@@ -37,7 +43,13 @@ class DataLoader:
         Returns:
             (np.ndarray, np.ndarray): data samples and targets
         """
-        return self.stream.next_sample(n_samples)
+        X, y = self.stream.next_sample(n_samples)
+
+        if self.scaler:
+            self.scaler.partial_fit(X)
+            X = self.scaler.transform(X)
+
+        return X, y
 
     def __check_input(self):
         """

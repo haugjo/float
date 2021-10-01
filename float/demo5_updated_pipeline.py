@@ -4,8 +4,10 @@ from skmultiflow.drift_detection.ddm import DDM as DDM_scikit
 from skmultiflow.neural_networks.perceptron import PerceptronMask
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, zero_one_loss
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, Normalizer
 
 from float.data import DataLoader
+from float.data.scaling import SklearnScaler
 from float.change_detection import ERICS, SkmultiflowChangeDetector
 from float.change_detection.tornado import PageHinkley, DDM
 from float.change_detection.evaluation import ChangeDetectionEvaluator
@@ -21,7 +23,8 @@ from float.prediction.evaluation.measures import noise_variability, mean_drift_p
 from float.visualization import Visualizer
 
 ### Initialize Data Loader ###
-data_loader = DataLoader(None, f'data/datasets/spambase.csv', target_col=0)
+scaler = SklearnScaler(scaler_obj=MinMaxScaler(), reset_after_drift=False)
+data_loader = DataLoader(None, f'data/datasets/spambase.csv', target_col=0, scaler=scaler)
 
 known_drifts = [round(data_loader.stream.n_samples * 0.2), round(data_loader.stream.n_samples * 0.4),
                 round(data_loader.stream.n_samples * 0.6), round(data_loader.stream.n_samples * 0.8)]
