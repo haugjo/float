@@ -15,7 +15,7 @@ class BaseFeatureSelector(metaclass=ABCMeta):
         weights (list): absolute weights in all time steps
         selection (list): indices of selected features in all time steps
         baseline (str): identifier of baseline method (value to replace non-selected features with)
-        ref_sample (float | np.array): sample used to obtain the baseline (not required for 'zero' baseline)
+        ref_sample (float | np.ndarray): sample used to obtain the baseline (not required for 'zero' baseline)
     """
 
     def __init__(self, n_total_features, n_selected_features, supports_multi_class, reset_after_drift, baseline, ref_sample):
@@ -28,7 +28,7 @@ class BaseFeatureSelector(metaclass=ABCMeta):
             supports_multi_class (bool): True if model support multi-class classification, False otherwise
             reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
             baseline (str): identifier of baseline method (value to replace non-selected features with)
-            ref_sample (float | np.array): integer (in case of 'constant' baseline) or sample used to obtain the baseline
+            ref_sample (float | np.ndarray): integer (in case of 'constant' baseline) or sample used to obtain the baseline
         """
         self.reset_after_drift = reset_after_drift
         self.n_total_features = n_total_features

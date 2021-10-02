@@ -24,7 +24,7 @@ class FSDS(BaseFeatureSelector):
             k (int): number of singular vectors with k <= ell
             reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
             baseline (str): identifier of baseline method (value to replace non-selected features with)
-            ref_sample (float | np.array): integer (in case of 'constant' baseline) or sample used to obtain the baseline
+            ref_sample (float | np.ndarray): integer (in case of 'constant' baseline) or sample used to obtain the baseline
         """
         super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
                          reset_after_drift=reset_after_drift, baseline=baseline, ref_sample=ref_sample)

@@ -34,7 +34,7 @@ class FIRES(BaseFeatureSelector):
             model (str): name of the base model to compute the likelihood (default is 'probit')
             reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
             baseline (str): identifier of baseline method (value to replace non-selected features with)
-            ref_sample (float | np.array): sample used to obtain the baseline (not required for 'zero' baseline)
+            ref_sample (float | np.ndarray): sample used to obtain the baseline (not required for 'zero' baseline)
         """
         super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
                          reset_after_drift=reset_after_drift, baseline=baseline, ref_sample=ref_sample)
