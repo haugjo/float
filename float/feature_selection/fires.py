@@ -2,10 +2,10 @@ import numpy as np
 from warnings import warn
 from scipy.stats import norm
 from sklearn.preprocessing import MinMaxScaler
-from float.feature_selection.feature_selector import FeatureSelector
+from float.feature_selection.base_feature_selector import BaseFeatureSelector
 
 
-class FIRES(FeatureSelector):
+class FIRES(BaseFeatureSelector):
     """
     FIRES: Fast, Interpretable and Robust Evaluation and Selection of features
 
@@ -13,16 +13,16 @@ class FIRES(FeatureSelector):
     In Proceedings of the 26th ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD ’20),
     August 23–27, 2020, Virtual Event, CA, USA.
     """
-    def __init__(self, n_total_features, n_selected_features, classes, evaluation_metrics=None, mu_init=0, sigma_init=1, penalty_s=0.01, penalty_r=0.01, epochs=1,
-                 lr_mu=0.01, lr_sigma=0.01, scale_weights=True, model='probit'):
+    def __init__(self, n_total_features, n_selected_features, classes, mu_init=0, sigma_init=1, penalty_s=0.01,
+                 penalty_r=0.01, epochs=1, lr_mu=0.01, lr_sigma=0.01, scale_weights=True, model='probit',
+                 reset_after_drift=False, baseline='constant', ref_sample=0):
         """
         Initializes the FIRES feature selector.
 
         Args:
             n_total_features (int): total number of features
             n_selected_features (int): number of selected features
-            classes (np.ndarray): unique target values (class labels)
-            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
+            classes (list): unique target values (class labels)
             mu_init (int | np.ndarray): initial importance parameter
             sigma_init (int | np.ndarray): initial uncertainty parameter
             penalty_s (float): penalty factor for the uncertainty (corresponds to gamma_s in the paper)
@@ -32,11 +32,16 @@ class FIRES(FeatureSelector):
             lr_sigma (float): learning rate for the gradient update of the uncertainty
             scale_weights (bool): if True, scale feature weights into the range [0,1]
             model (str): name of the base model to compute the likelihood (default is 'probit')
+            reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
+            baseline (str): identifier of baseline method (value to replace non-selected features with)
+            ref_sample (float | np.array): sample used to obtain the baseline (not required for 'zero' baseline)
         """
-        super().__init__(n_total_features, n_selected_features, evaluation_metrics, supports_multi_class=False,
-                         supports_streaming_features=False)
+        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
+                         reset_after_drift=reset_after_drift, baseline=baseline, ref_sample=ref_sample)
         self.n_total_ftr = n_total_features
         self.classes = classes
+        self.mu_init = mu_init
+        self.sigma_init = sigma_init
         self.mu = np.ones(n_total_features) * mu_init
         self.sigma = np.ones(n_total_features) * sigma_init
         self.penalty_s = penalty_s
@@ -46,18 +51,6 @@ class FIRES(FeatureSelector):
         self.lr_sigma = lr_sigma
         self.scale_weights = scale_weights
         self.model = model
-
-        # Additional model-specific parameters
-        self.model_param = {}
-
-        # Probit model
-        if self.model == 'probit' and tuple(classes) != (-1, 1):
-            if len(np.unique(classes)) == 2:
-                self.model_param['probit'] = True  # Indicates that we need to encode the target variable into {-1,1}
-                warn('FIRES WARNING: The target variable will be encoded as: {} = -1, {} = 1'.format(
-                    self.classes[0], self.classes[1]))
-            else:
-                raise ValueError('The target variable y must be binary.')
 
     def weight_features(self, X, y):
         """
@@ -73,10 +66,6 @@ class FIRES(FeatureSelector):
         # Update estimates of mu and sigma given the predictive model
         if self.model == 'probit':
             self.__probit(X, y)
-        # ### ADD YOUR OWN MODEL HERE ##################################################
-        # elif self.model == 'your_model':
-        #    self.__yourModel(x, y)
-        ################################################################################
         else:
             raise NotImplementedError('The given model name does not exist')
 
@@ -88,6 +77,13 @@ class FIRES(FeatureSelector):
         # Compute feature weights
         self.raw_weight_vector = self.__compute_weights()
 
+    def reset(self):
+        """
+        Reset the parameter distribution
+        """
+        self.mu = np.ones(self.n_total_features) * self.mu_init
+        self.sigma = np.ones(self.n_total_features) * self.sigma_init
+
     def __probit(self, X, y):
         """
         Updates the distribution parameters mu and sigma by optimizing them in terms of the (log) likelihood.
@@ -98,17 +94,25 @@ class FIRES(FeatureSelector):
             X (np.ndarray): batch of observations (numeric values only, consider normalizing data for better results)
             y (np.ndarray): batch of labels: type binary, i.e. {-1,1} (bool, int or str will be encoded accordingly)
         """
+        # Encode labels
+        for y_val in np.unique(y):  # Add newly observed unique labels
+            if y_val not in set(self.classes):
+                self.classes.append(y_val)
+
+        if tuple(self.classes) != (-1, 1):  # Check if labels are encoded correctly
+            if len(self.classes) < 2:
+                y[y == self.classes[0]] = -1
+            elif len(self.classes) == 2:
+                y[y == self.classes[0]] = -1
+                y[y == self.classes[1]] = 1
+            else:
+                raise ValueError('The target variable y must be binary.')
 
         for epoch in range(self.epochs):
             # Shuffle the observations
             random_idx = np.random.permutation(len(y))
             X = X[random_idx]
             y = y[random_idx]
-
-            # Encode target as {-1,1}
-            if 'probit' in self.model_param:
-                y[y == self.classes[0]] = -1
-                y[y == self.classes[1]] = 1
 
             # Iterative update of mu and sigma
             try:

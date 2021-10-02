@@ -13,7 +13,7 @@ feature_names = data_loader.stream.feature_names
 
 ### Initialize Feature Selectors ###
 fs_metrics = {'Nogueira Stability Measure': (
-    feature_selection.feature_selector.FeatureSelector.get_nogueira_stability,
+    feature_selection.base_feature_selector.FeatureSelector.get_nogueira_stability,
     {'n_total_features': data_loader.stream.n_features, 'nogueira_window_size': 10})}
 
 feature_selector_names = ['FIRES', 'OFS']
@@ -24,11 +24,11 @@ feature_selectors = [
                               evaluation_metrics=fs_metrics)]
 
 ### Initialize Predictor ###
-predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
-                                                                    data_loader.stream.target_values,
-                                                                    evaluation_metrics={'Accuracy': accuracy_score,
+predictor = float.prediction.evaluation.skmultiflow.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
+                                                                                                 data_loader.stream.target_values,
+                                                                                                 evaluation_metrics={'Accuracy': accuracy_score,
                                                                                         '0-1 Loss': zero_one_loss},
-                                                                    decay_rate=0.5, window_size=5)
+                                                                                                 decay_rate=0.5, window_size=5)
 
 for feature_selector_name, feature_selector in zip(feature_selector_names, feature_selectors):
     ### Initialize and run Prequential Pipeline ###

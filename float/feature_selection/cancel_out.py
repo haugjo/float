@@ -1,25 +1,33 @@
-from float.feature_selection.feature_selector import FeatureSelector
+from float.feature_selection.base_feature_selector import BaseFeatureSelector
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
 import numpy as np
 
 
-class CancelOutFeatureSelector(FeatureSelector):
-    def __init__(self, n_total_features, n_selected_features, evaluation_metrics=None):
+class CancelOutFeatureSelector(BaseFeatureSelector):
+    def __init__(self, n_total_features, n_selected_features, reset_after_drift=False, baseline='constant', ref_sample=0):
         """
         Initializes the Cancel Out feature selector.
 
         Args:
             n_total_features (int): total number of features
             n_selected_features (int): number of selected features
-            evaluation_metrics (dict of str: function | dict of str: (function, dict)): {metric_name: metric_function} OR {metric_name: (metric_function, {param_name1: param_val1, ...})} a dictionary of metrics to be used
+            reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
+            baseline (str): identifier of baseline method (value to replace non-selected features with)
+            ref_sample (float | np.array): sample used to obtain the baseline (not required for 'zero' baseline)
         """
-        super().__init__(n_total_features, n_selected_features, evaluation_metrics, supports_multi_class=False,
-                         supports_streaming_features=False)
+        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
+                         reset_after_drift=reset_after_drift, baseline=baseline, ref_sample=ref_sample)
 
     def weight_features(self, X, y):
         self.raw_weight_vector = self.__train_ann(X, y, 50, 128)
+
+    def reset(self):
+        """
+        CancelOut does not need to be reset, since the DNN is trained at every training iteration
+        """
+        pass
 
     @staticmethod
     def __train_ann(X, y, num_epochs, batch_size):

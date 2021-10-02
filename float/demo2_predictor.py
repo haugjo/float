@@ -12,9 +12,9 @@ batch_size = 10
 feature_names = data_loader.stream.feature_names
 
 ### Initialize Predictor ###
-predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
-                                                                    data_loader.stream.target_values,
-                                                                    evaluation_metrics={'Accuracy': accuracy_score,
+predictor = float.prediction.evaluation.skmultiflow.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMask(),
+                                                                                                 data_loader.stream.target_values,
+                                                                                                 evaluation_metrics={'Accuracy': accuracy_score,
                                                                                         'Precision': (precision_score, {
                                                                                             'labels': data_loader.stream.target_values,
                                                                                             'average': 'weighted',
@@ -28,7 +28,7 @@ predictor = prediction.skmultiflow_perceptron.SkmultiflowPerceptron(PerceptronMa
                                                                                             'average': 'weighted',
                                                                                             'zero_division': 0}),
                                                                                         '0-1 Loss': zero_one_loss},
-                                                                    decay_rate=0.5, window_size=5)
+                                                                                                 decay_rate=0.5, window_size=5)
 
 ### Initialize and run Prequential Pipeline ###
 prequential_pipeline = pipeline.prequential_pipeline.PrequentialPipeline(data_loader, None,

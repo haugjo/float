@@ -39,8 +39,8 @@ class Visualizer:
         Returns:
             Axes: the Axes object containing the line plot
         """
-        if self.measure_type not in ['prediction', 'concept_drift_detection']:
-            warnings.warn(f'Only measures of type "prediction" or "concept_drift_detection" can be visualized with method plot.')
+        if self.measure_type not in ['prediction', 'change_detection']:
+            warnings.warn(f'Only measures of type "prediction" or "change_detection" can be visualized with method plot.')
             return
 
         fig, ax = plt.subplots(figsize=fig_size)

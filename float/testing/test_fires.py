@@ -1,6 +1,6 @@
 import unittest
 from float.data.data_loader import DataLoader
-from float.feature_selection.feature_selector import FeatureSelector
+from float.feature_selection.evaluation.measures import nogueira_stability
 from float.feature_selection.fires import FIRES
 
 
@@ -8,7 +8,7 @@ class TestFIRES(unittest.TestCase):
     def __init__(self, method_name):
         super().__init__(method_name)
         data_loader = DataLoader(file_path='../data/datasets/spambase.csv', target_col=0)
-        evaluation_metrics = {'Nogueira Stability Measure': (FeatureSelector.get_nogueira_stability,
+        evaluation_metrics = {'Nogueira Stability Measure': (nogueira_stability,
                                                              {'n_total_features': data_loader.stream.n_features, 'nogueira_window_size': 10})}
         self.fires = FIRES(data_loader.stream.n_features, 10, data_loader.stream.target_values, evaluation_metrics)
 

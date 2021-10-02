@@ -1,18 +1,21 @@
-from float.pipeline.pipeline import Pipeline
+from float.pipeline.base_pipeline import BasePipeline
 from float.data.data_loader import DataLoader
-from float.feature_selection import FeatureSelector
-from float.concept_drift_detection import ConceptDriftDetector
-from float.prediction import Predictor
+from float.feature_selection import BaseFeatureSelector
+from float.feature_selection.evaluation import FeatureSelectionEvaluator
+from float.change_detection import BaseChangeDetector
+from float.change_detection.evaluation import ChangeDetectionEvaluator
+from float.prediction import BasePredictor
 import warnings
 import traceback
 
 
-class HoldoutPipeline(Pipeline):
+class HoldoutPipeline(BasePipeline):
     """
     Pipeline which implements the holdout evaluation.
     """
-    def __init__(self, data_loader, test_set, evaluation_interval, feature_selector=None, concept_drift_detector=None, predictor=None,
-                 max_n_samples=100000, batch_size=100, n_pretrain_samples=100, known_drifts=None, run=False):
+    def __init__(self, data_loader, test_set, evaluation_interval, feature_selector=None, feature_selection_evaluator=None,
+                 concept_drift_detector=None, change_detection_evaluator=None, predictor=None, prediction_evaluator=None,
+                 max_n_samples=100000, batch_size=100, n_pretrain_samples=100, known_drifts=None):
         """
         Initializes the pipeline.
 
@@ -20,19 +23,22 @@ class HoldoutPipeline(Pipeline):
             data_loader (DataLoader): DataLoader object
             test_set (np.ndarray, np.ndarray): the test samples and their labels to be used for the holdout evaluation
             evaluation_interval (int): the interval at which the predictor should be evaluated using the test set
-            feature_selector (FeatureSelector | None): FeatureSelector object
-            concept_drift_detector (ConceptDriftDetector | None): ConceptDriftDetector object
-            predictor (Predictor | None): Predictor object
+            feature_selector (BaseFeatureSelector | None): FeatureSelector object
+            feature_selection_evaluator (FeatureSelectionEvaluator | None): FeatureSelectionEvaluator object
+            concept_drift_detector (BaseChangeDetector | None): BaseChangeDetector object
+            change_detection_evaluator (ChangeDetectionEvaluator | None): ChangeDetectionEvaluator object
+            predictor (BasePredictor | None): Predictor object
+            prediction_evaluator (PredictionEvaluator | None): PredictionEvaluator object
             max_n_samples (int): maximum number of observations used in the evaluation
             batch_size (int): size of one batch (i.e. no. of observations at one time step)
             n_pretrain_samples (int): no. of observations used for initial training of the predictive model
             known_drifts (list): list of known concept drifts for this stream
-            run (bool): True if the run method should be executed on initialization, False otherwise
         """
         self.test_set = test_set
 
-        super().__init__(data_loader, feature_selector, concept_drift_detector, predictor, max_n_samples,
-                         batch_size, n_pretrain_samples, known_drifts, run, evaluation_interval)
+        super().__init__(data_loader, feature_selector, feature_selection_evaluator, concept_drift_detector,
+                         change_detection_evaluator, predictor, prediction_evaluator, max_n_samples, batch_size,
+                         n_pretrain_samples, known_drifts, evaluation_interval)
 
     def run(self):
         """
