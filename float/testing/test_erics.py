@@ -1,78 +1,38 @@
 import unittest
 from float.data.data_loader import DataLoader
-from float.change_detection.base_change_detector import BaseChangeDetector
 from float.change_detection.erics import ERICS
 
 
 class TestERICS(unittest.TestCase):
     def __init__(self, method_name):
         super().__init__(method_name)
-        data_loader = DataLoader(file_path='../data/datasets/spambase.csv', target_col=0)
-        known_drifts = [round(data_loader.stream.n_samples * 0.2), round(data_loader.stream.n_samples * 0.4)]
-        batch_size = 10
-        evaluation_metrics = {
-            'Delay': (
-                BaseChangeDetector.get_average_delay,
-                {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_n_samples': data_loader.stream.n_samples}),
-            'TPR': (
-                BaseChangeDetector.get_tpr,
-                {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_delay_range': 100}),
-            'FDR': (
-                BaseChangeDetector.get_fdr,
-                {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_delay_range': 100}),
-            'Precision': (
-                BaseChangeDetector.get_precision,
-                {'known_drifts': known_drifts, 'batch_size': batch_size, 'max_delay_range': 100})
-        }
-        self.erics = ERICS(data_loader.stream.n_features, evaluation_metrics)
+        self.data_loader = DataLoader(file_path='../data/datasets/spambase.csv', target_col=0)
+        self.erics = ERICS(self.data_loader.stream.n_features)
 
     def test_init(self):
-        pass
-
-    def test_reset(self):
-        pass
+        self.assertFalse(self.erics.global_drift_detected, msg='attribute global_drift_detected initialized correctly')
+        self.assertFalse(self.erics.partial_drift_detected, msg='attribute partial_drift_detected initialized correctly')
 
     def test_partial_fit(self):
-        pass
-
-    def test_update_param_sum(self):
-        pass
-
-    def test_compute_moving_average(self):
-        pass
-
-    def test_detect_drift(self):
-        pass
-
-    def test_update_probit(self):
-        pass
+        X, y = self.data_loader.get_data(50)
+        mu_w, sigma_w, param_sum, global_info_ma, partial_info_ma = self.erics.mu_w, self.erics.sigma_w, self.erics.param_sum.copy(), self.erics.global_info_ma.copy(), self.erics.partial_info_ma.copy()
+        self.erics.partial_fit(X, y)
+        self.assertFalse((mu_w[-1, :] == self.erics.mu_w[-1, :]).all(), msg='partial_fit() updates the attribute mu_w')
+        self.assertTrue((mu_w[1:, :] == self.erics.mu_w[:-1, :]).all(), msg='partial_fit() adds new entry and drops oldest entry from attribute mu_w')
+        self.assertFalse((sigma_w[-1, :] == self.erics.sigma_w[-1, :]).all(), msg='partial_fit() updates the attribute sigma_w')
+        self.assertTrue((sigma_w[1:, :] == self.erics.sigma_w[:-1, :]).all(), msg='partial_fit() adds new entry and drops oldest entry from attribute sigma_w')
+        self.assertFalse((param_sum == self.erics.param_sum).all(), msg='partial_fit() updates the attribute param_sum')
+        self.assertEqual(len(global_info_ma) + 1, len(self.erics.global_info_ma), msg='partial_fit() adds new entry to attribute global_info_ma')
+        self.assertEqual(len(partial_info_ma) + 1, len(self.erics.partial_info_ma), msg='partial_fit() adds new entry to attribute partial_info_ma')
 
     def test_detected_global_change(self):
-        pass
+        for i in range(10):
+            X, y = self.data_loader.get_data(50)
+            self.erics.partial_fit(X, y)
+            self.assertEqual(self.erics.global_drift_detected, self.erics.detected_global_change(), msg='detected_global_change() returns if there was a global change')
 
     def test_detected_partial_change(self):
-        pass
-
-    def test_detected_warning_zone(self):
-        pass
-
-    def test_get_length_estimation(self):
-        pass
-
-    def test_evaluate(self):
-        pass
-
-    def test_get_average_delay(self):
-        pass
-
-    def test_get_tpr_fdr_and_precision(self):
-        pass
-
-    def test_get_tpr(self):
-        pass
-
-    def test_get_fdr(self):
-        pass
-
-    def test_get_precision(self):
-        pass
+        for i in range(10):
+            X, y = self.data_loader.get_data(50)
+            self.erics.partial_fit(X, y)
+            self.assertEqual(self.erics.partial_drift_detected, self.erics.detected_partial_change()[0], msg='detected_global_change() returns if there was a partial change')

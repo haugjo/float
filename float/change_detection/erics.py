@@ -123,7 +123,7 @@ class ERICS(BaseChangeDetector):
         return self.partial_drift_detected, self.partial_drift_features
 
     def detected_warning_zone(self):
-        return False
+        pass
 
     def get_length_estimation(self):
         pass

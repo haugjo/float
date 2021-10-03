@@ -42,7 +42,7 @@ class TestSkmultiflowDriftDetector(unittest.TestCase):
                          "detected_global_change() returns True for a different concept")
 
     def test_detected_partial_change(self):
-        self.assertEqual(self.skmultiflow_drift_detector.detected_partial_change(), False,
+        self.assertEqual(self.skmultiflow_drift_detector.detected_partial_change(), (False, None),
                          "detected_partial_change() returns False initially")
 
     def test_detected_warning_zone(self):
