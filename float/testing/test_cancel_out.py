@@ -1,9 +1,7 @@
 import unittest
 import numpy as np
 from float.data.data_loader import DataLoader
-from float.feature_selection.evaluation.measures import nogueira_stability
 from float.feature_selection.cancel_out import CancelOutFeatureSelector
-from float.feature_selection.evaluation.feature_selection_evaluator import FeatureSelectionEvaluator
 
 
 class TestCancelOutFeatureSelector(unittest.TestCase):
@@ -13,7 +11,6 @@ class TestCancelOutFeatureSelector(unittest.TestCase):
         self.ref_sample, _ = self.data_loader.stream.next_sample(50)
         self.cancel_out = CancelOutFeatureSelector(self.data_loader.stream.n_features, 10, reset_after_drift=False,
                                                    baseline='constant', ref_sample=self.ref_sample)
-        self.fs_evaluator = FeatureSelectionEvaluator([nogueira_stability])
 
     def test_init(self):
         self.assertEqual(self.cancel_out.reset_after_drift, False, msg='attribute reset_after_drift is initialized correctly')
