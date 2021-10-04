@@ -31,12 +31,14 @@ known_drifts = [round(data_loader.stream.n_samples * 0.2), round(data_loader.str
 batch_size = 10
 feature_names = data_loader.stream.feature_names
 
-concept_drift_detector_names = ['ADWIN', 'EDDM', 'DDM_sk', 'DDM', 'ERICS', 'Page Hinkley']  # Todo: Remove, and use class names instead?
+concept_drift_detector_names = [  # 'ADWIN', 'EDDM', 'DDM_sk', 'DDM',
+    'ERICS', 'Page Hinkley'
+]  # Todo: Remove, and use class names instead?
 concept_drift_detectors = [  # SkmultiflowChangeDetector(ADWIN(delta=0.6), reset_after_drift=False),
     # SkmultiflowChangeDetector(EDDM(), reset_after_drift=True),
     # SkmultiflowChangeDetector(DDM_scikit(), reset_after_drift=True),
     # DDM(reset_after_drift=True),
-    # ERICS(data_loader.stream.n_features),
+    ERICS(data_loader.stream.n_features),
     PageHinkley(reset_after_drift=True)]
 
 cd_evaluator = dict()
@@ -114,14 +116,16 @@ visualizer.plot(
 plt.show()
 """
 plot(measures=[pred_evaluator.result['mean_drift_performance_decay']['measures']],
-     labels=['Drift Performance Decay'],
+     labels=['Perceptron'],
+     measure_name='Drift Performance Decay',
      measure_type='prediction',
      plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',
      smooth_curve=[False])
 plt.show()
 
 plot(measures=[pred_evaluator.result['mean_drift_recovery_time']['measures']],
-     labels=['Drift Recovery Time'],
+     labels=['Perceptron'],
+     measure_name='Drift Recovery Time',
      measure_type='prediction',
      plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',
      smooth_curve=[False])
@@ -140,4 +144,11 @@ draw_selected_features(measures=[f_selector.selection],
                        layout=(1, 1),
                        plot_title=f'Selected Features At Each Time Step For Data Set spambase, Predictor Perceptron',
                        fig_size=(10, 8))
+plt.show()
+
+plot(measures=[cd_evaluator['ERICS'].result['time_to_detection']['measures']],
+     labels=['ERICS'],
+     measure_name='False Discovery Rate',
+     measure_type='change_detection',
+     plot_title='')
 plt.show()
