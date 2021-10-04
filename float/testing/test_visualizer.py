@@ -1,6 +1,6 @@
 import unittest
 from matplotlib.axes import Axes
-from float.visualization.visualizer import Visualizer
+# from float.visualization.visualizer import Visualizer
 
 
 class TestVisualizer(unittest.TestCase):

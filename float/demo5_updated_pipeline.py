@@ -20,7 +20,7 @@ from float.pipeline import PrequentialPipeline
 from float.prediction import SkmultiflowClassifier
 from float.prediction.evaluation import PredictionEvaluator
 from float.prediction.evaluation.measures import noise_variability, mean_drift_performance_decay, mean_drift_recovery_time
-from float.visualization import Visualizer
+from float.visualization import plot, draw_selected_features, draw_top_features_with_reference
 
 ### Initialize Data Loader ###
 scaler = SklearnScaler(scaler_obj=MinMaxScaler(), reset_after_drift=False)
@@ -32,19 +32,19 @@ batch_size = 10
 feature_names = data_loader.stream.feature_names
 
 concept_drift_detector_names = ['ADWIN', 'EDDM', 'DDM_sk', 'DDM', 'ERICS', 'Page Hinkley']  # Todo: Remove, and use class names instead?
-concept_drift_detectors = [#SkmultiflowChangeDetector(ADWIN(delta=0.6), reset_after_drift=False),
-                           #SkmultiflowChangeDetector(EDDM(), reset_after_drift=True),
-                           #SkmultiflowChangeDetector(DDM_scikit(), reset_after_drift=True),
-                           #DDM(reset_after_drift=True),
-                           #ERICS(data_loader.stream.n_features),
-                           PageHinkley(reset_after_drift=True)]
+concept_drift_detectors = [  # SkmultiflowChangeDetector(ADWIN(delta=0.6), reset_after_drift=False),
+    # SkmultiflowChangeDetector(EDDM(), reset_after_drift=True),
+    # SkmultiflowChangeDetector(DDM_scikit(), reset_after_drift=True),
+    # DDM(reset_after_drift=True),
+    # ERICS(data_loader.stream.n_features),
+    PageHinkley(reset_after_drift=True)]
 
 cd_evaluator = dict()
 
 for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names, concept_drift_detectors):
     ### Initialize Predictor ###
     predictor = SkmultiflowClassifier(PerceptronMask(), data_loader.stream.target_values, reset_after_drift=True)  # todo: can we get rid of the target values parameter?
-    pred_evaluator = PredictionEvaluator([zero_one_loss, mean_drift_performance_decay, mean_drift_recovery_time],  #   noise_variability
+    pred_evaluator = PredictionEvaluator([zero_one_loss, mean_drift_performance_decay, mean_drift_recovery_time],  # noise_variability
                                          decay_rate=0.1,
                                          window_size=10,
                                          known_drifts=known_drifts,
@@ -113,32 +113,31 @@ visualizer.plot(
     smooth_curve=[False, False, True])
 plt.show()
 """
-visualizer = Visualizer(
-    [pred_evaluator.result['mean_drift_performance_decay']['measures']],
-    ['Drift Performance Decay'],
-    'prediction')
-visualizer.plot(
-    plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',
-    smooth_curve=[False])
+plot(measures=[pred_evaluator.result['mean_drift_performance_decay']['measures']],
+     labels=['Drift Performance Decay'],
+     measure_type='prediction',
+     plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',
+     smooth_curve=[False])
 plt.show()
 
-visualizer = Visualizer(
-    [pred_evaluator.result['mean_drift_recovery_time']['measures']],
-    ['Drift Recovery Time'],
-    'prediction')
-visualizer.plot(
-    plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',
-    smooth_curve=[False])
+plot(measures=[pred_evaluator.result['mean_drift_recovery_time']['measures']],
+     labels=['Drift Recovery Time'],
+     measure_type='prediction',
+     plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',
+     smooth_curve=[False])
 plt.show()
 
-visualizer = Visualizer(
-    [f_selector.selection], ['FIRES'], 'feature_selection')
-visualizer.draw_top_features_with_reference(feature_names,
-                                            f'Most Selected Features For Data Set spambase, Predictor Perceptron',
-                                            fig_size=(15, 5))
-plt.show()
-visualizer.draw_selected_features((1, 1),
-                                  f'Selected Features At Each Time Step For Data Set spambase, Predictor Perceptron',
-                                  fig_size=(10, 8))
-plt.show()
+draw_top_features_with_reference(measures=[f_selector.selection],
+                                 labels=['FIRES'],
+                                 measure_type='feature_selection',
+                                 feature_names=feature_names,
+                                 plot_title=f'Most Selected Features For Data Set spambase, Predictor Perceptron',
+                                 fig_size=(15, 5))
 
+draw_selected_features(measures=[f_selector.selection],
+                       labels=['FIRES'],
+                       measure_type='feature_selection',
+                       layout=(1, 1),
+                       plot_title=f'Selected Features At Each Time Step For Data Set spambase, Predictor Perceptron',
+                       fig_size=(10, 8))
+plt.show()
