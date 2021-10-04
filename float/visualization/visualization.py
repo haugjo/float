@@ -36,7 +36,7 @@ def plot(measures, labels, measure_name, measure_type, plot_title, fig_size=(10.
         y = savgol_filter(measure, 51, 3) if smooth_curve_i else measure
         ax.plot(np.arange(len(measure)), y, color=palette[i], label=label)
 
-    x_label = 'Detection Range' if measure_type == 'change_detection' else 'Time Step $t$'
+    x_label = 'Delay Range' if measure_type == 'change_detection' else 'Time Step $t$'
     ax.set_xlabel(x_label, size=font_size, labelpad=1.6)
     ax.set_ylabel(measure_name, size=font_size, labelpad=1.6)
     plt.legend()
