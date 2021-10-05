@@ -20,7 +20,7 @@ from float.pipeline import PrequentialPipeline
 from float.prediction import SkmultiflowClassifier
 from float.prediction.evaluation import PredictionEvaluator
 from float.prediction.evaluation.measures import noise_variability, mean_drift_performance_decay, mean_drift_recovery_time
-from float.visualization import plot, draw_selected_features, draw_top_features_with_reference
+from float.visualization import plot, draw_selected_features, draw_top_features_with_reference, draw_concept_drifts
 
 ### Initialize Data Loader ###
 scaler = SklearnScaler(scaler_obj=MinMaxScaler(), reset_after_drift=False)
@@ -119,7 +119,6 @@ plot(measures=[pred_evaluator.result['mean_drift_performance_decay']['measures']
      labels=['Perceptron'],
      measure_name='Drift Performance Decay',
      measure_type='prediction',
-     plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',
      smooth_curve=[False])
 plt.show()
 
@@ -127,7 +126,6 @@ plot(measures=[pred_evaluator.result['mean_drift_recovery_time']['measures']],
      labels=['Perceptron'],
      measure_name='Drift Recovery Time',
      measure_type='prediction',
-     plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',
      smooth_curve=[False])
 plt.show()
 
@@ -135,20 +133,26 @@ draw_top_features_with_reference(measures=[f_selector.selection],
                                  labels=['FIRES'],
                                  measure_type='feature_selection',
                                  feature_names=feature_names,
-                                 plot_title=f'Most Selected Features For Data Set spambase, Predictor Perceptron',
                                  fig_size=(15, 5))
+plt.show()
 
 draw_selected_features(measures=[f_selector.selection],
                        labels=['FIRES'],
                        measure_type='feature_selection',
                        layout=(1, 1),
-                       plot_title=f'Selected Features At Each Time Step For Data Set spambase, Predictor Perceptron',
                        fig_size=(10, 8))
 plt.show()
 
-plot(measures=[cd_evaluator['ERICS'].result['time_to_detection']['measures']],
+plot(measures=[cd_evaluator['ERICS'].result['false_discovery_rate']['measures']],
      labels=['ERICS'],
      measure_name='False Discovery Rate',
-     measure_type='change_detection',
-     plot_title='')
+     measure_type='change_detection')
+plt.show()
+
+draw_concept_drifts(measures=[concept_drift_detectors[-2].global_drifts, concept_drift_detectors[-1].global_drifts],
+                    labels=['ERICS', 'PageHinkley'],
+                    measure_type='change_detection',
+                    data_stream=data_loader.stream,
+                    known_drifts=known_drifts,
+                    batch_size=batch_size)
 plt.show()
