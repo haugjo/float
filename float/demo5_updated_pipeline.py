@@ -143,14 +143,14 @@ draw_selected_features(measures=[f_selector.selection],
                        fig_size=(10, 8))
 plt.show()
 
-plot(measures=[cd_evaluator['ERICS'].result['false_discovery_rate']['measures']],
-     labels=['ERICS'],
+plot(measures=[cd_evaluator['ERICS'].result['false_discovery_rate']['measures'], cd_evaluator['Page Hinkley'].result['false_discovery_rate']['measures']],
+     labels=['ERICS', 'Page Hinkley'],
      measure_name='False Discovery Rate',
      measure_type='change_detection')
 plt.show()
 
 draw_concept_drifts(measures=[concept_drift_detectors[-2].global_drifts, concept_drift_detectors[-1].global_drifts],
-                    labels=['ERICS', 'PageHinkley'],
+                    labels=['ERICS', 'Page Hinkley'],
                     measure_type='change_detection',
                     data_stream=data_loader.stream,
                     known_drifts=known_drifts,
