@@ -65,12 +65,12 @@ for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_det
     fs_evaluator = FeatureSelectionEvaluator([nogueira_stability])
 
     ### Initialize Concept Drift Detector ###
-    cd_evaluator[concept_drift_detector_name] = ChangeDetectionEvaluator(measures=[detected_change_rate,
-                                                                                   missed_detection_rate,
-                                                                                   false_discovery_rate,
-                                                                                   time_between_false_alarms,
-                                                                                   time_to_detection,
-                                                                                   mean_time_ratio],
+    cd_evaluator[concept_drift_detector_name] = ChangeDetectionEvaluator(measure_funcs=[detected_change_rate,
+                                                                                        missed_detection_rate,
+                                                                                        false_discovery_rate,
+                                                                                        time_between_false_alarms,
+                                                                                        time_to_detection,
+                                                                                        mean_time_ratio],
                                                                          known_drifts=known_drifts,
                                                                          batch_size=batch_size,
                                                                          n_samples=data_loader.stream.n_samples,
@@ -81,7 +81,7 @@ for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_det
     prequential_pipeline = PrequentialPipeline(data_loader=data_loader,
                                                feature_selector=f_selector,
                                                feature_selection_evaluator=fs_evaluator,
-                                               concept_drift_detector=concept_drift_detector,
+                                               change_detector=concept_drift_detector,
                                                change_detection_evaluator=cd_evaluator[concept_drift_detector_name],
                                                predictor=predictor,
                                                prediction_evaluator=pred_evaluator,

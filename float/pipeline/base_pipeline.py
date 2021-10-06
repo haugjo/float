@@ -19,7 +19,7 @@ class BasePipeline(metaclass=ABCMeta):
     Abstract base class which triggers events for different kinds of training procedures.
     """
 
-    def __init__(self, data_loader, feature_selector, feature_selection_evaluator, concept_drift_detector,
+    def __init__(self, data_loader, feature_selector, feature_selection_evaluator, change_detector,
                  change_detection_evaluator, predictor, prediction_evaluator, max_n_samples, batch_size,
                  n_pretrain_samples, known_drifts, evaluation_interval=None):
         """
@@ -29,7 +29,7 @@ class BasePipeline(metaclass=ABCMeta):
             data_loader (DataLoader): DataLoader object
             feature_selector (BaseFeatureSelector | None): FeatureSelector object
             feature_selection_evaluator (FeatureSelectionEvaluator | None): FeatureSelectionEvaluator object
-            concept_drift_detector (ConceptDriftDetector | None): ConceptDriftDetector object
+            change_detector (ConceptDriftDetector | None): ConceptDriftDetector object
             change_detection_evaluator (ChangeDetectionEvaluator | None): ChangeDetectionEvaluator object
             predictor (BasePredictor | None): Predictor object
             prediction_evaluator (PredictionEvaluator | None): PredictionEvaluator object
@@ -42,7 +42,7 @@ class BasePipeline(metaclass=ABCMeta):
         self.data_loader = data_loader
         self.feature_selector = feature_selector
         self.feature_selection_evaluator = feature_selection_evaluator
-        self.concept_drift_detector = concept_drift_detector
+        self.change_detector = change_detector
         self.change_detection_evaluator = change_detection_evaluator
         self.predictor = predictor
         self.prediction_evaluator = prediction_evaluator
@@ -75,11 +75,11 @@ class BasePipeline(metaclass=ABCMeta):
         if type(self.data_loader) is not DataLoader:
             raise AttributeError('No valid DataLoader object was provided.')
         if not issubclass(type(self.feature_selector), BaseFeatureSelector) and \
-                not issubclass(type(self.concept_drift_detector), BaseChangeDetector) and \
+                not issubclass(type(self.change_detector), BaseChangeDetector) and \
                 not issubclass(type(self.predictor), BasePredictor):
             raise AttributeError('No valid FeatureSelector, ConceptDriftDetector or Predictor object was provided.')
-        if self.concept_drift_detector:
-            if self.concept_drift_detector.error_based and not issubclass(type(self.predictor), BasePredictor):
+        if self.change_detector:
+            if self.change_detector.error_based and not issubclass(type(self.predictor), BasePredictor):
                 raise AttributeError('An error-based Concept Drift Detector cannot be used without a valid Predictor object.')
 
     def _start_evaluation(self):
@@ -160,21 +160,21 @@ class BasePipeline(metaclass=ABCMeta):
             self.predictor.partial_fit(X_train, y_train)
             self.prediction_evaluator.training_times.append(time.time() - start_time)
 
-        if self.concept_drift_detector:
+        if self.change_detector:
             start_time = time.time()
-            if self.concept_drift_detector.error_based:
+            if self.change_detector.error_based:
                 for val in (y_pred == y_test):  # Todo: make sure that y_pred is available
-                    self.concept_drift_detector.partial_fit(val)
+                    self.change_detector.partial_fit(val)
             else:
-                self.concept_drift_detector.partial_fit(copy.copy(X_train), copy.copy(y_train))
+                self.change_detector.partial_fit(copy.copy(X_train), copy.copy(y_train))
 
-            if self.concept_drift_detector.detected_warning_zone():
-                self.concept_drift_detector.warnings.append(self.time_step)
+            if self.change_detector.detect_warning_zone():
+                self.change_detector.warnings.append(self.time_step)
 
-            if self.concept_drift_detector.detected_global_change():
+            if self.change_detector.detect_change():
                 print(f"Global change detected at time step {self.time_step}")
-                if self.time_step not in self.concept_drift_detector.global_drifts:  # Todo: is this if-clause really necessary?
-                    self.concept_drift_detector.global_drifts.append(self.time_step)
+                if self.time_step not in self.change_detector.drifts:  # Todo: is this if-clause really necessary?
+                    self.change_detector.drifts.append(self.time_step)
 
                 # Reset modules
                 if self.data_loader.scaler.reset_after_drift:
@@ -183,17 +183,17 @@ class BasePipeline(metaclass=ABCMeta):
                     self.feature_selector.reset()
                 if self.predictor.reset_after_drift:
                     self.predictor.reset(X_train, y_train)
-                if self.concept_drift_detector.reset_after_drift:
-                    self.concept_drift_detector.reset()
+                if self.change_detector.reset_after_drift:
+                    self.change_detector.reset()
 
-            partial_change_detected, partial_change_features = self.concept_drift_detector.detected_partial_change()
+            partial_change_detected, partial_change_features = self.change_detector.detect_partial_change()
             if partial_change_detected:
-                if self.time_step not in self.concept_drift_detector.partial_drifts:  # Todo: is this if-clause really necessary?
-                    self.concept_drift_detector.partial_drifts.append((self.time_step, partial_change_features))
+                if self.time_step not in self.change_detector.partial_drifts:  # Todo: is this if-clause really necessary?
+                    self.change_detector.partial_drifts.append((self.time_step, partial_change_features))
 
             self.change_detection_evaluator.comp_times.append(time.time() - start_time)
             if last_iteration:
-                self.change_detection_evaluator.run(self.concept_drift_detector.global_drifts)
+                self.change_detection_evaluator.run(self.change_detector.drifts)
 
     def _update_progress_bar(self):
         """
@@ -224,17 +224,17 @@ class BasePipeline(metaclass=ABCMeta):
             }
                 , headers="keys", tablefmt='github'))
 
-        if self.concept_drift_detector:
+        if self.change_detector:
             print('----------------------')
             print('Concept Drift Detection:')
             print(tabulate({
-                **{'Model': [type(self.concept_drift_detector.detector).__name__ if type(
-                    self.concept_drift_detector) is SkmultiflowChangeDetector else
-                             type(self.concept_drift_detector).__name__.split('.')[-1]],
+                **{'Model': [type(self.change_detector.detector).__name__ if type(
+                    self.change_detector) is SkmultiflowChangeDetector else
+                             type(self.change_detector).__name__.split('.')[-1]],
                    'Avg. Time': [np.mean(self.change_detection_evaluator.comp_times)],
-                   'Detected Global Drifts': [self.concept_drift_detector.global_drifts] if len(
-                       self.concept_drift_detector.global_drifts) <= 5 else [
-                       str(self.concept_drift_detector.global_drifts[:5])[:-1] + ', ...]']},
+                   'Detected Global Drifts': [self.change_detector.drifts] if len(
+                       self.change_detector.drifts) <= 5 else [
+                       str(self.change_detector.drifts[:5])[:-1] + ', ...]']},
                 **{'Avg. ' + key: [np.mean([x for x in value if x is not None]) if len([x for x in value if x is not None]) > 0 else 'N/A']
                 if type(value) is list else [value['mean']] for key, value in self.change_detection_evaluator.result.items()}
             }, headers="keys", tablefmt='github'))

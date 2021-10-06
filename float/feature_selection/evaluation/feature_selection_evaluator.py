@@ -8,14 +8,14 @@ class FeatureSelectionEvaluator(metaclass=ABCMeta):
     Base class for the feature selection evaluation
 
     Attributes:
-        measures (list): list of evaluation measure functions
+        measure_funcs (list): list of evaluation measure functions
         result (dict): dictionary of results per evaluation measure
     """
-    def __init__(self, measures, decay_rate=None, window_size=None):
+    def __init__(self, measure_funcs, decay_rate=None, window_size=None):
         """ Initialize feature selection evaluation measure
 
         Args:
-            measures (list): list of evaluation measure functions
+            measure_funcs (list): list of evaluation measure functions
             decay_rate (float | None): when this parameter is set, the metric values are additionally aggregated with a decay/fading factor
             window_size (int | None): when this parameter is set, the metric values are additionally aggregated in a sliding window
         """
@@ -23,20 +23,20 @@ class FeatureSelectionEvaluator(metaclass=ABCMeta):
         self.window_size = window_size
         self.comp_times = []  # Todo: name all computation times in a standardized way
 
-        self.measures = measures
+        self.measure_funcs = measure_funcs
 
         self.result = dict()
-        for measure in measures:
-            self.result[measure.__name__] = dict()
-            self.result[measure.__name__]['measures'] = []
+        for measure_func in measure_funcs:
+            self.result[measure_func.__name__] = dict()
+            self.result[measure_func.__name__]['measures'] = []
 
             if self.decay_rate:
-                self.result[measure.__name__]['mean_decay'] = []
-                self.result[measure.__name__]['var_decay'] = []
+                self.result[measure_func.__name__]['mean_decay'] = []
+                self.result[measure_func.__name__]['var_decay'] = []
 
             if self.window_size:
-                self.result[measure.__name__]['mean_window'] = []
-                self.result[measure.__name__]['var_window'] = []
+                self.result[measure_func.__name__]['mean_window'] = []
+                self.result[measure_func.__name__]['var_window'] = []
 
     def run(self, selected_features, n_total_features):
         """
@@ -46,32 +46,32 @@ class FeatureSelectionEvaluator(metaclass=ABCMeta):
             selected_features (list): vector of selected features per time step
             n_total_features (int): total number of features
         """
-        for measure in self.measures:  # run each evaluation measure
+        for measure_func in self.measure_funcs:  # run each evaluation measure
             try:
-                new_measure = measure(selected_features, n_total_features)
-                self.result[measure.__name__]['measures'].append(new_measure)
-                self.result[measure.__name__]['mean'] = np.mean(self.result[measure.__name__]['measures'])
-                self.result[measure.__name__]['var'] = np.var(self.result[measure.__name__]['measures'])
+                new_measure_val = measure_func(selected_features, n_total_features)
+                self.result[measure_func.__name__]['measures'].append(new_measure_val)
+                self.result[measure_func.__name__]['mean'] = np.mean(self.result[measure_func.__name__]['measures'])
+                self.result[measure_func.__name__]['var'] = np.var(self.result[measure_func.__name__]['measures'])
 
                 if self.decay_rate:
-                    if len(self.result[measure.__name__]['mean_decay']) > 0:
-                        delta = new_measure - self.result[measure.__name__]['mean_decay'][-1]
-                        self.result[measure.__name__]['mean_decay'].append(
-                            self.result[measure.__name__]['mean_decay'][-1] + self.decay_rate * delta
+                    if len(self.result[measure_func.__name__]['mean_decay']) > 0:
+                        delta = new_measure_val - self.result[measure_func.__name__]['mean_decay'][-1]
+                        self.result[measure_func.__name__]['mean_decay'].append(
+                            self.result[measure_func.__name__]['mean_decay'][-1] + self.decay_rate * delta
                         )
-                        self.result[measure.__name__]['var_decay'].append(
-                            (1 - self.decay_rate) * (self.result[measure.__name__]['var_decay'][-1] + self.decay_rate * delta ** 2)
+                        self.result[measure_func.__name__]['var_decay'].append(
+                            (1 - self.decay_rate) * (self.result[measure_func.__name__]['var_decay'][-1] + self.decay_rate * delta ** 2)
                         )
                     else:
-                        self.result[measure.__name__]['mean_decay'].append(new_measure)
-                        self.result[measure.__name__]['var_decay'].append(.0)
+                        self.result[measure_func.__name__]['mean_decay'].append(new_measure_val)
+                        self.result[measure_func.__name__]['var_decay'].append(.0)
 
                 if self.window_size:
-                    self.result[measure.__name__]['mean_window'].append(
-                        np.mean(self.result[measure.__name__]['measures'][-self.window_size:])
+                    self.result[measure_func.__name__]['mean_window'].append(
+                        np.mean(self.result[measure_func.__name__]['measures'][-self.window_size:])
                     )
-                    self.result[measure.__name__]['var_window'].append(
-                        np.var(self.result[measure.__name__]['measures'][-self.window_size:])
+                    self.result[measure_func.__name__]['var_window'].append(
+                        np.var(self.result[measure_func.__name__]['measures'][-self.window_size:])
                     )
             except TypeError:
                 traceback.print_exc()
