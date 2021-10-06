@@ -49,10 +49,6 @@ class TestSkmultiflowDriftDetector(unittest.TestCase):
         self.assertEqual(self.skmultiflow_drift_detector.detect_warning_zone(), False,
                          "detected_warning_zone() returns False initially")
 
-    def test_get_length_estimation(self):
-        self.assertIsInstance(self.skmultiflow_drift_detector.get_length_estimation(), float,
-                              "get_length_estimation() returns float")
-
     def test_partial_fit(self):
         sample_count = self.skmultiflow_drift_detector.detector.sample_count
         miss_prob = self.skmultiflow_drift_detector.detector.miss_prob

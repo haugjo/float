@@ -86,6 +86,3 @@ class PageHinkley(BaseChangeDetector):
 
     def detect_warning_zone(self):
         return False
-
-    def get_length_estimation(self):
-        pass

@@ -66,16 +66,6 @@ class BaseChangeDetector(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def get_length_estimation(self):
-        """
-        Returns the length estimation.
-
-        Returns:
-            int: length estimation
-        """
-        raise NotImplementedError
-
-    @abstractmethod
     def partial_fit(self, *args, **kwargs):
         """
         Update the parameters of the concept drift detection model.

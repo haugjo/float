@@ -97,6 +97,3 @@ class EWMA(BaseChangeDetector):
 
     def detect_partial_change(self):
         return False, None
-
-    def get_length_estimation(self):
-        pass

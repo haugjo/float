@@ -47,15 +47,6 @@ class SkmultiflowChangeDetector(BaseChangeDetector):
         """
         return self.detector.in_warning_zone
 
-    def get_length_estimation(self):
-        """
-        Returns the length estimation.
-
-        Returns:
-            float: length estimation
-        """
-        return self.detector.estimation
-
     def partial_fit(self, input_value, *args, **kwargs):
         """
         Update the parameters of the concept drift detection model.
