@@ -28,7 +28,7 @@ class SkmultiflowChangeDetector(BaseChangeDetector):
         """
         self.detector.reset()
 
-    def detected_global_change(self):
+    def detect_change(self):
         """
         Checks whether global concept drift was detected or not.
 
@@ -37,7 +37,7 @@ class SkmultiflowChangeDetector(BaseChangeDetector):
         """
         return self.detector.detected_change()
 
-    def detected_warning_zone(self):
+    def detect_warning_zone(self):
         """
         If the concept drift detector supports the warning zone, this function will return
         whether it's inside the warning zone or not.
@@ -65,7 +65,7 @@ class SkmultiflowChangeDetector(BaseChangeDetector):
         """
         self.detector.add_element(input_value)
 
-    def detected_partial_change(self):
+    def detect_partial_change(self):
         return False, None
 
     def _validate(self):

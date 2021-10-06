@@ -91,7 +91,7 @@ class EDDM(BaseChangeDetector):
                     if r < self.OUT_CONTROL_LEVEL:
                         self.active_change = True
 
-    def detected_global_change(self):
+    def detect_change(self):
         """ Checks whether global concept drift was detected or not.
 
         Returns:
@@ -99,7 +99,7 @@ class EDDM(BaseChangeDetector):
         """
         return self.active_change
 
-    def detected_warning_zone(self):
+    def detect_warning_zone(self):
         """ Check for Warning Zone
 
         Returns:
@@ -107,7 +107,7 @@ class EDDM(BaseChangeDetector):
         """
         return self.active_warning
 
-    def detected_partial_change(self):
+    def detect_partial_change(self):
         return False, None
 
     def get_length_estimation(self):

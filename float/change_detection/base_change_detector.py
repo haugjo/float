@@ -7,7 +7,7 @@ class BaseChangeDetector(metaclass=ABCMeta):
 
     Attributes:
         error_based (bool): indicates whether change detector relies on error measures obtained from a predictor
-        global_drifts (list): time steps where a global concept drift was detected
+        drifts (list): time steps where a global concept drift was detected
         partial_drifts (list): time steps and features where a partial concept drift was detected
         warnings (list): time steps where a global warning was issued
     """
@@ -22,7 +22,7 @@ class BaseChangeDetector(metaclass=ABCMeta):
         self.reset_after_drift = reset_after_drift
         self.error_based = error_based
 
-        self.global_drifts = []
+        self.drifts = []
         self.partial_drifts = []
         self.warnings = []
 
@@ -34,7 +34,7 @@ class BaseChangeDetector(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def detected_global_change(self):
+    def detect_change(self):
         """
         Checks whether global concept drift was detected or not.
 
@@ -44,7 +44,7 @@ class BaseChangeDetector(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def detected_partial_change(self):
+    def detect_partial_change(self):
         """
         Checks whether partial concept drift was detected or not.
 
@@ -55,7 +55,7 @@ class BaseChangeDetector(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def detected_warning_zone(self):
+    def detect_warning_zone(self):
         """
         If the concept drift detector supports the warning zone, this function will return
         whether it's inside the warning zone or not.

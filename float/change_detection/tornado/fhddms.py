@@ -75,7 +75,7 @@ class FHDDMS(BaseChangeDetector):
             if self._mu_max_large - mu_long > self.__cal_hoeffding_bound(self._WIN_SIZE):
                 self.active_change = True
 
-    def detected_global_change(self):
+    def detect_change(self):
         """ Checks whether global concept drift was detected or not.
 
         Returns:
@@ -83,10 +83,10 @@ class FHDDMS(BaseChangeDetector):
         """
         return self.active_change
 
-    def detected_warning_zone(self):
+    def detect_warning_zone(self):
         return False
 
-    def detected_partial_change(self):
+    def detect_partial_change(self):
         return False, None
 
     def get_length_estimation(self):

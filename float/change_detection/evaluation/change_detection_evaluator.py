@@ -40,23 +40,23 @@ class ChangeDetectionEvaluator(metaclass=ABCMeta):
         for measure in measures:  # todo: do we need a _validate_func routine for measures from skmultiflow or river?
             self.result[measure.__name__] = dict()
 
-    def run(self, global_drifts):
+    def run(self, drifts):
         """
         Updates relevant statistics and computes the evaluation measures in last time step
 
         Args:
-            global_drifts (list): monitors if there was detected change at each time step
+            drifts (list): monitors if there was detected change at each time step
         """
         for measure in self.measures:  # run each evaluation measure
             try:
                 if isinstance(self.n_delay, int):  # run single delay parameter
-                    mean = measure(self, global_drifts, self.n_delay)
+                    mean = measure(self, drifts, self.n_delay)
                     mes = [mean]
                     var = 0
                 else:  # run multiple delay parameters
                     mes = []
                     for ndel in self.n_delay:
-                        mes.append(measure(self, global_drifts, ndel))
+                        mes.append(measure(self, drifts, ndel))
                     mean = np.mean(mes)
                     var = np.var(mes)
 

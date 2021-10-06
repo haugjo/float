@@ -29,24 +29,24 @@ class TestSkmultiflowDriftDetector(unittest.TestCase):
         self.assertEqual(self.skmultiflow_drift_detector.detector.delay, 0.0, "reset() sets delay to 0.0")
         self.assertEqual(self.skmultiflow_drift_detector.detector.sample_count, 1, "reset() sets sample_count to 1")
 
-    def test_detected_global_change(self):
-        self.assertEqual(self.skmultiflow_drift_detector.detected_global_change(), False,
+    def test_detect_change(self):
+        self.assertEqual(self.skmultiflow_drift_detector.detect_change(), False,
                          "detected_global_change() returns False initially")
         self.skmultiflow_drift_detector.partial_fit(0)
-        self.assertEqual(self.skmultiflow_drift_detector.detected_global_change(), False,
+        self.assertEqual(self.skmultiflow_drift_detector.detect_change(), False,
                          "detected_global_change() returns False for the same concept")
         for i in range(50):
             self.skmultiflow_drift_detector.partial_fit(0)
         self.skmultiflow_drift_detector.partial_fit(1)
-        self.assertEqual(self.skmultiflow_drift_detector.detected_global_change(), True,
+        self.assertEqual(self.skmultiflow_drift_detector.detect_change(), True,
                          "detected_global_change() returns True for a different concept")
 
-    def test_detected_partial_change(self):
-        self.assertEqual(self.skmultiflow_drift_detector.detected_partial_change(), (False, None),
+    def test_detect_partial_change(self):
+        self.assertEqual(self.skmultiflow_drift_detector.detect_partial_change(), (False, None),
                          "detected_partial_change() returns False initially")
 
-    def test_detected_warning_zone(self):
-        self.assertEqual(self.skmultiflow_drift_detector.detected_warning_zone(), False,
+    def test_detect_warning_zone(self):
+        self.assertEqual(self.skmultiflow_drift_detector.detect_warning_zone(), False,
                          "detected_warning_zone() returns False initially")
 
     def test_get_length_estimation(self):
@@ -61,21 +61,3 @@ class TestSkmultiflowDriftDetector(unittest.TestCase):
                          "partial_fit() increases sample_count by 1")
         self.assertNotEqual(self.skmultiflow_drift_detector.detector.miss_prob, miss_prob,
                             "partial_fit() updates miss_prob")
-
-    def test_evaluate(self):
-        pass
-
-    def test_get_average_delay(self):
-        pass
-
-    def test_get_tpr_fdr_and_precision(self):
-        pass
-
-    def test_get_tpr(self):
-        pass
-
-    def test_get_fdr(self):
-        pass
-
-    def test_get_precision(self):
-        pass

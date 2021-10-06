@@ -97,7 +97,7 @@ class HDDMA(BaseChangeDetector):
             self.n_min = self.n_max = self.total_n = 0
             self.c_min = self.c_max = self.total_c = 0
 
-    def detected_global_change(self):
+    def detect_change(self):
         """ Checks whether global concept drift was detected or not.
 
         Returns:
@@ -105,7 +105,7 @@ class HDDMA(BaseChangeDetector):
         """
         return self.active_change
 
-    def detected_warning_zone(self):
+    def detect_warning_zone(self):
         """ Check for Warning Zone
 
         Returns:
@@ -113,7 +113,7 @@ class HDDMA(BaseChangeDetector):
         """
         return self.active_warning
 
-    def detected_partial_change(self):
+    def detect_partial_change(self):
         return False, None
 
     def get_length_estimation(self):

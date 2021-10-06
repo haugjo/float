@@ -67,7 +67,7 @@ class Cusum(BaseChangeDetector):
             if self.sum > self.lambda_:
                 self.active_change = True
 
-    def detected_global_change(self):
+    def detect_change(self):
         """ Checks whether global concept drift was detected or not.
 
         Returns:
@@ -75,10 +75,10 @@ class Cusum(BaseChangeDetector):
         """
         return self.active_change
 
-    def detected_partial_change(self):
+    def detect_partial_change(self):
         return False, None
 
-    def detected_warning_zone(self):
+    def detect_warning_zone(self):
         return False
 
     def get_length_estimation(self):

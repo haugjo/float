@@ -95,7 +95,7 @@ class FHDDMSAdd(BaseChangeDetector):
             if self._mu_max_large - m_temp > self.__cal_hoeffding_bound(len(self._stack) * self._ELEMENT_SIZE):
                 self.active_change = True
 
-    def detected_global_change(self):
+    def detect_change(self):
         """ Checks whether global concept drift was detected or not.
 
         Returns:
@@ -103,10 +103,10 @@ class FHDDMSAdd(BaseChangeDetector):
         """
         return self.active_change
 
-    def detected_warning_zone(self):
+    def detect_warning_zone(self):
         return False
 
-    def detected_partial_change(self):
+    def detect_partial_change(self):
         return False, None
 
     def get_length_estimation(self):

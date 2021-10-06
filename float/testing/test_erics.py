@@ -10,7 +10,7 @@ class TestERICS(unittest.TestCase):
         self.erics = ERICS(self.data_loader.stream.n_features)
 
     def test_init(self):
-        self.assertFalse(self.erics.global_drift_detected, msg='attribute global_drift_detected initialized correctly')
+        self.assertFalse(self.erics.drift_detected, msg='attribute global_drift_detected initialized correctly')
         self.assertFalse(self.erics.partial_drift_detected, msg='attribute partial_drift_detected initialized correctly')
 
     def test_partial_fit(self):
@@ -25,14 +25,14 @@ class TestERICS(unittest.TestCase):
         self.assertEqual(len(global_info_ma) + 1, len(self.erics.global_info_ma), msg='partial_fit() adds new entry to attribute global_info_ma')
         self.assertEqual(len(partial_info_ma) + 1, len(self.erics.partial_info_ma), msg='partial_fit() adds new entry to attribute partial_info_ma')
 
-    def test_detected_global_change(self):
+    def test_detect_change(self):
         for i in range(10):
             X, y = self.data_loader.get_data(50)
             self.erics.partial_fit(X, y)
-            self.assertEqual(self.erics.global_drift_detected, self.erics.detected_global_change(), msg='detected_global_change() returns if there was a global change')
+            self.assertEqual(self.erics.drift_detected, self.erics.detect_change(), msg='detected_global_change() returns if there was a global change')
 
-    def test_detected_partial_change(self):
+    def test_detect_partial_change(self):
         for i in range(10):
             X, y = self.data_loader.get_data(50)
             self.erics.partial_fit(X, y)
-            self.assertEqual(self.erics.partial_drift_detected, self.erics.detected_partial_change()[0], msg='detected_global_change() returns if there was a partial change')
+            self.assertEqual(self.erics.partial_drift_detected, self.erics.detect_partial_change()[0], msg='detected_global_change() returns if there was a partial change')

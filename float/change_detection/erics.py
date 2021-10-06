@@ -42,7 +42,7 @@ class ERICS(BaseChangeDetector):
 
         # Default hyperparameters
         self.time_step = 0                                           # Current Time Step
-        self.time_since_last_global_drift = 0                        # Time steps since last global drift detection
+        self.time_since_last_drift = 0                               # Time steps since last global drift detection
         self.time_since_last_partial_drift = np.zeros(n_param)       # Time steps since last partial drift detection
         self.alpha = None                                            # Adaptive threshold for global concept drift detection
         self.partial_alpha = np.asarray([None] * self.n_param)       # Adaptive threshold for partial concept drift detection
@@ -61,7 +61,7 @@ class ERICS(BaseChangeDetector):
             self.fires_lr_sigma = lr_sigma
             self.fires_labels = []                                          # Unique labels (fires requires binary labels)
 
-        self.global_drift_detected = False
+        self.drift_detected = False
         self.partial_drift_detected = False
         self.partial_drift_features = None
 
@@ -82,18 +82,18 @@ class ERICS(BaseChangeDetector):
         Returns:
             (bool, bool, float): indicator global drift, indicator partial drift, computation time in sec.
         """
-        self.global_drift_detected = False
-        self.global_drift_detected = False
+        self.drift_detected = False
+        self.drift_detected = False
 
         # Update alpha (Eq. 7 in [1])
         if self.alpha is not None:
-            self.alpha -= (self.alpha * self.beta * self.time_since_last_global_drift)
+            self.alpha -= (self.alpha * self.beta * self.time_since_last_drift)
         for k in range(self.n_param):  # partial alpha
             if self.partial_alpha[k] is not None:
                 self.partial_alpha[k] -= (self.partial_alpha[k] * self.beta * self.time_since_last_partial_drift[k])
 
         # Update time since drift
-        self.time_since_last_global_drift += 1
+        self.time_since_last_drift += 1
         self.time_since_last_partial_drift += 1
 
         # Update Parameter distribution
@@ -104,15 +104,15 @@ class ERICS(BaseChangeDetector):
 
         self.__update_param_sum()                   # Update the sum expression for observations in a shifting window
         self.__compute_moving_average()             # Compute moving average in specified window
-        self.global_drift_detected, self.partial_drift_detected, self.partial_drift_features = self.__detect_drift()    # Detect concept drift
+        self.drift_detected, self.partial_drift_detected, self.partial_drift_features = self.__detect_drift()    # Detect concept drift
 
         # Update time step
         self.time_step += 1
 
-    def detected_global_change(self):
-        return self.global_drift_detected
+    def detect_change(self):
+        return self.drift_detected
 
-    def detected_partial_change(self):
+    def detect_partial_change(self):
         """
         Check if partial change was detected.
 
@@ -122,7 +122,7 @@ class ERICS(BaseChangeDetector):
         """
         return self.partial_drift_detected, self.partial_drift_features
 
-    def detected_warning_zone(self):
+    def detect_warning_zone(self):
         return False
 
     def get_length_estimation(self):
@@ -174,7 +174,7 @@ class ERICS(BaseChangeDetector):
     def __detect_drift(self):
         """
         Detect global and partial concept drift using the adaptive alpha-threshold
-        :return: global drift indicator, partial drift indicator, list of features with detected drift
+        :return: drift indicator, partial drift indicator, list of features with detected drift
         :rtype: bool, bool, list
         """
         global_window_delta = None
@@ -209,11 +209,11 @@ class ERICS(BaseChangeDetector):
             unspecified = np.isnan(self.partial_alpha.astype(float)).flatten()
             self.partial_alpha[unspecified] = np.abs(partial_window_delta[unspecified])
 
-        # Global Drift Detection
-        g_drift = False
+        # Drift Detection
+        drift = False
         if global_window_delta > self.alpha:
-            g_drift = True
-            self.time_since_last_global_drift = 0
+            drift = True
+            self.time_since_last_drift = 0
             self.alpha = None
 
         # Partial Drift Detection
@@ -225,7 +225,7 @@ class ERICS(BaseChangeDetector):
             self.time_since_last_partial_drift[k] = 0
             self.partial_alpha[k] = None
 
-        return g_drift, p_drift, partial_drift_features
+        return drift, p_drift, partial_drift_features
 
     # ----------------------------------------
     # BASE MODELS

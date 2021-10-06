@@ -62,7 +62,7 @@ class MDDMA(BaseChangeDetector):
             self.u_max = u if u > self.u_max else self.u_max
             self.active_change = True if (self.u_max - u > self.e) else False
 
-    def detected_global_change(self):
+    def detect_change(self):
         """ Checks whether global concept drift was detected or not.
 
         Returns:
@@ -70,10 +70,10 @@ class MDDMA(BaseChangeDetector):
         """
         return self.active_change
 
-    def detected_warning_zone(self):
+    def detect_warning_zone(self):
         return False
 
-    def detected_partial_change(self):
+    def detect_partial_change(self):
         return False, None
 
     def get_length_estimation(self):

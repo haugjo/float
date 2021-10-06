@@ -48,7 +48,7 @@ class Adwin(BaseChangeDetector):
         """
         self.active_change = self.adaptive_windowing.set_input(pr)
 
-    def detected_global_change(self):
+    def detect_change(self):
         """ Checks whether global concept drift was detected or not.
 
         Returns:
@@ -56,10 +56,10 @@ class Adwin(BaseChangeDetector):
         """
         return self.active_change
 
-    def detected_partial_change(self):
+    def detect_partial_change(self):
         return False, None
 
-    def detected_warning_zone(self):
+    def detect_warning_zone(self):
         return False
 
     def get_length_estimation(self):

@@ -92,7 +92,7 @@ for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_det
 
 """
 visualizer = Visualizer(
-    [concept_drift_detector.global_drifts for concept_drift_detector in concept_drift_detectors],
+    [concept_drift_detector.drifts for concept_drift_detector in concept_drift_detectors],
     concept_drift_detector_names, 'drift_detection')
 visualizer.draw_concept_drifts(data_loader.stream, known_drifts, batch_size,
                                plot_title=f'Concept Drifts For Data Set spambase, Predictor Perceptron, Feature Selector FIRES')
@@ -149,7 +149,7 @@ plot(measures=[cd_evaluator['ERICS'].result['false_discovery_rate']['measures'],
      measure_type='change_detection')
 plt.show()
 
-draw_concept_drifts(measures=[concept_drift_detectors[-2].global_drifts, concept_drift_detectors[-1].global_drifts],
+draw_concept_drifts(measures=[concept_drift_detectors[-2].drifts, concept_drift_detectors[-1].drifts],
                     labels=['ERICS', 'Page Hinkley'],
                     measure_type='change_detection',
                     data_stream=data_loader.stream,

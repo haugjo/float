@@ -59,7 +59,7 @@ class FHDDM(BaseChangeDetector):
                 self.__MU_M = mu_t
             self.active_change = (self.__MU_M - mu_t) > self.__E
 
-    def detected_global_change(self):
+    def detect_change(self):
         """ Checks whether global concept drift was detected or not.
 
         Returns:
@@ -67,10 +67,10 @@ class FHDDM(BaseChangeDetector):
         """
         return self.active_change
 
-    def detected_warning_zone(self):
+    def detect_warning_zone(self):
         return False
 
-    def detected_partial_change(self):
+    def detect_partial_change(self):
         return False, None
 
     def get_length_estimation(self):
