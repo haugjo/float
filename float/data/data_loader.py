@@ -1,6 +1,6 @@
 from skmultiflow.data.file_stream import FileStream
 from skmultiflow.data.base_stream import Stream
-from float.data.scaling import BaseScaler
+from float.data.preprocessing import BaseScaler
 import numpy as np
 
 

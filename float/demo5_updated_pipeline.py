@@ -7,7 +7,7 @@ from sklearn.metrics import accuracy_score, zero_one_loss
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, Normalizer
 
 from float.data import DataLoader
-from float.data.scaling import SklearnScaler
+from float.data.preprocessing import SklearnScaler
 from float.change_detection import ERICS, SkmultiflowChangeDetector
 from float.change_detection.tornado import PageHinkley, DDM
 from float.change_detection.evaluation import ChangeDetectionEvaluator
