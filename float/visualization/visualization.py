@@ -122,7 +122,7 @@ def bar(measures, labels, measure_name, measure_type, fig_size=(10, 5)):
     return ax
 
 
-def draw_selected_features(measures, labels, measure_type, layout, fig_size=(10, 5), share_x=True, share_y=True):
+def selected_features_scatter(measures, labels, measure_type, layout, fig_size=(10, 5), share_x=True, share_y=True):
     """
     Draws the selected features at each time step in a scatter plot.
 
@@ -169,7 +169,7 @@ def draw_selected_features(measures, labels, measure_type, layout, fig_size=(10,
     return axes
 
 
-def draw_top_features(measures, labels, measure_type, feature_names, layout, fig_size=(10, 5), share_x=True, share_y=True):
+def top_features_bar(measures, labels, measure_type, feature_names, layout, fig_size=(10, 5), share_x=True, share_y=True):
     """
     Draws the most selected features over time as a bar plot.
 
@@ -220,7 +220,7 @@ def draw_top_features(measures, labels, measure_type, feature_names, layout, fig
     return axes
 
 
-def draw_top_features_with_reference(measures, labels, measure_type, feature_names, fig_size=(10, 5)):
+def top_features_reference_bar(measures, labels, measure_type, feature_names, fig_size=(10, 5)):
     """
     Draws the most selected features over time as a bar plot.
 
@@ -268,7 +268,7 @@ def draw_top_features_with_reference(measures, labels, measure_type, feature_nam
     return ax
 
 
-def draw_concept_drifts(measures, labels, measure_type, data_stream, known_drifts, batch_size, fig_size=(10, 5)):
+def concept_drifts_scatter(measures, labels, measure_type, data_stream, known_drifts, batch_size, fig_size=(10, 5)):
     """
     Draws the known and the detected concept drifts for all concept drift detectors.
 

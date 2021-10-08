@@ -20,7 +20,7 @@ from float.pipeline import PrequentialPipeline
 from float.prediction import SkmultiflowClassifier
 from float.prediction.evaluation import PredictionEvaluator
 from float.prediction.evaluation.measures import noise_variability, mean_drift_performance_decay, mean_drift_recovery_time
-from float.visualization import plot, draw_selected_features, draw_top_features_with_reference, draw_concept_drifts
+from float.visualization import plot, selected_features_scatter, top_features_reference_bar, concept_drifts_scatter
 
 ### Initialize Data Loader ###
 scaler = SklearnScaler(scaler_obj=MinMaxScaler(), reset_after_drift=False)
@@ -131,18 +131,18 @@ plot(measures=[pred_evaluator.result['mean_drift_recovery_time']['measures']],
      smooth_curve=[False])
 plt.show()
 
-draw_top_features_with_reference(measures=[f_selector.selection],
-                                 labels=['FIRES'],
-                                 measure_type='feature_selection',
-                                 feature_names=feature_names,
-                                 fig_size=(15, 5))
+top_features_reference_bar(measures=[f_selector.selection],
+                           labels=['FIRES'],
+                           measure_type='feature_selection',
+                           feature_names=feature_names,
+                           fig_size=(15, 5))
 plt.show()
 
-draw_selected_features(measures=[f_selector.selection],
-                       labels=['FIRES'],
-                       measure_type='feature_selection',
-                       layout=(1, 1),
-                       fig_size=(10, 8))
+selected_features_scatter(measures=[f_selector.selection],
+                          labels=['FIRES'],
+                          measure_type='feature_selection',
+                          layout=(1, 1),
+                          fig_size=(10, 8))
 plt.show()
 
 plot(measures=[cd_evaluator['ERICS'].result['false_discovery_rate']['measures'], cd_evaluator['Page Hinkley'].result['false_discovery_rate']['measures']],
@@ -152,10 +152,10 @@ plot(measures=[cd_evaluator['ERICS'].result['false_discovery_rate']['measures'],
      measure_type='change_detection')
 plt.show()
 
-draw_concept_drifts(measures=[concept_drift_detectors[-2].drifts, concept_drift_detectors[-1].drifts],
-                    labels=['ERICS', 'Page Hinkley'],
-                    measure_type='change_detection',
-                    data_stream=data_loader.stream,
-                    known_drifts=known_drifts,
-                    batch_size=batch_size)
+concept_drifts_scatter(measures=[concept_drift_detectors[-2].drifts, concept_drift_detectors[-1].drifts],
+                       labels=['ERICS', 'Page Hinkley'],
+                       measure_type='change_detection',
+                       data_stream=data_loader.stream,
+                       known_drifts=known_drifts,
+                       batch_size=batch_size)
 plt.show()
