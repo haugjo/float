@@ -15,14 +15,14 @@ class TestERICS(unittest.TestCase):
 
     def test_partial_fit(self):
         X, y = self.data_loader.get_data(50)
-        mu_w, sigma_w, param_sum, global_info_ma, partial_info_ma = self.erics.mu_w, self.erics.sigma_w, self.erics.param_sum.copy(), self.erics.global_info_ma.copy(), self.erics.partial_info_ma.copy()
+        mu_w, sigma_w, param_sum, global_info_ma, partial_info_ma = self.erics.mu_w, self.erics.sigma_w, self.erics.param_sum.copy(), self.erics.info_ma.copy(), self.erics.partial_info_ma.copy()
         self.erics.partial_fit(X, y)
         self.assertFalse((mu_w[-1, :] == self.erics.mu_w[-1, :]).all(), msg='partial_fit() updates the attribute mu_w')
         self.assertTrue((mu_w[1:, :] == self.erics.mu_w[:-1, :]).all(), msg='partial_fit() adds new entry and drops oldest entry from attribute mu_w')
         self.assertFalse((sigma_w[-1, :] == self.erics.sigma_w[-1, :]).all(), msg='partial_fit() updates the attribute sigma_w')
         self.assertTrue((sigma_w[1:, :] == self.erics.sigma_w[:-1, :]).all(), msg='partial_fit() adds new entry and drops oldest entry from attribute sigma_w')
         self.assertFalse((param_sum == self.erics.param_sum).all(), msg='partial_fit() updates the attribute param_sum')
-        self.assertEqual(len(global_info_ma) + 1, len(self.erics.global_info_ma), msg='partial_fit() adds new entry to attribute global_info_ma')
+        self.assertEqual(len(global_info_ma) + 1, len(self.erics.info_ma), msg='partial_fit() adds new entry to attribute global_info_ma')
         self.assertEqual(len(partial_info_ma) + 1, len(self.erics.partial_info_ma), msg='partial_fit() adds new entry to attribute partial_info_ma')
 
     def test_detect_change(self):

@@ -49,7 +49,7 @@ class ERICS(BaseChangeDetector):
         self.mu_w = np.ones((self.M, self.n_param)) * init_mu        # Parameter Mean in window
         self.sigma_w = np.ones((self.M, self.n_param)) * init_sigma  # Parameter Variance in window
         self.param_sum = np.zeros((self.M - 1, self.n_param))        # Sum-expression for computation of moving average (see Eq. (8) in [1])
-        self.global_info_ma = []                                     # Global moving average
+        self.info_ma = []                                            # Global moving average
         self.partial_info_ma = []                                    # Partial moving average
 
         # Parameters of FIRES (Probit) model according to [2]
@@ -156,16 +156,16 @@ class ERICS(BaseChangeDetector):
         Compute the moving average (according to Eq. (8) in the ERICS paper [1])
         """
         partial_ma = np.zeros(self.n_param)
-        global_score = np.zeros(self.M - 1)
+        score = np.zeros(self.M - 1)
 
         for k in range(self.n_param):
             partial_score = self.param_sum[:, k] - 1
-            global_score += partial_score
+            score += partial_score
             partial_ma[k] = np.sum(np.abs(partial_score)) / (2 * self.M)  # Add partial mov. avg. for parameter k
 
-        global_ma = np.sum(np.abs(global_score)) / (2 * self.M)
+        ma = np.sum(np.abs(score)) / (2 * self.M)
 
-        self.global_info_ma.append(global_ma)
+        self.info_ma.append(ma)
         self.partial_info_ma.append(partial_ma)
 
     def __detect_drift(self):
@@ -174,7 +174,7 @@ class ERICS(BaseChangeDetector):
         :return: drift indicator, partial drift indicator, list of features with detected drift
         :rtype: bool, bool, list
         """
-        global_window_delta = None
+        window_delta = None
         partial_window_delta = None
 
         # Compute delta in sliding window W (according to Eq. (5) in the ERICS paper [1])
@@ -182,33 +182,33 @@ class ERICS(BaseChangeDetector):
             self.W = 2
             warn('Sliding window for concept drift detection was automatically set to 2 observations.')
 
-        if len(self.global_info_ma) < self.W:
-            oldest_entry = len(self.global_info_ma)
+        if len(self.info_ma) < self.W:
+            oldest_entry = len(self.info_ma)
         else:
             oldest_entry = self.W
 
         if oldest_entry == 1:  # In case of only one observation
-            global_window_delta = copy.copy(self.global_info_ma[-1])
+            window_delta = copy.copy(self.info_ma[-1])
             partial_window_delta = copy.copy(self.partial_info_ma[-1])
         else:
             for t in range(oldest_entry, 1, -1):
                 if t == oldest_entry:
-                    global_window_delta = self.global_info_ma[-t+1] - self.global_info_ma[-t]  # newer - older
+                    window_delta = self.info_ma[-t + 1] - self.info_ma[-t]  # newer - older
                     partial_window_delta = self.partial_info_ma[-t+1] - self.partial_info_ma[-t]
                 else:
-                    global_window_delta += (self.global_info_ma[-t+1] - self.global_info_ma[-t])
+                    window_delta += (self.info_ma[-t + 1] - self.info_ma[-t])
                     partial_window_delta += (self.partial_info_ma[-t+1] - self.partial_info_ma[-t])
 
         # (Re-) Initialize alpha if it is None (at time step 0 or if a drift was detected)
         if self.alpha is None:
-            self.alpha = np.abs(global_window_delta)  # according to Eq. (6) in [1] -> abs() is only required at t=0, to make sure that alpha > 0
+            self.alpha = np.abs(window_delta)  # according to Eq. (6) in [1] -> abs() is only required at t=0, to make sure that alpha > 0
         if None in self.partial_alpha:
             unspecified = np.isnan(self.partial_alpha.astype(float)).flatten()
             self.partial_alpha[unspecified] = np.abs(partial_window_delta[unspecified])
 
         # Drift Detection
         drift = False
-        if global_window_delta > self.alpha:
+        if window_delta > self.alpha:
             drift = True
             self.time_since_last_drift = 0
             self.alpha = None
