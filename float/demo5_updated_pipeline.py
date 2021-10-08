@@ -116,6 +116,7 @@ visualizer.plot(
 plt.show()
 """
 plot(measures=[pred_evaluator.result['mean_drift_performance_decay']['measures']],
+     variances=[pred_evaluator.result['mean_drift_performance_decay']['var']],
      labels=['Perceptron'],
      measure_name='Drift Performance Decay',
      measure_type='prediction',
@@ -123,6 +124,7 @@ plot(measures=[pred_evaluator.result['mean_drift_performance_decay']['measures']
 plt.show()
 
 plot(measures=[pred_evaluator.result['mean_drift_recovery_time']['measures']],
+     variances=[pred_evaluator.result['mean_drift_recovery_time']['var']],
      labels=['Perceptron'],
      measure_name='Drift Recovery Time',
      measure_type='prediction',
@@ -144,6 +146,7 @@ draw_selected_features(measures=[f_selector.selection],
 plt.show()
 
 plot(measures=[cd_evaluator['ERICS'].result['false_discovery_rate']['measures'], cd_evaluator['Page Hinkley'].result['false_discovery_rate']['measures']],
+     variances=[cd_evaluator['ERICS'].result['false_discovery_rate']['var'], cd_evaluator['Page Hinkley'].result['false_discovery_rate']['var']],
      labels=['ERICS', 'Page Hinkley'],
      measure_name='False Discovery Rate',
      measure_type='change_detection')

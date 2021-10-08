@@ -29,6 +29,8 @@ class FeatureSelectionEvaluator(metaclass=ABCMeta):
         for measure_func in measure_funcs:
             self.result[measure_func.__name__] = dict()
             self.result[measure_func.__name__]['measures'] = []
+            self.result[measure_func.__name__]['mean'] = []
+            self.result[measure_func.__name__]['var'] = []
 
             if self.decay_rate:
                 self.result[measure_func.__name__]['mean_decay'] = []
@@ -50,8 +52,8 @@ class FeatureSelectionEvaluator(metaclass=ABCMeta):
             try:
                 new_measure_val = measure_func(selected_features, n_total_features)
                 self.result[measure_func.__name__]['measures'].append(new_measure_val)
-                self.result[measure_func.__name__]['mean'] = np.mean(self.result[measure_func.__name__]['measures'])
-                self.result[measure_func.__name__]['var'] = np.var(self.result[measure_func.__name__]['measures'])
+                self.result[measure_func.__name__]['mean'].append(np.mean(self.result[measure_func.__name__]['measures']))
+                self.result[measure_func.__name__]['var'].append(np.var(self.result[measure_func.__name__]['measures']))
 
                 if self.decay_rate:
                     if len(self.result[measure_func.__name__]['mean_decay']) > 0:

@@ -13,7 +13,7 @@ palette = ['#332288', '#88ccee', '#44aa99', '#117733', '#999933', '#ddcc77', '#c
 font_size = 12
 
 
-def plot(measures, labels, measure_name, measure_type, fig_size=(10.2, 5.2), smooth_curve=False):
+def plot(measures, labels, measure_name, measure_type, variances=None, fig_size=(10.2, 5.2), smooth_curve=False):
     """
     Creates a line plot.
 
@@ -22,6 +22,7 @@ def plot(measures, labels, measure_name, measure_type, fig_size=(10.2, 5.2), smo
         labels (list[str]): the list of labels for the measures
         measure_name (str): the measure to be plotted
         measure_type (str): the type of the measures passed, one of 'prediction', 'feature_selection, or 'drift_detection'
+        variances (list[list]): the list of lists of the measures' variance values
         fig_size (float, float): the figure size of the plot
         smooth_curve (bool | list[bool]): True if the plotted curve should be smoothed, False otherwise
 
@@ -37,6 +38,8 @@ def plot(measures, labels, measure_name, measure_type, fig_size=(10.2, 5.2), smo
         smooth_curve_i = smooth_curve if type(smooth_curve) is bool else smooth_curve[i]
         y = savgol_filter(measure, 51, 3) if smooth_curve_i else measure
         ax.plot(np.arange(len(measure)), y, color=palette[i], label=label)
+        if variances:
+            ax.fill_between(np.arange(len(measure)), y - (np.array(variances[i])/2), y + (np.array(variances[i])/2), color=palette[i], alpha=0.5, label=label + ' var')
 
     x_label = 'Delay Range' if measure_type == 'change_detection' else 'Time Step $t$'
     ax.set_xlabel(x_label, size=font_size, labelpad=1.6)

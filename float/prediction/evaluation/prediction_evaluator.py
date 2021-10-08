@@ -40,6 +40,8 @@ class PredictionEvaluator(metaclass=ABCMeta):
 
             self.result[measure_func.__name__] = dict()
             self.result[measure_func.__name__]['measures'] = []
+            self.result[measure_func.__name__]['mean'] = []
+            self.result[measure_func.__name__]['var'] = []
 
             if self.decay_rate:
                 self.result[measure_func.__name__]['mean_decay'] = []
@@ -76,8 +78,8 @@ class PredictionEvaluator(metaclass=ABCMeta):
                 # Make function call and save measurement
                 new_measure_val = measure_func(**call_args)
                 self.result[measure_func.__name__]['measures'].append(new_measure_val)
-                self.result[measure_func.__name__]['mean'] = np.mean(self.result[measure_func.__name__]['measures'])
-                self.result[measure_func.__name__]['var'] = np.var(self.result[measure_func.__name__]['measures'])
+                self.result[measure_func.__name__]['mean'].append(np.mean(self.result[measure_func.__name__]['measures']))
+                self.result[measure_func.__name__]['var'].append(np.var(self.result[measure_func.__name__]['measures']))
 
                 if self.decay_rate:
                     if len(self.result[measure_func.__name__]['mean_decay']) > 0:
