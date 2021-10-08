@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def time_to_detection(evaluator, global_drifts, n_delay):
+def detection_delay(evaluator, global_drifts, n_delay):
     """
     Get the mean Time to Detection,
     i.e. the average delay between the beginning of a known drift and the first detection.

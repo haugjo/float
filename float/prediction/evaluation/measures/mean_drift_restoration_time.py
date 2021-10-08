@@ -3,7 +3,7 @@ import warnings
 from sklearn.metrics import zero_one_loss
 
 
-def mean_drift_recovery_time(result, known_drifts, batch_size, reference_measure=zero_one_loss, incr=False, interval=10):
+def mean_drift_restoration_time(result, known_drifts, batch_size, reference_measure=zero_one_loss, incr=False, interval=10):
     """
     Recovery Time After Concept Drift
     Return the average no. of iterations (time steps) before recovering the evaluation measure previous of a drift
@@ -24,7 +24,7 @@ def mean_drift_recovery_time(result, known_drifts, batch_size, reference_measure
 
     # Get previous mean recovery time
     if len_result > 0:
-        recovery = result['mean_drift_recovery_time']['measures'][-1]
+        recovery = result['mean_drift_restoration_time']['measures'][-1]
     else:
         return 0
 
@@ -44,7 +44,7 @@ def mean_drift_recovery_time(result, known_drifts, batch_size, reference_measure
             drift = next(iter_drifts, None)
 
     if drift is not None:
-        if len_result > drift + 1 and recovery == result['mean_drift_recovery_time']['measures'][-2]:
+        if len_result > drift + 1 and recovery == result['mean_drift_restoration_time']['measures'][-2]:
             return recovery  # return, if model has already recovered from drift
         else:
             # Get current recovery time
@@ -61,7 +61,7 @@ def mean_drift_recovery_time(result, known_drifts, batch_size, reference_measure
                     rec_new = len(result[reference_measure.__name__]['measures'][drift:])
 
                 # Get recovery time prior to current drift
-                prev_drift_recovery = result['mean_drift_recovery_time']['measures'][drift - 1]
+                prev_drift_recovery = result['mean_drift_restoration_time']['measures'][drift - 1]
                 recovery = prev_drift_recovery + (rec_new - prev_drift_recovery) / i  # incremental mean
             else:
                 warnings.warn('The reference measure {} is not part of the PredictionEvaluator; we return 0 per '

@@ -11,7 +11,7 @@ from float.data.preprocessing import SklearnScaler
 from float.change_detection import ERICS, SkmultiflowChangeDetector
 from float.change_detection.tornado import PageHinkley, DDM
 from float.change_detection.evaluation import ChangeDetectionEvaluator
-from float.change_detection.evaluation.measures import time_to_detection, detected_change_rate, \
+from float.change_detection.evaluation.measures import detection_delay, detected_change_rate, \
     false_discovery_rate, time_between_false_alarms, mean_time_ratio, missed_detection_rate
 from float.feature_selection.evaluation import FeatureSelectionEvaluator
 from float.feature_selection.evaluation.measures import nogueira_stability
@@ -19,7 +19,7 @@ from float.feature_selection import FIRES
 from float.pipeline import PrequentialPipeline
 from float.prediction import SkmultiflowClassifier
 from float.prediction.evaluation import PredictionEvaluator
-from float.prediction.evaluation.measures import noise_variability, mean_drift_performance_decay, mean_drift_recovery_time
+from float.prediction.evaluation.measures import noise_variability, mean_drift_performance_deterioration, mean_drift_restoration_time
 from float.visualization import plot, selected_features_scatter, top_features_reference_bar, concept_drifts_scatter
 
 ### Initialize Data Loader ###
@@ -46,7 +46,7 @@ cd_evaluator = dict()
 for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names, concept_drift_detectors):
     ### Initialize Predictor ###
     predictor = SkmultiflowClassifier(PerceptronMask(), data_loader.stream.target_values, reset_after_drift=True)  # todo: can we get rid of the target values parameter?
-    pred_evaluator = PredictionEvaluator([zero_one_loss, mean_drift_performance_decay, mean_drift_recovery_time],  # noise_variability
+    pred_evaluator = PredictionEvaluator([zero_one_loss, mean_drift_performance_deterioration, mean_drift_restoration_time],  # noise_variability
                                          decay_rate=0.1,
                                          window_size=10,
                                          known_drifts=known_drifts,
@@ -69,7 +69,7 @@ for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_det
                                                                                         missed_detection_rate,
                                                                                         false_discovery_rate,
                                                                                         time_between_false_alarms,
-                                                                                        time_to_detection,
+                                                                                        detection_delay,
                                                                                         mean_time_ratio],
                                                                          known_drifts=known_drifts,
                                                                          batch_size=batch_size,
@@ -115,16 +115,16 @@ visualizer.plot(
     smooth_curve=[False, False, True])
 plt.show()
 """
-plot(measures=[pred_evaluator.result['mean_drift_performance_decay']['measures']],
-     variances=[pred_evaluator.result['mean_drift_performance_decay']['var']],
+plot(measures=[pred_evaluator.result['mean_drift_performance_deterioration']['measures']],
+     variances=[pred_evaluator.result['mean_drift_performance_deterioration']['var']],
      labels=['Perceptron'],
      measure_name='Drift Performance Decay',
      measure_type='prediction',
      smooth_curve=[False])
 plt.show()
 
-plot(measures=[pred_evaluator.result['mean_drift_recovery_time']['measures']],
-     variances=[pred_evaluator.result['mean_drift_recovery_time']['var']],
+plot(measures=[pred_evaluator.result['mean_drift_restoration_time']['measures']],
+     variances=[pred_evaluator.result['mean_drift_restoration_time']['var']],
      labels=['Perceptron'],
      measure_name='Drift Recovery Time',
      measure_type='prediction',

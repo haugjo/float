@@ -3,7 +3,7 @@ import warnings
 from sklearn.metrics import zero_one_loss
 
 
-def mean_drift_performance_decay(result, known_drifts, batch_size, reference_measure=zero_one_loss, interval=10):
+def mean_drift_performance_deterioration(result, known_drifts, batch_size, reference_measure=zero_one_loss, interval=10):
     """
     Performance Decay Under Concept Drift
     Return the average divergence of the reference measure after the start of a known concept drift
@@ -23,7 +23,7 @@ def mean_drift_performance_decay(result, known_drifts, batch_size, reference_mea
 
     # Get previous mean decay
     if len_result > 0:
-        decay = result['mean_drift_performance_decay']['measures'][-1]
+        decay = result['mean_drift_performance_deterioration']['measures'][-1]
     else:
         decay = 0
 
