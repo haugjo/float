@@ -6,9 +6,8 @@ from scipy.signal import savgol_filter
 from skmultiflow.data.data_stream import Stream
 import matplotlib.lines as mlines
 
-# palette = ['#001219', '#005f73', '#0a9396', '#94d2bd', '#e9d8a6', '#ee9b00', '#ca6702', '#bb3e03',
-#            '#ae2012', '#9b2226']
-palette = ['#332288', '#88ccee', '#44aa99', '#117733', '#999933', '#ddcc77', '#cc3311']  # indigo, light blue, teal, dark green, olive, yellow green, red
+# dark blue, light blue, teal, dark green, olive, yellow green, red, magenta, grey, black
+palette = ['#003366', '#88ccee', '#44aa99', '#117733', '#999933', '#ddcc77', '#cc3311', 'ee3377', 'bbbbbb', '000000']
 
 font_size = 12
 
