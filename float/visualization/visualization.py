@@ -5,9 +5,10 @@ import warnings
 from scipy.signal import savgol_filter
 from skmultiflow.data.data_stream import Stream
 import matplotlib.lines as mlines
+from math import pi
 
 # dark blue, light blue, teal, dark green, olive, yellow green, red, magenta, grey, black
-palette = ['#003366', '#88ccee', '#44aa99', '#117733', '#999933', '#ddcc77', '#cc3311', 'ee3377', 'bbbbbb', '000000']
+palette = ['#003366', '#88ccee', '#44aa99', '#117733', '#999933', '#ddcc77', '#cc3311', '#ee3377', '#bbbbbb', '#000000']
 
 font_size = 12
 
@@ -18,7 +19,7 @@ def plot(measures, labels, measure_name, measure_type, variances=None, fig_size=
 
     Args:
         measures (list[list]): the list of lists of measures to be visualized
-        labels (list[str]): the list of labels for the measures
+        labels (list[str]): the list of labels for the models
         measure_name (str): the measure to be plotted
         measure_type (str): the type of the measures passed, one of 'prediction', 'feature_selection, or 'drift_detection'
         variances (list[list]): the list of lists of the measures' variance values
@@ -55,7 +56,7 @@ def scatter(measures, labels, measure_name, measure_type, layout, fig_size=(10, 
 
     Args:
         measures (list[list]): the list of lists of measures to be visualized
-        labels (list[str]): the list of labels for the measures
+        labels (list[str]): the list of labels for the models
         measure_name (str): the measure to be plotted
         measure_type (str): the type of the measures passed, one of 'prediction', 'feature_selection, or 'drift_detection'
         layout (int, int): the layout of the figure (nrows, ncols)
@@ -96,7 +97,7 @@ def bar(measures, labels, measure_name, measure_type, fig_size=(10, 5)):
 
     Args:
         measures (list[list]): the list of lists of measures to be visualized
-        labels (list[str]): the list of labels for the measures
+        labels (list[str]): the list of labels for the models
         measure_name (str): the measure to be plotted
         measure_type (str): the type of the measures passed, one of 'prediction', 'feature_selection, or 'drift_detection'
         fig_size (float, float): the figure size of the plot
@@ -128,7 +129,7 @@ def selected_features_scatter(measures, labels, measure_type, layout, fig_size=(
 
     Args:
         measures (list[list]): the list of lists of measures to be visualized
-        labels (list[str]): the list of labels for the measures
+        labels (list[str]): the list of labels for the models
         measure_type (str): the type of the measures passed, one of 'prediction', 'feature_selection, or 'drift_detection'
         layout (int, int): the layout of the figure (nrows, ncols)
         fig_size (float, float): the figure size of the plot
@@ -175,7 +176,7 @@ def top_features_bar(measures, labels, measure_type, feature_names, layout, fig_
 
     Args:
         measures (list[list]): the list of lists of measures to be visualized
-        labels (list[str]): the list of labels for the measures
+        labels (list[str]): the list of labels for the models
         measure_type (str): the type of the measures passed, one of 'prediction', 'feature_selection, or 'drift_detection'
         feature_names (list): the list of feature names
         layout (int, int): the layout of the figure (nrows, ncols)
@@ -226,7 +227,7 @@ def top_features_reference_bar(measures, labels, measure_type, feature_names, fi
 
     Args:
         measures (list[list]): the list of lists of measures to be visualized
-        labels (list[str]): the list of labels for the measures
+        labels (list[str]): the list of labels for the models
         measure_type (str): the type of the measures passed, one of 'prediction', 'feature_selection, or 'drift_detection'
         feature_names (list): the list of feature names
         fig_size (float, float): the figure size of the plot
@@ -274,7 +275,7 @@ def concept_drifts_scatter(measures, labels, measure_type, data_stream, known_dr
 
     Args:
         measures (list[list]): the list of lists of measures to be visualized
-        labels (list[str]): the list of labels for the measures
+        labels (list[str]): the list of labels for the models
         measure_type (str): the type of the measures passed, one of 'prediction', 'feature_selection, or 'drift_detection'
         data_stream (Stream): the data set as a stream
         known_drifts (list): the known concept drifts for this data set
@@ -318,5 +319,39 @@ def concept_drifts_scatter(measures, labels, measure_type, data_stream, known_dr
     detected_drift_patch = mlines.Line2D([], [], marker='|', linestyle='None', markersize=10, markeredgewidth=2,
                                          color=palette[0], label='detected drift')
     plt.legend(handles=[known_drift_patch, detected_drift_patch])
+    plt.tight_layout()
+    return ax
+
+
+def spider_chart(measures, labels, measure_names):
+    """
+    Draws a spider chart of the given measure values and models.
+
+    Args:
+        measures (list[list]): the list of lists containing the measure values for each model
+        labels (list[str]): the list of labels for the models
+        measure_names (list[str]): the measures to be plotted
+
+    Returns:
+        Axes: the Axes object containing the bar plot
+    """
+    N = len(measures[0])
+    angles = [n / float(N) * 2 * pi for n in range(N)]
+    angles += angles[:1]
+    ax = plt.subplot(111, polar=True)
+    ax.set_theta_offset(pi / 2)
+    ax.set_theta_direction(-1)
+    plt.xticks(angles[:-1], measure_names)
+    ax.set_rlabel_position(0)
+    plt.yticks([0, 0.5, 1], ["0", "0.5", "1"], color=palette[-1], size=7)
+    plt.ylim(0, 1)
+
+    for i, (measure, label) in enumerate(zip(measures, labels)):
+        measure += measure[:1]
+        ax.plot(angles, measure, color=palette[i], linewidth=1, linestyle='solid', label=label)
+        ax.fill(angles, measure, color=palette[i], alpha=0.1)
+
+    plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
+    plt.margins(0.1, 0.1)
     plt.tight_layout()
     return ax

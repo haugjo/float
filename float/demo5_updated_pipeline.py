@@ -20,7 +20,7 @@ from float.pipeline import PrequentialPipeline
 from float.prediction import SkmultiflowClassifier
 from float.prediction.evaluation import PredictionEvaluator
 from float.prediction.evaluation.measures import noise_variability, mean_drift_performance_deterioration, mean_drift_restoration_time
-from float.visualization import plot, selected_features_scatter, top_features_reference_bar, concept_drifts_scatter
+from float.visualization import plot, selected_features_scatter, top_features_reference_bar, concept_drifts_scatter, spider_chart
 
 ### Initialize Data Loader ###
 scaler = SklearnScaler(scaler_obj=MinMaxScaler(), reset_after_drift=False)
@@ -46,7 +46,7 @@ cd_evaluator = dict()
 for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names, concept_drift_detectors):
     ### Initialize Predictor ###
     predictor = SkmultiflowClassifier(PerceptronMask(), data_loader.stream.target_values, reset_after_drift=True)  # todo: can we get rid of the target values parameter?
-    pred_evaluator = PredictionEvaluator([zero_one_loss, mean_drift_performance_deterioration, mean_drift_restoration_time],  # noise_variability
+    pred_evaluator = PredictionEvaluator([accuracy_score, zero_one_loss, mean_drift_performance_deterioration, mean_drift_restoration_time, noise_variability],
                                          decay_rate=0.1,
                                          window_size=10,
                                          known_drifts=known_drifts,
@@ -158,4 +158,15 @@ concept_drifts_scatter(measures=[concept_drift_detectors[-2].drifts, concept_dri
                        data_stream=data_loader.stream,
                        known_drifts=known_drifts,
                        batch_size=batch_size)
+plt.show()
+
+spider_chart(measures=[[pred_evaluator.result['accuracy_score']['mean'][-1], pred_evaluator.result['zero_one_loss']['mean'][-1],
+                        pred_evaluator.result['noise_variability']['mean'][-1], fs_evaluator.result['nogueira_stability']['mean'][-1],
+                        cd_evaluator['ERICS'].result['missed_detection_rate']['mean'], cd_evaluator['ERICS'].result['false_discovery_rate']['mean']],
+                       [pred_evaluator.result['accuracy_score']['mean'][-1], pred_evaluator.result['zero_one_loss']['mean'][-1],
+                        pred_evaluator.result['noise_variability']['mean'][-1], fs_evaluator.result['nogueira_stability']['mean'][-1],
+                        cd_evaluator['Page Hinkley'].result['missed_detection_rate']['mean'], cd_evaluator['Page Hinkley'].result['false_discovery_rate']['mean']]
+                       ],
+             labels=['ERICS', 'Page Hinkley'],
+             measure_names=['accuracy_score', 'zero_one_loss', 'noise_variability', 'nogueira_stability', 'missed_detection_rate', 'false_discovery_rate'])
 plt.show()
