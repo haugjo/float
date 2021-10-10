@@ -30,5 +30,5 @@ class TestFeatureSelectionEvaluator(unittest.TestCase):
         _ = self.fires.select_features(X)
         self.feature_selection_evaluator.run(self.fires.selection, self.fires.n_total_features)
         self.assertTrue(len(self.feature_selection_evaluator.result[nogueira_stability.__name__]['measures']) > 0, msg='run() adds a value to the measure dict')
-        self.assertIsNotNone(self.feature_selection_evaluator.result[nogueira_stability.__name__]['mean'], msg='run() sets the mean')
-        self.assertIsNotNone(self.feature_selection_evaluator.result[nogueira_stability.__name__]['var'], msg='run() sets the var')
+        self.assertTrue(len(self.feature_selection_evaluator.result[nogueira_stability.__name__]['mean']) > 0, msg='run() adds a value to the mean dict')
+        self.assertTrue(len(self.feature_selection_evaluator.result[nogueira_stability.__name__]['var']) > 0, msg='run() adds a value to the var dict')

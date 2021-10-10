@@ -14,6 +14,9 @@ from .test_fsds import TestFSDS
 from .test_ofs import TestOFS
 from .test_erics import TestERICS
 from .test_holdout_pipeline import TestHoldoutPipeline
+from .test_prediction_evaluator import TestPredictionEvaluator
+from .test_feature_selection_evaluator import TestFeatureSelectionEvaluator
+from .test_change_detection_evaluator import TestChangeDetectionEvaluator
 
 __all__ = ['TestDataLoader', 'TestVisualizer', 'TestSkmultiflowDriftDetector', 'TestPrequentialPipeline', 'TestSkmultiflowPerceptron',
            'TestCancelOutFeatureSelector', 'TestEFS', 'TestFIRES', 'TestFSDS', 'TestOFS', 'TestERICS', 'TestHoldoutPipeline']
