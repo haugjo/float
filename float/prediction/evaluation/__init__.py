@@ -4,5 +4,4 @@ The float.prediction.evaluation module includes base evaluation functionality an
 
 from .prediction_evaluator import PredictionEvaluator
 
-
 __all__ = ['PredictionEvaluator']

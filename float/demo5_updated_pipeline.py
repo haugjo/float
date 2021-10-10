@@ -8,7 +8,8 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, Ro
 
 from float.data import DataLoader
 from float.data.preprocessing import SklearnScaler
-from float.change_detection import ERICS, SkmultiflowChangeDetector
+from float.change_detection import ERICS
+from float.change_detection.skmultiflow import SkmultiflowChangeDetector
 from float.change_detection.tornado import PageHinkley, DDM
 from float.change_detection.evaluation import ChangeDetectionEvaluator
 from float.change_detection.evaluation.measures import detection_delay, detected_change_rate, \
@@ -17,7 +18,7 @@ from float.feature_selection.evaluation import FeatureSelectionEvaluator
 from float.feature_selection.evaluation.measures import nogueira_stability
 from float.feature_selection import FIRES
 from float.pipeline import PrequentialPipeline
-from float.prediction import SkmultiflowClassifier
+from float.prediction.skmultiflow import SkmultiflowClassifier
 from float.prediction.evaluation import PredictionEvaluator
 from float.prediction.evaluation.measures import noise_variability, mean_drift_performance_deterioration, mean_drift_restoration_time
 from float.visualization import plot, selected_features_scatter, top_features_reference_bar, concept_drifts_scatter, spider_chart

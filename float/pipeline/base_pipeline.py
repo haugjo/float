@@ -8,7 +8,8 @@ from tabulate import tabulate
 from float.data.data_loader import DataLoader
 from float.feature_selection import BaseFeatureSelector
 from float.feature_selection.evaluation import FeatureSelectionEvaluator
-from float.change_detection import BaseChangeDetector, SkmultiflowChangeDetector
+from float.change_detection import BaseChangeDetector
+from float.change_detection.skmultiflow import SkmultiflowChangeDetector
 from float.change_detection.evaluation import ChangeDetectionEvaluator
 from float.prediction import BasePredictor
 from float.prediction.evaluation import PredictionEvaluator
