@@ -1,24 +1,46 @@
+"""Detection Delay Measure.
+
+This function returns the average delay in number of observations between the beginning of a known concept drift
+and the first detected concept drift.
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import numpy as np
 
+from float.change_detection.evaluation.change_detection_evaluator import ChangeDetectionEvaluator
 
-def detection_delay(evaluator, global_drifts, n_delay):
-    """
-    Get the mean Time to Detection,
-    i.e. the average delay between the beginning of a known drift and the first detection.
 
-    This measure is introduced in
-    Bifet, Albert, et al. "CD-MOA: Change detection framework for massive online analysis."
-    International Symposium on Intelligent Data Analysis. Springer, Berlin, Heidelberg, 2013.
+def detection_delay(evaluator: ChangeDetectionEvaluator, drifts: list, n_delay: int = None) -> float:
+    """Calculates the average delay before detecting a concept drift.
 
     Args:
-        evaluator (ChangeDetectionEvaluator): evaluator object
-        global_drifts (list): time steps where a global concept drift was detected
-        n_delay (int): no. of observations after a known concept drift in which to count detections as true positive (not required for this measure!)
+        evaluator: The ChangeDetectionEvaluator object.
+        drifts: List of time steps corresponding to detected concept drifts.
+        n_delay: This attribute is only included for code clarity. It is not relveant for this measure.
+
     Returns:
-        float: avg. delay in no. of observations between a known drift and the first detected drift
+        float: The average delay in number of observations between a known drift and the first detected drift.
     """
     iter_drifts = iter(evaluator.known_drifts)
-    detections = np.asarray(global_drifts) * evaluator.batch_size  # translate drifts to relative position in dataset
+    detections = np.asarray(drifts) * evaluator.batch_size  # translate drifts to relative position in dataset
     delay = 0
     drift = next(iter_drifts, None)
     while drift is not None:

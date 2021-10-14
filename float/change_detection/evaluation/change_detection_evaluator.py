@@ -88,13 +88,13 @@ class ChangeDetectionEvaluator(metaclass=ABCMeta):
         for measure_func in self.measure_funcs:
             try:
                 if isinstance(self.n_delay, int):  # run with a single delay parameter
-                    mean = measure_func(self, drifts, self.n_delay)
+                    mean = measure_func(evaluator=self, drifts=drifts, n_delay=self.n_delay)
                     mes = [mean]
                     var = 0
                 else:  # run with multiple delay parameters
                     mes = []
                     for ndel in self.n_delay:
-                        mes.append(measure_func(self, drifts, ndel))
+                        mes.append(measure_func(evaluator=self, drifts=drifts, n_delay=ndel))
                     mean = np.mean(mes)
                     var = np.var(mes)
 
