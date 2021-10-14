@@ -1,65 +1,91 @@
-from float.change_detection.base_change_detector import BaseChangeDetector
+"""SeqDrift2 Drift Detection Method.
+
+Code adopted from https://github.com/alipsgh/tornado, please cite:
+The Tornado Framework
+By Ali Pesaranghader
+University of Ottawa, Ontario, Canada
+E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com
+---
+Paper: Pears, Russel, Sripirakas Sakthithasan, and Yun Sing Koh. "Detecting concept change in dynamic data streams."
+Published in: Machine Learning 97.3 (2014): 259-293.
+URL: https://link.springer.com/article/10.1007/s10994-013-5433-9
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import math
 import random
 import sys
+from typing import Tuple
+
+from float.change_detection.base_change_detector import BaseChangeDetector
 
 
 class SeqDrift2(BaseChangeDetector):
-    """ SeqDrift2 Drift Detection Method
+    """SeqDrift2 change detector."""
+    def __init__(self, delta: float = 0.01, block_size: int = 200, reset_after_drift: bool = False):
+        """Inits the change detector.
 
-    Code adopted from https://github.com/alipsgh/tornado, please cite:
-    The Tornado Framework
-    By Ali Pesaranghader
-    University of Ottawa, Ontario, Canada
-    E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com
-    ---
-    Paper: Pears, Russel, Sripirakas Sakthithasan, and Yun Sing Koh. "Detecting concept change in dynamic data streams."
-    Published in: Machine Learning 97.3 (2014): 259-293.
-    URL: https://link.springer.com/article/10.1007/s10994-013-5433-9
-
-    Attributes:  # Todo: add attribute descriptions
-    """
-    def __init__(self, delta=0.01, block_size=200, reset_after_drift=False):
-        """ Initialize the concept drift detector
-
-        Todo: add remaining param descriptions
         Args:
-            delta (float):
-            block_size (int):
-            reset_after_drift (bool): indicates whether to reset the change detector after a drift was detected
+            delta: Todo
+            block_size: Todo
+            reset_after_drift: See description of base class.
         """
         super().__init__(reset_after_drift=reset_after_drift, error_based=True)
-        self.active_change = False
 
-        self.DELTA = delta
-        self.BLOCK_SIZE = block_size
-        self.seq_drift2 = _SeqDrift2Tornado(self.DELTA, self.BLOCK_SIZE)
+        self._DELTA = delta
+        self._BLOCK_SIZE = block_size
+        self._seq_drift2 = _SeqDrift2Tornado(self._DELTA, self._BLOCK_SIZE)
+        self._active_change = False
 
     def reset(self):
-        """ Resets the concept drift detector parameters.
-        """
-        self.seq_drift2 = _SeqDrift2Tornado(self.DELTA, self.BLOCK_SIZE)
+        """Resets the change detector."""
+        self._seq_drift2 = _SeqDrift2Tornado(self._DELTA, self._BLOCK_SIZE)
 
-    def partial_fit(self, pr):
-        """ Update the concept drift detector
+    def partial_fit(self, pr: bool):
+        """Updates the change detector.
 
         Args:
-            pr (bool): indicator of correct prediction (i.e. pr=True) and incorrect prediction (i.e. pr=False)
+            pr: Boolean indicating a correct prediction.
+                If True the prediction by the online learner was correct, False otherwise.
         """
-        self.active_change = self.seq_drift2.setInput(pr)
+        self._active_change = self._seq_drift2.setInput(pr)
 
-    def detect_change(self):
-        """ Checks whether global concept drift was detected or not.
+    def detect_change(self) -> bool:
+        """Detects global concept drift."""
+        return self._active_change
 
-        Returns:
-            bool: whether global concept drift was detected or not.
+    def detect_partial_change(self) -> Tuple[bool, list]:
+        """Detects partial concept drift.
+
+        Notes:
+            SeqDrift2 does not detect partial change.
         """
-        return self.active_change
+        return False, []
 
-    def detect_partial_change(self):
-        return False, None
+    def detect_warning_zone(self) -> bool:
+        """Detects a warning zone.
 
-    def detect_warning_zone(self):
+        Notes:
+            SeqDrift2 does not raise warnings.
+        """
         return False
 
 
@@ -67,8 +93,10 @@ class SeqDrift2(BaseChangeDetector):
 # Tornado Functionality (left unchanged)
 # ----------------------------------------
 class _SeqDrift2Tornado:
-    """
-    Tornado-class (SeqDrift2 renamed to _SeqDrift2Tornado, otherwise left unchanged)
+    """Tornado base class.
+
+    Notes:
+        We renamed SeqDrift2 to _SeqDrift2Tornado, but left the code otherwise unchanged.
     """
     def __init__(self, _significanceLevel, _blockSize):
 
@@ -213,9 +241,7 @@ class _SeqDrift2Tornado:
 
 
 class _Reservoir:
-    """
-    Tornado-class (left unchanged)
-    """
+    """Tornado-class (left unchanged)."""
     def __init__(self, _iSize, _iBlockSize):
         self.size = 0
         self.total = 0
@@ -267,9 +293,7 @@ class _Reservoir:
 
 
 class _Repository:
-    """
-    Tornado-class (left unchanged)
-    """
+    """Tornado-class (left unchanged)."""
     def __init__(self, _iBlockSize):
         self.blockSize = _iBlockSize
         self.blocks = []
@@ -328,9 +352,7 @@ class _Repository:
 
 
 class _Block:
-    """
-    Tornado-class (left unchanged)
-    """
+    """Tornado-class (left unchanged)."""
     def __init__(self, _iLength, _isTested=None):
         self.data = []
         self.total = 0

@@ -1,32 +1,68 @@
+"""Evaluation Module for Change Detection Methods.
+
+This module contains an evaluator class for explicit change (i.e. concept drift) detection methods.
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 from abc import ABCMeta
-import traceback
 import numpy as np
+import traceback
+from typing import Callable, List, Union, Dict
 
 
 class ChangeDetectionEvaluator(metaclass=ABCMeta):
-    """
-    Abstract base class for change detection evaluation measures
+    """Change detection evaluation class.
+
+    This class computes and stores the measure/metric functions and results for the evaluation of explicit
+    change detection methods.
 
     Attributes:
-        measure_funcs (list): list of evaluation measure functions
-        known_drifts (list): positions in dataset corresponding to known concept drift
-        batch_size (int): no. of observations processed per iteration/time step
-        n_samples (int): total number of observations
-        n_delay (int | list): no. of observations after a known concept drift in which to count detections as true positive
-        n_init_tolerance (int): no. of observations used for initial training, not counted for measure
-        comp_times (list): computation time in all time steps
-        result (dict): dictionary of results per evaluation measure
+        measure_funcs (List[Callable]): A list of evaluation measure functions.
+        known_drifts (List[int] | List[tuple]):
+            The positions in the dataset (indices) corresponding to known concept drifts.
+        batch_size (int): The number of observations processed per iteration/time step.
+        n_samples (int): Te total number of observations.
+        n_delay (Union[int, list]): The number of observations after a known concept drift, during which we count
+                the detections made by the model as true positives. If the argument is a list, the evaluator computes
+                results for each delay specified in the list.
+        n_init_tolerance (int): The number of observations reserved for the initial training. We do not consider
+            these observations in the evaluation.
+        comp_times (list): Computation times of the change detector per time step.
+        result (dict): Results (i.e. calculated measurements, mean, and variance) for each evaluation measure function
     """
-    def __init__(self, measure_funcs, known_drifts, batch_size, n_samples, n_delay=100, n_init_tolerance=100):
-        """ Initialize change detection evaluation measure
+    def __init__(self, measure_funcs: List[Callable], known_drifts: Union[List[int], List[tuple]], batch_size: int,
+                 n_samples: int, n_delay: Union[int, list] = 100, n_init_tolerance: int = 100):
+        """ Initializes the change detection evaluation measure.
 
         Args:
-            measure_funcs (list): list of evaluation measure functions
-            known_drifts (list): positions in dataset corresponding to known concept drift
-            batch_size (int): no of observations processed per iteration/time step
-            n_samples (int): total number of observations
-            n_delay (int | list): no. of observations after a known concept drift in which to count detections as true positive
-            n_init_tolerance (int): no. of observations used for initial training, not counted for measure
+            measure_funcs (List[Callable]): A list of evaluation measure functions.
+            known_drifts (Union[List[int], List[tuple]]):
+                The positions in the dataset (indices) corresponding to known concept drifts.
+            batch_size (int): The number of observations processed per iteration/time step.
+            n_samples (int): The total number of observations.
+            n_delay (Union[int, list]): The number of observations after a known concept drift, during which we count
+                the detections made by the model as true positives. If the argument is a list, the evaluator computes
+                results for each delay specified in the list.
+            n_init_tolerance (int): The number of observations reserved for the initial training. We do not consider
+                these observations in the evaluation.
         """
         self.measure_funcs = measure_funcs
         self.known_drifts = known_drifts
@@ -37,23 +73,25 @@ class ChangeDetectionEvaluator(metaclass=ABCMeta):
         self.comp_times = []
 
         self.result = dict()
-        for measure_func in measure_funcs:  # todo: do we need a _validate_func routine for measures from skmultiflow or river?
+        for measure_func in measure_funcs:  # Todo: To support scikit-multiflow/river functionality, add a validation function
             self.result[measure_func.__name__] = dict()
 
-    def run(self, drifts):
-        """
-        Updates relevant statistics and computes the evaluation measures in last time step
+    def run(self, drifts: List):
+        """Updates relevant statistics and computes the evaluation measures.
 
         Args:
-            drifts (list): monitors if there was detected change at each time step
+            drifts: List of time steps corresponding to detected concept drifts.
+
+        Raises:
+            TypeError: If there occurs an error while executing the provided evaluation measure function.
         """
-        for measure_func in self.measure_funcs:  # run each evaluation measure
+        for measure_func in self.measure_funcs:
             try:
-                if isinstance(self.n_delay, int):  # run single delay parameter
+                if isinstance(self.n_delay, int):  # run with a single delay parameter
                     mean = measure_func(self, drifts, self.n_delay)
                     mes = [mean]
                     var = 0
-                else:  # run multiple delay parameters
+                else:  # run with multiple delay parameters
                     mes = []
                     for ndel in self.n_delay:
                         mes.append(measure_func(self, drifts, ndel))

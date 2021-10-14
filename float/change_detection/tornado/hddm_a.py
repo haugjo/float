@@ -1,140 +1,154 @@
-from float.change_detection.base_change_detector import BaseChangeDetector
+"""Hoeffding's Bound based Drift Detection Method (A_test Scheme).
+
+Code adopted from https://github.com/alipsgh/tornado, please cite:
+The Tornado Framework
+By Ali Pesaranghader
+University of Ottawa, Ontario, Canada
+E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com
+---
+Paper: Frías-Blanco, Isvani, et al. "Online and non-parametric drift detection methods based on Hoeffding’s bounds."
+Published in: IEEE Transactions on Knowledge and Data Engineering 27.3 (2015): 810-823.
+URL: http://ieeexplore.ieee.org/abstract/document/6871418/
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import math
+from typing import Tuple
+
+from float.change_detection.base_change_detector import BaseChangeDetector
 
 
 class HDDMA(BaseChangeDetector):
-    """ Hoeffding's Bound based Drift Detection Method - A_test Scheme (HDDMA)
-
-    Code adopted from https://github.com/alipsgh/tornado, please cite:
-    The Tornado Framework
-    By Ali Pesaranghader
-    University of Ottawa, Ontario, Canada
-    E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com
-    ---
-    Paper: Frías-Blanco, Isvani, et al. "Online and non-parametric drift detection methods based on Hoeffding’s bounds."
-    Published in: IEEE Transactions on Knowledge and Data Engineering 27.3 (2015): 810-823.
-    URL: http://ieeexplore.ieee.org/abstract/document/6871418/
-
-    Attributes:  # Todo: add attribute descriptions
-    """
-    def __init__(self, drift_confidence=0.001, warning_confidence=0.005, test_type='two-sided', reset_after_drift=False):
-        """ Initialize the concept drift detector
-
-        Args:  # Todo: add argument descriptions
-            drift_confidence (float):
-            warning_confidence (float):
-            test_type (str):
-            reset_after_drift (bool): indicates whether to reset the change detector after a drift was detected
-        """
-        super().__init__(reset_after_drift=reset_after_drift, error_based=True)
-        self.active_change = False
-        self.active_warning = False
-
-        self.drift_confidence = drift_confidence
-        self.warning_confidence = warning_confidence
-        self.test_type = test_type
-
-        self.n_min = 0
-        self.c_min = 0
-        self.total_n = 0
-        self.total_c = 0
-        self.n_max = 0
-        self.c_max = 0
-
-    def reset(self):
-        """ Resets the concept drift detector parameters.
-        """
-        self.n_min = 0
-        self.c_min = 0
-        self.total_n = 0
-        self.total_c = 0
-        self.n_max = 0
-        self.c_max = 0
-
-    def partial_fit(self, pr):
-        """ Update the concept drift detector
+    """HDDMA change detector."""
+    def __init__(self, drift_confidence: float = 0.001, warning_confidence: float = 0.005, test_type: str = 'two-sided',
+                 reset_after_drift: bool = False):
+        """ Inits the change detector.
 
         Args:
-            pr (bool): indicator of correct prediction (i.e. pr=True) and incorrect prediction (i.e. pr=False)
+            drift_confidence: Todo
+            warning_confidence: Todo
+            test_type: Todo
+            reset_after_drift: See description of base class.
+        """
+        super().__init__(reset_after_drift=reset_after_drift, error_based=True)
+
+        self._drift_confidence = drift_confidence
+        self._warning_confidence = warning_confidence
+        self._test_type = test_type
+        self._n_min = 0
+        self._c_min = 0
+        self._total_n = 0
+        self._total_c = 0
+        self._n_max = 0
+        self._c_max = 0
+        self._active_change = False
+        self._active_warning = False
+
+    def reset(self):
+        """Resets the change detector."""
+        self._n_min = 0
+        self._c_min = 0
+        self._total_n = 0
+        self._total_c = 0
+        self._n_max = 0
+        self._c_max = 0
+
+    def partial_fit(self, pr: bool):
+        """Updates the change detector.
+
+        Args:
+            pr: Boolean indicating a correct prediction.
+                If True the prediction by the online learner was correct, False otherwise.
         """
         pr = 1 if pr is False else 0
 
-        self.active_change = False
-        self.active_warning = False
+        self._active_change = False
+        self._active_warning = False
 
         # 1. UPDATING STATS
-        self.total_n += 1
-        self.total_c += pr
+        self._total_n += 1
+        self._total_c += pr
 
-        if self.n_min == 0:
-            self.n_min = self.total_n
-            self.c_min = self.total_c
+        if self._n_min == 0:
+            self._n_min = self._total_n
+            self._c_min = self._total_c
 
-        if self.n_max == 0:
-            self.n_max = self.total_n
-            self.c_max = self.total_c
+        if self._n_max == 0:
+            self._n_max = self._total_n
+            self._c_max = self._total_c
 
-        cota = math.sqrt((1.0 / (2 * self.n_min)) * math.log(1.0 / self.drift_confidence, math.e))
-        cota1 = math.sqrt((1.0 / (2 * self.total_n)) * math.log(1.0 / self.drift_confidence, math.e))
-        if self.c_min / self.n_min + cota >= self.total_c / self.total_n + cota1:
-            self.c_min = self.total_c
-            self.n_min = self.total_n
+        cota = math.sqrt((1.0 / (2 * self._n_min)) * math.log(1.0 / self._drift_confidence, math.e))
+        cota1 = math.sqrt((1.0 / (2 * self._total_n)) * math.log(1.0 / self._drift_confidence, math.e))
+        if self._c_min / self._n_min + cota >= self._total_c / self._total_n + cota1:
+            self._c_min = self._total_c
+            self._n_min = self._total_n
 
-        cota = math.sqrt((1.0 / (2 * self.n_max)) * math.log(1.0 / self.drift_confidence, math.e))
-        if self.c_max / self.n_max - cota <= self.total_c / self.total_n - cota1:
-            self.c_max = self.total_c
-            self.n_max = self.total_n
+        cota = math.sqrt((1.0 / (2 * self._n_max)) * math.log(1.0 / self._drift_confidence, math.e))
+        if self._c_max / self._n_max - cota <= self._total_c / self._total_n - cota1:
+            self._c_max = self._total_c
+            self._n_max = self._total_n
 
-        if self._mean_incr(self.drift_confidence):
-            self.n_min = self.n_max = self.total_n = 0
-            self.c_min = self.c_max = self.total_c = 0
-            self.active_change = True
-        elif self._mean_incr(self.warning_confidence):
-            self.active_warning = True
+        if self._mean_incr(self._drift_confidence):
+            self._n_min = self._n_max = self._total_n = 0
+            self._c_min = self._c_max = self._total_c = 0
+            self._active_change = True
+        elif self._mean_incr(self._warning_confidence):
+            self._active_warning = True
 
         # 2. UPDATING WARNING AND DRIFT STATUSES
-        if self.test_type == 'two-sided' and self._mean_decr():
-            self.n_min = self.n_max = self.total_n = 0
-            self.c_min = self.c_max = self.total_c = 0
+        if self._test_type == 'two-sided' and self._mean_decr():
+            self._n_min = self._n_max = self._total_n = 0
+            self._c_min = self._c_max = self._total_c = 0
 
-    def detect_change(self):
-        """ Checks whether global concept drift was detected or not.
+    def detect_change(self) -> bool:
+        """Detects global concept drift."""
+        return self._active_change
 
-        Returns:
-            bool: whether global concept drift was detected or not.
+    def detect_partial_change(self) -> Tuple[bool, list]:
+        """Detects partial concept drift.
+
+        Notes:
+            HDDMA does not detect partial change.
         """
-        return self.active_change
+        return False, []
 
-    def detect_warning_zone(self):
-        """ Check for Warning Zone
-
-        Returns:
-            bool: whether the concept drift detector is in the warning zone or not.
-        """
-        return self.active_warning
-
-    def detect_partial_change(self):
-        return False, None
+    def detect_warning_zone(self) -> bool:
+        """Detects a warning zone."""
+        return self._active_warning
 
     # ----------------------------------------
     # Tornado Functionality (left unchanged)
     # ----------------------------------------
     def _mean_incr(self, confidence_level):
-        """
-        Tornado-function (left unchanged)
-        """
-        if self.n_min == self.total_n:
+        """Tornado-function (left unchanged)."""
+        if self._n_min == self._total_n:
             return False
-        m = (self.total_n - self.n_min) / self.n_min * (1.0 / self.total_n)
+        m = (self._total_n - self._n_min) / self._n_min * (1.0 / self._total_n)
         cota = math.sqrt((m / 2) * math.log(2.0 / confidence_level, math.e))
-        return self.total_c / self.total_n - self.c_min / self.n_min >= cota
+        return self._total_c / self._total_n - self._c_min / self._n_min >= cota
 
     def _mean_decr(self):
-        """
-        Tornado-function (left unchanged)
-        """
-        if self.n_max == self.total_n:
+        """Tornado-function (left unchanged)."""
+        if self._n_max == self._total_n:
             return False
-        m = (self.total_n - self.n_max) / self.n_max * (1.0 / self.total_n)
-        cota = math.sqrt((m / 2) * math.log(2.0 / self.drift_confidence, math.e))
-        return self.c_max / self.n_max - self.total_c / self.total_n >= cota
+        m = (self._total_n - self._n_max) / self._n_max * (1.0 / self._total_n)
+        cota = math.sqrt((m / 2) * math.log(2.0 / self._drift_confidence, math.e))
+        return self._c_max / self._n_max - self._total_c / self._total_n >= cota

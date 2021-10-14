@@ -64,11 +64,14 @@ class SklearnScaler(BaseScaler):
             else:
                 try:
                     self._has_partial_fit = False
+                    warnings.warn(
+                        "The {} scaler has no partial_fit function and will thus not be updated, which may mitigate "
+                        "the overall performance.".format(type(self.scaler_obj).__name__))
                     check_is_fitted(self.scaler_obj)  # Check if scaler object has already been fitted
                 except NotFittedError:
                     self._must_be_fitted = True
                     warnings.warn('Sklearn scaler object {} has not been fitted and will be fitted on the first batch '
-                                  'of observations'.format(type(self.scaler_obj).__name__))
+                                  'of observations.'.format(type(self.scaler_obj).__name__))
                     pass
 
         # Check if scaler object has a transform function
