@@ -24,11 +24,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import numpy as np
+from typing import Optional
 
 from float.change_detection.evaluation.change_detection_evaluator import ChangeDetectionEvaluator
 
 
-def detection_delay(evaluator: ChangeDetectionEvaluator, drifts: list, n_delay: int = None) -> float:
+def detection_delay(evaluator: ChangeDetectionEvaluator, drifts: list, n_delay: Optional[int] = None) -> float:
     """Calculates the average delay before detecting a concept drift.
 
     Args:

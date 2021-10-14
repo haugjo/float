@@ -1,4 +1,4 @@
-"""Base Change Detection Module
+"""Base Change Detection Module.
 
 This module encapsulates functionality for global and partial (i.e. feature-wise) concept drift detection.
 The abstract BaseChangeDetector class should be used as super class for all concept drift detection methods.
@@ -24,7 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from abc import ABCMeta, abstractmethod
-from typing import Tuple
+from typing import Tuple, List
 
 
 class BaseChangeDetector(metaclass=ABCMeta):
@@ -36,7 +36,7 @@ class BaseChangeDetector(metaclass=ABCMeta):
             A boolean indicating if the change detector partial_fit function will receive error measurements as input
             from the pipeline (True) or if it will receive input observations and targets from the pipeline (False).
         drifts (list): A list of time steps corresponding to detected concept drifts.
-        partial_drifts (list[tuple]):
+        partial_drifts (List[tuple]):
             A list of time steps and features corresponding to detected partial concept drifts. A partial drift is a
             concept drift that is restricted to one or multiple (but not all) input features. Some change detectors are
             able to detect partial concept drift. This attribute is a list of tuples of the form (time step,

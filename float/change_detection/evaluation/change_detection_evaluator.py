@@ -40,7 +40,7 @@ class ChangeDetectionEvaluator(metaclass=ABCMeta):
             The positions in the dataset (indices) corresponding to known concept drifts.
         batch_size (int): The number of observations processed per iteration/time step.
         n_samples (int): Te total number of observations.
-        n_delay (Union[int, list]): The number of observations after a known concept drift, during which we count
+        n_delay (int | list): The number of observations after a known concept drift, during which we count
                 the detections made by the model as true positives. If the argument is a list, the evaluator computes
                 results for each delay specified in the list.
         n_init_tolerance (int): The number of observations reserved for the initial training. We do not consider
@@ -54,11 +54,11 @@ class ChangeDetectionEvaluator(metaclass=ABCMeta):
 
         Args:
             measure_funcs (List[Callable]): A list of evaluation measure functions.
-            known_drifts (Union[List[int], List[tuple]]):
+            known_drifts (List[int] | List[tuple]):
                 The positions in the dataset (indices) corresponding to known concept drifts.
             batch_size (int): The number of observations processed per iteration/time step.
             n_samples (int): The total number of observations.
-            n_delay (Union[int, list]): The number of observations after a known concept drift, during which we count
+            n_delay (int | list): The number of observations after a known concept drift, during which we count
                 the detections made by the model as true positives. If the argument is a list, the evaluator computes
                 results for each delay specified in the list.
             n_init_tolerance (int): The number of observations reserved for the initial training. We do not consider

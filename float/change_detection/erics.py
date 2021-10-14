@@ -34,6 +34,7 @@ SOFTWARE.
 """
 import copy
 import numpy as np
+from numpy.typing import ArrayLike
 from scipy.stats import norm
 from typing import Tuple
 from warnings import warn
@@ -105,7 +106,7 @@ class ERICS(BaseChangeDetector):
         """
         pass
 
-    def partial_fit(self, x: np.ndarray, y: np.ndarray):
+    def partial_fit(self, x: ArrayLike, y: ArrayLike):
         """Updates the change detector.
 
         Args:
