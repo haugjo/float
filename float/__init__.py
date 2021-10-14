@@ -7,8 +7,8 @@ from . import data
 from . import feature_selection
 from . import pipeline
 from . import prediction
-from . import testing
+from . import unit_tests
 from . import visualization
 
 __all__ = ['change_detection', 'data', 'feature_selection', 'pipeline', 'prediction',
-           'testing', 'visualization']
+           'unit_tests', 'visualization']
