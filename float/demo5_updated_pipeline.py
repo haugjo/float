@@ -10,7 +10,7 @@ from float.data import DataLoader
 from float.data.preprocessing import SklearnScaler
 from float.change_detection import ERICS
 from float.change_detection.skmultiflow import SkmultiflowChangeDetector
-from float.change_detection.tornado import PageHinkley, DDM
+from float.change_detection.tornado import PageHinkley, SeqDrift2
 from float.change_detection.evaluation import ChangeDetectionEvaluator
 from float.change_detection.evaluation.measures import detection_delay, detected_change_rate, \
     false_discovery_rate, time_between_false_alarms, mean_time_ratio, missed_detection_rate
@@ -35,11 +35,11 @@ feature_names = data_loader.stream.feature_names
 concept_drift_detector_names = [  # 'ADWIN', 'EDDM', 'DDM_sk', 'DDM',
     'ERICS', 'Page Hinkley'
 ]  # Todo: Remove, and use class names instead?
-concept_drift_detectors = [  # SkmultiflowChangeDetector(ADWIN(delta=0.6), reset_after_drift=False),
-    # SkmultiflowChangeDetector(EDDM(), reset_after_drift=True),
-    # SkmultiflowChangeDetector(DDM_scikit(), reset_after_drift=True),
-    # DDM(reset_after_drift=True),
-    ERICS(data_loader.stream.n_features),
+concept_drift_detectors = [#SkmultiflowChangeDetector(ADWIN(delta=0.6), reset_after_drift=False),
+    SkmultiflowChangeDetector(EDDM(), reset_after_drift=True),
+    SkmultiflowChangeDetector(DDM_scikit(), reset_after_drift=True),
+    #SeqDrift2(reset_after_drift=True),
+    #ERICS(data_loader.stream.n_features),
     PageHinkley(reset_after_drift=True)]
 cd_evaluator = dict()
 

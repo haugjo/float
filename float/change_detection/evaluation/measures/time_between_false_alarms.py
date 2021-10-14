@@ -1,26 +1,52 @@
+"""Time Between False Alarms Measure.
+
+This function returns the mean time between false alarms as introduced in:
+Bifet, Albert, et al. "CD-MOA: Change detection framework for massive online analysis."
+International Symposium on Intelligent Data Analysis. Springer, Berlin, Heidelberg, 2013.
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import numpy as np
 
+from float.change_detection.evaluation.change_detection_evaluator import ChangeDetectionEvaluator
 
-def time_between_false_alarms(evaluator, global_drifts, n_delay):
-    """
-    Get the mean Time Between False Alarms, i.e. the mean no. of observations between false positive drift detections.
 
-    This measure is introduced in
-    Bifet, Albert, et al. "CD-MOA: Change detection framework for massive online analysis."
-    International Symposium on Intelligent Data Analysis. Springer, Berlin, Heidelberg, 2013.
+def time_between_false_alarms(evaluator: ChangeDetectionEvaluator, drifts: list, n_delay: int) -> float:
+    """Calculates the mean time between false alarms.
 
     Args:
-        evaluator (ChangeDetectionEvaluator): evaluator object
-        global_drifts (list): time steps where a global concept drift was detected
-        n_delay (int): no. of observations after a known concept drift in which to count detections as true positive
+        evaluator: The ChangeDetectionEvaluator object.
+        drifts: List of time steps corresponding to detected concept drifts.
+        n_delay:
+            The number of observations after a known concept drift, during which we count the detections made by the
+            model as true positives.
+
     Returns:
-        float: mean time between false alarms
+        float: The mean time between false alarms in number of observations.
     """
-    if len(global_drifts) == 0:  # if there is no detected drift, the time between false alarms is zero
+    if len(drifts) == 0:  # if there is no detected drift, the time between false alarms is zero
         return 0
 
     iter_drifts = iter(evaluator.known_drifts)
-    detections = np.asarray(global_drifts) * evaluator.batch_size  # translate drifts to relative position in dataset
+    detections = np.asarray(drifts) * evaluator.batch_size  # translate drifts to relative position in dataset
     time_between = 0
     n_diffs = 0
     last_false_alarm = 0

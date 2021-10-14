@@ -1,65 +1,87 @@
-from float.change_detection.base_change_detector import BaseChangeDetector
+"""Adaptive Windowing Drift Detection Method.
+
+Code adopted from https://github.com/alipsgh/tornado, please cite:
+The Tornado Framework
+By Ali Pesaranghader
+University of Ottawa, Ontario, Canada
+E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com
+---
+Paper: Bifet, Albert, and Ricard Gavalda. "Learning from time-changing data with adaptive windowing."
+Published in: Proceedings of the 2007 SIAM International Conference on Data Mining. Society for Industrial and Applied Mathematics, 2007.
+URL: http://www.cs.upc.edu/~GAVALDA/papers/adwin06.pdf
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import math
+from typing import Tuple
+
+from float.change_detection.base_change_detector import BaseChangeDetector
 
 
 class Adwin(BaseChangeDetector):
-    """ Adaptive Windowing (Adwin) Drift Detection Method
+    """Adwin Change Detector."""
+    def __init__(self, delta: float = 0.002, reset_after_drift: bool = False):
+        """Inits the change detector.
 
-    Code adopted from https://github.com/alipsgh/tornado, please cite:
-    The Tornado Framework
-    By Ali Pesaranghader
-    University of Ottawa, Ontario, Canada
-    E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com
-    ---
-    Paper: Bifet, Albert, and Ricard Gavalda. "Learning from time-changing data with adaptive windowing."
-    Published in: Proceedings of the 2007 SIAM International Conference on Data Mining. Society for Industrial and Applied Mathematics, 2007.
-    URL: http://www.cs.upc.edu/~GAVALDA/papers/adwin06.pdf
-
-    Attributes:  # Todo: add attribute descriptions
-        delta (float):
-        adaptive_windowing (_AdaptiveWindowing):
-        prediction_based (bool): indicates whether drift detector requires predictions
-        active_change (bool): indicates whether there is a change ongoing
-    """
-    def __init__(self, delta=0.002, reset_after_drift=False):
-        """ Initialize the concept drift detector
-
-        Todo: add remaining param descriptions
         Args:
-            delta (float):
-            reset_after_drift (bool): indicates whether to reset the change detector after a drift was detected
+            delta: Todo
+            reset_after_drift: See description of base class.
         """
         super().__init__(reset_after_drift=reset_after_drift, error_based=True)
-        self.active_change = False
 
-        self.delta = delta
-        self.adaptive_windowing = _AdaptiveWindowing(self.delta)
+        self._delta = delta
+        self._adaptive_windowing = _AdaptiveWindowing(self._delta)
+        self._active_change = False   # Boolean indicating whether there is an ongoing concept drift
 
     def reset(self):
-        """ Resets the concept drift detector parameters.
-        """
-        self.adaptive_windowing = _AdaptiveWindowing(self.delta)
+        """Resets the change detector."""
+        self._adaptive_windowing = _AdaptiveWindowing(self._delta)
 
-    def partial_fit(self, pr):
-        """ Update the drift detector
+    def partial_fit(self, pr: bool):
+        """Updates the change detector.
 
         Args:
-            pr (bool): indicator of correct prediction (i.e. pr=True) and incorrect prediction (i.e. pr=False)
+            pr: Boolean indicating a correct prediction.
+                If True the prediction by the online learner was correct, False otherwise.
         """
-        self.active_change = self.adaptive_windowing.set_input(pr)
+        self._active_change = self._adaptive_windowing.set_input(pr)
 
-    def detect_change(self):
-        """ Checks whether global concept drift was detected or not.
+    def detect_change(self) -> bool:
+        """Detects global concept drift."""
+        return self._active_change
 
-        Returns:
-            bool: whether global concept drift was detected or not.
+    def detect_partial_change(self) -> Tuple[bool, list]:
+        """Detects partial concept drift.
+
+        Notes:
+            Adwin does not detect partial change.
         """
-        return self.active_change
+        return False, []
 
-    def detect_partial_change(self):
-        return False, None
+    def detect_warning_zone(self) -> bool:
+        """Detects a warning zone.
 
-    def detect_warning_zone(self):
+        Notes:
+            Adwin does not raise warnings.
+        """
         return False
 
 
@@ -67,87 +89,92 @@ class Adwin(BaseChangeDetector):
 # Tornado Functionality (left unchanged)
 # ----------------------------------------
 class _AdaptiveWindowing:
-    """ Adaptive Windowing
-    Class implementation from the tornado package (name changed from ADWIN to _AdaptiveWindowing, otherwise left unchanged)
+    """Adaptive windowing base class of the Tornado package.
+
+    Notes:
+        This is a class implementation from the tornado package. We changed the name from ADWIN to _AdaptiveWindowing,
+        and added underscores to most attributes and functions in order to indicate that they are protected members.
+        Otherwise, the code was left unchanged.
     """
     def __init__(self, delta):
-        self.DELTA = delta
+        self._DELTA = delta
 
-        self.mint_minim_longitud_window = 10
-        self.mint_time = 0
-        self.mint_clock = 32
+        self._mint_minim_longitud_window = 10
+        self._mint_time = 0
+        self._mint_clock = 32
 
-        self.last_bucket_row = 0
+        self._last_bucket_row = 0
 
-        self.bucket_number = 0
-        self.detect = 0
-        self.detect_twice = 0
-        self.mint_min_win_length = 5
+        self._bucket_number = 0
+        self._detect = 0
+        self._detect_twice = 0
+        self._mint_min_win_length = 5
 
-        self.MAXBUCKETS = 5
-        self.TOTAL = 0
-        self.VARIANCE = 0
-        self.WIDTH = 0
+        self._MAXBUCKETS = 5
+        self._TOTAL = 0
+        self._VARIANCE = 0
+        self._WIDTH = 0
 
-        self.list_row_buckets = _List()
+        self._list_row_buckets = _List()
 
-    def insert_element(self, value):
-        self.WIDTH += 1
-        self.insert_element_bucket(0, value, self.list_row_buckets.head)
+    def _insert_element(self, value):
+        self._WIDTH += 1
+        self._insert_element_bucket(0, value, self._list_row_buckets.head)
         inc_variance = 0
-        if self.WIDTH > 1:
-            inc_variance = (self.WIDTH - 1) * (value - self.TOTAL / (self.WIDTH - 1)) * (value - self.TOTAL / (self.WIDTH - 1)) / self.WIDTH
-        self.VARIANCE += inc_variance
+        if self._WIDTH > 1:
+            inc_variance = (self._WIDTH - 1) * (value - self._TOTAL / (self._WIDTH - 1)) * (value - self._TOTAL / (self._WIDTH - 1)) / self._WIDTH
+        self._VARIANCE += inc_variance
 
-        self.TOTAL += value
-        self.compress_buckets()
+        self._TOTAL += value
+        self._compress_buckets()
 
-    def insert_element_bucket(self, variance, value, node):
+    def _insert_element_bucket(self, variance, value, node):
         node.insert_bucket(value, variance)
-        self.bucket_number += 1
+        self._bucket_number += 1
 
     @staticmethod
-    def bucket_size(row):
+    def _bucket_size(row):
         return int(pow(2, row))
 
-    def delete_element(self):
-        node = self.list_row_buckets.tail
-        n1 = self.bucket_size(self.last_bucket_row)
-        self.WIDTH -= n1
-        self.TOTAL -= node.get_total(0)
+    def _delete_element(self):
+        node = self._list_row_buckets.tail
+        n1 = self._bucket_size(self._last_bucket_row)
+        self._WIDTH -= n1
+        self._TOTAL -= node.get_total(0)
         u1 = node.get_total(0) / n1
-        inc_variance = node.get_variance(0) + n1 * self.WIDTH * (u1 - self.TOTAL / self.WIDTH) * (u1 - self.TOTAL / self.WIDTH) / (n1 + self.WIDTH)
-        self.VARIANCE -= inc_variance
-        if self.VARIANCE < 0:
-            self.VARIANCE = 0
+        inc_variance = node.get_variance(0) + n1 * self._WIDTH * (u1 - self._TOTAL / self._WIDTH) * (u1 - self._TOTAL / self._WIDTH) / (n1 + self._WIDTH)
+        self._VARIANCE -= inc_variance
+        if self._VARIANCE < 0:
+            self._VARIANCE = 0
 
         node.remove_bucket()
-        self.bucket_number -= 1
+        self._bucket_number -= 1
         if node.bucket_size_row == 0:
-            self.list_row_buckets.remove_from_tail()
-            self.last_bucket_row -= 1
+            self._list_row_buckets.remove_from_tail()
+            self._last_bucket_row -= 1
         return n1
 
-    def compress_buckets(self):
-        cursor = self.list_row_buckets.head
+    def _compress_buckets(self):
+        cursor = self._list_row_buckets.head
         i = 0
         while True:
             k = cursor.bucket_size_row
-            if k == self.MAXBUCKETS + 1:
+            if k == self._MAXBUCKETS + 1:
                 next_node = cursor.next
                 if next_node is None:
-                    self.list_row_buckets.add_to_tail()
+                    self._list_row_buckets.add_to_tail()
                     next_node = cursor.next
-                    self.last_bucket_row += 1
-                n1 = self.bucket_size(i)
-                n2 = self.bucket_size(i)
+                    self._last_bucket_row += 1
+                n1 = self._bucket_size(i)
+                n2 = self._bucket_size(i)
                 u1 = cursor.get_total(0) / n1
                 u2 = cursor.get_total(1) / n2
                 inc_variance = n1 * n2 * (u1 - u2) * (u1 - u2) / (n1 + n2)
-                next_node.insert_bucket(cursor.get_total(0) + cursor.get_total(1), cursor.get_variance(0) + cursor.get_variance(1) + inc_variance)
-                self.bucket_number += 1
+                next_node.insert_bucket(cursor.get_total(0) + cursor.get_total(1), cursor.get_variance(0) +
+                                        cursor.get_variance(1) + inc_variance)
+                self._bucket_number += 1
                 cursor.compress_buckets_row(2)
-                if next_node.bucket_size_row <= self.MAXBUCKETS:
+                if next_node.bucket_size_row <= self._MAXBUCKETS:
                     break
             else:
                 break
@@ -158,27 +185,27 @@ class _AdaptiveWindowing:
 
     def set_input(self, pr):
         bln_change = False
-        self.mint_time += 1
-        self.insert_element(pr)
+        self._mint_time += 1
+        self._insert_element(pr)
 
-        if self.mint_time % self.mint_clock == 0 and self.WIDTH > self.mint_minim_longitud_window:
+        if self._mint_time % self._mint_clock == 0 and self._WIDTH > self._mint_minim_longitud_window:
             bln_reduce_width = True
             while bln_reduce_width:
                 bln_reduce_width = False
                 bln_exit = False
                 n0 = 0
-                n1 = self.WIDTH
+                n1 = self._WIDTH
                 u0 = 0
-                u1 = self.TOTAL
+                u1 = self._TOTAL
 
-                cursor = self.list_row_buckets.tail
-                i = self.last_bucket_row
+                cursor = self._list_row_buckets.tail
+                i = self._last_bucket_row
                 while True:
 
                     for k in range(0, cursor.bucket_size_row):
 
-                        n0 += self.bucket_size(i)
-                        n1 -= self.bucket_size(i)
+                        n0 += self._bucket_size(i)
+                        n1 -= self._bucket_size(i)
                         u0 += cursor.get_total(k)
                         u1 -= cursor.get_total(k)
 
@@ -186,17 +213,18 @@ class _AdaptiveWindowing:
                             bln_exit = True
                             break
 
-                        if n1 > self.mint_min_win_length + 1 and n0 > self.mint_min_win_length + 1 and self.bln_cut_expression(n0, n1, u0, u1):
-                            self.detect = self.mint_time
+                        if n1 > self._mint_min_win_length + 1 and n0 > self._mint_min_win_length + 1 and \
+                                self._bln_cut_expression(n0, n1, u0, u1):
+                            self._detect = self._mint_time
 
-                            if self.detect == 0:
-                                self.detect = self.mint_time
-                            elif self.detect_twice == 0:
-                                self.detect_twice = self.mint_time
+                            if self._detect == 0:
+                                self._detect = self._mint_time
+                            elif self._detect_twice == 0:
+                                self._detect_twice = self._mint_time
                             bln_reduce_width = True
                             bln_change = True
-                            if self.WIDTH > 0:
-                                n0 -= self.delete_element()
+                            if self._WIDTH > 0:
+                                n0 -= self._delete_element()
                                 bln_exit = True
                                 break
                     cursor = cursor.previous
@@ -206,55 +234,58 @@ class _AdaptiveWindowing:
 
         return bln_change
 
-    def bln_cut_expression(self, n0, n1, u0, u1):
+    def _bln_cut_expression(self, n0, n1, u0, u1):
         diff = math.fabs((u0 / n0) - (u1 / n1))
-        n = self.WIDTH
-        m = (1 / (n0 - self.mint_min_win_length + 1)) + (1 / (n1 - self.mint_min_win_length + 1))
-        dd = math.log(2 * math.log(n) / self.DELTA)
-        v = self.VARIANCE / self.WIDTH
+        n = self._WIDTH
+        m = (1 / (n0 - self._mint_min_win_length + 1)) + (1 / (n1 - self._mint_min_win_length + 1))
+        dd = math.log(2 * math.log(n) / self._DELTA)
+        v = self._VARIANCE / self._WIDTH
         e = math.sqrt(2 * m * v * dd) + 2 / 3 * dd * m
         return diff > e
 
 
 class _List:
-    """ List
-    Class implementation from the tornado package (left unchanged)
+    """List base class of the Tornado package.
+
+    Notes:
+        This is a class implementation from the Tornado package. We added underscores to most attributes and functions
+        in order to indicate that they are protected members. Otherwise, the code was left unchanged.
     """
     def __init__(self):
-        self.count = None
+        self._count = None
         self.head = None
         self.tail = None
 
-        self.clear()
-        self.add_to_head()
+        self._clear()
+        self._add_to_head()
 
-    def is_empty(self):
-        return self.count == 0
+    def _is_empty(self):
+        return self._count == 0
 
-    def clear(self):
+    def _clear(self):
         self.head = None
         self.tail = None
-        self.count = 0
+        self._count = 0
 
-    def add_to_head(self):
+    def _add_to_head(self):
         self.head = _ListItem(self.head, None)
         if self.tail is None:
             self.tail = self.head
-        self.count += 1
+        self._count += 1
 
-    def remove_from_head(self):
+    def _remove_from_head(self):
         self.head = self.head.next
         if self.head is not None:
             self.head.set_previous(None)
         else:
             self.tail = None
-        self.count -= 1
+        self._count -= 1
 
     def add_to_tail(self):
         self.tail = _ListItem(None, self.tail)
         if self.head is None:
             self.head = self.tail
-        self.count += 1
+        self._count += 1
 
     def remove_from_tail(self):
         self.tail = self.tail.previous
@@ -262,73 +293,76 @@ class _List:
             self.head = None
         else:
             self.tail.set_next(None)
-        self.count -= 1
+        self._count -= 1
 
 
 class _ListItem:
-    """ List Item
-    Class implementation from the tornado package (left unchanged)
+    """List Item base class of the Tornado package.
+
+    Notes:
+        This is a class implementation from the Tornado package. We added underscores to most attributes and functions
+        in order to indicate that they are protected members. Otherwise, the code was left unchanged.
     """
     def __init__(self, next_node=None, previous_node=None):
 
-        self.bucket_size_row = 0
-        self.MAXBUCKETS = 5
+        self._bucket_size_row = 0
+        self._MAXBUCKETS = 5
 
-        self.bucket_total = []
-        self.bucket_variance = []
-        for i in range(0, self.MAXBUCKETS + 1):
-            self.bucket_total.append(0)
-            self.bucket_variance.append(0)
+        self._bucket_total = []
+        self._bucket_variance = []
+        for i in range(0, self._MAXBUCKETS + 1):
+            self._bucket_total.append(0)
+            self._bucket_variance.append(0)
 
-        self.next = next_node
+        self._next = next_node
         self.previous = previous_node
         if next_node is not None:
             next_node.previous = self
         if previous_node is not None:
             previous_node.next = self
 
-        self.clear()
+        self._clear()
 
-    def clear(self):
-        self.bucket_size_row = 0
-        for k in range(0, self.MAXBUCKETS + 1):
-            self.clear_bucket(k)
+    def _clear(self):
+        self._bucket_size_row = 0
+        for k in range(0, self._MAXBUCKETS + 1):
+            self._clear_bucket(k)
 
-    def clear_bucket(self, k):
-        self.set_total(0, k)
-        self.set_variance(0, k)
+    def _clear_bucket(self, k):
+        self._set_total(0, k)
+        self._set_variance(0, k)
 
-    def insert_bucket(self, value, variance):
-        k = self.bucket_size_row
-        self.bucket_size_row += 1
-        self.set_total(value, k)
-        self.set_variance(variance, k)
+    def _insert_bucket(self, value, variance):
+        k = self._bucket_size_row
+        self._bucket_size_row += 1
+        self._set_total(value, k)
+        self._set_variance(variance, k)
 
-    def remove_bucket(self):
-        self.compress_buckets_row(1)
+    def _remove_bucket(self):
+        self._compress_buckets_row(1)
 
-    def compress_buckets_row(self, number_items_deleted):
-        for k in range(number_items_deleted, self.MAXBUCKETS + 1):
-            self.bucket_total[k - number_items_deleted] = self.bucket_total[k]
-            self.bucket_variance[k - number_items_deleted] = self.bucket_variance[k]
+    def _compress_buckets_row(self, number_items_deleted):
+        for k in range(number_items_deleted, self._MAXBUCKETS + 1):
+            self._bucket_total[k - number_items_deleted] = self._bucket_total[k]
+            self._bucket_variance[k - number_items_deleted] = self._bucket_variance[k]
         for k in range(1, number_items_deleted + 1):
-            self.clear_bucket(self.MAXBUCKETS - k + 1)
-        self.bucket_size_row -= number_items_deleted
+            self._clear_bucket(self._MAXBUCKETS - k + 1)
+        self._bucket_size_row -= number_items_deleted
 
-    def set_previous(self, previous_node):
+    def _set_previous(self, previous_node):
         self.previous = previous_node
 
-    def set_next(self, next_node):
-        self.next = next_node
+    def _set_next(self, next_node):
+        self._next = next_node
 
-    def get_total(self, k):
-        return self.bucket_total[k]
+    def _get_total(self, k):
+        return self._bucket_total[k]
 
-    def set_total(self, value, k):
-        self.bucket_total[k] = value
+    def _set_total(self, value, k):
+        self._bucket_total[k] = value
 
-    def get_variance(self, k):
-        return self.bucket_variance[k]
+    def _get_variance(self, k):
+        return self._bucket_variance[k]
 
-    def set_variance(self, value, k):
-        self.bucket_variance[k] = value
+    def _set_variance(self, value, k):
+        self._bucket_variance[k] = value

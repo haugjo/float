@@ -1,105 +1,125 @@
-from float.change_detection.base_change_detector import BaseChangeDetector
+"""McDiarmid Drift Detection Method (Euler Scheme).
+
+Code adopted from https://github.com/alipsgh/tornado, please cite:
+The Tornado Framework
+By Ali Pesaranghader
+University of Ottawa, Ontario, Canada
+E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com
+---
+Paper: Pesaranghader, Ali, et al. "McDiarmid Drift Detection Method for Evolving Data Streams."
+Published in: International Joint Conference on Neural Network (IJCNN 2018)
+URL: https://arxiv.org/abs/1710.02030
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import math
+from typing import Tuple
+
+from float.change_detection.base_change_detector import BaseChangeDetector
 
 
 class MDDME(BaseChangeDetector):
-    """ McDiarmid Drift Detection Method - Euler Scheme (MDDME)
+    """MDDME change detector."""
+    def __init__(self, n: int = 100, lambda_: float = 0.01, delta: float = 0.000001, reset_after_drift: bool = False):
+        """Inits the change detector.
 
-    Code adopted from https://github.com/alipsgh/tornado, please cite:
-    The Tornado Framework
-    By Ali Pesaranghader
-    University of Ottawa, Ontario, Canada
-    E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com
-    ---
-    Paper: Pesaranghader, Ali, et al. "McDiarmid Drift Detection Method for Evolving Data Streams."
-    Published in: International Joint Conference on Neural Network (IJCNN 2018)
-    URL: https://arxiv.org/abs/1710.02030
-
-    Attributes:  # Todo: add attribute descriptions
-        min_instance (int):
-    """
-    def __init__(self, n=100, lambda_=0.01, delta=0.000001, reset_after_drift=False):
-        """ Initialize the concept drift detector
-
-        Todo: add remaining param descriptions
         Args:
-            n (int):
-            lambda_ (float):
-            delta (float):
-            reset_after_drift (bool): indicates whether to reset the change detector after a drift was detected
+            n: Todo
+            lambda_: Todo
+            delta: Todo
+            reset_after_drift: See description of base class.
         """
         super().__init__(reset_after_drift=reset_after_drift, error_based=True)
-        self.active_change = False
 
-        self.win = []
-        self.n = n
-        self.lambda_ = lambda_
-        self.delta = delta
-
-        self.e = math.sqrt(0.5 * self._cal_sigma() * (math.log(1 / self.delta, math.e)))
-        self.u_max = 0
+        self._win = []
+        self._n = n
+        self._lambda_ = lambda_
+        self._delta = delta
+        self._e = math.sqrt(0.5 * self._cal_sigma() * (math.log(1 / self._delta, math.e)))
+        self._u_max = 0
+        self._active_change = False
 
     def reset(self):
-        """ Resets the concept drift detector parameters.
-        """
-        self.win.clear()
-        self.u_max = 0
+        """Resets the change detector."""
+        self._win.clear()
+        self._u_max = 0
 
-    def partial_fit(self, pr):
-        """ Update the concept drift detector
+    def partial_fit(self, pr: bool):
+        """Updates the change detector.
 
         Args:
-            pr (bool): indicator of correct prediction (i.e. pr=True) and incorrect prediction (i.e. pr=False)
+            pr: Boolean indicating a correct prediction.
+                If True the prediction by the online learner was correct, False otherwise.
         """
-        self.active_change = False
+        self._active_change = False
 
-        if len(self.win) == self.n:
-            self.win.pop(0)
-        self.win.append(pr)
+        if len(self._win) == self._n:
+            self._win.pop(0)
+        self._win.append(pr)
 
-        if len(self.win) == self.n:
+        if len(self._win) == self._n:
             u = self._cal_w_sigma()
-            self.u_max = u if u > self.u_max else self.u_max
-            self.active_change = True if (self.u_max - u > self.e) else False
+            self._u_max = u if u > self._u_max else self._u_max
+            self._active_change = True if (self._u_max - u > self._e) else False
 
-    def detect_change(self):
-        """ Checks whether global concept drift was detected or not.
+    def detect_change(self) -> bool:
+        """Detects global concept drift."""
+        return self._active_change
 
-        Returns:
-            bool: whether global concept drift was detected or not.
+    def detect_partial_change(self) -> Tuple[bool, list]:
+        """Detects partial concept drift.
+
+        Notes:
+            MDDME does not detect partial change.
         """
-        return self.active_change
+        return False, []
 
-    def detect_warning_zone(self):
+    def detect_warning_zone(self) -> bool:
+        """Detects a warning zone.
+
+        Notes:
+            MDDME does not raise warnings.
+        """
         return False
-
-    def detect_partial_change(self):
-        return False, None
 
     # ----------------------------------------
     # Tornado Functionality (left unchanged)
     # ----------------------------------------
     def _cal_sigma(self):
-        """
-        Tornado-function (left unchanged)
-        """
-        sum_, bound_sum, r, ratio = 0, 0, 1, math.pow(math.e, self.lambda_)
-        for i in range(self.n):
+        """Tornado-function (left unchanged)."""
+        sum_, bound_sum, r, ratio = 0, 0, 1, math.pow(math.e, self._lambda_)
+        for i in range(self._n):
             sum_ += r
             r *= ratio
         r = 1
-        for i in range(self.n):
+        for i in range(self._n):
             bound_sum += math.pow(r / sum_, 2)
             r *= ratio
         return bound_sum
 
     def _cal_w_sigma(self):
-        """
-        Tornado-function (left unchanged)
-        """
-        total_sum, win_sum, r, ratio = 0, 0, 1, math.pow(math.e, self.lambda_)
-        for i in range(self.n):
+        """Tornado-function (left unchanged)."""
+        total_sum, win_sum, r, ratio = 0, 0, 1, math.pow(math.e, self._lambda_)
+        for i in range(self._n):
             total_sum += r
-            win_sum += self.win[i] * r
+            win_sum += self._win[i] * r
             r *= ratio
         return win_sum / total_sum
