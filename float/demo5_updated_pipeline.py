@@ -41,105 +41,86 @@ concept_drift_detectors = [  # SkmultiflowChangeDetector(ADWIN(delta=0.6), reset
     # DDM(reset_after_drift=True),
     ERICS(data_loader.stream.n_features),
     PageHinkley(reset_after_drift=True)]
-
 cd_evaluator = dict()
+
+pred_evaluator = dict()
+predictor_names = ['Perceptron']
+predictors = [SkmultiflowClassifier(PerceptronMask(), data_loader.stream.target_values, reset_after_drift=True)]  # todo: can we get rid of the target values parameter?
+
+ref_sample, _ = data_loader.stream.next_sample(50)
+data_loader.stream.reset()
+fs_evaluator = dict()
+feature_selector_names = ['FIRES']
+feature_selectors = [FIRES(n_total_features=data_loader.stream.n_features,
+                           n_selected_features=20,
+                           classes=data_loader.stream.target_values,
+                           reset_after_drift=False,
+                           baseline='expectation',
+                           ref_sample=ref_sample)]
 
 for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_detector_names, concept_drift_detectors):
     ### Initialize Predictor ###
-    predictor = SkmultiflowClassifier(PerceptronMask(), data_loader.stream.target_values, reset_after_drift=True)  # todo: can we get rid of the target values parameter?
-    pred_evaluator = PredictionEvaluator([accuracy_score, zero_one_loss, mean_drift_performance_deterioration, mean_drift_restoration_time, noise_variability],
-                                         decay_rate=0.1,
-                                         window_size=10,
-                                         known_drifts=known_drifts,
-                                         batch_size=batch_size,
-                                         interval=10)
+    for predictor_name, predictor in zip(predictor_names, predictors):
+        pred_evaluator[predictor_name] = PredictionEvaluator([accuracy_score, zero_one_loss, mean_drift_performance_deterioration, mean_drift_restoration_time, noise_variability],
+                                                             decay_rate=0.1,
+                                                             window_size=10,
+                                                             known_drifts=known_drifts,
+                                                             batch_size=batch_size,
+                                                             interval=10)
+        ### Initialize Feature Selection ###
+        for feature_selector_name, feature_selector in zip(feature_selector_names, feature_selectors):
+            fs_evaluator[feature_selector_name] = FeatureSelectionEvaluator([nogueira_stability])
 
-    ### Initialize Feature Selection ###
-    ref_sample, _ = data_loader.stream.next_sample(50)
-    data_loader.stream.reset()
-    f_selector = FIRES(n_total_features=data_loader.stream.n_features,
-                       n_selected_features=20,
-                       classes=data_loader.stream.target_values,
-                       reset_after_drift=False,
-                       baseline='expectation',
-                       ref_sample=ref_sample)
-    fs_evaluator = FeatureSelectionEvaluator([nogueira_stability])
+            ### Initialize Concept Drift Detector ###
+            cd_evaluator[concept_drift_detector_name] = ChangeDetectionEvaluator(measure_funcs=[detected_change_rate,
+                                                                                                missed_detection_rate,
+                                                                                                false_discovery_rate,
+                                                                                                time_between_false_alarms,
+                                                                                                detection_delay,
+                                                                                                mean_time_ratio],
+                                                                                 known_drifts=known_drifts,
+                                                                                 batch_size=batch_size,
+                                                                                 n_samples=data_loader.stream.n_samples,
+                                                                                 n_delay=list(range(100, 1000)),
+                                                                                 n_init_tolerance=100)
 
-    ### Initialize Concept Drift Detector ###
-    cd_evaluator[concept_drift_detector_name] = ChangeDetectionEvaluator(measure_funcs=[detected_change_rate,
-                                                                                        missed_detection_rate,
-                                                                                        false_discovery_rate,
-                                                                                        time_between_false_alarms,
-                                                                                        detection_delay,
-                                                                                        mean_time_ratio],
-                                                                         known_drifts=known_drifts,
-                                                                         batch_size=batch_size,
-                                                                         n_samples=data_loader.stream.n_samples,
-                                                                         n_delay=list(range(100, 1000)),
-                                                                         n_init_tolerance=100)
+            ### Initialize and run Prequential Pipeline ###
+            prequential_pipeline = PrequentialPipeline(data_loader=data_loader,
+                                                       feature_selector=feature_selector,
+                                                       feature_selection_evaluator=fs_evaluator[feature_selector_name],
+                                                       change_detector=concept_drift_detector,
+                                                       change_detection_evaluator=cd_evaluator[concept_drift_detector_name],
+                                                       predictor=predictor,
+                                                       prediction_evaluator=pred_evaluator[predictor_name],
+                                                       batch_size=batch_size,
+                                                       max_n_samples=data_loader.stream.n_samples,
+                                                       known_drifts=known_drifts)
+            prequential_pipeline.run()
 
-    ### Initialize and run Prequential Pipeline ###
-    prequential_pipeline = PrequentialPipeline(data_loader=data_loader,
-                                               feature_selector=f_selector,
-                                               feature_selection_evaluator=fs_evaluator,
-                                               change_detector=concept_drift_detector,
-                                               change_detection_evaluator=cd_evaluator[concept_drift_detector_name],
-                                               predictor=predictor,
-                                               prediction_evaluator=pred_evaluator,
-                                               batch_size=batch_size,
-                                               max_n_samples=data_loader.stream.n_samples,
-                                               known_drifts=known_drifts)
-    prequential_pipeline.run()
-
-"""
-visualizer = Visualizer(
-    [concept_drift_detector.drifts for concept_drift_detector in concept_drift_detectors],
-    concept_drift_detector_names, 'drift_detection')
-visualizer.draw_concept_drifts(data_loader.stream, known_drifts, batch_size,
-                               plot_title=f'Concept Drifts For Data Set spambase, Predictor Perceptron, Feature Selector FIRES')
-plt.show()
-
-visualizer = Visualizer(
-    [cd_eval.result['detected_change_rate']['measures'] for cd_eval in cd_evaluator.values()],
-    concept_drift_detector_names, 'change_detection'
-)
-visualizer.plot(
-    plot_title=f'Concept Drift True Positive Rate For Data Set spambase, Predictor Perceptron, Feature Selector FIRES')
-plt.show()
-
-visualizer = Visualizer(
-    [pred_evaluator.result['accuracy_score']['measures'], pred_evaluator.result['accuracy_score']['mean_decay'], pred_evaluator.result['accuracy_score']['mean_window']],
-    ['Accuracy Measures', 'Accuracy Decay', 'Accuracy Window'],
-    'prediction')
-visualizer.plot(
-    plot_title=f'Metrics For Data Set spambase, Predictor Perceptron, Feature Selector FIRES',
-    smooth_curve=[False, False, True])
-plt.show()
-"""
-plot(measures=[pred_evaluator.result['mean_drift_performance_deterioration']['measures']],
-     variances=[pred_evaluator.result['mean_drift_performance_deterioration']['var']],
+plot(measures=[pred_evaluator['Perceptron'].result['mean_drift_performance_deterioration']['measures']],
+     variances=[pred_evaluator['Perceptron'].result['mean_drift_performance_deterioration']['var']],
      labels=['Perceptron'],
      measure_name='Drift Performance Decay',
      measure_type='prediction',
      smooth_curve=[False])
 plt.show()
 
-plot(measures=[pred_evaluator.result['mean_drift_restoration_time']['measures']],
-     variances=[pred_evaluator.result['mean_drift_restoration_time']['var']],
+plot(measures=[pred_evaluator['Perceptron'].result['mean_drift_restoration_time']['measures']],
+     variances=[pred_evaluator['Perceptron'].result['mean_drift_restoration_time']['var']],
      labels=['Perceptron'],
      measure_name='Drift Recovery Time',
      measure_type='prediction',
      smooth_curve=[False])
 plt.show()
 
-top_features_reference_bar(measures=[f_selector.selection],
+top_features_reference_bar(measures=[feature_selectors[0].selection],
                            labels=['FIRES'],
                            measure_type='feature_selection',
                            feature_names=feature_names,
                            fig_size=(15, 5))
 plt.show()
 
-selected_features_scatter(measures=[f_selector.selection],
+selected_features_scatter(measures=[feature_selectors[0].selection],
                           labels=['FIRES'],
                           measure_type='feature_selection',
                           layout=(1, 1),
@@ -161,11 +142,11 @@ concept_drifts_scatter(measures=[concept_drift_detectors[-2].drifts, concept_dri
                        batch_size=batch_size)
 plt.show()
 
-spider_chart(measures=[[pred_evaluator.result['accuracy_score']['mean'][-1], pred_evaluator.result['zero_one_loss']['mean'][-1],
-                        pred_evaluator.result['noise_variability']['mean'][-1], fs_evaluator.result['nogueira_stability']['mean'][-1],
+spider_chart(measures=[[pred_evaluator['Perceptron'].result['accuracy_score']['mean'][-1], pred_evaluator['Perceptron'].result['zero_one_loss']['mean'][-1],
+                        pred_evaluator['Perceptron'].result['noise_variability']['mean'][-1], fs_evaluator['FIRES'].result['nogueira_stability']['mean'][-1],
                         cd_evaluator['ERICS'].result['missed_detection_rate']['mean'], cd_evaluator['ERICS'].result['false_discovery_rate']['mean']],
-                       [pred_evaluator.result['accuracy_score']['mean'][-1], pred_evaluator.result['zero_one_loss']['mean'][-1],
-                        pred_evaluator.result['noise_variability']['mean'][-1], fs_evaluator.result['nogueira_stability']['mean'][-1],
+                       [pred_evaluator['Perceptron'].result['accuracy_score']['mean'][-1], pred_evaluator['Perceptron'].result['zero_one_loss']['mean'][-1],
+                        pred_evaluator['Perceptron'].result['noise_variability']['mean'][-1], fs_evaluator['FIRES'].result['nogueira_stability']['mean'][-1],
                         cd_evaluator['Page Hinkley'].result['missed_detection_rate']['mean'], cd_evaluator['Page Hinkley'].result['false_discovery_rate']['mean']]
                        ],
              labels=['ERICS', 'Page Hinkley'],
