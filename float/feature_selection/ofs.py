@@ -1,52 +1,72 @@
-from float.feature_selection.base_feature_selector import BaseFeatureSelector
+"""Online Feature Selection Method.
+
+This module contains the Online Feature Selection model based on a Perceptron, which was introduced by:
+WANG, Jialei, et al. Online feature selection and its applications. IEEE Transactions on knowledge and data engineering,
+2013, 26. Jg., Nr. 3, S. 698-710.
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import numpy as np
+from numpy.typing import ArrayLike
 import math
+from typing import Union
+
+from float.feature_selection.base_feature_selector import BaseFeatureSelector
 
 
 class OFS(BaseFeatureSelector):
-    """
-    Online Feature Selection.
+    """OFS feature selector.
 
-    Based on a paper by Wang et al. 2014. Feature Selection for binary classification.
-    This code is an adaptation of the official Matlab implementation.
+    This feature selector uses the weights of a Perceptron classifier.
     """
-    def __init__(self, n_total_features, n_selected_features, reset_after_drift=False, baseline='constant', ref_sample=0):
-        """
-        Initializes the OFS feature selector.
+    def __init__(self, n_total_features: int, n_selected_features: int, reset_after_drift: bool = False,
+                 baseline: str = 'constant', ref_sample: Union[float, ArrayLike] = 0):
+        """Initializes the feature selector.
 
         Args:
-            n_total_features (int): total number of features
-            n_selected_features (int): number of selected features
-            reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
-            baseline (str): identifier of baseline method (value to replace non-selected features with)
-            ref_sample (float | np.ndarray): integer (in case of 'constant' baseline) or sample used to obtain the baseline
+            n_total_features: See description of base class.
+            n_selected_features: See description of base class.
+            reset_after_drift: See description of base class.
+            baseline: See description of base class.
+            ref_sample: See description of base class.
         """
-        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
-                         reset_after_drift=reset_after_drift, baseline=baseline, ref_sample=ref_sample)
+        super().__init__(n_total_features=n_total_features, n_selected_features=n_selected_features,
+                         supports_multi_class=False, reset_after_drift=reset_after_drift, baseline=baseline,
+                         ref_sample=ref_sample)
 
-    def weight_features(self, X, y):
-        """
-        Given a batch of observations and corresponding labels, computes feature weights.
-
-        Args:
-            X (np.ndarray): samples of current batch
-            y (np.ndarray): labels of current batch
-        """
-        eta = 0.2
+    def weight_features(self, x: ArrayLike, y: ArrayLike):
+        """Updates feature weights."""
+        eta = 0.2  # Default parameters as proposed by the authors
         lamb = 0.01
 
-        for x_b, y_b in zip(X, y):  # perform feature selection for each instance in batch
+        for x_b, y_b in zip(x, y):  # perform feature selection for each instance in batch
             # Convert label to -1 and 1
             y_b = -1 if y_b == 0 else 1
 
-            f = np.dot(self.raw_weight_vector, x_b)  # prediction
+            f = np.dot(self.weights, x_b)  # prediction
 
             if y_b * f <= 1:  # update classifier w
-                self.raw_weight_vector = self.raw_weight_vector + eta * y_b * x_b
-                self.raw_weight_vector = self.raw_weight_vector * min(1, 1 / (math.sqrt(lamb) * np.linalg.norm(self.raw_weight_vector)))
+                self.weights = self.weights + eta * y_b * x_b
+                self.weights = self.weights * min(1, 1 / (math.sqrt(lamb) * np.linalg.norm(self.weights)))
 
     def reset(self):
-        """
-        Reset weight vector
-        """
-        self.raw_weight_vector = np.zeros(self.n_total_features)
+        """Resets the feature selector."""
+        self.weights = np.zeros(self.n_total_features)

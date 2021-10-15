@@ -46,7 +46,7 @@ class BaseScaler(metaclass=ABCMeta):
         """Updates the scaler.
 
         Args:
-            x: array/matrix of observations.
+            x: Array/matrix of observations.
         """
         raise NotImplementedError
 
@@ -55,7 +55,7 @@ class BaseScaler(metaclass=ABCMeta):
         """Scales the given observations.
 
         Args:
-            x: array/matrix of observations.
+            x: Array/matrix of observations.
 
         Returns:
             ArrayLike: The scaled observations.

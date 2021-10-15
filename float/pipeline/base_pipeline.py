@@ -147,7 +147,7 @@ class BasePipeline(metaclass=ABCMeta):
 
             X_train = self.feature_selector.select_features(X_train)
 
-            self.feature_selection_evaluator.run(self.feature_selector.selection, self.feature_selector.n_total_features)
+            self.feature_selection_evaluator.run(self.feature_selector.selected_features, self.feature_selector.n_total_features)
 
         if self.predictor:
             start_time = time.time()

@@ -1,38 +1,86 @@
-from float.feature_selection.base_feature_selector import BaseFeatureSelector
+"""CancelOut Feature Selection Method.
+
+This module contains an adaptation of the CancelOut feature selection method for data streams. CancelOut
+was introduced as a feature selection layer for neural networks by:
+BORISOV, Vadim; HAUG, Johannes; KASNECI, Gjergji. Cancelout: A layer for feature selection in deep neural networks.
+In: International Conference on Artificial Neural Networks. Springer, Cham, 2019. S. 72-83.
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+import numpy as np
+from numpy.typing import ArrayLike
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
-import numpy as np
+from typing import Union
+
+from float.feature_selection.base_feature_selector import BaseFeatureSelector
 
 
 class CancelOutFeatureSelector(BaseFeatureSelector):
-    def __init__(self, n_total_features, n_selected_features, reset_after_drift=False, baseline='constant', ref_sample=0):
-        """
-        Initializes the Cancel Out feature selector.
+    """CancelOut feature selector."""
+    def __init__(self, n_total_features: int, n_selected_features: int, reset_after_drift: bool = False,
+                 baseline: str = 'constant', ref_sample: Union[float, ArrayLike] = 0):
+        """Initializes the feature selector.
 
         Args:
-            n_total_features (int): total number of features
-            n_selected_features (int): number of selected features
-            reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
-            baseline (str): identifier of baseline method (value to replace non-selected features with)
-            ref_sample (float | np.ndarray): sample used to obtain the baseline (not required for 'zero' baseline)
+            n_total_features: See description of base class.
+            n_selected_features: See description of base class.
+            reset_after_drift: See description of base class.
+            baseline: See description of base class.
+            ref_sample: See description of base class.
         """
-        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
-                         reset_after_drift=reset_after_drift, baseline=baseline, ref_sample=ref_sample)
+        super().__init__(n_total_features=n_total_features, n_selected_features=n_selected_features,
+                         supports_multi_class=False, reset_after_drift=reset_after_drift, baseline=baseline,
+                         ref_sample=ref_sample)
 
-    def weight_features(self, X, y):
-        self.raw_weight_vector = self.__train_ann(X, y, 50, 128)
+    def weight_features(self, x: ArrayLike, y: ArrayLike):
+        """Updates feature weights."""
+        self.weights = self._train_ann(x=x, y=y, num_epochs=50, batch_size=128)  # We use default parameters proposed by the authors
 
     def reset(self):
-        """
-        CancelOut does not need to be reset, since the DNN is trained at every training iteration
+        """Resets the feature selector.
+
+        CancelOut does not need to be reset, since the DNN is trained anew at every training iteration.
         """
         pass
 
+    # ----------------------------------------
+    # CancelOut Functionality
+    # ----------------------------------------
     @staticmethod
-    def __train_ann(X, y, num_epochs, batch_size):
-        model = CancelOutNeuralNet(X.shape[1], X.shape[1] + 10, 2)
-        data_loader = CancelOutDataLoader(X, y)
+    def _train_ann(x: ArrayLike, y: ArrayLike, num_epochs: int, batch_size: int) -> ArrayLike:
+        """Trains a neural network and returns feature weights from the CancelOut layer.
+
+        Args:
+            x: Array/matrix of observations.
+            y: Array of corresponding labels.
+            num_epochs: Number of training epochs.
+            batch_size: The training batch size.
+
+        Returns:
+            ArrayLike: A vector of feature weights
+        """
+        model = CancelOutNeuralNet(x.shape[1], x.shape[1] + 10, 2)
+        data_loader = CancelOutDataLoader(x, y)
         batch_size = batch_size
         train_loader = torch.utils.data.DataLoader(dataset=data_loader,
                                                    batch_size=batch_size,
@@ -63,10 +111,11 @@ class CancelOutFeatureSelector(BaseFeatureSelector):
             list(model.cancelout.parameters())[0].detach().numpy())
 
 
+# ----------------------------------------
+# CancelOut Classes
+# ----------------------------------------
 class CancelOutNeuralNet(nn.Module):
-    """
-    A simple DL model.
-    """
+    """A neural network with CancelOut layer."""
     def __init__(self, input_size, hidden_size, num_classes):
         super(CancelOutNeuralNet, self).__init__()
         self.cancelout = CancelOut(input_size)
@@ -86,32 +135,28 @@ class CancelOutNeuralNet(nn.Module):
 
 
 class CancelOutDataLoader(Dataset):
-    """
-    A dataset loader.
-    """
-    def __init__(self, X, y):
-        self.X = X
+    """CancelOut dataset loader for the neural network."""
+    def __init__(self, x, y):
+        self.x = x
         self.y = y
 
     def __getitem__(self, index):
-        return self.X[index], self.y[index]
+        return self.x[index], self.y[index]
 
     def __len__(self):
-        return len(self.X)
+        return len(self.x)
 
 
 class CancelOut(nn.Module):
-    """
-    A CancelOut Layer.
-    """
-    def __init__(self, X, *args, **kwargs):
-        """
+    """CancelOut network layer."""
+    def __init__(self, x):
+        """Initializes the network layer
 
         Args:
             X: an input data (vector, matrix, tensor)
         """
         super(CancelOut, self).__init__()
-        self.weights = nn.Parameter(torch.zeros(X, requires_grad=True) + 4)
+        self.weights = nn.Parameter(torch.zeros(x, requires_grad=True) + 4)
 
-    def forward(self, X):
-        return X * torch.sigmoid(self.weights.float())
+    def forward(self, x):
+        return x * torch.sigmoid(self.weights.float())

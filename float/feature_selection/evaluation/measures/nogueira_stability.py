@@ -1,21 +1,45 @@
+"""Nogueira Feature Set Stability Measure.
+
+This function returns the feature set stability measure introduced by:
+NOGUEIRA, Sarah; SECHIDIS, Konstantinos; BROWN, Gavin. On the stability of feature selection algorithms.
+J. Mach. Learn. Res., 2017, 18. Jg., Nr. 1, S. 6345-6398.
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import numpy as np
+from numpy.typing import ArrayLike
 
 
-def nogueira_stability(selected_features, n_total_features):
-    """
-    Returns the Nogueira measure for feature selection stability.
-
-    todo: add reference to paper
+def nogueira_stability(selected_features: ArrayLike, n_total_features: int) -> float:
+    """Calculates the Nogueira measure for feature selection stability.
 
     Args:
-        selected_features (list): vector of selected features per time step
-        n_total_features (int): total number of features
+        selected_features (ArrayLike): The indices of all currently selected features.
+        n_total_features (int): The total number of features.
 
     Returns:
-        float: the stability measure due to Nogueira et al.
+        float: The feature set stability due to Nogueira et al.
     """
     Z = np.zeros([min(len(selected_features), 2), n_total_features])
-    for row, col in enumerate(selected_features[-2:]):  # Todo: we compute stability between last two selections (do we need a larger window here?)
+    for row, col in enumerate(selected_features[-2:]):  # Compute stability between the last two feature sets
         Z[row, col] = 1
 
     try:

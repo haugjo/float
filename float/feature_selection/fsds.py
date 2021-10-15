@@ -1,69 +1,95 @@
-from float.feature_selection.base_feature_selector import BaseFeatureSelector
+"""Fast Feature Selection on Data Streams Method.
+
+This module contains the Fast Feature Selection in Data Streams model that is able to select features via a sketching
+algorithm without requiring supervision. The method was introduced by:
+HUANG, Hao; YOO, Shinjae; KASIVISWANATHAN, Shiva Prasad. Unsupervised feature selection on data streams.
+In: Proceedings of the 24th ACM International on Conference on Information and Knowledge Management. 2015. S. 1031-1040.
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import numpy as np
 import numpy.linalg as ln
+from numpy.typing import ArrayLike
+from typing import Union, Optional
+
+from float.feature_selection.base_feature_selector import BaseFeatureSelector
 
 
 class FSDS(BaseFeatureSelector):
-    """
-    Feature Selection on Data Streams.
+    """FSDS feature selector.
 
-    Based on a paper by Huang et al. (2015). Feature Selection for unsupervised Learning.
-    This code is copied from the Python implementation of the authors with minor reductions and adaptations.
+    This code is adopted from the official Python implementation of the authors with minor adaptations.
     """
-    def __init__(self, n_total_features, n_selected_features, l=0, m=None, B=None, k=2, reset_after_drift=False,
-                 baseline='constant', ref_sample=0):
-        """
-        Initializes the FSDS feature selector.
+    def __init__(self, n_total_features: int, n_selected_features: int, l: int = 0, m: Optional[int] = None,
+                 B: Optional[Union[list, ArrayLike]] = None, k: int = 2, reset_after_drift: bool = False,
+                 baseline: str = 'constant', ref_sample: Union[float, ArrayLike] = 0):
+        """Initializes the feature selector.
 
         Args:
-            n_total_features (int): total number of features
-            n_selected_features (int): number of selected features
-            l (int): size of the matrix sketch with l << m
-            m (int): size of the feature space
-            B (list/np.ndarray): matrix sketch
-            k (int): number of singular vectors with k <= ell
-            reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
-            baseline (str): identifier of baseline method (value to replace non-selected features with)
-            ref_sample (float | np.ndarray): integer (in case of 'constant' baseline) or sample used to obtain the baseline
+            n_total_features: See description of base class.
+            n_selected_features: See description of base class.
+            l: Size of the matrix sketch with l << m.
+            m: Size of the feature space (i.e. dimensionality).
+            B: Matrix sketch.
+            k: Number of singular vectors.
+            reset_after_drift: See description of base class.
+            baseline: See description of base class.
+            ref_sample: See description of base class.
         """
-        super().__init__(n_total_features, n_selected_features, supports_multi_class=False,
-                         reset_after_drift=reset_after_drift, baseline=baseline, ref_sample=ref_sample)
+        super().__init__(n_total_features=n_total_features, n_selected_features=n_selected_features,
+                         supports_multi_class=True, reset_after_drift=reset_after_drift, baseline=baseline,
+                         ref_sample=ref_sample)
 
-        self.m_init = m
-        self.B_init = B
-        self.m = n_total_features if m is None else m
-        self.B = [] if B is None else B
-        self.l = l
-        self.k = k
+        self._m_init = m
+        self._B_init = B
+        self._m = n_total_features if m is None else m
+        self._B = [] if B is None else B
+        self._l = l
+        self._k = k
 
-    def weight_features(self, X, y):
+    def weight_features(self, x: ArrayLike, y: ArrayLike):
+        """Updates feature weights.
+
+        FSDS is an unsupervised approach and does not use target information.
         """
-        Given a batch of observations and corresponding labels, computes feature weights.
+        Yt = x.T  # algorithm assumes rows to represent features
 
-        Args:
-            X (np.ndarray): samples of current batch
-            y (np.ndarray): labels of current batch
-        """
-        Yt = X.T  # algorithm assumes rows to represent features
+        if self._l < 1:
+            self._l = int(np.sqrt(self._m))
 
-        if self.l < 1:
-            self.l = int(np.sqrt(self.m))
-
-        if len(self.B) == 0:
+        if len(self._B) == 0:
             # for Y0, we need to first create an initial sketched matrix
-            self.B = Yt[:, :self.l]
-            C = np.hstack((self.B, Yt[:, self.l:]))
-            n = Yt.shape[1] - self.l
+            self._B = Yt[:, :self._l]
+            C = np.hstack((self._B, Yt[:, self._l:]))
+            n = Yt.shape[1] - self._l
         else:
             # combine current sketched matrix with input at time t
             # C: m-by-(n+ell) matrix
-            C = np.hstack((self.B, Yt))
+            C = np.hstack((self._B, Yt))
             n = Yt.shape[1]
 
         U, s, V = ln.svd(C, full_matrices=False)
-        U = U[:, :self.l]
-        s = s[:self.l]
-        V = V[:, :self.l]
+        U = U[:, :self._l]
+        s = s[:self._l]
+        V = V[:, :self._l]
 
         # shrink step in Frequent Directions algorithm
         # (shrink singular values based on the squared smallest singular value)
@@ -76,27 +102,25 @@ class FSDS(BaseFeatureSelector):
 
         # update sketched matrix B
         # (focus on column singular vectors)
-        self.B = np.dot(U, np.diag(s))
+        self._B = np.dot(U, np.diag(s))
 
         # According to Section 5.1, for all experiments,
         # the authors set alpha = 2^3 * sigma_k based on the pre-experiment
-        alpha = (2 ** 3) * s[self.k - 1]
+        alpha = (2 ** 3) * s[self._k - 1]
 
         # solve the ridge regression by using the top-k singular values
         # X: m-by-k matrix (k <= ell)
-        D = np.diag(s[:self.k] / (s[:self.k] ** 2 + alpha))
+        D = np.diag(s[:self._k] / (s[:self._k] ** 2 + alpha))
 
         # -- Extension of original code --
         # replace nan values with 0 to prevent division by zero error for small batch numbers
         D = np.nan_to_num(D)
 
-        X = np.dot(U[:, :self.k], D)
+        x = np.dot(U[:, :self._k], D)
 
-        self.raw_weight_vector = np.amax(abs(X), axis=1)
+        self.weights = np.amax(abs(x), axis=1)
 
     def reset(self):
-        """
-         Reset matrix sketch
-        """
-        self.m = self.n_total_features if self.m_init is None else self.m_init
-        self.B = [] if self.B_init is None else self.B_init
+        """Resets the feature selector."""
+        self._m = self.n_total_features if self._m_init is None else self._m_init
+        self._B = [] if self._B_init is None else self._B_init

@@ -22,13 +22,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from abc import ABCMeta
 import numpy as np
 import traceback
-from typing import Callable, List, Union, Dict
+from typing import Callable, List, Union
 
 
-class ChangeDetectionEvaluator(metaclass=ABCMeta):
+class ChangeDetectionEvaluator:
     """Change detection evaluation class.
 
     This class computes and stores the measure/metric functions and results for the evaluation of explicit
@@ -50,7 +49,7 @@ class ChangeDetectionEvaluator(metaclass=ABCMeta):
     """
     def __init__(self, measure_funcs: List[Callable], known_drifts: Union[List[int], List[tuple]], batch_size: int,
                  n_samples: int, n_delay: Union[int, list] = 100, n_init_tolerance: int = 100):
-        """ Initializes the change detection evaluation measure.
+        """Initializes the change detection evaluation object.
 
         Args:
             measure_funcs (List[Callable]): A list of evaluation measure functions.

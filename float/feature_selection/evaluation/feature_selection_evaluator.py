@@ -1,29 +1,61 @@
-from abc import ABCMeta
-import traceback
+"""Evaluation Module for Online Feature Selection Methods.
+
+This module contains an evaluator class for online feature selection methods.
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import numpy as np
+from numpy.typing import ArrayLike
+import traceback
+from typing import Optional, List, Callable
 
 
-class FeatureSelectionEvaluator(metaclass=ABCMeta):
-    """
-    Base class for the feature selection evaluation
+class FeatureSelectionEvaluator:
+    """Online feature selection evaluator class.
 
     Attributes:
-        measure_funcs (list): list of evaluation measure functions
-        result (dict): dictionary of results per evaluation measure
+        measure_funcs (List[Callable]): List of evaluation measure functions.
+        decay_rate (float |None):
+            If this parameter is set, the measurements are additionally aggregated with a decay/fading factor.
+        window_size (int | None):
+            If this parameter is set, the measurements are additionally aggregated in a sliding window.
+        comp_times (list):
+            A list of computation times per iteration.
+        result (dict):
+            The raw and aggregated measurements of each evaluation measure function.
     """
-    def __init__(self, measure_funcs, decay_rate=None, window_size=None):
-        """ Initialize feature selection evaluation measure
+    def __init__(self, measure_funcs: List[Callable], decay_rate: Optional[float] = None,
+                 window_size: Optional[int] = None):
+        """Initializes the online feature selection evaluation object.
 
         Args:
-            measure_funcs (list): list of evaluation measure functions
-            decay_rate (float | None): when this parameter is set, the metric values are additionally aggregated with a decay/fading factor
-            window_size (int | None): when this parameter is set, the metric values are additionally aggregated in a sliding window
+            measure_funcs: List of evaluation measure functions.
+            decay_rate:
+                If this parameter is set, the measurements are additionally aggregated with a decay/fading factor.
+            window_size: If this parameter is set, the measurements are additionally aggregated in a sliding window.
         """
+        self.measure_funcs = measure_funcs
         self.decay_rate = decay_rate
         self.window_size = window_size
-        self.comp_times = []  # Todo: name all computation times in a standardized way
-
-        self.measure_funcs = measure_funcs
+        self.comp_times = []
 
         self.result = dict()
         for measure_func in measure_funcs:
@@ -40,13 +72,12 @@ class FeatureSelectionEvaluator(metaclass=ABCMeta):
                 self.result[measure_func.__name__]['mean_window'] = []
                 self.result[measure_func.__name__]['var_window'] = []
 
-    def run(self, selected_features, n_total_features):
-        """
-        Compute and save each evaluation measure
+    def run(self, selected_features: ArrayLike, n_total_features: int):
+        """Updates relevant statistics and computes the evaluation measures.
 
         Args:
-            selected_features (list): vector of selected features per time step
-            n_total_features (int): total number of features
+            selected_features (ArrayLike): The indices of all currently selected features.
+            n_total_features (int): The total number of features.
         """
         for measure_func in self.measure_funcs:  # run each evaluation measure
             try:
