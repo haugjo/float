@@ -1,38 +1,75 @@
-from abc import ABCMeta
-import traceback
-import numpy as np
-import inspect
+"""Evaluation Module for Online Predictive Models.
+
+This module contains an evaluator class for online predictive models.
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import copy
+import numpy as np
+from numpy.typing import ArrayLike
+import inspect
+import traceback
+from typing import List, Callable, Optional
+
 from float.prediction import BasePredictor
 
 
-class PredictionEvaluator(metaclass=ABCMeta):
-    """
-    Abstract base class for prediction evaluation measures
+class PredictionEvaluator:
+    """Online prediction evaluator class.
 
     Attributes:
-        measure_funcs (list): list of evaluation measure functions
-        result (dict): dictionary of results per evaluation measure
-        testing_times (list): testing times per time step
-        training_times (list): training times per time step
+        measure_funcs (List[Callable]): List of evaluation measure functions.
+        decay_rate (float |None):
+            If this parameter is set, the measurements are additionally aggregated with a decay/fading factor.
+        window_size (int | None):
+            If this parameter is set, the measurements are additionally aggregated in a sliding window.
+        kwargs (dict):
+            A dictionary containing additional and specific keyword arguments, which are passed to the evaluation
+            functions.
+        testing_comp_times (list): A list of computation times per testing iteration.
+        training_comp_times (list): training times per time step per training iteration.
+        result (dict):
+            The raw and aggregated measurements of each evaluation measure function.
     """
 
-    def __init__(self, measure_funcs, decay_rate=None, window_size=None, **kwargs):
-        """ Initialize change detection evaluation measure
+    def __init__(self, measure_funcs: List[Callable], decay_rate: Optional[float] = None,
+                 window_size: Optional[float] = None, **kwargs):
+        """Inits the prediction evaluation object.
 
         Args:
-            measure_funcs (list): list of evaluation measure functions
-            decay_rate (float | None): when this parameter is set, the metric values are additionally aggregated with a decay/fading factor
-            window_size (int | None): when this parameter is set, the metric values are additionally aggregated in a sliding window
-            kwargs: additional keyword arguments for the given measures
+            measure_funcs: List of evaluation measure functions.
+            decay_rate:
+                If this parameter is set, the measurements are additionally aggregated with a decay/fading factor.
+            window_size: If this parameter is set, the measurements are additionally aggregated in a sliding window.
+            kwargs:
+                A dictionary containing additional and specific keyword arguments, which are passed to the evaluation
+                functions.
         """
+        self.measure_funcs = measure_funcs
         self.decay_rate = decay_rate
         self.window_size = window_size
         self.kwargs = kwargs
-        self.measure_funcs = measure_funcs  # Todo: name measure_funcs
 
-        self.testing_times = []
-        self.training_times = []
+        self.testing_comp_times = []
+        self.training_comp_times = []
 
         self.result = dict()
         for measure_func in measure_funcs:
@@ -51,15 +88,17 @@ class PredictionEvaluator(metaclass=ABCMeta):
                 self.result[measure_func.__name__]['mean_window'] = []
                 self.result[measure_func.__name__]['var_window'] = []
 
-    def run(self, y_true, y_pred, X, predictor):
-        """
-        Compute and save each evaluation measure
+    def run(self, y_true: ArrayLike, y_pred: ArrayLike, X: ArrayLike, predictor: BasePredictor):
+        """Updates relevant statistics and computes the evaluation measures.
 
         Args:
-            y_true (list | np.array): true target label
-            y_pred (list | np.array): predicted target label
-            X (np.array): matrix of observations
-            predictor (BasePredictor): predictor object
+            y_true: True target labels.
+            y_pred: Predicted target labels.
+            X: Array/matrix of observations.
+            predictor: Predictor object.
+
+        Raises:
+            TypeError: If the calculation of a measure runs an error.
         """
         self.kwargs['y_true'] = copy.copy(y_true)
         self.kwargs['y_pred'] = copy.copy(y_pred)
@@ -107,19 +146,24 @@ class PredictionEvaluator(metaclass=ABCMeta):
                 continue
 
     @staticmethod
-    def _validate_func(func, kwargs):
-        """
-        Validate the provided metric function
+    def _validate_func(func: Callable, kwargs: dict):
+        """Validates the provided metric function.
 
         Args:
-            func (function): evaluation/metric function
-            kwargs (dict): additional keyword arguments for the given measures
+            func: Evaluation/metric function
+            kwargs:
+                A dictionary containing additional and specific keyword arguments, which are passed to the evaluation
+                function.
+
+        Raises:
+            TypeError: If an invalid metric function was provided.
+            AttributeError: If a non-keyword argument is missing from the provided parameters.
         """
         if not callable(func):
             raise TypeError("Please provide a valid metric function.")
 
         param_list = list(kwargs.keys())
-        param_list.extend(['y_true', 'y_pred', 'X', 'predictor', 'result'])  # Note: arguments will be provided by the evaluator
+        param_list.extend(['y_true', 'y_pred', 'X', 'predictor', 'result'])  # Arguments will be passed directly by the evaluator
 
         for arg in inspect.signature(func).parameters.values():
             if arg.default is arg.empty and arg.name not in param_list:

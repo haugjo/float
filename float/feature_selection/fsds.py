@@ -41,7 +41,7 @@ class FSDS(BaseFeatureSelector):
     def __init__(self, n_total_features: int, n_selected_features: int, l: int = 0, m: Optional[int] = None,
                  B: Optional[Union[list, ArrayLike]] = None, k: int = 2, reset_after_drift: bool = False,
                  baseline: str = 'constant', ref_sample: Union[float, ArrayLike] = 0):
-        """Initializes the feature selector.
+        """Inits the feature selector.
 
         Args:
             n_total_features: See description of base class.
@@ -65,12 +65,12 @@ class FSDS(BaseFeatureSelector):
         self._l = l
         self._k = k
 
-    def weight_features(self, x: ArrayLike, y: ArrayLike):
+    def weight_features(self, X: ArrayLike, y: ArrayLike):
         """Updates feature weights.
 
         FSDS is an unsupervised approach and does not use target information.
         """
-        Yt = x.T  # algorithm assumes rows to represent features
+        Yt = X.T  # algorithm assumes rows to represent features
 
         if self._l < 1:
             self._l = int(np.sqrt(self._m))

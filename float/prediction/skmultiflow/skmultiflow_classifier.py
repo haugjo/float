@@ -1,39 +1,66 @@
+"""Scikit-Multiflow Predictive Model Wrapper.
+
+This module contains a wrapper for the scikit-multiflow predictive models.
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+from numpy.typing import ArrayLike
 from skmultiflow.core import ClassifierMixin
+from typing import Optional
+
 from float.prediction.base_predictor import BasePredictor
 
 
 class SkmultiflowClassifier(BasePredictor):
+    """Wrapper for scikit-multiflow predictive models.
+
+    Attributes:
+        model (ClassifierMixin): The scikit-multiflow predictor object.
+        classes (list): A list of all unique classes.
     """
-    Wrapper for skmultiflow predictor classes.
-    """
-    def __init__(self, model, classes, reset_after_drift=False):
-        """
-        Initializes the skmultiflow PerceptronMask.
+    def __init__(self, model: ClassifierMixin, classes: list, reset_after_drift: bool = False):
+        """Inits the scikit-multiflow predictor.
 
         Args:
-            model (ClassifierMixin): the sklearn classifier to be used for prediction
-            classes (list): the list of classes in the data
-            reset_after_drift (bool): indicates whether to reset the predictor after a drift was detected
+            model: The scikit-multiflow predictor object.
+            classes: A list of all unique classes.
+            reset_after_drift: A boolean indicating if the predictor will be reset after a drift was detected.
         """
-        super().__init__(reset_after_drift)
+        super().__init__(reset_after_drift=reset_after_drift)
         self.model = model
         self.classes = classes
 
-    def partial_fit(self, X, y, sample_weight=None):
-        self.model.partial_fit(X, y, classes=self.classes, sample_weight=sample_weight)
+    def partial_fit(self, X: ArrayLike, y: ArrayLike, sample_weight: Optional[ArrayLike] = None):
+        """Updates the predictor."""
+        self.model.partial_fit(X=X, y=y, classes=self.classes, sample_weight=sample_weight)
 
-    def predict(self, X):
-        return self.model.predict(X)
+    def predict(self, X: ArrayLike) -> ArrayLike:
+        """Predicts the target values."""
+        return self.model.predict(X=X)
 
-    def predict_proba(self, X):
-        return self.model.predict_proba(X)
+    def predict_proba(self, X: ArrayLike) -> ArrayLike:
+        """Predicts the probability of target values."""
+        return self.model.predict_proba(X=X)
 
-    def reset(self, X, y):
-        """
-        Reset and retrain on current sample
-        Args:
-            X (np.ndarray): data samples to train the model with
-            y (np.ndarray): target values for all samples in X
-        """
+    def reset(self, X: ArrayLike, y: ArrayLike):
+        """Resets the predictor and fits to given sample."""
         self.model.reset()
-        self.partial_fit(X, y)
+        self.partial_fit(X=X, y=y)

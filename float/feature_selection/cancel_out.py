@@ -39,7 +39,7 @@ class CancelOutFeatureSelector(BaseFeatureSelector):
     """CancelOut feature selector."""
     def __init__(self, n_total_features: int, n_selected_features: int, reset_after_drift: bool = False,
                  baseline: str = 'constant', ref_sample: Union[float, ArrayLike] = 0):
-        """Initializes the feature selector.
+        """Inits the feature selector.
 
         Args:
             n_total_features: See description of base class.
@@ -52,9 +52,9 @@ class CancelOutFeatureSelector(BaseFeatureSelector):
                          supports_multi_class=False, reset_after_drift=reset_after_drift, baseline=baseline,
                          ref_sample=ref_sample)
 
-    def weight_features(self, x: ArrayLike, y: ArrayLike):
+    def weight_features(self, X: ArrayLike, y: ArrayLike):
         """Updates feature weights."""
-        self.weights = self._train_ann(x=x, y=y, num_epochs=50, batch_size=128)  # We use default parameters proposed by the authors
+        self.weights = self._train_ann(X=X, y=y, num_epochs=50, batch_size=128)  # We use default parameters proposed by the authors
 
     def reset(self):
         """Resets the feature selector.
@@ -67,11 +67,11 @@ class CancelOutFeatureSelector(BaseFeatureSelector):
     # CancelOut Functionality
     # ----------------------------------------
     @staticmethod
-    def _train_ann(x: ArrayLike, y: ArrayLike, num_epochs: int, batch_size: int) -> ArrayLike:
+    def _train_ann(X: ArrayLike, y: ArrayLike, num_epochs: int, batch_size: int) -> ArrayLike:
         """Trains a neural network and returns feature weights from the CancelOut layer.
 
         Args:
-            x: Array/matrix of observations.
+            X: Array/matrix of observations.
             y: Array of corresponding labels.
             num_epochs: Number of training epochs.
             batch_size: The training batch size.
@@ -79,8 +79,8 @@ class CancelOutFeatureSelector(BaseFeatureSelector):
         Returns:
             ArrayLike: A vector of feature weights
         """
-        model = CancelOutNeuralNet(x.shape[1], x.shape[1] + 10, 2)
-        data_loader = CancelOutDataLoader(x, y)
+        model = CancelOutNeuralNet(X.shape[1], X.shape[1] + 10, 2)
+        data_loader = CancelOutDataLoader(X, y)
         batch_size = batch_size
         train_loader = torch.utils.data.DataLoader(dataset=data_loader,
                                                    batch_size=batch_size,

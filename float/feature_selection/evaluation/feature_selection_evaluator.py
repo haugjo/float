@@ -44,7 +44,7 @@ class FeatureSelectionEvaluator:
     """
     def __init__(self, measure_funcs: List[Callable], decay_rate: Optional[float] = None,
                  window_size: Optional[int] = None):
-        """Initializes the online feature selection evaluation object.
+        """Inits the online feature selection evaluation object.
 
         Args:
             measure_funcs: List of evaluation measure functions.
@@ -78,6 +78,9 @@ class FeatureSelectionEvaluator:
         Args:
             selected_features (ArrayLike): The indices of all currently selected features.
             n_total_features (int): The total number of features.
+
+        Raises:
+            TypeError: If the calculation of a measure runs an error.
         """
         for measure_func in self.measure_funcs:  # run each evaluation measure
             try:

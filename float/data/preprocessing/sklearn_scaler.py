@@ -51,17 +51,17 @@ class SklearnScaler(BaseScaler):
         self._must_be_fitted = False
         self._validate()
 
-    def partial_fit(self, x: ArrayLike):
+    def partial_fit(self, X: ArrayLike):
         """Updates the scaler."""
         if self._must_be_fitted:
-            self.scaler_obj.fit(x)
+            self.scaler_obj.fit(X)
             self._must_be_fitted = False
         elif self._has_partial_fit:
-            self.scaler_obj.partial_fit(x)
+            self.scaler_obj.partial_fit(X)
 
-    def transform(self, x: ArrayLike) -> ArrayLike:
+    def transform(self, X: ArrayLike) -> ArrayLike:
         """Scales the given observations."""
-        return self.scaler_obj.transform(x)
+        return self.scaler_obj.transform(X)
 
     def reset(self):
         """Resets the scaler.

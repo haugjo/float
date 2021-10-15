@@ -152,14 +152,14 @@ class BasePipeline(metaclass=ABCMeta):
         if self.predictor:
             start_time = time.time()
             y_pred = self.predictor.predict(X_test)
-            self.prediction_evaluator.testing_times.append(time.time() - start_time)
+            self.prediction_evaluator.testing_comp_times.append(time.time() - start_time)
 
             if not self.time_step == 0 and not self.time_step % self.evaluation_interval:  # Todo: why not evaluate at time step t=0?
                 self.prediction_evaluator.run(y_test, y_pred, X_test, self.predictor)
 
             start_time = time.time()
             self.predictor.partial_fit(X_train, y_train)
-            self.prediction_evaluator.training_times.append(time.time() - start_time)
+            self.prediction_evaluator.training_comp_times.append(time.time() - start_time)
 
         if self.change_detector:
             start_time = time.time()
@@ -245,8 +245,8 @@ class BasePipeline(metaclass=ABCMeta):
             print('Prediction:')
             print(tabulate({
                 **{'Model': [type(self.predictor).__name__.split('.')[-1]],
-                   'Avg. Test Time': [np.mean(self.prediction_evaluator.testing_times)],
-                   'Avg. Train Time': [np.mean(self.prediction_evaluator.training_times)]},
+                   'Avg. Test Time': [np.mean(self.prediction_evaluator.testing_comp_times)],
+                   'Avg. Train Time': [np.mean(self.prediction_evaluator.training_comp_times)]},
                 **{'Avg. ' + key: [value['mean']] for key, value in self.prediction_evaluator.result.items()}
             }, headers="keys", tablefmt='github'))
         print('#############################################################################')

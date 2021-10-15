@@ -55,7 +55,7 @@ class BaseFeatureSelector(metaclass=ABCMeta):
 
     def __init__(self, n_total_features: int, n_selected_features: int, supports_multi_class: bool,
                  reset_after_drift: bool, baseline: str, ref_sample: Union[float, ArrayLike]):
-        """Initializes the feature selector.
+        """Inits the feature selector.
 
         Args:
             n_total_features: The total number of features.
@@ -88,12 +88,12 @@ class BaseFeatureSelector(metaclass=ABCMeta):
         self._scale_warning_issued = False
 
     @abstractmethod
-    def weight_features(self, x: ArrayLike, y: ArrayLike):
+    def weight_features(self, X: ArrayLike, y: ArrayLike):
         """Updates feature weights.
 
         Args:
-            x (ArrayLike): Array/matrix of observations.
-            y (ArrayLike): Array of corresponding labels.
+            X: Array/matrix of observations.
+            y: Array of corresponding labels.
         """
         raise NotImplementedError
 
@@ -102,11 +102,11 @@ class BaseFeatureSelector(metaclass=ABCMeta):
         """Resets the feature selector."""
         raise NotImplementedError
 
-    def select_features(self, x: ArrayLike) -> ArrayLike:
+    def select_features(self, X: ArrayLike) -> ArrayLike:
         """Selects features with highest absolute weights.
 
         Args:
-            x (ArrayLike): Array/matrix of observations.
+            X: Array/matrix of observations.
 
         Returns:
             ArrayLike: The observations with all non-selected features replaced by the baseline value.
@@ -125,19 +125,19 @@ class BaseFeatureSelector(metaclass=ABCMeta):
         self.weights_history.append(abs_weights.tolist())
         self.selected_features_history.append(self.selected_features.tolist())
 
-        x_new = self._get_baseline(x)
-        x_new[:, self.selected_features] = x[:, self.selected_features]
+        X_new = self._get_baseline(X=X)
+        X_new[:, self.selected_features] = X[:, self.selected_features]
 
-        return x_new
+        return X_new
 
-    def _get_baseline(self, x: ArrayLike):
+    def _get_baseline(self, X: ArrayLike):
         """Returns a matrix/vector filled with the baseline.
 
         Please cite:
         Haug, Johannes, et al. "On Baselines for Local Feature Attributions." arXiv preprint arXiv:2101.00905 (2021).
 
         Args:
-            x (ArrayLike): Array/matrix of observations.
+            X: Array/matrix of observations.
 
         Returns:
             ArrayLike: A matrix in the shape of x, pre-filled with the baseline.
@@ -148,40 +148,40 @@ class BaseFeatureSelector(metaclass=ABCMeta):
             # Constant baseline value
             if not isinstance(self.ref_sample, (int, float)):
                 warnings.warn("No integer value provided via ref_sample. Baseline 'constant' will return zero.")
-                return np.zeros_like(x)
-            return np.ones_like(x) * self.ref_sample
+                return np.zeros_like(X)
+            return np.ones_like(X) * self.ref_sample
 
         elif self.baseline == 'max_dist':
             # Baseline equals reference observation with max. euclidean distance regarding a given instance
-            x_new = np.zeros_like(x)
-            for i, x in enumerate(x):
+            X_new = np.zeros_like(X)
+            for i, x in enumerate(X):
                 dist = [np.linalg.norm(x - x_ref) for x_ref in self.ref_sample]
-                x_new[i, :] = self.ref_sample[np.argmax(dist), :]
-            return x_new
+                X_new[i, :] = self.ref_sample[np.argmax(dist), :]
+            return X_new
 
         elif self.baseline == 'gaussian':
             # Baseline is sampled from feature-wise Gaussian distributions (loc and scale acc. to ref sample)
-            x_new = np.zeros_like(x)
-            for ftr in range(x.shape[1]):
+            X_new = np.zeros_like(X)
+            for ftr in range(X.shape[1]):
                 loc = np.mean(self.ref_sample[:, ftr], axis=0)
                 scale = np.std(self.ref_sample[:, ftr], axis=0)
-                x_new[:, ftr] = rng.normal(loc=loc, scale=scale, size=x_new.shape[0])
-            return x_new
+                X_new[:, ftr] = rng.normal(loc=loc, scale=scale, size=X_new.shape[0])
+            return X_new
 
         elif self.baseline == 'uniform':
             # Baseline is sampled from feature-wise Uniform distributions (low and high acc. to ref sample)
-            x_new = np.zeros_like(x)
-            for ftr in range(x.shape[1]):
+            X_new = np.zeros_like(X)
+            for ftr in range(X.shape[1]):
                 low = np.min(self.ref_sample[:, ftr], axis=0)
                 high = np.max(self.ref_sample[:, ftr], axis=0)
-                x_new[:, ftr] = rng.uniform(low=low, high=high, size=x_new.shape[0])
-            return x_new
+                X_new[:, ftr] = rng.uniform(low=low, high=high, size=X_new.shape[0])
+            return X_new
 
         elif self.baseline == 'expectation':
             # Baseline equals the sample expectation
-            return np.tile(np.mean(self.ref_sample, axis=0), (x.shape[0], 1))
+            return np.tile(np.mean(self.ref_sample, axis=0), (X.shape[0], 1))
 
         else:
             warnings.warn(
                 "Baseline method {} is not implemented. We use the 'zero' baseline instead.".format(self.baseline))
-            return np.zeros_like(x)
+            return np.zeros_like(X)

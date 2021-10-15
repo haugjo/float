@@ -1,22 +1,51 @@
+"""Drift Performance Deterioration Measure.
+
+This function returns the drift performance deterioration. This measure corresponds to the mean difference of some
+performance measure before and after a known concept drift. It is hence a measure to quantify the adaptability of a
+predictor under concept drift.
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import numpy as np
-import warnings
 from sklearn.metrics import zero_one_loss
+from typing import Callable, Union, List
+import warnings
 
 
-def mean_drift_performance_deterioration(result, known_drifts, batch_size, reference_measure=zero_one_loss, interval=10):
-    """
-    Performance Decay Under Concept Drift
-    Return the average divergence of the reference measure after the start of a known concept drift
+def mean_drift_performance_deterioration(result: dict, known_drifts: Union[List[int], List[tuple]], batch_size: int,
+                                         reference_measure: Callable = zero_one_loss, interval: int = 10) -> float:
+    """Calculates the mean drift performance deterioration measure.
 
     Args:
-        result (dict): result dictionary of the prediction evaluator
-        known_drifts (list): list of indices indicating positions of known concept drift
-        batch_size (int): no. of observations processed per iteration
-        reference_measure (function): evaluation measure function
-        interval (int): interval after known conept drifts to investigate performance decay
+        result: A result dictionary from the PredictionEvaluator object.
+        known_drifts:
+                The positions in the dataset (indices) corresponding to known concept drifts.
+        batch_size: The number of observations processed per iteration/time step.
+        reference_measure: Evaluation measure function
+        interval:
+            Scalar specifying the size of the interval (i.e. number of time steps) after known concept drift, in which
+            we investigate the a performance decay of the reference measure.
 
     Returns:
-        float: current mean performance decay after (known) concept drifts regarding the reference measure
+        float: Current mean performance decay after (known) concept drifts regarding the reference measure.
     """
     init_interval = interval
     len_result = len(result[reference_measure.__name__]['measures'])

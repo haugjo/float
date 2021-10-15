@@ -43,7 +43,7 @@ class FIRES(BaseFeatureSelector):
                  penalty_r: float = 0.01, epochs: int = 1, lr_mu: float = 0.01, lr_sigma: float = 0.01,
                  scale_weights: bool = True, reset_after_drift: bool = False, baseline: str = 'constant',
                  ref_sample: Union[float, ArrayLike] = 0):
-        """Initializes the feature selector.
+        """Inits the feature selector.
 
         Args:
             n_total_features: See description of base class.
@@ -86,10 +86,10 @@ class FIRES(BaseFeatureSelector):
         self._lr_sigma = lr_sigma
         self._scale_weights = scale_weights
 
-    def weight_features(self, x, y):
+    def weight_features(self, X: ArrayLike, y: ArrayLike):
         """Updates feature weights."""
         # Update estimates of mu and sigma given the predictive model
-        self._probit(x, y)
+        self._probit(X=X, y=y)
 
         # Limit sigma to range [0, inf]
         if sum(n < 0 for n in self._sigma) > 0:
@@ -107,7 +107,7 @@ class FIRES(BaseFeatureSelector):
     # ----------------------------------------
     # FIRES Functionality
     # ----------------------------------------
-    def _probit(self, x: ArrayLike, y: ArrayLike):
+    def _probit(self, X: ArrayLike, y: ArrayLike):
         """Updates the Probit model parameters.
 
         This function updates the distribution parameters mu and sigma by optimizing them in terms of the (log)
@@ -115,8 +115,8 @@ class FIRES(BaseFeatureSelector):
         This corresponds to the FIRES-GLM model in the paper.
 
         Args:
-            x (ArrayLike): Array/matrix of observations.
-            y (ArrayLike): Array of corresponding labels.
+            X: Array/matrix of observations.
+            y: Array of corresponding labels.
 
         Raises:
             TypeError: If features are not in numeric type.
@@ -138,19 +138,19 @@ class FIRES(BaseFeatureSelector):
         for epoch in range(self._epochs):
             # Shuffle the observations
             random_idx = np.random.permutation(len(y))
-            x = x[random_idx]
+            X = X[random_idx]
             y = y[random_idx]
 
             # Iterative update of mu and sigma
             try:
                 # Helper functions
-                dot_mu_x = np.dot(x, self._mu)
-                rho = np.sqrt(1 + np.dot(x ** 2, self._sigma ** 2))
+                dot_mu_x = np.dot(X, self._mu)
+                rho = np.sqrt(1 + np.dot(X ** 2, self._sigma ** 2))
 
                 # Gradients
-                nabla_mu = norm.pdf(y / rho * dot_mu_x) * (y / rho * x.T)
+                nabla_mu = norm.pdf(y / rho * dot_mu_x) * (y / rho * X.T)
                 nabla_sigma = norm.pdf(y / rho * dot_mu_x) * (
-                        - y / (2 * rho ** 3) * 2 * (x ** 2 * self._sigma).T * dot_mu_x)
+                        - y / (2 * rho ** 3) * 2 * (X ** 2 * self._sigma).T * dot_mu_x)
 
                 # Marginal Likelihood
                 marginal = norm.cdf(y / rho * dot_mu_x)

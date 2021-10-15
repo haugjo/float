@@ -74,13 +74,13 @@ class DataLoader:
         Returns:
             Tuple[ArrayLike, ArrayLike]: The sampled observations and corresponding targets.
         """
-        x, y = self.stream.next_sample(n_samples)
+        X, y = self.stream.next_sample(n_samples)
 
         if self.scaler:
-            self.scaler.partial_fit(x)
-            x = self.scaler.transform(x)
+            self.scaler.partial_fit(X)
+            X = self.scaler.transform(X)
 
-        return x, y
+        return X, y
 
     def _check_input(self):
         """Validates the input.

@@ -106,11 +106,11 @@ class ERICS(BaseChangeDetector):
         """
         pass
 
-    def partial_fit(self, x: ArrayLike, y: ArrayLike):
+    def partial_fit(self, X: ArrayLike, y: ArrayLike):
         """Updates the change detector.
 
         Args:
-            x: Batch of observations.
+            X: Batch of observations.
             y: Batch of labels.
         """
         self._drift_detected = False
@@ -126,7 +126,7 @@ class ERICS(BaseChangeDetector):
         self._time_since_last_drift += 1
         self._time_since_last_partial_drift += 1
 
-        self._update_probit(x, y)          # Update Parameter distribution
+        self._update_probit(X=X, y=y)          # Update Parameter distribution
         self._update_param_sum()           # Update the sum expression for observations in a shifting window
         self._compute_moving_average()     # Compute moving average in specified window
 
@@ -247,14 +247,14 @@ class ERICS(BaseChangeDetector):
 
         return drift, p_drift, partial_drift_features
 
-    def _update_probit(self, x: np.ndarray, y: np.ndarray):
+    def _update_probit(self, X: np.ndarray, y: np.ndarray):
         """Update parameters of the Probit model.
 
         According to [2], as implemented here https://github.com/haugjo/fires
         We have slightly adjusted the original code to fit our use case.
 
         Args:
-            x: Batch of observations.
+            X: Batch of observations.
             y: Batch of labels. The labels must be binary and will be automatically encoded as {-1,1}
 
         Raises:
@@ -278,19 +278,19 @@ class ERICS(BaseChangeDetector):
         for epoch in range(self._fires_epochs):
             # Shuffle the observations
             random_idx = np.random.permutation(len(y))
-            x = x[random_idx]
+            X = X[random_idx]
             y = y[random_idx]
 
             # Iterative update of mu and sigma
             try:
                 # Helper functions
-                dot_mu_x = np.dot(x, self._fires_mu)
-                rho = np.sqrt(1 + np.dot(x ** 2, self._fires_sigma ** 2))
+                dot_mu_x = np.dot(X, self._fires_mu)
+                rho = np.sqrt(1 + np.dot(X ** 2, self._fires_sigma ** 2))
 
                 # Gradients
-                nabla_mu = norm.pdf(y / rho * dot_mu_x) * (y / rho * x.T)
+                nabla_mu = norm.pdf(y / rho * dot_mu_x) * (y / rho * X.T)
                 nabla_sigma = norm.pdf(y / rho * dot_mu_x) * (
-                            - y / (2 * rho ** 3) * 2 * (x ** 2 * self._fires_sigma).T * dot_mu_x)
+                            - y / (2 * rho ** 3) * 2 * (X ** 2 * self._fires_sigma).T * dot_mu_x)
 
                 # Marginal Likelihood
                 marginal = norm.cdf(y / rho * dot_mu_x)

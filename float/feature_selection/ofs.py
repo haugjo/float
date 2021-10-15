@@ -39,7 +39,7 @@ class OFS(BaseFeatureSelector):
     """
     def __init__(self, n_total_features: int, n_selected_features: int, reset_after_drift: bool = False,
                  baseline: str = 'constant', ref_sample: Union[float, ArrayLike] = 0):
-        """Initializes the feature selector.
+        """Inits the feature selector.
 
         Args:
             n_total_features: See description of base class.
@@ -52,12 +52,12 @@ class OFS(BaseFeatureSelector):
                          supports_multi_class=False, reset_after_drift=reset_after_drift, baseline=baseline,
                          ref_sample=ref_sample)
 
-    def weight_features(self, x: ArrayLike, y: ArrayLike):
+    def weight_features(self, X: ArrayLike, y: ArrayLike):
         """Updates feature weights."""
         eta = 0.2  # Default parameters as proposed by the authors
         lamb = 0.01
 
-        for x_b, y_b in zip(x, y):  # perform feature selection for each instance in batch
+        for x_b, y_b in zip(X, y):  # perform feature selection for each instance in batch
             # Convert label to -1 and 1
             y_b = -1 if y_b == 0 else 1
 

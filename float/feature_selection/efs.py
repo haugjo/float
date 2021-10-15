@@ -41,7 +41,7 @@ class EFS(BaseFeatureSelector):
     def __init__(self, n_total_features: int, n_selected_features: int, u: Optional[ArrayLike] = None,
                  v: Optional[ArrayLike] = None, theta: float = 1, M: float = 1, alpha: float = 1.5, beta: float = 0.5,
                  reset_after_drift: bool = False, baseline: str = 'constant', ref_sample: Union[float, ArrayLike] = 0):
-        """Initializes the feature selector.
+        """Inits the feature selector.
 
         Args:
             n_total_features: See description of base class.
@@ -70,10 +70,10 @@ class EFS(BaseFeatureSelector):
         self._alpha = alpha
         self._beta = beta
 
-    def weight_features(self, x: ArrayLike, y: ArrayLike):
+    def weight_features(self, X: ArrayLike, y: ArrayLike):
         """Updates feature weights."""
         # Iterate over all elements in the batch
-        for x_b, y_b in zip(x, y):
+        for x_b, y_b in zip(X, y):
 
             # Convert label to -1 and 1
             y_b = -1 if y_b == 0 else 1

@@ -1,28 +1,58 @@
-import numpy as np
+"""Noise Variability Measure.
+
+This function returns the noise variability of a predictor. This measure corresponds to the mean difference of some
+performance measure when perturbing the input with noise. It is hence an indication of a predictor's robustness to
+noisy inputs.
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import copy
+import numpy as np
+from numpy.typing import ArrayLike
 from sklearn.metrics import zero_one_loss
+from typing import Callable, Optional, List
+
+from float.prediction.base_predictor import BasePredictor
 
 
-def noise_variability(y_true, y_pred, X, predictor, reference_measure=zero_one_loss, cont_noise_loc=0,
-                      cont_noise_scale=0.1, cat_features=None, cat_noise_dist=None, n_samples=10):
-    """
-    Variability Under Input Noise (as indication of algorithmic stability).
-    Return the mean divergence (difference) from the original loss for n input perturbations.
+def noise_variability(y_true: ArrayLike, y_pred: ArrayLike, X: ArrayLike, predictor: BasePredictor,
+                      reference_measure: Callable = zero_one_loss, cont_noise_loc: float = 0,
+                      cont_noise_scale: float = 0.1, cat_features: Optional[list] = None,
+                      cat_noise_dist: Optional[List[list]] = None, n_samples: int = 10) -> float:
+    """Calculates the variability of a predictor under input noise.
 
     Args:
-        y_true (list | np.array): true target label
-        y_pred (list | np.array): predicted target label
-        X (np.array): matrix of observations
-        reference_measure (function): evaluation measure function
-        predictor (BasePredictor): predictor object
-        cont_noise_loc (float): location (mean) of normal distribution from which to sample noise for continuous features
-        cont_noise_scale (float): scale (variance) of normal distribution from which to sample noise for continuous features
-        cat_features (list | None): list of indices that correspond to categorical features
-        cat_noise_dist (list | None): list of lists, where each list contains the noise values of one categorical feature
-        n_samples (int): no. of times to sample noise and investigate divergence from original loss
+        y_true: True target labels.
+        y_pred: Predicted target labels.
+        X: Array/matrix of observations.
+        predictor: Predictor object.
+        reference_measure: Evaluation measure function.
+        cont_noise_loc: Location (mean) of a normal distribution from which we sample noise for continuous features.
+        cont_noise_scale: Scale (variance) of a normal distribution from which we sample noise for continuous features.
+        cat_features: List of indices that correspond to categorical features.
+        cat_noise_dist: List of lists, where each list contains the noise values of one categorical feature.
+        n_samples: Number of times we sample noise and investigate divergence from the original loss.
 
     Returns:
-        float: the mean difference to the original loss for n input perturbations
+        float: Mean difference to the original loss for n input perturbations.
     """
     # Init random state Todo: replace with global random state
     rng = np.random.default_rng(0)
@@ -61,4 +91,4 @@ def noise_variability(y_true, y_pred, X, predictor, reference_measure=zero_one_l
         new_pred = predictor.predict(X_ns)
         divergence.append(reference_measure(y_true=y_true, y_pred=new_pred) - old_score)
 
-    return np.mean(divergence)
+    return np.mean(divergence).item()

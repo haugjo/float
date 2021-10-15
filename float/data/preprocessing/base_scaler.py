@@ -42,20 +42,20 @@ class BaseScaler(metaclass=ABCMeta):
         self.reset_after_drift = reset_after_drift
 
     @abstractmethod
-    def partial_fit(self, x: ArrayLike):
+    def partial_fit(self, X: ArrayLike):
         """Updates the scaler.
 
         Args:
-            x: Array/matrix of observations.
+            X: Array/matrix of observations.
         """
         raise NotImplementedError
 
     @abstractmethod
-    def transform(self, x: ArrayLike) -> ArrayLike:
+    def transform(self, X: ArrayLike) -> ArrayLike:
         """Scales the given observations.
 
         Args:
-            x: Array/matrix of observations.
+            X: Array/matrix of observations.
 
         Returns:
             ArrayLike: The scaled observations.
