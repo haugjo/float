@@ -50,8 +50,8 @@ def mean_drift_performance_deterioration(result: dict, known_drifts: Union[List[
     init_interval = interval
     len_result = len(result[reference_measure.__name__]['measures'])
 
-    # Get previous mean decay
-    if len_result > 0:
+    # Get previous mean deterioration (decay)
+    if len_result > 1:
         decay = result['mean_drift_performance_deterioration']['measures'][-1]
     else:
         decay = 0

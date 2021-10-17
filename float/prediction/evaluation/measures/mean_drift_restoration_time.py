@@ -55,7 +55,7 @@ def mean_drift_restoration_time(result: dict, known_drifts: Union[List[int], Lis
     len_result = len(result[reference_measure.__name__]['measures'])
 
     # Get previous mean recovery time
-    if len_result > 0:
+    if len_result > 1:
         recovery = result['mean_drift_restoration_time']['measures'][-1]
     else:
         return 0

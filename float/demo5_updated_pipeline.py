@@ -86,14 +86,15 @@ for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_det
 
             ### Initialize and run Prequential Pipeline ###
             prequential_pipeline = PrequentialPipeline(data_loader=data_loader,
-                                                       feature_selector=feature_selector,
-                                                       feature_selection_evaluator=fs_evaluator[feature_selector_name],
-                                                       change_detector=concept_drift_detector,
-                                                       change_detection_evaluator=cd_evaluator[concept_drift_detector_name],
                                                        predictor=predictor,
                                                        prediction_evaluator=pred_evaluator[predictor_name],
+                                                       change_detector=concept_drift_detector,
+                                                       change_detection_evaluator=cd_evaluator[
+                                                           concept_drift_detector_name],
+                                                       feature_selector=feature_selector,
+                                                       feature_selection_evaluator=fs_evaluator[feature_selector_name],
                                                        batch_size=batch_size,
-                                                       max_n_samples=data_loader.stream.n_samples,
+                                                       n_max=data_loader.stream.n_samples,
                                                        known_drifts=known_drifts)
             prequential_pipeline.run()
 
