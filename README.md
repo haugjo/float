@@ -1,5 +1,3 @@
-![test](logo/logo_color.png)
-
 <p align="center">
   <img alt="float" src="logo/logo_color.png" width="450"/>
 </p>
