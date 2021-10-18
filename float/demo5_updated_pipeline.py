@@ -80,7 +80,7 @@ for concept_drift_detector_name, concept_drift_detector in zip(concept_drift_det
                                                                                                 mean_time_ratio],
                                                                                  known_drifts=known_drifts,
                                                                                  batch_size=batch_size,
-                                                                                 n_samples=data_loader.stream.n_samples,
+                                                                                 n_total=data_loader.stream.n_samples,
                                                                                  n_delay=list(range(100, 1000)),
                                                                                  n_init_tolerance=100)
 

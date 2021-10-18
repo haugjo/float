@@ -54,7 +54,8 @@ class CancelOutFeatureSelector(BaseFeatureSelector):
 
     def weight_features(self, X: ArrayLike, y: ArrayLike):
         """Updates feature weights."""
-        self.weights = self._train_ann(X=X, y=y, num_epochs=50, batch_size=128)  # We use default parameters proposed by the authors
+        # We train the ANN with default parameters proposed by the authors
+        self.weights = self._train_ann(X=X, y=y, num_epochs=50, batch_size=128)
 
     def reset(self):
         """Resets the feature selector.

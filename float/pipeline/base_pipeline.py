@@ -239,16 +239,16 @@ class BasePipeline(metaclass=ABCMeta):
             n_batch = self.n_max - self.n_total
         return n_batch
 
-    def _finish_iteration(self, n_iter: int):
+    def _finish_iteration(self, n_batch: int):
         """Finishes one training iteration, i.e. time step.
 
         Args:
-            n_iter (int):
+            n_batch (int):
                 Number of observation that were processed in the iteration. This equals the batch size in all but the
                 last iteration.
         """
         self.time_step += 1
-        self.n_total += n_iter
+        self.n_total += n_batch
         self._update_progress_bar()
 
     def _update_progress_bar(self):

@@ -100,4 +100,4 @@ class PrequentialPipeline(BasePipeline):
                 traceback.print_exc()
                 break
 
-            self._finish_iteration(n_batch)
+            self._finish_iteration(n_batch=n_batch)

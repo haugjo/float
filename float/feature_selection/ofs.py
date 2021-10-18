@@ -57,13 +57,13 @@ class OFS(BaseFeatureSelector):
         eta = 0.2  # Default parameters as proposed by the authors
         lamb = 0.01
 
-        for x_b, y_b in zip(X, y):  # perform feature selection for each instance in batch
+        for x_b, y_b in zip(X, y):  # Perform feature selection for each instance in batch
             # Convert label to -1 and 1
             y_b = -1 if y_b == 0 else 1
 
-            f = np.dot(self.weights, x_b)  # prediction
+            f = np.dot(self.weights, x_b)  # Prediction
 
-            if y_b * f <= 1:  # update classifier w
+            if y_b * f <= 1:  # Update classifier weights
                 self.weights = self.weights + eta * y_b * x_b
                 self.weights = self.weights * min(1, 1 / (math.sqrt(lamb) * np.linalg.norm(self.weights)))
 

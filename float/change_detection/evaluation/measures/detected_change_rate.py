@@ -41,29 +41,29 @@ def detected_change_rate(evaluator: ChangeDetectionEvaluator, drifts: list, n_de
     Returns:
         float: The rate of correctly detected known concept drifts
     """
-    if len(drifts) == 0:  # if there is no detected drift, the measure is zero
+    if len(drifts) == 0:  # If there is no detected drift, the measure is zero
         return 0
 
     iter_drifts = iter(evaluator.known_drifts)
-    detections = np.asarray(drifts) * evaluator.batch_size  # translate drifts to relative position in dataset
+    detections = np.asarray(drifts) * evaluator.batch_size  # Translate drifts to relative position in dataset
     recall = 0
     drift = next(iter_drifts, None)
     while drift is not None:
         # Find start of a known drift
-        if isinstance(drift, tuple):  # incremental/gradual drifts involve a starting and end point
+        if isinstance(drift, tuple):  # Incremental/gradual drifts involve a starting and end point
             start_search = drift[0]
         else:
             start_search = drift
 
         # Find end of considered search space
-        drift = next(iter_drifts, None)  # get next drift
+        drift = next(iter_drifts, None)
         if drift is not None:
-            if isinstance(drift, tuple):  # end of search space = start of next known drift OR delay (min value)
+            if isinstance(drift, tuple):  # End of search space = start of next known drift OR delay (min value)
                 end_search = min(drift[0], start_search + n_delay)
             else:
                 end_search = min(drift, start_search + n_delay)
         else:
-            end_search = start_search + n_delay  # if no more concept drift, set end search space to max delay
+            end_search = start_search + n_delay  # If no more known concept drifts, set end search space to max delay
 
         # Find first relevant detection
         relevant_drift = next((det for det in detections if start_search <= det < end_search), None)

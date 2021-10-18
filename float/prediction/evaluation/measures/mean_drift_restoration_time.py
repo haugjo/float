@@ -62,10 +62,10 @@ def mean_drift_restoration_time(result: dict, known_drifts: Union[List[int], Lis
 
     # Identify currently relevant drift
     drift = next(iter_drifts, None)
-    i = len(known_drifts)  # drift identifier
+    i = len(known_drifts)  # Drift identifier
     while drift is not None:
         if isinstance(drift, tuple):
-            drift = round(drift[0] / batch_size)  # consider beginning of drift as reference point
+            drift = round(drift[0] / batch_size)  # Consider beginning of drift as reference point
         else:
             drift = round(drift / batch_size)
 
@@ -77,7 +77,7 @@ def mean_drift_restoration_time(result: dict, known_drifts: Union[List[int], Lis
 
     if drift is not None:
         if len_result > drift + 1 and recovery == result['mean_drift_restoration_time']['measures'][-2]:
-            return recovery  # return, if model has already recovered from drift
+            return recovery  # Return, if model has already recovered from drift
         else:
             # Get current recovery time
             if reference_measure.__name__ in result:
@@ -89,15 +89,15 @@ def mean_drift_restoration_time(result: dict, known_drifts: Union[List[int], Lis
 
                 if len(relevant_idx) > 0:
                     rec_new = relevant_idx[0]
-                else:  # model has not recovered yet, use time since drift as return value
+                else:  # Model has not recovered yet, use time since drift as return value
                     rec_new = len(result[reference_measure.__name__]['measures'][drift:])
 
                 # Get recovery time prior to current drift
                 prev_drift_recovery = result['mean_drift_restoration_time']['measures'][drift - 1]
-                recovery = prev_drift_recovery + (rec_new - prev_drift_recovery) / i  # incremental mean
+                recovery = prev_drift_recovery + (rec_new - prev_drift_recovery) / i  # Incremental mean
             else:
-                warnings.warn('The reference measure {} is not part of the PredictionEvaluator; we return 0 per '
-                              'default. Please provide {} to the PredictionEvaluator and rerun.'.format(
+                warnings.warn("The reference measure {} is not part of the PredictionEvaluator; we return 0 per "
+                              "default. Please provide {} to the PredictionEvaluator and rerun.".format(
                     reference_measure.__name__, reference_measure.__name__))
 
     return recovery

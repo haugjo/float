@@ -53,8 +53,7 @@ class HoldoutPipeline(BasePipeline):
                  n_pretrain: int = 100, n_max: int = np.inf,
                  known_drifts: Optional[Union[List[int], List[tuple]]] = None,
                  evaluation_interval: Optional[int] = None):
-        """
-        Initializes the pipeline.
+        """Initializes the pipeline.
 
         Args:
             data_loader: Data loader object.
@@ -109,4 +108,4 @@ class HoldoutPipeline(BasePipeline):
                 traceback.print_exc()
                 break
 
-            self._finish_iteration(n_batch)
+            self._finish_iteration(n_batch=n_batch)
