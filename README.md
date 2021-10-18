@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="float" src="logo/logo_color.png" width="450"/>
+  <img alt="float" src="logo/logo_color.png" width="250"/>
 </p>
 <p align="center">
     <em>[Todo: insert badges for pypi and documentation]</em>
