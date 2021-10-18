@@ -69,10 +69,17 @@ class PrequentialPipeline(BasePipeline):
                 Note that this delivers only an indication of the approximate memory consumption and can significantly
                 increase the total run time of the pipeline.
         """
-        super().__init__(data_loader=data_loader, predictor=predictor, prediction_evaluator=prediction_evaluator,
-                         change_detector=change_detector, change_detection_evaluator=change_detection_evaluator,
-                         feature_selector=feature_selector, feature_selection_evaluator=feature_selection_evaluator,
-                         batch_size=batch_size, n_pretrain=n_pretrain, n_max=n_max, known_drifts=known_drifts,
+        super().__init__(data_loader=data_loader,
+                         predictor=predictor,
+                         prediction_evaluator=prediction_evaluator,
+                         change_detector=change_detector,
+                         change_detection_evaluator=change_detection_evaluator,
+                         feature_selector=feature_selector,
+                         feature_selection_evaluator=feature_selection_evaluator,
+                         batch_size=batch_size,
+                         n_pretrain=n_pretrain,
+                         n_max=n_max,
+                         known_drifts=known_drifts,
                          estimate_memory_alloc=estimate_memory_alloc)
 
     def run(self):

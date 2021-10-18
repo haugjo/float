@@ -27,16 +27,22 @@ SOFTWARE.
 import copy
 import numpy as np
 from numpy.typing import ArrayLike
+from numpy.random import Generator
 from sklearn.metrics import zero_one_loss
 from typing import Callable, Optional, List
 
 from float.prediction.base_predictor import BasePredictor
 
 
-def noise_variability(y_true: ArrayLike, y_pred: ArrayLike, X: ArrayLike, predictor: BasePredictor,
-                      reference_measure: Callable = zero_one_loss, cont_noise_loc: float = 0,
-                      cont_noise_scale: float = 0.1, cat_features: Optional[list] = None,
-                      cat_noise_dist: Optional[List[list]] = None, n_samples: int = 10) -> float:
+def noise_variability(y_true: ArrayLike, y_pred: ArrayLike,
+                      X: ArrayLike, predictor: BasePredictor,
+                      reference_measure: Callable = zero_one_loss,
+                      cont_noise_loc: float = 0,
+                      cont_noise_scale: float = 0.1,
+                      cat_features: Optional[list] = None,
+                      cat_noise_dist: Optional[List[list]] = None,
+                      n_samples: int = 10,
+                      rng: Generator = np.random.default_rng(0)) -> float:
     """Calculates the variability of a predictor under input noise.
 
     Args:
@@ -50,13 +56,11 @@ def noise_variability(y_true: ArrayLike, y_pred: ArrayLike, X: ArrayLike, predic
         cat_features: List of indices that correspond to categorical features.
         cat_noise_dist: List of lists, where each list contains the noise values of one categorical feature.
         n_samples: Number of times we sample noise and investigate divergence from the original loss.
+        rng: A numpy random number generator object. The global random state of the pipeline will be used to this end.
 
     Returns:
         float: Mean difference to the original loss for n input perturbations.
     """
-    # Init random state Todo: replace with global random state
-    rng = np.random.default_rng(0)
-
     # Get feature indices
     if cat_features is None:
         cat_features = []

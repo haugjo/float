@@ -30,8 +30,11 @@ from sklearn.metrics import zero_one_loss
 from typing import Union, List, Callable
 
 
-def mean_drift_restoration_time(result: dict, known_drifts: Union[List[int], List[tuple]], batch_size: int,
-                                reference_measure: Callable = zero_one_loss, incr: bool = False,
+def mean_drift_restoration_time(result: dict,
+                                known_drifts: Union[List[int], List[tuple]],
+                                batch_size: int,
+                                reference_measure: Callable = zero_one_loss,
+                                incr: bool = False,
                                 interval: int = 10) -> float:
     """
     Recovery Time After Concept Drift

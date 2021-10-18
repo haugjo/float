@@ -49,8 +49,13 @@ class ChangeDetectionEvaluator:
             List of measured memory changes (GB RAM) per training iteration of the concept drift detector.
         result (dict): Results (i.e. calculated measurements, mean, and variance) for each evaluation measure function
     """
-    def __init__(self, measure_funcs: List[Callable], known_drifts: Union[List[int], List[tuple]], batch_size: int,
-                 n_total: int, n_delay: Union[int, list] = 100, n_init_tolerance: int = 100):
+    def __init__(self,
+                 measure_funcs: List[Callable],
+                 known_drifts: Union[List[int], List[tuple]],
+                 batch_size: int,
+                 n_total: int,
+                 n_delay: Union[int, list] = 100,
+                 n_init_tolerance: int = 100):
         """Initializes the change detection evaluation object.
 
         Args:

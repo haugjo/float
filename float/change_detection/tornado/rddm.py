@@ -39,8 +39,13 @@ from float.change_detection.base_change_detector import BaseChangeDetector
 
 class RDDM(BaseChangeDetector):
     """RDDM change detector."""
-    def __init__(self, min_instance: int = 129, warning_level: float = 1.773, drift_level: float = 2.258,
-                 max_size_concept: int = 40000, min_size_stable_concept: int = 7000, warn_limit: int = 1400,
+    def __init__(self,
+                 min_instance: int = 129,
+                 warning_level: float = 1.773,
+                 drift_level: float = 2.258,
+                 max_size_concept: int = 40000,
+                 min_size_stable_concept: int = 7000,
+                 warn_limit: int = 1400,
                  reset_after_drift: bool = False):
         """Inits the change detector.
 

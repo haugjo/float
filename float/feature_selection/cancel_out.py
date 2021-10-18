@@ -37,8 +37,12 @@ from float.feature_selection.base_feature_selector import BaseFeatureSelector
 
 class CancelOutFeatureSelector(BaseFeatureSelector):
     """CancelOut feature selector."""
-    def __init__(self, n_total_features: int, n_selected_features: int, reset_after_drift: bool = False,
-                 baseline: str = 'constant', ref_sample: Union[float, ArrayLike] = 0):
+    def __init__(self,
+                 n_total_features: int,
+                 n_selected_features: int,
+                 reset_after_drift: bool = False,
+                 baseline: str = 'constant',
+                 ref_sample: Union[float, ArrayLike] = 0):
         """Inits the feature selector.
 
         Args:
@@ -48,8 +52,11 @@ class CancelOutFeatureSelector(BaseFeatureSelector):
             baseline: See description of base class.
             ref_sample: See description of base class.
         """
-        super().__init__(n_total_features=n_total_features, n_selected_features=n_selected_features,
-                         supports_multi_class=False, reset_after_drift=reset_after_drift, baseline=baseline,
+        super().__init__(n_total_features=n_total_features,
+                         n_selected_features=n_selected_features,
+                         supports_multi_class=False,
+                         reset_after_drift=reset_after_drift,
+                         baseline=baseline,
                          ref_sample=ref_sample)
 
     def weight_features(self, X: ArrayLike, y: ArrayLike):

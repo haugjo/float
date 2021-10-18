@@ -38,10 +38,20 @@ from float.feature_selection.base_feature_selector import BaseFeatureSelector
 
 class FIRES(BaseFeatureSelector):
     """FIRES feature selector."""
-    def __init__(self, n_total_features: int, n_selected_features: int, classes: list,
-                 mu_init: Union[int, ArrayLike] = 0, sigma_init: Union[int, ArrayLike] = 1, penalty_s: float = 0.01,
-                 penalty_r: float = 0.01, epochs: int = 1, lr_mu: float = 0.01, lr_sigma: float = 0.01,
-                 scale_weights: bool = True, reset_after_drift: bool = False, baseline: str = 'constant',
+    def __init__(self,
+                 n_total_features: int,
+                 n_selected_features: int,
+                 classes: list,
+                 mu_init: Union[int, ArrayLike] = 0,
+                 sigma_init: Union[int, ArrayLike] = 1,
+                 penalty_s: float = 0.01,
+                 penalty_r: float = 0.01,
+                 epochs: int = 1,
+                 lr_mu: float = 0.01,
+                 lr_sigma: float = 0.01,
+                 scale_weights: bool = True,
+                 reset_after_drift: bool = False,
+                 baseline: str = 'constant',
                  ref_sample: Union[float, ArrayLike] = 0):
         """Inits the feature selector.
 
@@ -69,8 +79,11 @@ class FIRES(BaseFeatureSelector):
             baseline: See description of base class.
             ref_sample: See description of base class.
         """
-        super().__init__(n_total_features=n_total_features, n_selected_features=n_selected_features,
-                         supports_multi_class=False, reset_after_drift=reset_after_drift, baseline=baseline,
+        super().__init__(n_total_features=n_total_features,
+                         n_selected_features=n_selected_features,
+                         supports_multi_class=False,
+                         reset_after_drift=reset_after_drift,
+                         baseline=baseline,
                          ref_sample=ref_sample)
 
         self._n_total_ftr = n_total_features

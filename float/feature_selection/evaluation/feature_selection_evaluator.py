@@ -42,7 +42,9 @@ class FeatureSelectionEvaluator:
             List of measured memory changes (GB RAM) per training iteration of the online feature selection model.
         result (dict): The raw and aggregated measurements of each evaluation measure function.
     """
-    def __init__(self, measure_funcs: List[Callable], decay_rate: Optional[float] = None,
+    def __init__(self,
+                 measure_funcs: List[Callable],
+                 decay_rate: Optional[float] = None,
                  window_size: Optional[int] = None):
         """Inits the online feature selection evaluation object.
 

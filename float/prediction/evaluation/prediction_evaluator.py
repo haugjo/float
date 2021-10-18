@@ -22,9 +22,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import copy
 import numpy as np
 from numpy.typing import ArrayLike
+from numpy.random import Generator
 import inspect
 import traceback
 from typing import List, Callable, Optional
@@ -51,8 +51,11 @@ class PredictionEvaluator:
             The raw and aggregated measurements of each evaluation measure function.
     """
 
-    def __init__(self, measure_funcs: List[Callable], decay_rate: Optional[float] = None,
-                 window_size: Optional[float] = None, **kwargs):
+    def __init__(self,
+                 measure_funcs: List[Callable],
+                 decay_rate: Optional[float] = None,
+                 window_size: Optional[float] = None,
+                 **kwargs):
         """Inits the prediction evaluation object.
 
         Args:
@@ -90,7 +93,7 @@ class PredictionEvaluator:
                 self.result[measure_func.__name__]['mean_window'] = []
                 self.result[measure_func.__name__]['var_window'] = []
 
-    def run(self, y_true: ArrayLike, y_pred: ArrayLike, X: ArrayLike, predictor: BasePredictor):
+    def run(self, y_true: ArrayLike, y_pred: ArrayLike, X: ArrayLike, predictor: BasePredictor, rng: Generator):
         """Updates relevant statistics and computes the evaluation measures.
 
         Args:
@@ -98,6 +101,7 @@ class PredictionEvaluator:
             y_pred: Predicted target labels.
             X: Array/matrix of observations.
             predictor: Predictor object.
+            rng: A numpy random number generator object.
 
         Raises:
             TypeError: If the calculation of a measure runs an error.
@@ -106,6 +110,7 @@ class PredictionEvaluator:
         self.kwargs['y_pred'] = y_pred
         self.kwargs['X'] = X
         self.kwargs['predictor'] = predictor
+        self.kwargs['rng'] = rng
         self.kwargs['result'] = self.result
 
         for measure_func in self.measure_funcs:  # run each evaluation measure

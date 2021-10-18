@@ -26,7 +26,7 @@ from float.visualization import plot, selected_features_scatter, top_features_re
 
 ### Initialize Data Loader ###
 scaler = SklearnScaler(scaler_obj=MinMaxScaler(), reset_after_drift=False)
-data_loader = DataLoader(None, f'data/datasets/spambase.csv', target_col=0, scaler=scaler)
+data_loader = DataLoader(path='data/datasets/spambase.csv', target_col=-1, scaler=scaler)
 
 known_drifts = [round(data_loader.stream.n_samples * 0.2), round(data_loader.stream.n_samples * 0.4),
                 round(data_loader.stream.n_samples * 0.6), round(data_loader.stream.n_samples * 0.8)]

@@ -38,9 +38,18 @@ class EFS(BaseFeatureSelector):
 
     This feature selection algorithm uses the weights of a Modified Balanced Winnow classifier.
     """
-    def __init__(self, n_total_features: int, n_selected_features: int, u: Optional[ArrayLike] = None,
-                 v: Optional[ArrayLike] = None, theta: float = 1, M: float = 1, alpha: float = 1.5, beta: float = 0.5,
-                 reset_after_drift: bool = False, baseline: str = 'constant', ref_sample: Union[float, ArrayLike] = 0):
+    def __init__(self,
+                 n_total_features: int,
+                 n_selected_features: int,
+                 u: Optional[ArrayLike] = None,
+                 v: Optional[ArrayLike] = None,
+                 theta: float = 1,
+                 M: float = 1,
+                 alpha: float = 1.5,
+                 beta: float = 0.5,
+                 reset_after_drift: bool = False,
+                 baseline: str = 'constant',
+                 ref_sample: Union[float, ArrayLike] = 0):
         """Inits the feature selector.
 
         Args:
@@ -56,8 +65,11 @@ class EFS(BaseFeatureSelector):
             baseline: See description of base class.
             ref_sample: See description of base class.
         """
-        super().__init__(n_total_features=n_total_features, n_selected_features=n_selected_features,
-                         supports_multi_class=False, reset_after_drift=reset_after_drift, baseline=baseline,
+        super().__init__(n_total_features=n_total_features,
+                         n_selected_features=n_selected_features,
+                         supports_multi_class=False,
+                         reset_after_drift=reset_after_drift,
+                         baseline=baseline,
                          ref_sample=ref_sample)
 
         self._u_init = u

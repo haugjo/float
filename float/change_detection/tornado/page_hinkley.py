@@ -37,7 +37,11 @@ from float.change_detection.base_change_detector import BaseChangeDetector
 
 class PageHinkley(BaseChangeDetector):
     """Page Hinkley drift detector."""
-    def __init__(self, min_instance: int = 30, delta: float = 0.005, lambda_: int = 50, alpha: float = 1 - 0.0001,
+    def __init__(self,
+                 min_instance: int = 30,
+                 delta: float = 0.005,
+                 lambda_: int = 50,
+                 alpha: float = 1 - 0.0001,
                  reset_after_drift: bool = False):
         """Inits the change detector
 

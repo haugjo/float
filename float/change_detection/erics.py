@@ -44,8 +44,16 @@ from float.change_detection.base_change_detector import BaseChangeDetector
 
 class ERICS(BaseChangeDetector):
     """ERICS Change Detector."""
-    def __init__(self, n_param: int, window_mvg_average: int = 50, window_drift_detect: int = 50, beta: float = 0.0001,
-                 init_mu: int = 0, init_sigma: int = 1, epochs: int = 10, lr_mu: float = 0.01, lr_sigma: float = 0.01,
+    def __init__(self,
+                 n_param: int,
+                 window_mvg_average: int = 50,
+                 window_drift_detect: int = 50,
+                 beta: float = 0.0001,
+                 init_mu: int = 0,
+                 init_sigma: int = 1,
+                 epochs: int = 10,
+                 lr_mu: float = 0.01,
+                 lr_sigma: float = 0.01,
                  reset_after_drift: bool = False):
         """Inits the ERICS change detector.
 

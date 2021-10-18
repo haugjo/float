@@ -29,6 +29,7 @@ import copy
 import math
 import numpy as np
 from numpy.typing import ArrayLike
+from numpy.random import Generator
 import sys
 from tabulate import tabulate
 import time
@@ -71,11 +72,13 @@ class BasePipeline(metaclass=ABCMeta):
         evaluation_interval (int | None):
             The interval/frequency at which the online learning models are evaluated. This parameter is only relevant in
             a periodic Holdout evaluation.
+        rng (Generator): A numpy random number generator object.
         start_time (float): Physical start time.
         time_step (int): Current logical time step, i.e. iteration.
         n_total (int): Total number of observations currently observed.
     """
-    def __init__(self, data_loader: DataLoader,
+    def __init__(self,
+                 data_loader: DataLoader,
                  predictor: Optional[BasePredictor] = None,
                  prediction_evaluator: Optional[PredictionEvaluator] = None,
                  change_detector: Optional[BaseChangeDetector] = None,
@@ -86,7 +89,8 @@ class BasePipeline(metaclass=ABCMeta):
                  n_pretrain: int = 100, n_max: int = np.inf,
                  known_drifts: Optional[Union[List[int], List[tuple]]] = None,
                  estimate_memory_alloc: bool = False,
-                 evaluation_interval: Optional[int] = None):
+                 evaluation_interval: Optional[int] = None,
+                 random_state: int = 0):
         """Initializes the pipeline.
 
         Args:
@@ -108,6 +112,7 @@ class BasePipeline(metaclass=ABCMeta):
             evaluation_interval: Todo: remove from abstract class, as it is only used by the Holdout pipeline
                 The interval/frequency at which the online learning models are evaluated. This parameter is only
                 relevant in a periodic Holdout evaluation.
+            random_state: A random integer seed used to specify a random number generator.
 
         Raises:
             AttributeError: If one of the provided objects is not valid.
@@ -125,6 +130,7 @@ class BasePipeline(metaclass=ABCMeta):
         self.known_drifts = known_drifts
         self.estimate_memory_alloc = estimate_memory_alloc
         self.evaluation_interval = evaluation_interval if evaluation_interval else 1
+        self.rng = np.random.default_rng(seed=random_state)
 
         self.start_time = 0
         self.time_step = 0
@@ -195,13 +201,13 @@ class BasePipeline(metaclass=ABCMeta):
 
             start_time = time.time()
             self.feature_selector.weight_features(X=copy.copy(X_train), y=copy.copy(y_train))
-            X_train = self.feature_selector.select_features(X=copy.copy(X_train))
             self.feature_selection_evaluator.comp_times.append(time.time() - start_time)
 
             if self.estimate_memory_alloc:
                 self.feature_selection_evaluator.memory_changes.append(
                     self._get_memory_snapshot_diff(start_snapshot=start_snapshot))
 
+            X_train = self.feature_selector.select_features(X=copy.copy(X_train), rng=self.rng)
             self.feature_selection_evaluator.run(self.feature_selector.selected_features,
                                                  self.feature_selector.n_total_features)
 
@@ -211,8 +217,11 @@ class BasePipeline(metaclass=ABCMeta):
             self.prediction_evaluator.testing_comp_times.append(time.time() - start_time)
 
             if not self.time_step == 0 and not self.time_step % self.evaluation_interval:  # Todo: why not evaluate at time step t=0?
-                self.prediction_evaluator.run(y_true=copy.copy(y_test), y_pred=copy.copy(y_pred), X=copy.copy(X_test),
-                                              predictor=self.predictor)
+                self.prediction_evaluator.run(y_true=copy.copy(y_test),
+                                              y_pred=copy.copy(y_pred),
+                                              X=copy.copy(X_test),
+                                              predictor=self.predictor,
+                                              rng=self.rng)
 
             if self.estimate_memory_alloc:
                 start_snapshot = tracemalloc.take_snapshot()
@@ -335,7 +344,7 @@ class BasePipeline(metaclass=ABCMeta):
         """Prints a summary of the evaluation to the console."""
         print('\n################################## SUMMARY ##################################')
         print('Evaluation has finished after {}s'.format(time.time() - self.start_time))
-        print(f'Data Set {self.data_loader.file_path}')
+        print(f'Data Set {self.data_loader.path}')
         print('The pipeline has processed {} instances in total, using batches of size {}.'.format(self.n_total, self.batch_size))
 
         if self.feature_selector:
@@ -344,8 +353,7 @@ class BasePipeline(metaclass=ABCMeta):
                                                                self.feature_selector.n_total_features))
             print(tabulate({
                 **{'Model': [type(self.feature_selector).__name__.split('.')[-1]],
-                   'Avg. Comp. Time': [np.mean(self.feature_selection_evaluator.comp_times)],
-                   'Avg. Change of RAM (GB)': [np.mean(self.feature_selection_evaluator.memory_changes)]},
+                   'Avg. Comp. Time': [np.mean(self.feature_selection_evaluator.comp_times)]},
                 **{'Avg. ' + key: [value['mean'][-1]] for key, value in self.feature_selection_evaluator.result.items()}
             }
                 , headers="keys", tablefmt='github'))
@@ -358,7 +366,6 @@ class BasePipeline(metaclass=ABCMeta):
                     self.change_detector) is SkmultiflowChangeDetector else
                              type(self.change_detector).__name__.split('.')[-1]],
                    'Avg. Comp. Time': [np.mean(self.change_detection_evaluator.comp_times)],
-                   'Avg. Change of RAM (GB)': [np.mean(self.change_detection_evaluator.memory_changes)],
                    'Detected Global Drifts': [self.change_detector.drifts] if len(
                        self.change_detector.drifts) <= 5 else [
                        str(self.change_detector.drifts[:5])[:-1] + ', ...]']},
@@ -374,8 +381,7 @@ class BasePipeline(metaclass=ABCMeta):
                     self.predictor) is SkmultiflowClassifier else
                              type(self.predictor).__name__.split('.')[-1]],
                    'Avg. Test Comp. Time': [np.mean(self.prediction_evaluator.testing_comp_times)],
-                   'Avg. Train Comp. Time': [np.mean(self.prediction_evaluator.training_comp_times)],
-                   'Avg. Change of RAM (GB)': [np.mean(self.prediction_evaluator.memory_changes)]},
+                   'Avg. Train Comp. Time': [np.mean(self.prediction_evaluator.training_comp_times)]},
                 **{'Avg. ' + key: [value['mean'][-1]] for key, value in self.prediction_evaluator.result.items()}
             }, headers="keys", tablefmt='github'))
         print('#############################################################################')

@@ -39,8 +39,12 @@ from float.change_detection.base_change_detector import BaseChangeDetector
 
 class HDDMW(BaseChangeDetector):
     """ HDDMW change detector."""
-    def __init__(self, drift_confidence: float = 0.001, warning_confidence: float = 0.005, lambda_: float = 0.05,
-                 test_type: str = 'one-sided', reset_after_drift: bool = False):
+    def __init__(self,
+                 drift_confidence: float = 0.001,
+                 warning_confidence: float = 0.005,
+                 lambda_: float = 0.05,
+                 test_type: str = 'one-sided',
+                 reset_after_drift: bool = False):
         """ Inits the change detector.
 
         Args:

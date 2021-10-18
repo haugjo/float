@@ -30,8 +30,11 @@ from typing import Callable, Union, List
 import warnings
 
 
-def mean_drift_performance_deterioration(result: dict, known_drifts: Union[List[int], List[tuple]], batch_size: int,
-                                         reference_measure: Callable = zero_one_loss, interval: int = 10) -> float:
+def mean_drift_performance_deterioration(result: dict,
+                                         known_drifts: Union[List[int], List[tuple]],
+                                         batch_size: int,
+                                         reference_measure: Callable = zero_one_loss,
+                                         interval: int = 10) -> float:
     """Calculates the mean drift performance deterioration measure.
 
     Args:

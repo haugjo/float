@@ -38,8 +38,7 @@ from float.change_detection.base_change_detector import BaseChangeDetector
 
 class MDDMA(BaseChangeDetector):
     """MDDMA change detector."""
-    def __init__(self, n: int = 100, difference: float = 0.01, delta: float = 0.000001,
-                 reset_after_drift: bool = False):
+    def __init__(self, n: int = 100, difference: float = 0.01, delta: float = 0.000001, reset_after_drift: bool = False):
         """Inits the change detector.
 
         Args:

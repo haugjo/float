@@ -38,7 +38,10 @@ from float.change_detection.base_change_detector import BaseChangeDetector
 
 class HDDMA(BaseChangeDetector):
     """HDDMA change detector."""
-    def __init__(self, drift_confidence: float = 0.001, warning_confidence: float = 0.005, test_type: str = 'two-sided',
+    def __init__(self,
+                 drift_confidence: float = 0.001,
+                 warning_confidence: float = 0.005,
+                 test_type: str = 'two-sided',
                  reset_after_drift: bool = False):
         """ Inits the change detector.
 

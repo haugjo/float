@@ -26,6 +26,7 @@ SOFTWARE.
 from abc import ABCMeta, abstractmethod
 import numpy as np
 from numpy.typing import ArrayLike
+from numpy.random import Generator
 from typing import Union, List
 import warnings
 
@@ -53,8 +54,13 @@ class BaseFeatureSelector(metaclass=ABCMeta):
         selected_features_history (List[list]): A list of all selected feature vectors obtained over time.
     """
 
-    def __init__(self, n_total_features: int, n_selected_features: int, supports_multi_class: bool,
-                 reset_after_drift: bool, baseline: str, ref_sample: Union[float, ArrayLike]):
+    def __init__(self,
+                 n_total_features: int,
+                 n_selected_features: int,
+                 supports_multi_class: bool,
+                 reset_after_drift: bool,
+                 baseline: str,
+                 ref_sample: Union[float, ArrayLike]):
         """Inits the feature selector.
 
         Args:
@@ -102,11 +108,12 @@ class BaseFeatureSelector(metaclass=ABCMeta):
         """Resets the feature selector."""
         raise NotImplementedError
 
-    def select_features(self, X: ArrayLike) -> ArrayLike:
+    def select_features(self, X: ArrayLike, rng: Generator) -> ArrayLike:
         """Selects features with highest absolute weights.
 
         Args:
             X: Array/matrix of observations.
+            rng: A numpy random number generator object.
 
         Returns:
             ArrayLike: The observations with all non-selected features replaced by the baseline value.
@@ -125,12 +132,12 @@ class BaseFeatureSelector(metaclass=ABCMeta):
         self.weights_history.append(abs_weights.tolist())
         self.selected_features_history.append(self.selected_features.tolist())
 
-        X_new = self._get_baseline(X=X)
+        X_new = self._get_baseline(X=X, rng=rng)
         X_new[:, self.selected_features] = X[:, self.selected_features]
 
         return X_new
 
-    def _get_baseline(self, X: ArrayLike):
+    def _get_baseline(self, X: ArrayLike, rng: Generator):
         """Returns a matrix/vector filled with the baseline.
 
         Please cite:
@@ -138,12 +145,11 @@ class BaseFeatureSelector(metaclass=ABCMeta):
 
         Args:
             X: Array/matrix of observations.
+            rng: A numpy random number generator object.
 
         Returns:
             ArrayLike: A matrix in the shape of x, pre-filled with the baseline.
         """
-        rng = np.random.default_rng(0)  # Todo: use global rng
-
         if self.baseline == 'constant':
             # Constant baseline value
             if not isinstance(self.ref_sample, (int, float)):

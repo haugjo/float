@@ -38,12 +38,15 @@ class DataLoader:
     data stream. The data loader uses a skmultiflow Stream object to generate or load streaming data.
 
     Attributes:
+        path (str | None): The path to a .csv file containing the training data set.
         stream (Stream | None): A scikit-multiflow data stream object.
-        file_path (str | None): The path to a .csv file containing the training data set.
         target_col (int): The index of the target column in the training data.
         scaler (BaseScaler | None): A scaler object used to normalize/standardize sampled instances.
     """
-    def __init__(self, stream: Optional[Stream] = None, file_path: Optional[str] = None, target_col: int = -1,
+    def __init__(self,
+                 path: Optional[str] = None,
+                 stream: Optional[Stream] = None,
+                 target_col: int = -1,
                  scaler: Optional[BaseScaler] = None):
         """Inits the data loader.
 
@@ -52,18 +55,18 @@ class DataLoader:
         - a valid scikit multiflow Stream object.
 
         Args:
+            path: The path to a .csv file containing the training data set.
             stream: A scikit-multiflow data stream object.
-            file_path: The path to a .csv file containing the training data set.
             target_col: The index of the target column in the training data.
             scaler: A scaler object used to normalize/standardize sampled instances.
         """
         self.stream = stream
-        self.file_path = file_path
+        self.path = path
         self.target_col = target_col
         self.scaler = scaler
 
-        self._check_input()
-        self.stream = stream if stream else FileStream(self.file_path, self.target_col)
+        self._validate()
+        self.stream = stream if stream else FileStream(self.path, self.target_col)
 
     def get_data(self, n_batch: int) -> Tuple[ArrayLike, ArrayLike]:
         """Loads a batch from the stream object.
@@ -82,7 +85,7 @@ class DataLoader:
 
         return X, y
 
-    def _check_input(self):
+    def _validate(self):
         """Validates the input.
 
         This function checks whether the constructor either received a valid path to a .csv file or a valid
@@ -94,16 +97,16 @@ class DataLoader:
             ValueError: If the .csv cannot be converted to a scikit multiflow FileStream.
         """
         if not type(self.stream) is Stream:
-            if not type(self.file_path) is str:
-                raise AttributeError('Neither a valid skmultiflow Stream object nor a file path was provided.')
-            elif not self.file_path.endswith('.csv'):
-                raise AttributeError('Neither a valid skmultiflow Stream object nor a .csv file path was provided.')
+            if not type(self.path) is str:
+                raise AttributeError("Neither a valid scikit-multiflow Stream object nor a file path was provided.")
+            elif not self.path.endswith('.csv'):
+                raise AttributeError("Neither a valid scikit-multiflow Stream object nor a .csv-file path was provided.")
             elif not type(self.target_col) is int:
-                raise AttributeError('The parameter target_col needs to be an integer.')
+                raise AttributeError("The parameter target_col needs to be an integer.")
             else:
                 try:
-                    FileStream(self.file_path, self.target_col)
+                    FileStream(self.path, self.target_col)
                 except FileNotFoundError:
-                    raise FileNotFoundError('The file path you provided does not exist.')
+                    raise FileNotFoundError("The file path provided does not exist.")
                 except ValueError:
-                    raise ValueError('The .csv file cannot be converted to a skmultiflow FileStream.')
+                    raise ValueError("The .csv file cannot be converted to a scikit-multiflow FileStream.")
