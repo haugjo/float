@@ -32,14 +32,16 @@ known_drifts = [round(data_loader.stream.n_samples * 0.2), round(data_loader.str
 batch_size = 10
 feature_names = data_loader.stream.feature_names
 
-concept_drift_detector_names = [  # 'ADWIN', 'EDDM', 'DDM_sk', 'DDM',
+concept_drift_detector_names = [  # 'ADWIN',
+    'EDDM', 'DDM_sk',
+    # 'DDM',
     'ERICS', 'Page Hinkley'
 ]  # Todo: Remove, and use class names instead?
 concept_drift_detectors = [#SkmultiflowChangeDetector(ADWIN(delta=0.6), reset_after_drift=False),
     SkmultiflowChangeDetector(EDDM(), reset_after_drift=True),
     SkmultiflowChangeDetector(DDM_scikit(), reset_after_drift=True),
     #SeqDrift2(reset_after_drift=True),
-    #ERICS(data_loader.stream.n_features),
+    ERICS(data_loader.stream.n_features),
     PageHinkley(reset_after_drift=True)]
 cd_evaluator = dict()
 

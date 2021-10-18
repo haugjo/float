@@ -93,7 +93,11 @@ class HoldoutPipeline(BasePipeline):
         self._finish_evaluation()
 
     def _run_holdout(self):
-        """Runs the holdout evaluation strategy."""
+        """Runs the holdout evaluation strategy.
+
+        Raises:
+            BaseException: If the holdout evaluation runs into an error.
+        """
         while self.n_total < self.n_max:
             last_iteration = False
             n_batch = self._get_n_batch()

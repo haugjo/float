@@ -43,6 +43,7 @@ from float.change_detection.skmultiflow import SkmultiflowChangeDetector
 from float.change_detection.evaluation import ChangeDetectionEvaluator
 from float.prediction import BasePredictor
 from float.prediction.evaluation import PredictionEvaluator
+from float.prediction.skmultiflow import SkmultiflowClassifier
 
 
 class BasePipeline(metaclass=ABCMeta):
@@ -204,7 +205,6 @@ class BasePipeline(metaclass=ABCMeta):
                 self.change_detector.warnings.append(self.time_step)
 
             if self.change_detector.detect_change():
-                print("Global change detected at time step {}".format(self.time_step))
                 if self.time_step not in self.change_detector.drifts:  # Todo: is this if-clause really necessary?
                     self.change_detector.drifts.append(self.time_step)
 
@@ -243,7 +243,7 @@ class BasePipeline(metaclass=ABCMeta):
         """Finishes one training iteration, i.e. time step.
 
         Args:
-            n_batch (int):
+            n_batch:
                 Number of observation that were processed in the iteration. This equals the batch size in all but the
                 last iteration.
         """
@@ -253,9 +253,17 @@ class BasePipeline(metaclass=ABCMeta):
 
     def _update_progress_bar(self):
         """Updates the progress bar in the console."""
-        j = math.ceil(self.n_total / self.n_max * 100)
+        progress = math.ceil(self.n_total / self.n_max * 100)
+
+        if self.change_detector:
+            n_detections = len(self.change_detector.drifts)
+            last_drift = self.change_detector.drifts[-1] if n_detections > 0 else 0
+            out_text = "[%-20s] %d%%, No. of detected drifts: %d, Last detected drift at t=%d." % ('=' * int(0.2 * progress), progress, n_detections, last_drift)
+        else:
+            out_text = "[%-20s] %d%%" % ('=' * int(0.2 * progress), progress)
+
         sys.stdout.write('\r')
-        sys.stdout.write("[%-20s] %d%%" % ('=' * int(0.2 * j), j))
+        sys.stdout.write(out_text)
         sys.stdout.flush()
 
     def _finish_evaluation(self):
@@ -266,9 +274,9 @@ class BasePipeline(metaclass=ABCMeta):
     def _print_summary(self):
         """Prints a summary of the evaluation to the console."""
         print('\n################################## SUMMARY ##################################')
-        print('Evaluation finished after {}s'.format(time.time() - self.start_time))
+        print('Evaluation has finished after {}s'.format(time.time() - self.start_time))
         print(f'Data Set {self.data_loader.file_path}')
-        print('Processed {} instances in batches of {}'.format(self.n_total, self.batch_size))
+        print('The pipeline has processed {} instances in total, using batches of size {}.'.format(self.n_total, self.batch_size))
 
         if self.feature_selector:
             print('----------------------')
@@ -276,8 +284,8 @@ class BasePipeline(metaclass=ABCMeta):
                                                                self.feature_selector.n_total_features))
             print(tabulate({
                 **{'Model': [type(self.feature_selector).__name__.split('.')[-1]],
-                   'Avg. Time': [np.mean(self.feature_selection_evaluator.comp_times)]},
-                **{'Avg. ' + key: [value['mean']] for key, value in self.feature_selection_evaluator.result.items()}
+                   'Avg. Comp. Time': [np.mean(self.feature_selection_evaluator.comp_times)]},
+                **{'Avg. ' + key: [value['mean'][-1]] for key, value in self.feature_selection_evaluator.result.items()}
             }
                 , headers="keys", tablefmt='github'))
 
@@ -288,7 +296,7 @@ class BasePipeline(metaclass=ABCMeta):
                 **{'Model': [type(self.change_detector.detector).__name__ if type(
                     self.change_detector) is SkmultiflowChangeDetector else
                              type(self.change_detector).__name__.split('.')[-1]],
-                   'Avg. Time': [np.mean(self.change_detection_evaluator.comp_times)],
+                   'Avg. Comp. Time': [np.mean(self.change_detection_evaluator.comp_times)],
                    'Detected Global Drifts': [self.change_detector.drifts] if len(
                        self.change_detector.drifts) <= 5 else [
                        str(self.change_detector.drifts[:5])[:-1] + ', ...]']},
@@ -300,9 +308,11 @@ class BasePipeline(metaclass=ABCMeta):
             print('----------------------')
             print('Prediction:')
             print(tabulate({
-                **{'Model': [type(self.predictor).__name__.split('.')[-1]],
-                   'Avg. Test Time': [np.mean(self.prediction_evaluator.testing_comp_times)],
-                   'Avg. Train Time': [np.mean(self.prediction_evaluator.training_comp_times)]},
-                **{'Avg. ' + key: [value['mean']] for key, value in self.prediction_evaluator.result.items()}
+                **{'Model': [type(self.predictor.model).__name__ if type(
+                    self.predictor) is SkmultiflowClassifier else
+                             type(self.predictor).__name__.split('.')[-1]],
+                   'Avg. Test Comp. Time': [np.mean(self.prediction_evaluator.testing_comp_times)],
+                   'Avg. Train Comp. Time': [np.mean(self.prediction_evaluator.training_comp_times)]},
+                **{'Avg. ' + key: [value['mean'][-1]] for key, value in self.prediction_evaluator.result.items()}
             }, headers="keys", tablefmt='github'))
         print('#############################################################################')
