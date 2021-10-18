@@ -7,13 +7,14 @@ from float.change_detection.evaluation import ChangeDetectionEvaluator
 from float.prediction import BasePredictor
 import warnings
 import traceback
+import numpy as np
 
 
 class HoldoutPipeline(BasePipeline):
     """
     Pipeline which implements the holdout evaluation.
     """
-    def __init__(self, data_loader, test_set, evaluation_interval, feature_selector=None, feature_selection_evaluator=None,
+    def __init__(self, data_loader, test_set, evaluation_interval, test_obs_interval=None, feature_selector=None, feature_selection_evaluator=None,
                  change_detector=None, change_detection_evaluator=None, predictor=None, prediction_evaluator=None,
                  max_n_samples=100000, batch_size=100, n_pretrain_samples=100, known_drifts=None):
         """
@@ -23,6 +24,7 @@ class HoldoutPipeline(BasePipeline):
             data_loader (DataLoader): DataLoader object
             test_set (np.ndarray, np.ndarray): the test samples and their labels to be used for the holdout evaluation
             evaluation_interval (int): the interval at which the predictor should be evaluated using the test set
+            test_obs_interval (int): specified at each interval samples should be added to the test set
             feature_selector (BaseFeatureSelector | None): FeatureSelector object
             feature_selection_evaluator (FeatureSelectionEvaluator | None): FeatureSelectionEvaluator object
             change_detector (BaseChangeDetector | None): BaseChangeDetector object
@@ -35,6 +37,7 @@ class HoldoutPipeline(BasePipeline):
             known_drifts (list): list of known concept drifts for this stream
         """
         self.test_set = test_set
+        self.test_obs_interval = test_obs_interval
 
         super().__init__(data_loader, feature_selector, feature_selection_evaluator, change_detector,
                          change_detection_evaluator, predictor, prediction_evaluator, max_n_samples, batch_size,
@@ -67,7 +70,17 @@ class HoldoutPipeline(BasePipeline):
                 last_iteration = True
 
             train_set = self.data_loader.get_data(n_samples)
+
+            # TODO create new test set as soon as this gets triggered for the first time, otherwise use one passed as param
+            # TODO use a running counter not the samples len counter
+            if self.test_obs_interval:
+                test_set_idx = np.array([idx for idx in np.arange(train_set[0].shape[0]) if idx % self.test_obs_interval == 0 and idx != 0])
+                if test_set_idx.shape[0] != 0:
+                    self.test_set = (np.append(self.test_set[0], train_set[0][test_set_idx, :], axis=0), np.append(self.test_set[1], train_set[1][test_set_idx], axis=0))
+                    train_set = (np.delete(train_set[0], test_set_idx, axis=0), np.delete(train_set[1], test_set_idx))
             try:
+                if train_set[0].shape == (0, 57):
+                    print()
                 self._run_single_training_iteration(train_set, self.test_set, last_iteration)
             except BaseException:
                 traceback.print_exc()
