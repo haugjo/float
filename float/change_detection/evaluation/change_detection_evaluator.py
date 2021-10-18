@@ -44,7 +44,9 @@ class ChangeDetectionEvaluator:
                 results for each delay specified in the list.
         n_init_tolerance (int): The number of observations reserved for the initial training. We do not consider
             these observations in the evaluation.
-        comp_times (list): Computation times of the change detector per time step.
+        comp_times (list): Computation times of updating the change detector per time step.
+        memory_changes (list):
+            List of measured memory changes (GB RAM) per training iteration of the concept drift detector.
         result (dict): Results (i.e. calculated measurements, mean, and variance) for each evaluation measure function
     """
     def __init__(self, measure_funcs: List[Callable], known_drifts: Union[List[int], List[tuple]], batch_size: int,
@@ -70,6 +72,7 @@ class ChangeDetectionEvaluator:
         self.n_delay = n_delay
         self.n_init_tolerance = n_init_tolerance
         self.comp_times = []
+        self.memory_changes = []
 
         self.result = dict()
         for measure_func in measure_funcs:

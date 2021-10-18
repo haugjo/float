@@ -98,7 +98,8 @@ for change_detector_name, change_detector in zip(change_detector_names, change_d
                                                        feature_selection_evaluator=fs_evaluator[feature_selector_name],
                                                        batch_size=batch_size,
                                                        n_max=data_loader.stream.n_samples,
-                                                       known_drifts=known_drifts)
+                                                       known_drifts=known_drifts,
+                                                       estimate_memory_alloc=False)
             prequential_pipeline.run()
             # holdout_pipeline = HoldoutPipeline(data_loader=data_loader,
             #                                    feature_selector=feature_selector,

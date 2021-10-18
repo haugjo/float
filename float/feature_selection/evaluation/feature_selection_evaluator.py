@@ -37,10 +37,10 @@ class FeatureSelectionEvaluator:
             If this parameter is set, the measurements are additionally aggregated with a decay/fading factor.
         window_size (int | None):
             If this parameter is set, the measurements are additionally aggregated in a sliding window.
-        comp_times (list):
-            A list of computation times per iteration.
-        result (dict):
-            The raw and aggregated measurements of each evaluation measure function.
+        comp_times (list): List of computation times per iteration of feature weighting and selection.
+        memory_changes (list):
+            List of measured memory changes (GB RAM) per training iteration of the online feature selection model.
+        result (dict): The raw and aggregated measurements of each evaluation measure function.
     """
     def __init__(self, measure_funcs: List[Callable], decay_rate: Optional[float] = None,
                  window_size: Optional[int] = None):
@@ -56,6 +56,7 @@ class FeatureSelectionEvaluator:
         self.decay_rate = decay_rate
         self.window_size = window_size
         self.comp_times = []
+        self.memory_changes = []
 
         self.result = dict()
         for measure_func in measure_funcs:

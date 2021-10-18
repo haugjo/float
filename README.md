@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="float" src="logo/logo_color.png" width="250"/>
+  <img alt="float" src="logo/logo_and_text_color.png" width="400"/>
 </p>
 <p align="center">
     <em>[Todo: insert badges for pypi and documentation]</em>
@@ -22,6 +22,9 @@ Alternatively, you may also clone the repository from Github:
 ```
 git clone git@github.com:haugjo/float.git
 ```
+
+## Requirements
+Float is able to run with the following package versions (note that older versions have not been tested, but may also work): Todo
 
 ## Quickstart
 Below, we show how to run a basic prequential evaluation in float:
@@ -83,9 +86,9 @@ Please also make sure that you reference the corresponding papers, when using on
 We welcome meaningful contributions by the community. In particular, we encourage contribution of new evaluation strategies, measures and data sets.
 
 Additionally, we welcome implementations of novel online learning models (however, we discourage contributing models that are already included in one 
-of the major libraries yet. Again, note that float is not mainly intended to be a library of state-of-the-art learning methods, but a toolbox for their standardized evaluation.)
+of the major libraries. Again, note that float is not primarily intended as a library of state-of-the-art online learning methods, but as a toolkit for their standardised evaluation.)
 
-Contributed source code must adhere to the following criteria:
+All contributed source code must adhere to the following criteria:
 - Code must conform with the [PEP8](https://www.python.org/dev/peps/pep-0008/) standard.
 - Docstrings must conform with the [Google docstring](https://google.github.io/styleguide/pyguide.html) convention.
 - All existing unit tests must run without an error (new unit tests should be provided as needed).

@@ -39,14 +39,17 @@ from float.prediction.evaluation import PredictionEvaluator
 
 class PrequentialPipeline(BasePipeline):
     """Pipeline class for prequential evaluation."""
-    def __init__(self, data_loader: DataLoader, predictor: Optional[BasePredictor] = None,
+    def __init__(self, data_loader: DataLoader,
+                 predictor: Optional[BasePredictor] = None,
                  prediction_evaluator: Optional[PredictionEvaluator] = None,
                  change_detector: Optional[BaseChangeDetector] = None,
                  change_detection_evaluator: Optional[ChangeDetectionEvaluator] = None,
                  feature_selector: Optional[BaseFeatureSelector] = None,
-                 feature_selection_evaluator: Optional[FeatureSelectionEvaluator] = None, batch_size: int = 1,
+                 feature_selection_evaluator: Optional[FeatureSelectionEvaluator] = None,
+                 batch_size: int = 1,
                  n_pretrain: int = 100, n_max: int = np.inf,
-                 known_drifts: Optional[Union[List[int], List[tuple]]] = None):
+                 known_drifts: Optional[Union[List[int], List[tuple]]] = None,
+                 estimate_memory_alloc: bool = False):
         """Initializes the pipeline.
 
         Args:
@@ -61,11 +64,16 @@ class PrequentialPipeline(BasePipeline):
             n_pretrain: Number of observations used for the initial training of the predictive model.
             n_max: Maximum number of observations used in the evaluation.
             known_drifts: The positions in the dataset (indices) corresponding to known concept drifts.
+            estimate_memory_alloc:
+                Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
+                Note that this delivers only an indication of the approximate memory consumption and can significantly
+                increase the total run time of the pipeline.
         """
         super().__init__(data_loader=data_loader, predictor=predictor, prediction_evaluator=prediction_evaluator,
                          change_detector=change_detector, change_detection_evaluator=change_detection_evaluator,
                          feature_selector=feature_selector, feature_selection_evaluator=feature_selection_evaluator,
-                         batch_size=batch_size, n_pretrain=n_pretrain, n_max=n_max, known_drifts=known_drifts)
+                         batch_size=batch_size, n_pretrain=n_pretrain, n_max=n_max, known_drifts=known_drifts,
+                         estimate_memory_alloc=estimate_memory_alloc)
 
     def run(self):
         """Runs the pipeline."""

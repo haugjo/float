@@ -44,8 +44,9 @@ class PredictionEvaluator:
         kwargs (dict):
             A dictionary containing additional and specific keyword arguments, which are passed to the evaluation
             functions.
-        testing_comp_times (list): A list of computation times per testing iteration.
-        training_comp_times (list): training times per time step per training iteration.
+        testing_comp_times (list): List of computation times per testing iteration.
+        training_comp_times (list): List of computation times per training iteration.
+        memory_changes (list): List of measured memory changes (GB RAM) per training iteration of the predictor.
         result (dict):
             The raw and aggregated measurements of each evaluation measure function.
     """
@@ -70,6 +71,7 @@ class PredictionEvaluator:
 
         self.testing_comp_times = []
         self.training_comp_times = []
+        self.memory_changes = []
 
         self.result = dict()
         for measure_func in measure_funcs:

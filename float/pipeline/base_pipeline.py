@@ -33,6 +33,8 @@ import sys
 from tabulate import tabulate
 import time
 import traceback
+import tracemalloc
+from tracemalloc import Snapshot
 from typing import Optional, Union, List, Tuple
 
 from float.data.data_loader import DataLoader
@@ -62,6 +64,10 @@ class BasePipeline(metaclass=ABCMeta):
         n_max (int | None): Maximum number of observations used in the evaluation.
         known_drifts (List[int] | List[tuple] | None):
             The positions in the dataset (indices) corresponding to known concept drifts.
+        estimate_memory_alloc (bool):
+            Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
+            Note that this delivers only an indication of the approximate memory consumption and can significantly
+            increase the total run time of the pipeline.
         evaluation_interval (int | None):
             The interval/frequency at which the online learning models are evaluated. This parameter is only relevant in
             a periodic Holdout evaluation.
@@ -69,14 +75,17 @@ class BasePipeline(metaclass=ABCMeta):
         time_step (int): Current logical time step, i.e. iteration.
         n_total (int): Total number of observations currently observed.
     """
-    def __init__(self, data_loader: DataLoader, predictor: Optional[BasePredictor] = None,
+    def __init__(self, data_loader: DataLoader,
+                 predictor: Optional[BasePredictor] = None,
                  prediction_evaluator: Optional[PredictionEvaluator] = None,
                  change_detector: Optional[BaseChangeDetector] = None,
                  change_detection_evaluator: Optional[ChangeDetectionEvaluator] = None,
                  feature_selector: Optional[BaseFeatureSelector] = None,
-                 feature_selection_evaluator: Optional[FeatureSelectionEvaluator] = None, batch_size: int = 1,
+                 feature_selection_evaluator: Optional[FeatureSelectionEvaluator] = None,
+                 batch_size: int = 1,
                  n_pretrain: int = 100, n_max: int = np.inf,
                  known_drifts: Optional[Union[List[int], List[tuple]]] = None,
+                 estimate_memory_alloc: bool = False,
                  evaluation_interval: Optional[int] = None):
         """Initializes the pipeline.
 
@@ -92,7 +101,11 @@ class BasePipeline(metaclass=ABCMeta):
             n_pretrain: Number of observations used for the initial training of the predictive model.
             n_max: Maximum number of observations used in the evaluation.
             known_drifts: The positions in the dataset (indices) corresponding to known concept drifts.
-            evaluation_interval:
+            estimate_memory_alloc:
+                Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
+                Note that this delivers only an indication of the approximate memory consumption and can significantly
+                increase the total run time of the pipeline.
+            evaluation_interval: Todo: remove from abstract class, as it is only used by the Holdout pipeline
                 The interval/frequency at which the online learning models are evaluated. This parameter is only
                 relevant in a periodic Holdout evaluation.
 
@@ -110,6 +123,7 @@ class BasePipeline(metaclass=ABCMeta):
         self.n_pretrain = n_pretrain
         self.n_max = n_max
         self.known_drifts = known_drifts
+        self.estimate_memory_alloc = estimate_memory_alloc
         self.evaluation_interval = evaluation_interval if evaluation_interval else 1
 
         self.start_time = 0
@@ -146,6 +160,9 @@ class BasePipeline(metaclass=ABCMeta):
 
     def _start_evaluation(self):
         """Starts the evaluation."""
+        if self.estimate_memory_alloc:
+            tracemalloc.start()
+
         self.start_time = time.time()
         if self.n_pretrain > 0:
             self._pretrain_predictor()
@@ -173,10 +190,18 @@ class BasePipeline(metaclass=ABCMeta):
         X_test, y_test = test_set if test_set else train_set
 
         if self.feature_selector:
+            if self.estimate_memory_alloc:
+                start_snapshot = tracemalloc.take_snapshot()
+
             start_time = time.time()
             self.feature_selector.weight_features(X=copy.copy(X_train), y=copy.copy(y_train))
             X_train = self.feature_selector.select_features(X=copy.copy(X_train))
             self.feature_selection_evaluator.comp_times.append(time.time() - start_time)
+
+            if self.estimate_memory_alloc:
+                self.feature_selection_evaluator.memory_changes.append(
+                    self._get_memory_snapshot_diff(start_snapshot=start_snapshot))
+
             self.feature_selection_evaluator.run(self.feature_selector.selected_features,
                                                  self.feature_selector.n_total_features)
 
@@ -189,17 +214,32 @@ class BasePipeline(metaclass=ABCMeta):
                 self.prediction_evaluator.run(y_true=copy.copy(y_test), y_pred=copy.copy(y_pred), X=copy.copy(X_test),
                                               predictor=self.predictor)
 
+            if self.estimate_memory_alloc:
+                start_snapshot = tracemalloc.take_snapshot()
+
             start_time = time.time()
             self.predictor.partial_fit(X_train, y_train)
             self.prediction_evaluator.training_comp_times.append(time.time() - start_time)
 
+            if self.estimate_memory_alloc:
+                self.prediction_evaluator.memory_changes.append(
+                    self._get_memory_snapshot_diff(start_snapshot=start_snapshot))
+
         if self.change_detector:
+            if self.estimate_memory_alloc:
+                start_snapshot = tracemalloc.take_snapshot()
+
             start_time = time.time()
             if self.change_detector.error_based:
                 for val in (y_pred == y_test):
                     self.change_detector.partial_fit(val)
             else:
                 self.change_detector.partial_fit(X=copy.copy(X_train), y=copy.copy(y_train))
+            self.change_detection_evaluator.comp_times.append(time.time() - start_time)
+
+            if self.estimate_memory_alloc:
+                self.change_detection_evaluator.memory_changes.append(
+                    self._get_memory_snapshot_diff(start_snapshot=start_snapshot))
 
             if self.change_detector.detect_warning_zone():
                 self.change_detector.warnings.append(self.time_step)
@@ -227,7 +267,6 @@ class BasePipeline(metaclass=ABCMeta):
                 if self.time_step not in self.change_detector.partial_drifts:  # Todo: is this if-clause really necessary?
                     self.change_detector.partial_drifts.append((self.time_step, partial_change_features))
 
-            self.change_detection_evaluator.comp_times.append(time.time() - start_time)
             if last_iteration:
                 self.change_detection_evaluator.run(self.change_detector.drifts)
 
@@ -242,6 +281,20 @@ class BasePipeline(metaclass=ABCMeta):
         else:
             n_batch = self.n_max - self.n_total
         return n_batch
+
+    @staticmethod
+    def _get_memory_snapshot_diff(start_snapshot: Snapshot) -> float:
+        """Returns the absolute different in allocated memory between two snapshots.
+
+        Args:
+            start_snapshot: The initial memory snapshot that was obtained by tracemalloc.
+
+        Returns:
+            float: Difference of allocated memory in GB
+        """
+        end_snapshot = tracemalloc.take_snapshot()
+        differences = end_snapshot.compare_to(old_snapshot=start_snapshot, key_type='lineno', cumulative=True)
+        return np.sum([stat.size_diff for stat in differences]) * 0.000000001
 
     def _finish_iteration(self, n_batch: int):
         """Finishes one training iteration, i.e. time step.
@@ -272,6 +325,9 @@ class BasePipeline(metaclass=ABCMeta):
 
     def _finish_evaluation(self):
         """Finishes the evaluation."""
+        if self.estimate_memory_alloc:
+            tracemalloc.stop()
+
         self.data_loader.stream.restart()
         self._print_summary()
 
@@ -288,7 +344,8 @@ class BasePipeline(metaclass=ABCMeta):
                                                                self.feature_selector.n_total_features))
             print(tabulate({
                 **{'Model': [type(self.feature_selector).__name__.split('.')[-1]],
-                   'Avg. Comp. Time': [np.mean(self.feature_selection_evaluator.comp_times)]},
+                   'Avg. Comp. Time': [np.mean(self.feature_selection_evaluator.comp_times)],
+                   'Avg. Change of RAM (GB)': [np.mean(self.feature_selection_evaluator.memory_changes)]},
                 **{'Avg. ' + key: [value['mean'][-1]] for key, value in self.feature_selection_evaluator.result.items()}
             }
                 , headers="keys", tablefmt='github'))
@@ -301,6 +358,7 @@ class BasePipeline(metaclass=ABCMeta):
                     self.change_detector) is SkmultiflowChangeDetector else
                              type(self.change_detector).__name__.split('.')[-1]],
                    'Avg. Comp. Time': [np.mean(self.change_detection_evaluator.comp_times)],
+                   'Avg. Change of RAM (GB)': [np.mean(self.change_detection_evaluator.memory_changes)],
                    'Detected Global Drifts': [self.change_detector.drifts] if len(
                        self.change_detector.drifts) <= 5 else [
                        str(self.change_detector.drifts[:5])[:-1] + ', ...]']},
@@ -316,7 +374,8 @@ class BasePipeline(metaclass=ABCMeta):
                     self.predictor) is SkmultiflowClassifier else
                              type(self.predictor).__name__.split('.')[-1]],
                    'Avg. Test Comp. Time': [np.mean(self.prediction_evaluator.testing_comp_times)],
-                   'Avg. Train Comp. Time': [np.mean(self.prediction_evaluator.training_comp_times)]},
+                   'Avg. Train Comp. Time': [np.mean(self.prediction_evaluator.training_comp_times)],
+                   'Avg. Change of RAM (GB)': [np.mean(self.prediction_evaluator.memory_changes)]},
                 **{'Avg. ' + key: [value['mean'][-1]] for key, value in self.prediction_evaluator.result.items()}
             }, headers="keys", tablefmt='github'))
         print('#############################################################################')
