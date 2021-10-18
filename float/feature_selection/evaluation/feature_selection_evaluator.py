@@ -82,7 +82,7 @@ class FeatureSelectionEvaluator:
         Raises:
             TypeError: If the calculation of a measure runs an error.
         """
-        for measure_func in self.measure_funcs:  # run each evaluation measure
+        for measure_func in self.measure_funcs:
             try:
                 new_measure_val = measure_func(selected_features, n_total_features)
                 self.result[measure_func.__name__]['measures'].append(new_measure_val)

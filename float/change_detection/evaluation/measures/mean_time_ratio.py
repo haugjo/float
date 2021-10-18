@@ -47,5 +47,6 @@ def mean_time_ratio(evaluator: ChangeDetectionEvaluator, drifts: list, n_delay: 
     Returns:
         float: The mean time ratio.
     """
-    return (time_between_false_alarms(evaluator, drifts, n_delay)
-            / detection_delay(evaluator, drifts, n_delay)) * detected_change_rate(evaluator, drifts, n_delay)
+    return (time_between_false_alarms(evaluator=evaluator, drifts=drifts, n_delay=n_delay)
+            / detection_delay(evaluator=evaluator, drifts=drifts, n_delay=n_delay)) \
+           * detected_change_rate(evaluator=evaluator, drifts=drifts, n_delay=n_delay)

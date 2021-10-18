@@ -73,7 +73,7 @@ class SkmultiflowChangeDetector(BaseChangeDetector):
 
     def detect_warning_zone(self) -> bool:
         """Detects a warning zone."""
-        return self.detector.in_warning_zone
+        return self.detector.detected_warning_zone()
 
     def _validate(self) -> bool:
         """Validate the provided scikit-multiflow drift detector object.
@@ -89,4 +89,4 @@ class SkmultiflowChangeDetector(BaseChangeDetector):
         elif isinstance(self.detector, KSWIN):
             return False
         else:
-            raise TypeError("Scikit-Multiflow Drift Detector Class {} is not supported.".format(type(self.detector)))
+            raise TypeError("Scikit-Multiflow drift detector class {} is not supported.".format(type(self.detector)))

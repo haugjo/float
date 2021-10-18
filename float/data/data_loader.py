@@ -65,16 +65,16 @@ class DataLoader:
         self._check_input()
         self.stream = stream if stream else FileStream(self.file_path, self.target_col)
 
-    def get_data(self, n_samples: int) -> Tuple[ArrayLike, ArrayLike]:
+    def get_data(self, n_batch: int) -> Tuple[ArrayLike, ArrayLike]:
         """Loads a batch from the stream object.
 
         Args:
-            n_samples: Number of samples to load from the data stream object.
+            n_batch: Number of samples to load from the data stream object.
 
         Returns:
             Tuple[ArrayLike, ArrayLike]: The sampled observations and corresponding targets.
         """
-        X, y = self.stream.next_sample(n_samples)
+        X, y = self.stream.next_sample(batch_size=n_batch)
 
         if self.scaler:
             self.scaler.partial_fit(X)

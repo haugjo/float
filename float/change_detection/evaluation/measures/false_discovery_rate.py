@@ -40,17 +40,17 @@ def false_discovery_rate(evaluator: ChangeDetectionEvaluator, drifts: list, n_de
     Returns:
         float: The false discovery rate of detected concept drifts.
     """
-    if len(drifts) == 0:  # if there is no detected drift, the FDR is zero
+    if len(drifts) == 0:  # If there is no detected drift, the FDR is zero
         return 0
 
     iter_drifts = iter(evaluator.known_drifts)
-    detections = np.asarray(drifts) * evaluator.batch_size  # translate drifts to relative position in dataset
+    detections = np.asarray(drifts) * evaluator.batch_size  # Translate drifts to relative position in dataset
     false_discoveries = 0
     start_search = evaluator.n_init_tolerance
     drift = next(iter_drifts, None)
     while drift is not None:
         # Find end of considered search space
-        if isinstance(drift, tuple):  # incremental/gradual drifts involve a starting and end point
+        if isinstance(drift, tuple):  # Incremental/gradual drifts involve a starting and end point
             end_search = drift[0]
         else:
             end_search = drift
@@ -61,7 +61,7 @@ def false_discovery_rate(evaluator: ChangeDetectionEvaluator, drifts: list, n_de
         # Update starting point
         start_search = end_search + n_delay
 
-        drift = next(iter_drifts, None)  # get next drift
+        drift = next(iter_drifts, None)
 
     # Finally, add all false discoveries after the last known drift
     relevant_drifts = [det for det in detections if det >= start_search]

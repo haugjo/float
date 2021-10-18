@@ -17,7 +17,8 @@ from float.change_detection.evaluation.measures import detection_delay, detected
 from float.feature_selection.evaluation import FeatureSelectionEvaluator
 from float.feature_selection.evaluation.measures import nogueira_stability
 from float.feature_selection import FIRES
-from float.pipeline import PrequentialPipeline, HoldoutPipeline
+from float.pipeline import PrequentialPipeline
+from float.pipeline import HoldoutPipeline
 from float.prediction.skmultiflow import SkmultiflowClassifier
 from float.prediction.evaluation import PredictionEvaluator
 from float.prediction.evaluation.measures import noise_variability, mean_drift_performance_deterioration, mean_drift_restoration_time
@@ -32,14 +33,16 @@ known_drifts = [round(data_loader.stream.n_samples * 0.2), round(data_loader.str
 batch_size = 10
 feature_names = data_loader.stream.feature_names
 
-change_detector_names = [  # 'ADWIN', 'EDDM', 'DDM_sk', 'DDM',
+change_detector_names = [  # 'ADWIN',
+    'EDDM', 'DDM_sk',
+    # 'DDM',
     'ERICS', 'Page Hinkley'
 ]  # Todo: Remove, and use class names instead?
 change_detectors = [  # SkmultiflowChangeDetector(ADWIN(delta=0.6), reset_after_drift=False),
     SkmultiflowChangeDetector(EDDM(), reset_after_drift=True),
     SkmultiflowChangeDetector(DDM_scikit(), reset_after_drift=True),
     # SeqDrift2(reset_after_drift=True),
-    # ERICS(data_loader.stream.n_features),
+    ERICS(data_loader.stream.n_features),
     PageHinkley(reset_after_drift=True)]
 cd_evaluator = dict()
 
@@ -71,7 +74,7 @@ for change_detector_name, change_detector in zip(change_detector_names, change_d
         for feature_selector_name, feature_selector in zip(feature_selector_names, feature_selectors):
             fs_evaluator[feature_selector_name] = FeatureSelectionEvaluator([nogueira_stability])
 
-            ### Initialize Concept Drift Detector ###
+            ### Initialize Change Detector ###
             cd_evaluator[change_detector_name] = ChangeDetectionEvaluator(measure_funcs=[detected_change_rate,
                                                                                          missed_detection_rate,
                                                                                          false_discovery_rate,
@@ -80,36 +83,37 @@ for change_detector_name, change_detector in zip(change_detector_names, change_d
                                                                                          mean_time_ratio],
                                                                           known_drifts=known_drifts,
                                                                           batch_size=batch_size,
-                                                                          n_samples=data_loader.stream.n_samples,
+                                                                          n_total=data_loader.stream.n_samples,
                                                                           n_delay=list(range(100, 1000)),
                                                                           n_init_tolerance=100)
 
             ### Initialize and run Prequential Pipeline ###
-            # prequential_pipeline = PrequentialPipeline(data_loader=data_loader,
-            #                                            feature_selector=feature_selector,
-            #                                            feature_selection_evaluator=fs_evaluator[feature_selector_name],
-            #                                            change_detector=change_detector,
-            #                                            change_detection_evaluator=cd_evaluator[change_detector_name],
-            #                                            predictor=predictor,
-            #                                            prediction_evaluator=pred_evaluator[predictor_name],
-            #                                            batch_size=batch_size,
-            #                                            max_n_samples=data_loader.stream.n_samples,
-            #                                            known_drifts=known_drifts)
-            # prequential_pipeline.run()
-            holdout_pipeline = HoldoutPipeline(data_loader=data_loader,
-                                               feature_selector=feature_selector,
-                                               feature_selection_evaluator=fs_evaluator[feature_selector_name],
-                                               change_detector=change_detector,
-                                               change_detection_evaluator=cd_evaluator[change_detector_name],
-                                               predictor=predictor,
-                                               prediction_evaluator=pred_evaluator[predictor_name],
-                                               batch_size=batch_size,
-                                               max_n_samples=data_loader.stream.n_samples - 10,
-                                               known_drifts=known_drifts,
-                                               evaluation_interval=10,
-                                               test_set=data_loader.get_data(10),
-                                               test_obs_interval=5)
-            holdout_pipeline.run()
+            prequential_pipeline = PrequentialPipeline(data_loader=data_loader,
+                                                       predictor=predictor,
+                                                       prediction_evaluator=pred_evaluator[predictor_name],
+                                                       change_detector=change_detector,
+                                                       change_detection_evaluator=cd_evaluator[
+                                                           change_detector_name],
+                                                       feature_selector=feature_selector,
+                                                       feature_selection_evaluator=fs_evaluator[feature_selector_name],
+                                                       batch_size=batch_size,
+                                                       n_max=data_loader.stream.n_samples,
+                                                       known_drifts=known_drifts)
+            prequential_pipeline.run()
+            # holdout_pipeline = HoldoutPipeline(data_loader=data_loader,
+            #                                    feature_selector=feature_selector,
+            #                                    feature_selection_evaluator=fs_evaluator[feature_selector_name],
+            #                                    change_detector=change_detector,
+            #                                    change_detection_evaluator=cd_evaluator[change_detector_name],
+            #                                    predictor=predictor,
+            #                                    prediction_evaluator=pred_evaluator[predictor_name],
+            #                                    batch_size=batch_size,
+            #                                    n_max=data_loader.stream.n_samples - 10,
+            #                                    known_drifts=known_drifts,
+            #                                    evaluation_interval=10,
+            #                                    test_set=data_loader.get_data(10),
+            #                                    test_obs_interval=5)
+            # holdout_pipeline.run()
 
 plot(measures=[pred_evaluator['Perceptron'].result['mean_drift_performance_deterioration']['measures']],
      variances=[pred_evaluator['Perceptron'].result['mean_drift_performance_deterioration']['var']],

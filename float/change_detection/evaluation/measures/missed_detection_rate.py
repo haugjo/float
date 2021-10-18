@@ -44,4 +44,4 @@ def missed_detection_rate(evaluator: ChangeDetectionEvaluator, drifts: list, n_d
     Returns:
         float: The fraction of missed known concept drifts.
     """
-    return 1 - detected_change_rate(evaluator, drifts, n_delay)
+    return 1 - detected_change_rate(evaluator=evaluator, drifts=drifts, n_delay=n_delay)

@@ -45,21 +45,21 @@ def mean_drift_performance_deterioration(result: dict, known_drifts: Union[List[
             we investigate the a performance decay of the reference measure.
 
     Returns:
-        float: Current mean performance decay after (known) concept drifts regarding the reference measure.
+        float: Current mean performance deterioration after (known) concept drifts regarding the reference measure.
     """
     init_interval = interval
     len_result = len(result[reference_measure.__name__]['measures'])
 
-    # Get previous mean decay
-    if len_result > 0:
-        decay = result['mean_drift_performance_deterioration']['measures'][-1]
+    # Get previous mean deterioration
+    if len_result > 1:
+        deter = result['mean_drift_performance_deterioration']['measures'][-1]
     else:
-        decay = 0
+        deter = 0
 
     # Compute performance decay for each known drift that has already happened
     for i, kd in enumerate(known_drifts):
         if isinstance(kd, tuple):
-            drift_t = round(kd[0] / batch_size)  # consider beginning of drift as reference point
+            drift_t = round(kd[0] / batch_size)  # Consider beginning of drift as reference point
         else:
             drift_t = round(kd / batch_size)
 
@@ -77,12 +77,12 @@ def mean_drift_performance_deterioration(result: dict, known_drifts: Union[List[
                 before_scores = result[reference_measure.__name__]['measures'][drift_t - interval:drift_t]
                 after_scores = result[reference_measure.__name__]['measures'][drift_t:drift_t + interval]
                 diff_new = np.mean(after_scores) - np.mean(before_scores)
-                decay = decay + (diff_new - decay) / (i * init_interval + interval)  # incremental mean
+                deter = deter + (diff_new - deter) / (i * init_interval + interval)  # Incremental mean
             else:
-                warnings.warn('The reference measure {} is not part of the PredictionEvaluator; we return 0 per '
-                              'default. Please provide {} to the PredictionEvaluator and rerun.'.format(
+                warnings.warn("The reference measure {} is not part of the PredictionEvaluator; we return 0 per "
+                              "default. Please provide {} to the PredictionEvaluator and rerun.".format(
                     reference_measure.__name__, reference_measure.__name__))
         else:
-            break  # other known drifts have not been reached yet
+            break  # Return, since other known drifts have not been reached yet
 
-    return decay
+    return deter

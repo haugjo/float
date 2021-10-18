@@ -62,7 +62,7 @@ class Adwin(BaseChangeDetector):
             pr: Boolean indicating a correct prediction.
                 If True the prediction by the online learner was correct, False otherwise.
         """
-        self._active_change = self._adaptive_windowing.set_input(pr)
+        self._active_change = self._adaptive_windowing.set_input(pr=pr)
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""

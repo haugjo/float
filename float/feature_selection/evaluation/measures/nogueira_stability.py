@@ -49,6 +49,6 @@ def nogueira_stability(selected_features: ArrayLike, n_total_features: int) -> f
         denom = (kbar / d) * (1 - kbar / d)
         stability = 1 - (M / (M - 1)) * np.mean(np.multiply(hatPF, 1 - hatPF)) / denom
     except ZeroDivisionError:
-        stability = 0  # metric requires at least 2 measurements and thus runs an error at t=1
+        stability = 0  # The measure requires at least 2 measurements and thus runs an error at t=1
 
     return stability

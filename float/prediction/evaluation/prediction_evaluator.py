@@ -100,11 +100,11 @@ class PredictionEvaluator:
         Raises:
             TypeError: If the calculation of a measure runs an error.
         """
-        self.kwargs['y_true'] = copy.copy(y_true)
-        self.kwargs['y_pred'] = copy.copy(y_pred)
-        self.kwargs['X'] = copy.copy(X)
-        self.kwargs['predictor'] = copy.deepcopy(predictor)
-        self.kwargs['result'] = copy.deepcopy(self.result)
+        self.kwargs['y_true'] = y_true
+        self.kwargs['y_pred'] = y_pred
+        self.kwargs['X'] = X
+        self.kwargs['predictor'] = predictor
+        self.kwargs['result'] = self.result
 
         for measure_func in self.measure_funcs:  # run each evaluation measure
             try:

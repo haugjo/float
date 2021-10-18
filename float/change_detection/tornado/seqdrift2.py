@@ -52,12 +52,12 @@ class SeqDrift2(BaseChangeDetector):
 
         self._DELTA = delta
         self._BLOCK_SIZE = block_size
-        self._seq_drift2 = _SeqDrift2Tornado(self._DELTA, self._BLOCK_SIZE)
+        self._seq_drift2 = _SeqDrift2Tornado(_significanceLevel=self._DELTA, _blockSize=self._BLOCK_SIZE)
         self._active_change = False
 
     def reset(self):
         """Resets the change detector."""
-        self._seq_drift2 = _SeqDrift2Tornado(self._DELTA, self._BLOCK_SIZE)
+        self._seq_drift2 = _SeqDrift2Tornado(_significanceLevel=self._DELTA, _blockSize=self._BLOCK_SIZE)
 
     def partial_fit(self, pr: bool):
         """Updates the change detector.
@@ -66,7 +66,7 @@ class SeqDrift2(BaseChangeDetector):
             pr: Boolean indicating a correct prediction.
                 If True the prediction by the online learner was correct, False otherwise.
         """
-        self._active_change = self._seq_drift2.setInput(pr)
+        self._active_change = self._seq_drift2.setInput(_inputValue=pr)
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""

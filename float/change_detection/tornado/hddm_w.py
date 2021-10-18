@@ -88,9 +88,11 @@ class HDDMW(BaseChangeDetector):
             self._total.independent_bounded_condition_sum = 1.0
         else:
             self._total.EWMA_estimator = self._lambda_ * pr + aux_decay_rate * self._total.EWMA_estimator
-            self._total.independent_bounded_condition_sum = self._lambda_ * self._lambda_ + aux_decay_rate * aux_decay_rate * self._total.independent_bounded_condition_sum
+            self._total.independent_bounded_condition_sum = self._lambda_ * self._lambda_ + aux_decay_rate \
+                                                            * aux_decay_rate \
+                                                            * self._total.independent_bounded_condition_sum
 
-        self._update_incr_statistics(pr)
+        self._update_incr_statistics(pr=pr)
 
         if self._monitor_mean_incr(self._drift_confidence):
             self._reset_parameters()
@@ -98,9 +100,9 @@ class HDDMW(BaseChangeDetector):
         elif self._monitor_mean_incr(self._warning_confidence):
             self._active_warning = True
 
-        self._update_decr_statistics(pr)
+        self._update_decr_statistics(pr=pr)
 
-        if self._test_type != 'one-sided' and self._monitor_mean_decr(self._drift_confidence):
+        if self._test_type != 'one-sided' and self._monitor_mean_decr(confidence_level=self._drift_confidence):
             self._reset_parameters()
 
     def detect_change(self) -> bool:

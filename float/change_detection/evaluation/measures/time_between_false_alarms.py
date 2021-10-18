@@ -42,11 +42,11 @@ def time_between_false_alarms(evaluator: ChangeDetectionEvaluator, drifts: list,
     Returns:
         float: The mean time between false alarms in number of observations.
     """
-    if len(drifts) == 0:  # if there is no detected drift, the time between false alarms is zero
+    if len(drifts) == 0:  # If there is no detected drift, the time between false alarms is zero
         return 0
 
     iter_drifts = iter(evaluator.known_drifts)
-    detections = np.asarray(drifts) * evaluator.batch_size  # translate drifts to relative position in dataset
+    detections = np.asarray(drifts) * evaluator.batch_size  # Translate drifts to relative position in dataset
     time_between = 0
     n_diffs = 0
     last_false_alarm = 0
@@ -54,7 +54,7 @@ def time_between_false_alarms(evaluator: ChangeDetectionEvaluator, drifts: list,
     drift = next(iter_drifts, None)
     while drift is not None:
         # Find end of considered search space
-        if isinstance(drift, tuple):  # incremental/gradual drifts involve a starting and end point
+        if isinstance(drift, tuple):  # Incremental/gradual drifts involve a starting and end point
             end_search = drift[0]
         else:
             end_search = drift
@@ -66,14 +66,12 @@ def time_between_false_alarms(evaluator: ChangeDetectionEvaluator, drifts: list,
         if len(relevant_drifts) > 0:
             if last_false_alarm != 0:
                 diffs = np.append(diffs, relevant_drifts[0] - last_false_alarm)
-            last_false_alarm = relevant_drifts[-1]  # update last false alarm
+            last_false_alarm = relevant_drifts[-1]
         time_between += np.sum(diffs)
         n_diffs += len(diffs)
 
-        # Update starting point
         start_search = end_search + n_delay
-
-        drift = next(iter_drifts, None)  # get next drift
+        drift = next(iter_drifts, None)
 
     # Finally, add all false discoveries after the last known drift
     relevant_drifts = [det for det in detections if det >= start_search]

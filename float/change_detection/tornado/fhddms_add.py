@@ -51,7 +51,7 @@ class FHDDMSAdd(BaseChangeDetector):
         self._ELEMENT_SIZE = n
         self._DELTA = delta
         self._stack = []
-        self._init_stack(m)
+        self._init_stack(size=m)
         self._first_round = True
         self._counter = 0
         self._mu_max_short = 0
@@ -61,7 +61,7 @@ class FHDDMSAdd(BaseChangeDetector):
 
     def reset(self):
         """Resets the change detector."""
-        self._init_stack(len(self._stack))
+        self._init_stack(size=len(self._stack))
         self._first_round = True
         self._counter = 0
         self._mu_max_short = 0
@@ -103,7 +103,7 @@ class FHDDMSAdd(BaseChangeDetector):
             m_temp = self._stack[index] / self._ELEMENT_SIZE
             if self._mu_max_short < m_temp:
                 self._mu_max_short = m_temp
-            if self._mu_max_short - m_temp > self.__cal_hoeffding_bound(self._ELEMENT_SIZE):
+            if self._mu_max_short - m_temp > self.__cal_hoeffding_bound(n=self._ELEMENT_SIZE):
                 self._active_change = True
 
         # TESTING THE WHOLE WINDOW
@@ -111,7 +111,7 @@ class FHDDMSAdd(BaseChangeDetector):
             m_temp = self._num_ones / (len(self._stack) * self._ELEMENT_SIZE)
             if self._mu_max_large < m_temp:
                 self._mu_max_large = m_temp
-            if self._mu_max_large - m_temp > self.__cal_hoeffding_bound(len(self._stack) * self._ELEMENT_SIZE):
+            if self._mu_max_large - m_temp > self.__cal_hoeffding_bound(n=len(self._stack) * self._ELEMENT_SIZE):
                 self._active_change = True
 
     def detect_change(self) -> bool:

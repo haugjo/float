@@ -106,11 +106,11 @@ class HDDMA(BaseChangeDetector):
             self._c_max = self._total_c
             self._n_max = self._total_n
 
-        if self._mean_incr(self._drift_confidence):
+        if self._mean_incr(confidence_level=self._drift_confidence):
             self._n_min = self._n_max = self._total_n = 0
             self._c_min = self._c_max = self._total_c = 0
             self._active_change = True
-        elif self._mean_incr(self._warning_confidence):
+        elif self._mean_incr(confidence_level=self._warning_confidence):
             self._active_warning = True
 
         # 2. UPDATING WARNING AND DRIFT STATUSES
