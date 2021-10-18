@@ -178,14 +178,18 @@ class BasePipeline(metaclass=ABCMeta):
                     self.change_detector.drifts.append(self.time_step)
 
                 # Reset modules
-                if self.data_loader.scaler.reset_after_drift:
-                    self.data_loader.scaler.reset()
-                if self.feature_selector.reset_after_drift:
-                    self.feature_selector.reset()
-                if self.predictor.reset_after_drift:
-                    self.predictor.reset(X_train, y_train)
-                if self.change_detector.reset_after_drift:
-                    self.change_detector.reset()
+                if self.data_loader.scaler:
+                    if self.data_loader.scaler.reset_after_drift:
+                        self.data_loader.scaler.reset()
+                if self.feature_selector:
+                    if self.feature_selector.reset_after_drift:
+                        self.feature_selector.reset()
+                if self.predictor:
+                    if self.predictor.reset_after_drift:
+                        self.predictor.reset(X_train, y_train)
+                if self.change_detector:
+                    if self.change_detector.reset_after_drift:
+                        self.change_detector.reset()
 
             partial_change_detected, partial_change_features = self.change_detector.detect_partial_change()
             if partial_change_detected:

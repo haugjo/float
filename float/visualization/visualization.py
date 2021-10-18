@@ -29,8 +29,8 @@ def plot(measures, labels, measure_name, measure_type, variances=None, fig_size=
     Returns:
         Axes: the Axes object containing the line plot
     """
-    if measure_type not in ['prediction', 'change_detection']:
-        warnings.warn(f'Only measures of type "prediction" or "change_detection" can be visualized with method plot.')
+    if measure_type not in ['prediction', 'change_detection', 'feature_selection']:
+        warnings.warn(f'Only measures of type "prediction", "change_detection" or "feature_selection" can be visualized with method plot.')
         return
 
     fig, ax = plt.subplots(figsize=fig_size)
