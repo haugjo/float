@@ -1,9 +1,30 @@
-"""
-The float.pipeline module includes methods for creating and triggering events.
-"""
+"""Pipeline Module.
 
+This module contains functionality to construct a pipeline and run experiments in a standardized and modular fashion.
+In general, we recommend building custom experiments around a pipeline object.
+
+Copyright (C) 2021 Johannes Haug
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 from .base_pipeline import BasePipeline
-from .prequential_pipeline import PrequentialPipeline
 from .holdout_pipeline import HoldoutPipeline
+from .prequential_pipeline import PrequentialPipeline
 
 __all__ = ['BasePipeline', 'PrequentialPipeline', 'HoldoutPipeline']
