@@ -39,7 +39,7 @@ def plot(measures, labels, measure_name, measure_type, variances=None, fig_size=
         y = savgol_filter(measure, 51, 3) if smooth_curve_i else measure
         ax.plot(np.arange(len(measure)), y, color=palette[i], label=label)
         if variances:
-            ax.fill_between(np.arange(len(measure)), y - (np.array(variances[i])/2), y + (np.array(variances[i])/2), color=palette[i], alpha=0.5, label=label + ' var')
+            ax.fill_between(np.arange(len(measure)), y - (np.array(variances[i])/2), y + (np.array(variances[i])/2), color=palette[i], alpha=0.5)
 
     x_label = 'Delay Range' if measure_type == 'change_detection' else 'Time Step $t$'
     ax.set_xlabel(x_label, size=font_size, labelpad=1.6)
