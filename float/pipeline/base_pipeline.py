@@ -69,9 +69,9 @@ class BasePipeline(metaclass=ABCMeta):
             Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
             Note that this delivers only an indication of the approximate memory consumption and can significantly
             increase the total run time of the pipeline.
-        evaluation_interval (int | None):
-            The interval/frequency at which the online learning models are evaluated. This parameter is only relevant in
-            a periodic Holdout evaluation.
+        test_interval (int):
+            The interval/frequency at which the online learning models are evaluated. This parameter is always 1 for a
+            prequential evaluation.
         rng (Generator): A numpy random number generator object.
         start_time (float): Physical start time.
         time_step (int): Current logical time step, i.e. iteration.
@@ -79,18 +79,19 @@ class BasePipeline(metaclass=ABCMeta):
     """
     def __init__(self,
                  data_loader: DataLoader,
-                 predictor: Optional[BasePredictor] = None,
-                 prediction_evaluator: Optional[PredictionEvaluator] = None,
-                 change_detector: Optional[BaseChangeDetector] = None,
-                 change_detection_evaluator: Optional[ChangeDetectionEvaluator] = None,
-                 feature_selector: Optional[BaseFeatureSelector] = None,
-                 feature_selection_evaluator: Optional[FeatureSelectionEvaluator] = None,
-                 batch_size: int = 1,
-                 n_pretrain: int = 100, n_max: int = np.inf,
-                 known_drifts: Optional[Union[List[int], List[tuple]]] = None,
-                 estimate_memory_alloc: bool = False,
-                 evaluation_interval: Optional[int] = None,
-                 random_state: int = 0):
+                 predictor: Optional[BasePredictor],
+                 prediction_evaluator: Optional[PredictionEvaluator],
+                 change_detector: Optional[BaseChangeDetector],
+                 change_detection_evaluator: Optional[ChangeDetectionEvaluator],
+                 feature_selector: Optional[BaseFeatureSelector],
+                 feature_selection_evaluator: Optional[FeatureSelectionEvaluator],
+                 batch_size: int,
+                 n_pretrain: int,
+                 n_max: int,
+                 known_drifts: Optional[Union[List[int], List[tuple]]],
+                 estimate_memory_alloc: bool,
+                 test_interval: int,
+                 random_state: int):
         """Initializes the pipeline.
 
         Args:
@@ -109,9 +110,9 @@ class BasePipeline(metaclass=ABCMeta):
                 Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
                 Note that this delivers only an indication of the approximate memory consumption and can significantly
                 increase the total run time of the pipeline.
-            evaluation_interval: Todo: remove from abstract class, as it is only used by the Holdout pipeline
-                The interval/frequency at which the online learning models are evaluated. This parameter is only
-                relevant in a periodic Holdout evaluation.
+            test_interval:
+                The interval/frequency at which the online learning models are evaluated. This parameter is always 1 for
+                a prequential evaluation.
             random_state: A random integer seed used to specify a random number generator.
 
         Raises:
@@ -129,18 +130,14 @@ class BasePipeline(metaclass=ABCMeta):
         self.n_max = n_max
         self.known_drifts = known_drifts
         self.estimate_memory_alloc = estimate_memory_alloc
-        self.evaluation_interval = evaluation_interval if evaluation_interval else 1
+        self.test_interval = test_interval
         self.rng = np.random.default_rng(seed=random_state)
 
         self.start_time = 0
         self.time_step = 0
         self.n_total = 0
 
-        try:
-            self._validate()
-        except AttributeError:
-            traceback.print_exc(limit=1)
-            return
+        self._validate()
 
     @abstractmethod
     def run(self):
@@ -151,18 +148,24 @@ class BasePipeline(metaclass=ABCMeta):
         """Validates the input parameters.
 
         Raises:
-            AttributeError: If a crucial parameter to run the pipeline is missing.
+            AttributeError: If a crucial parameter to run the pipeline is missing or is invalid.
         """
         if type(self.data_loader) is not DataLoader:
             raise AttributeError("No valid DataLoader object was provided.")
+
         if not issubclass(type(self.feature_selector), BaseFeatureSelector) and \
                 not issubclass(type(self.change_detector), BaseChangeDetector) and \
                 not issubclass(type(self.predictor), BasePredictor):
             raise AttributeError("No valid FeatureSelector, ConceptDriftDetector or Predictor object was provided.")
+
         if self.change_detector:
             if self.change_detector.error_based and not issubclass(type(self.predictor), BasePredictor):
                 raise AttributeError("An error-based Concept Drift Detector cannot be used without a valid Predictor "
                                      "object.")
+
+        if self.feature_selector:
+            if not self.feature_selector.supports_multi_class and self.data_loader.stream.n_classes > 2:
+                raise AttributeError("The provided Feature Selector does not support multiclass targets.")
 
     def _start_evaluation(self):
         """Starts the evaluation."""
@@ -195,6 +198,9 @@ class BasePipeline(metaclass=ABCMeta):
         X_train, y_train = train_set
         X_test, y_test = test_set if test_set else train_set
 
+        # ----------------------------------------
+        # Online Feature Selection
+        # ----------------------------------------
         if self.feature_selector:
             if self.estimate_memory_alloc:
                 start_snapshot = tracemalloc.take_snapshot()
@@ -208,20 +214,27 @@ class BasePipeline(metaclass=ABCMeta):
                     self._get_memory_snapshot_diff(start_snapshot=start_snapshot))
 
             X_train = self.feature_selector.select_features(X=copy.copy(X_train), rng=self.rng)
-            self.feature_selection_evaluator.run(self.feature_selector.selected_features,
-                                                 self.feature_selector.n_total_features)
 
+            if not self.time_step % self.test_interval:
+                self.feature_selection_evaluator.run(self.feature_selector.selected_features,
+                                                     self.feature_selector.n_total_features)
+
+        # ----------------------------------------
+        # Prediction
+        # ----------------------------------------
+        y_pred = None
         if self.predictor:
-            start_time = time.time()
-            y_pred = self.predictor.predict(X_test)
-            self.prediction_evaluator.testing_comp_times.append(time.time() - start_time)
+            if (self.n_pretrain > 0 or self.time_step > 0) and X_test.shape[0] > 0:  # Predict/Test if model has already been trained.
+                start_time = time.time()
+                y_pred = self.predictor.predict(X_test)
+                self.prediction_evaluator.testing_comp_times.append(time.time() - start_time)
 
-            if not self.time_step == 0 and not self.time_step % self.evaluation_interval:  # Todo: why not evaluate at time step t=0?
-                self.prediction_evaluator.run(y_true=copy.copy(y_test),
-                                              y_pred=copy.copy(y_pred),
-                                              X=copy.copy(X_test),
-                                              predictor=self.predictor,
-                                              rng=self.rng)
+                if not self.time_step % self.test_interval:
+                    self.prediction_evaluator.run(y_true=copy.copy(y_test),
+                                                  y_pred=copy.copy(y_pred),
+                                                  X=copy.copy(X_test),
+                                                  predictor=self.predictor,
+                                                  rng=self.rng)
 
             if self.estimate_memory_alloc:
                 start_snapshot = tracemalloc.take_snapshot()
@@ -234,14 +247,19 @@ class BasePipeline(metaclass=ABCMeta):
                 self.prediction_evaluator.memory_changes.append(
                     self._get_memory_snapshot_diff(start_snapshot=start_snapshot))
 
+        # ----------------------------------------
+        # Concept Drift Detection
+        # ----------------------------------------
         if self.change_detector:
             if self.estimate_memory_alloc:
                 start_snapshot = tracemalloc.take_snapshot()
 
             start_time = time.time()
             if self.change_detector.error_based:
-                for val in (y_pred == y_test):
-                    self.change_detector.partial_fit(val)
+                if y_pred is not None:
+                    # If the predictor has not been pre-trained, then there is no prediction in the first time step.
+                    for val in (y_pred == y_test):
+                        self.change_detector.partial_fit(val)
             else:
                 self.change_detector.partial_fit(X=copy.copy(X_train), y=copy.copy(y_train))
             self.change_detection_evaluator.comp_times.append(time.time() - start_time)
@@ -254,8 +272,7 @@ class BasePipeline(metaclass=ABCMeta):
                 self.change_detector.warnings.append(self.time_step)
 
             if self.change_detector.detect_change():
-                if self.time_step not in self.change_detector.drifts:  # Todo: is this if-clause really necessary?
-                    self.change_detector.drifts.append(self.time_step)
+                self.change_detector.drifts.append(self.time_step)
 
                 # Reset modules
                 if self.data_loader.scaler:
@@ -273,10 +290,9 @@ class BasePipeline(metaclass=ABCMeta):
 
             partial_change_detected, partial_change_features = self.change_detector.detect_partial_change()
             if partial_change_detected:
-                if self.time_step not in self.change_detector.partial_drifts:  # Todo: is this if-clause really necessary?
-                    self.change_detector.partial_drifts.append((self.time_step, partial_change_features))
+                self.change_detector.partial_drifts.append((self.time_step, partial_change_features))
 
-            if last_iteration:
+            if last_iteration:  # The concept drift detection is only evaluated in the last iteration.
                 self.change_detection_evaluator.run(self.change_detector.drifts)
 
     def _get_n_batch(self) -> int:

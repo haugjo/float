@@ -47,9 +47,11 @@ class PrequentialPipeline(BasePipeline):
                  feature_selector: Optional[BaseFeatureSelector] = None,
                  feature_selection_evaluator: Optional[FeatureSelectionEvaluator] = None,
                  batch_size: int = 1,
-                 n_pretrain: int = 100, n_max: int = np.inf,
+                 n_pretrain: int = 100,
+                 n_max: int = np.inf,
                  known_drifts: Optional[Union[List[int], List[tuple]]] = None,
-                 estimate_memory_alloc: bool = False):
+                 estimate_memory_alloc: bool = False,
+                 random_state: int = 0):
         """Initializes the pipeline.
 
         Args:
@@ -68,6 +70,7 @@ class PrequentialPipeline(BasePipeline):
                 Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
                 Note that this delivers only an indication of the approximate memory consumption and can significantly
                 increase the total run time of the pipeline.
+            random_state: A random integer seed used to specify a random number generator.
         """
         super().__init__(data_loader=data_loader,
                          predictor=predictor,
@@ -80,7 +83,9 @@ class PrequentialPipeline(BasePipeline):
                          n_pretrain=n_pretrain,
                          n_max=n_max,
                          known_drifts=known_drifts,
-                         estimate_memory_alloc=estimate_memory_alloc)
+                         estimate_memory_alloc=estimate_memory_alloc,
+                         test_interval=1,  # Defaults to one for a prequential evaluation.
+                         random_state=random_state)
 
     def run(self):
         """Runs the pipeline."""
@@ -111,7 +116,7 @@ class PrequentialPipeline(BasePipeline):
 
             try:
                 self._run_iteration(train_set=train_set, last_iteration=last_iteration)
-            except BaseException:
+            except BaseException:  # This exception is left unspecific on purpose to fetch all possible errors.
                 traceback.print_exc()
                 break
 
