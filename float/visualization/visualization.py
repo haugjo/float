@@ -343,8 +343,8 @@ def spider_chart(measures, labels, measure_names):
     ax.set_theta_direction(-1)
     plt.xticks(angles[:-1], measure_names)
     ax.set_rlabel_position(0)
-    plt.yticks([0, 0.5, 1], ["0", "0.5", "1"], color=palette[-1], size=7)
-    plt.ylim(0, 1)
+    plt.yticks([0, 0.125, 0.25], ["0", "0.125", "0.25"], color=palette[-1], size=7)
+    plt.ylim(0, 0.25)
 
     for i, (measure, label) in enumerate(zip(measures, labels)):
         measure += measure[:1]
