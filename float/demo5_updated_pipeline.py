@@ -3,7 +3,7 @@ from skmultiflow.drift_detection.eddm import EDDM
 from skmultiflow.drift_detection.ddm import DDM as DDM_scikit
 from skmultiflow.neural_networks.perceptron import PerceptronMask
 import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score, zero_one_loss
+from sklearn.metrics import accuracy_score, zero_one_loss, precision_score
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, Normalizer
 
 from float.data import DataLoader
@@ -22,7 +22,8 @@ from float.pipeline import HoldoutPipeline
 from float.prediction.skmultiflow import SkmultiflowClassifier
 from float.prediction.evaluation import PredictionEvaluator
 from float.prediction.evaluation.measures import noise_variability, mean_drift_performance_deterioration, mean_drift_restoration_time
-from float.visualization import plot, selected_features_scatter, top_features_reference_bar, concept_drifts_scatter, spider_chart
+from float.visualization import plot, scatter, feature_selection_scatter, \
+    concept_drift_detection_scatter, feature_selection_bar
 
 ### Initialize Data Loader ###
 scaler = SklearnScaler(scaler_obj=MinMaxScaler(), reset_after_drift=False)
@@ -34,16 +35,17 @@ batch_size = 10
 feature_names = data_loader.stream.feature_names
 
 change_detector_names = [  # 'ADWIN',
-    'EDDM', 'DDM_sk',
+    'EDDM', #'DDM_sk',
     # 'DDM',
-    'ERICS', 'Page Hinkley'
+    #'ERICS', 'Page Hinkley'
 ]  # Todo: Remove, and use class names instead?
 change_detectors = [  # SkmultiflowChangeDetector(ADWIN(delta=0.6), reset_after_drift=False),
     SkmultiflowChangeDetector(EDDM(), reset_after_drift=True),
-    SkmultiflowChangeDetector(DDM_scikit(), reset_after_drift=True),
+    #SkmultiflowChangeDetector(DDM_scikit(), reset_after_drift=True),
     # SeqDrift2(reset_after_drift=True),
     ERICS(data_loader.stream.n_features),
-    PageHinkley(reset_after_drift=True)]
+    # PageHinkley(reset_after_drift=True)
+    ]
 cd_evaluator = dict()
 
 pred_evaluator = dict()
@@ -88,7 +90,6 @@ for change_detector_name, change_detector in zip(change_detector_names, change_d
                                                                           n_init_tolerance=100)
 
             ### Initialize and run Prequential Pipeline ###
-            """
             prequential_pipeline = PrequentialPipeline(data_loader=data_loader,
                                                        predictor=predictor,
                                                        prediction_evaluator=pred_evaluator[predictor_name],
@@ -120,59 +121,38 @@ for change_detector_name, change_detector in zip(change_detector_names, change_d
                                                test_replace_interval=20,
                                                random_state=0)
             holdout_pipeline.run()
+            """
 
 plot(measures=[pred_evaluator['Perceptron'].result['mean_drift_performance_deterioration']['measures']],
-     variances=[pred_evaluator['Perceptron'].result['mean_drift_performance_deterioration']['var']],
-     labels=['Perceptron'],
-     measure_name='Drift Performance Decay',
-     measure_type='prediction',
-     smooth_curve=[False])
+     variance_measures=[pred_evaluator['Perceptron'].result['mean_drift_performance_deterioration']['var']],
+     legend_labels=['Perceptron'],
+     y_label='Drift Performance Decay')
+plt.show()
+
+scatter(measures=[pred_evaluator['Perceptron'].result['mean_drift_performance_deterioration']['measures']],
+        legend_labels=['Perceptron'],
+        y_label='Drift Performance Decay')
 plt.show()
 
 plot(measures=[pred_evaluator['Perceptron'].result['mean_drift_restoration_time']['measures']],
-     variances=[pred_evaluator['Perceptron'].result['mean_drift_restoration_time']['var']],
-     labels=['Perceptron'],
-     measure_name='Drift Recovery Time',
-     measure_type='prediction',
-     smooth_curve=[False])
+     variance_measures=[pred_evaluator['Perceptron'].result['mean_drift_restoration_time']['var']],
+     legend_labels=['Perceptron'],
+     y_label='Drift Recovery Time')
 plt.show()
 
-top_features_reference_bar(measures=[feature_selectors[0].selected_features_history],
-                           labels=['FIRES'],
-                           measure_type='feature_selection',
-                           feature_names=feature_names,
-                           fig_size=(15, 5))
+feature_selection_bar(selected_features=[feature_selectors[0].selected_features_history],
+                      model_names=['FIRES'],
+                      feature_names=feature_names,
+                      fig_size=(15, 5))
 plt.show()
 
-selected_features_scatter(measures=[feature_selectors[0].selected_features_history],
-                          labels=['FIRES'],
-                          measure_type='feature_selection',
-                          layout=(1, 1),
-                          fig_size=(10, 8))
+feature_selection_scatter(selected_features=feature_selectors[0].selected_features_history, fig_size=(10, 8))
 plt.show()
 
-plot(measures=[cd_evaluator['ERICS'].result['false_discovery_rate']['measures'], cd_evaluator['Page Hinkley'].result['false_discovery_rate']['measures']],
-     variances=[cd_evaluator['ERICS'].result['false_discovery_rate']['var'], cd_evaluator['Page Hinkley'].result['false_discovery_rate']['var']],
-     labels=['ERICS', 'Page Hinkley'],
-     measure_name='False Discovery Rate',
-     measure_type='change_detection')
-plt.show()
-
-concept_drifts_scatter(measures=[change_detectors[-2].drifts, change_detectors[-1].drifts],
-                       labels=['ERICS', 'Page Hinkley'],
-                       measure_type='change_detection',
-                       data_stream=data_loader.stream,
-                       known_drifts=known_drifts,
-                       batch_size=batch_size)
-plt.show()
-
-spider_chart(measures=[[pred_evaluator['Perceptron'].result['accuracy_score']['mean'][-1], pred_evaluator['Perceptron'].result['zero_one_loss']['mean'][-1],
-                        pred_evaluator['Perceptron'].result['noise_variability']['mean'][-1], fs_evaluator['FIRES'].result['nogueira_stability']['mean'][-1],
-                        cd_evaluator['ERICS'].result['missed_detection_rate']['mean'], cd_evaluator['ERICS'].result['false_discovery_rate']['mean']],
-                       [pred_evaluator['Perceptron'].result['accuracy_score']['mean'][-1], pred_evaluator['Perceptron'].result['zero_one_loss']['mean'][-1],
-                        pred_evaluator['Perceptron'].result['noise_variability']['mean'][-1], fs_evaluator['FIRES'].result['nogueira_stability']['mean'][-1],
-                        cd_evaluator['Page Hinkley'].result['missed_detection_rate']['mean'], cd_evaluator['Page Hinkley'].result['false_discovery_rate']['mean']]
-                       ],
-             labels=['ERICS', 'Page Hinkley'],
-             measure_names=['accuracy_score', 'zero_one_loss', 'noise_variability', 'nogueira_stability', 'missed_detection_rate', 'false_discovery_rate'])
+concept_drift_detection_scatter(detected_drifts=[change_detectors[0].drifts, change_detectors[1].drifts],
+                                model_names=['ERICS', 'Page Hinkley'],
+                                n_samples=data_loader.stream.n_samples,
+                                known_drifts=known_drifts,
+                                batch_size=batch_size,
+                                n_pretrain=0)
 plt.show()

@@ -27,7 +27,6 @@ from . import data
 from . import feature_selection
 from . import pipeline
 from . import prediction
-from . import unit_tests
 from . import visualization
 
-__all__ = ['change_detection', 'data', 'feature_selection', 'pipeline', 'prediction', 'unit_tests', 'visualization']
+__all__ = ['change_detection', 'data', 'feature_selection', 'pipeline', 'prediction', 'visualization']

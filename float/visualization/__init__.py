@@ -22,8 +22,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from .visualization import plot, scatter, bar, selected_features_scatter, top_features_bar, top_features_bar, \
-    top_features_reference_bar, concept_drifts_scatter, spider_chart
+from .visualization import plot, scatter, bar, feature_selection_scatter, feature_selection_bar,\
+    concept_drift_detection_scatter
 
-__all__ = ['plot', 'scatter', 'bar', 'selected_features_scatter', 'top_features_bar', 'top_features_reference_bar',
-           'concept_drifts_scatter', 'spider_chart']
+__all__ = ['plot', 'scatter', 'bar', 'feature_selection_scatter', 'feature_selection_bar',
+           'concept_drift_detection_scatter']

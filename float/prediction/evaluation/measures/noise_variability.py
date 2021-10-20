@@ -34,8 +34,10 @@ from typing import Callable, Optional, List
 from float.prediction.base_predictor import BasePredictor
 
 
-def noise_variability(y_true: ArrayLike, y_pred: ArrayLike,
-                      X: ArrayLike, predictor: BasePredictor,
+def noise_variability(y_true: ArrayLike,
+                      y_pred: ArrayLike,
+                      X: ArrayLike,
+                      predictor: BasePredictor,
                       reference_measure: Callable = zero_one_loss,
                       cont_noise_loc: float = 0,
                       cont_noise_scale: float = 0.1,
