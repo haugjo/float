@@ -33,7 +33,6 @@ from numpy.random import Generator
 import sys
 from tabulate import tabulate
 import time
-import traceback
 import tracemalloc
 from tracemalloc import Snapshot
 from typing import Optional, Union, List, Tuple
@@ -216,7 +215,7 @@ class BasePipeline(metaclass=ABCMeta):
             X_train = self.feature_selector.select_features(X=copy.copy(X_train), rng=self.rng)
 
             if not self.time_step % self.test_interval:
-                self.feature_selection_evaluator.run(self.feature_selector.selected_features,
+                self.feature_selection_evaluator.run(self.feature_selector.selected_features_history,
                                                      self.feature_selector.n_total_features)
 
         # ----------------------------------------

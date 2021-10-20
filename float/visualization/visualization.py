@@ -191,7 +191,6 @@ def feature_selection_scatter(selected_features: list,
     ax.grid(True)
     ax.set_xlabel('Time Step $t$', size=font_size, labelpad=1.6)
     ax.set_ylabel('Feature Index', size=font_size, labelpad=1.5)
-    ax.tick_params(axis='both', labelsize=font_size * 0.7, length=0)
     ax.scatter(x, y, marker='.', zorder=100, color=_PALETTE[0], label='Selected Feature Indicator')
     ax.legend(frameon=True, loc='best', fontsize=font_size * 0.7, borderpad=0.2, handletextpad=0.2)
 

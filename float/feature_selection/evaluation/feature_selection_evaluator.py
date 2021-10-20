@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import numpy as np
-from numpy.typing import ArrayLike
 import traceback
 from typing import Optional, List, Callable
 
@@ -75,19 +74,19 @@ class FeatureSelectionEvaluator:
                 self.result[measure_func.__name__]['mean_window'] = []
                 self.result[measure_func.__name__]['var_window'] = []
 
-    def run(self, selected_features: ArrayLike, n_total_features: int):
+    def run(self, selected_features_history: List[list], n_total_features: int):
         """Updates relevant statistics and computes the evaluation measures.
 
         Args:
-            selected_features (ArrayLike): The indices of all currently selected features.
-            n_total_features (int): The total number of features.
+            selected_features_history: A list of all selected feature vectors obtained over time.
+            n_total_features: The total number of features.
 
         Raises:
             TypeError: If the calculation of a measure runs an error.
         """
         for measure_func in self.measure_funcs:
             try:
-                new_measure_val = measure_func(selected_features, n_total_features)
+                new_measure_val = measure_func(selected_features_history, n_total_features)
                 self.result[measure_func.__name__]['measures'].append(new_measure_val)
                 self.result[measure_func.__name__]['mean'].append(np.mean(self.result[measure_func.__name__]['measures']))
                 self.result[measure_func.__name__]['var'].append(np.var(self.result[measure_func.__name__]['measures']))

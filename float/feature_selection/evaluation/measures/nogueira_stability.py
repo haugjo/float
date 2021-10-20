@@ -25,21 +25,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import numpy as np
-from numpy.typing import ArrayLike
+from typing import List
 
 
-def nogueira_stability(selected_features: ArrayLike, n_total_features: int) -> float:
+def nogueira_stability(selected_features_history: List[list], n_total_features: int) -> float:
     """Calculates the Nogueira measure for feature selection stability.
 
     Args:
-        selected_features (ArrayLike): The indices of all currently selected features.
-        n_total_features (int): The total number of features.
+        selected_features_history: A list of all selected feature vectors obtained over time.
+        n_total_features: The total number of features.
 
     Returns:
         float: The feature set stability due to Nogueira et al.
     """
-    Z = np.zeros([min(len(selected_features), 2), n_total_features])
-    for row, col in enumerate(selected_features[-2:]):  # Compute stability between the last two feature sets
+    Z = np.zeros([min(len(selected_features_history), 2), n_total_features])
+    for row, col in enumerate(selected_features_history[-2:]):  # Consider a window of previous feature sets
         Z[row, col] = 1
 
     try:
