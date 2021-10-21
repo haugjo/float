@@ -39,8 +39,8 @@ _PALETTE = ['#003366', '#88ccee', '#44aa99', '#117733', '#999933', '#ddcc77', '#
 def plot(measures: List[list],
          legend_labels: List[str],
          y_label: str,
-         fig_size: tuple = (10, 5),
-         font_size: int = 12,
+         fig_size: tuple = (13, 5),
+         font_size: int = 16,
          x_label: str = 'Time Step $t$',
          variance_measures: Optional[List[list]] = None,
          apply_smoothing: bool = False) -> Axes:
@@ -66,6 +66,8 @@ def plot(measures: List[list],
         Axes: The Axes object containing the line plot.
     """
     fig, ax = plt.subplots(figsize=fig_size)
+    ax.set_axisbelow(True)
+    ax.grid(True)
 
     for i in range(len(measures)):
         if apply_smoothing:  # Apply a filter to the provided measurements to smooth the line plots
@@ -73,7 +75,7 @@ def plot(measures: List[list],
         else:
             y = measures[i]
 
-        ax.plot(np.arange(len(measures[i])), y, color=_PALETTE[i], label=legend_labels[i])
+        ax.plot(np.arange(len(measures[i])), y, color=_PALETTE[i], label=legend_labels[i], lw=2)
 
         if variance_measures:  # Display variances as shaded areas around the line plot
             ax.fill_between(np.arange(len(measures[i])),
@@ -84,8 +86,9 @@ def plot(measures: List[list],
 
     ax.set_xlabel(x_label, size=font_size, labelpad=1.6)
     ax.set_ylabel(y_label, size=font_size, labelpad=1.6)
-    plt.legend()
-    plt.margins(0.01, 0.01)
+    plt.legend(frameon=True, loc='best', fontsize=font_size * 0.8, borderpad=0.3, handletextpad=0.5)
+    plt.margins(0.01, 0.03)
+    plt.tick_params(axis='both', labelsize=font_size * 0.8, length=0)
     plt.tight_layout()
     return ax
 
@@ -93,8 +96,8 @@ def plot(measures: List[list],
 def scatter(measures: List[list],
             legend_labels: List[str],
             y_label: str,
-            fig_size: tuple = (10, 5),
-            font_size: int = 12,
+            fig_size: tuple = (13, 5),
+            font_size: int = 16,
             x_label: str = 'Time Step $t$') -> Axes:
     """Returns a scatter plot.
 
@@ -112,6 +115,8 @@ def scatter(measures: List[list],
         Axes: The Axes object containing the scatter plot.
     """
     fig, ax = plt.subplots(figsize=fig_size)
+    ax.set_axisbelow(True)
+    ax.grid(True)
 
     for i in range(len(measures)):
         ax.scatter(np.arange(len(measures[i])),
@@ -121,9 +126,9 @@ def scatter(measures: List[list],
 
     ax.set_xlabel(x_label, size=font_size, labelpad=1.6)
     ax.set_ylabel(y_label, size=font_size, labelpad=1.6)
-    ax.legend()
-
-    plt.margins(0.01, 0.01)
+    plt.legend(frameon=True, loc='best', fontsize=font_size * 0.8, borderpad=0.3, handletextpad=0.5)
+    plt.margins(0.01, 0.03)
+    plt.tick_params(axis='both', labelsize=font_size * 0.8, length=0)
     plt.tight_layout()
     return ax
 
@@ -131,8 +136,8 @@ def scatter(measures: List[list],
 def bar(measures: List[list],
         legend_labels: List[str],
         y_label: str,
-        fig_size: tuple = (10, 5),
-        font_size: int = 12,
+        fig_size: tuple = (13, 5),
+        font_size: int = 16,
         x_label: str = 'Time Step $t$') -> Axes:
     """Returns a bar plot.
 
@@ -148,6 +153,8 @@ def bar(measures: List[list],
         Axes: The Axes object containing the bar plot.
     """
     fig, ax = plt.subplots(figsize=fig_size)
+    ax.set_axisbelow(True)
+    ax.grid(True, axis='y')
     width = 0.8
     n_measures = len(measures)
 
@@ -161,15 +168,16 @@ def bar(measures: List[list],
 
     ax.set_xlabel(x_label, size=font_size, labelpad=1.6)
     ax.set_ylabel(y_label, size=font_size, labelpad=1.6)
-    plt.legend()
-    plt.margins(0.01, 0.01)
+    plt.legend(frameon=True, loc='best', fontsize=font_size * 0.8, borderpad=0.3, handletextpad=0.5)
+    plt.margins(0.01, 0.03)
+    plt.tick_params(axis='both', labelsize=font_size * 0.8, length=0)
     plt.tight_layout()
     return ax
 
 
 def feature_selection_scatter(selected_features: list,
-                              fig_size: tuple = (10, 5),
-                              font_size: int = 12) -> Axes:
+                              fig_size: tuple = (13, 5),
+                              font_size: int = 16) -> Axes:
     """Return a scatter plot that illustrate the selected features over time.
 
     Args:
@@ -182,19 +190,21 @@ def feature_selection_scatter(selected_features: list,
         Axes: The Axes object containing the plot.
     """
     fig, ax = plt.subplots(figsize=fig_size)
+    ax.set_axisbelow(True)
+    ax.grid(True)
 
     x, y = [], []
     for k, val in enumerate(selected_features):
         x.extend(np.ones(len(val), dtype=int) * k)
         y.extend(val)
 
-    ax.grid(True)
     ax.set_xlabel('Time Step $t$', size=font_size, labelpad=1.6)
     ax.set_ylabel('Feature Index', size=font_size, labelpad=1.5)
     ax.scatter(x, y, marker='.', zorder=100, color=_PALETTE[0], label='Selected Feature Indicator')
-    ax.legend(frameon=True, loc='best', fontsize=font_size * 0.7, borderpad=0.2, handletextpad=0.2)
+    ax.legend(frameon=True, loc='best', fontsize=font_size * 0.8, borderpad=0.2, handletextpad=0.2)
 
-    plt.margins(0.01, 0.01)
+    plt.margins(0.01, 0.03)
+    plt.tick_params(axis='both', labelsize=font_size * 0.8, length=0)
     plt.tight_layout()
     return ax
 
@@ -203,8 +213,8 @@ def feature_selection_bar(selected_features: List[list],
                           model_names: List[str],
                           feature_names: list,
                           top_n_features: Optional[int] = None,
-                          fig_size: tuple = (10, 5),
-                          font_size: int = 12) -> Axes:
+                          fig_size: tuple = (13, 5),
+                          font_size: int = 16) -> Axes:
     """Returns a bar plot that shows the number of times a feature was selected (between multiple models).
 
     Args:
@@ -227,6 +237,8 @@ def feature_selection_bar(selected_features: List[list],
     n_features = len(feature_names) if top_n_features is None else top_n_features
 
     fig, ax = plt.subplots(figsize=fig_size)
+    ax.set_axisbelow(True)
+    ax.grid(True, axis='y')
     order = None
     name_idx = np.arange(n_features)
 
@@ -243,7 +255,6 @@ def feature_selection_bar(selected_features: List[list],
             y = np.zeros(n_features)
             y[uniques] = counts
 
-        ax.grid(True, axis='y')
         ax.bar(np.arange(n_features) - width / 2. + i / n_models * width,
                y,
                width=width / n_models,
@@ -257,9 +268,9 @@ def feature_selection_bar(selected_features: List[list],
                ha='right')
     plt.ylabel('No. Times Selected', size=font_size, labelpad=1.5)
     plt.xlabel('Input Feature', size=font_size, labelpad=1.6)
-    plt.tick_params(axis='both', labelsize=font_size * 0.7, length=0)
-    plt.legend()
-    plt.margins(0.01, 0.01)
+    plt.legend(frameon=True, loc='best', fontsize=font_size * 0.8, borderpad=0.3, handletextpad=0.5)
+    plt.margins(0.01, 0.03)
+    plt.tick_params(axis='both', labelsize=font_size * 0.8, length=0)
     plt.tight_layout()
     return ax
 
@@ -270,8 +281,8 @@ def concept_drift_detection_scatter(detected_drifts: List[list],
                                     known_drifts: Union[List[int], List[tuple]],
                                     batch_size: int,
                                     n_pretrain: int,
-                                    fig_size: tuple = (10, 5),
-                                    font_size: int = 12) -> Axes:
+                                    fig_size: tuple = (13, 5),
+                                    font_size: int = 16) -> Axes:
     """Returns a scatter plot with the known and the detected concept drifts.
 
     Args:
@@ -295,17 +306,19 @@ def concept_drift_detection_scatter(detected_drifts: List[list],
     """
     n_models = len(detected_drifts)
     fig, ax = plt.subplots(figsize=fig_size)
+    ax.set_axisbelow(True)
+    ax.grid(True, axis='x')
 
     # Draw known drifts
     for known_drift in known_drifts:
         if isinstance(known_drift, tuple):
             ax.axvspan(round((known_drift[0] - n_pretrain) / batch_size),
                        round((known_drift[1] - n_pretrain) / batch_size),
-                       facecolor=_PALETTE[1],
-                       edgecolor=_PALETTE[0],
+                       color=_PALETTE[-3],
+                       alpha=0.5,
                        hatch="//")
         else:
-            ax.axvline(round((known_drift - n_pretrain) / batch_size), color=_PALETTE[1], lw=3, zorder=0)
+            ax.axvline(round((known_drift - n_pretrain) / batch_size), color=_PALETTE[-3], lw=3, zorder=0)
 
     # Draw detected drifts
     y_loc = 0
@@ -316,7 +329,7 @@ def concept_drift_detection_scatter(detected_drifts: List[list],
                    np.repeat(y_loc, len(detected_drifts[i])),
                    marker='|',
                    color=_PALETTE[0],
-                   s=300,
+                   s=500,
                    zorder=10)
         y_loc += (1 / n_models)
         y_tick_labels.append(model_names[i])
@@ -329,9 +342,18 @@ def concept_drift_detection_scatter(detected_drifts: List[list],
     plt.xlabel('Time Step $t$', fontsize=font_size)
 
     known_drift_patch = mlines.Line2D([], [], marker='|', linestyle='None', markersize=10, markeredgewidth=2,
-                                      color=_PALETTE[1], label='Known drifts')
+                                      color=_PALETTE[-3], label='Known drifts')
     detected_drift_patch = mlines.Line2D([], [], marker='|', linestyle='None', markersize=10, markeredgewidth=2,
                                          color=_PALETTE[0], label='Detected drifts')
-    plt.legend(handles=[known_drift_patch, detected_drift_patch])
+
+    plt.legend(handles=[known_drift_patch, detected_drift_patch],
+               frameon=True,
+               loc='best',
+               fontsize=font_size * 0.8,
+               borderpad=0.3,
+               handletextpad=0.5)
+
+    plt.margins(0.01, 0.1)
+    plt.tick_params(axis='both', labelsize=font_size * 0.8, length=0)
     plt.tight_layout()
     return ax
