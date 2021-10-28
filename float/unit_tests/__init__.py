@@ -23,8 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from .test_data_loader import TestDataLoader
+from .test_sklearn_scaler import TestSklearnScaler
 
-from .test_skmultiflow_classifier import TestSkmultiflowPerceptron
+from .test_skmultiflow_classifier import TestSkmultiflowClassifier
 from .test_prediction_evaluator import TestPredictionEvaluator
 
 from .test_cancel_out import TestCancelOutFeatureSelector
@@ -43,7 +44,7 @@ from .test_holdout_pipeline import TestHoldoutPipeline
 
 from .test_visualizer import TestVisualizer
 
-__all__ = ['TestDataLoader', 'TestSkmultiflowPerceptron', 'TestPredictionEvaluator',
+__all__ = ['TestDataLoader', 'TestSklearnScaler', 'TestSkmultiflowClassifier', 'TestPredictionEvaluator',
            'TestCancelOutFeatureSelector', 'TestEFS', 'TestFIRES', 'TestFSDS', 'TestOFS', 'TestFeatureSelectionEvaluator',
            'TestERICS', 'TestSkmultiflowDriftDetector', 'TestChangeDetectionEvaluator',
            'TestPrequentialPipeline', 'TestHoldoutPipeline', 'TestVisualizer']
