@@ -24,7 +24,7 @@ SOFTWARE.
 """
 from .test_data_loader import TestDataLoader
 
-from .test_skmultiflow_perceptron import TestSkmultiflowPerceptron
+from .test_skmultiflow_classifier import TestSkmultiflowPerceptron
 from .test_prediction_evaluator import TestPredictionEvaluator
 
 from .test_cancel_out import TestCancelOutFeatureSelector
