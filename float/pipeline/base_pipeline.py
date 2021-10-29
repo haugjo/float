@@ -76,6 +76,7 @@ class BasePipeline(metaclass=ABCMeta):
         time_step (int): Current logical time step, i.e. iteration.
         n_total (int): Total number of observations currently observed.
     """
+
     def __init__(self,
                  data_loader: DataLoader,
                  predictor: Optional[BasePredictor],
@@ -155,11 +156,11 @@ class BasePipeline(metaclass=ABCMeta):
         if not issubclass(type(self.feature_selector), BaseFeatureSelector) and \
                 not issubclass(type(self.change_detector), BaseChangeDetector) and \
                 not issubclass(type(self.predictor), BasePredictor):
-            raise AttributeError("No valid FeatureSelector, ConceptDriftDetector or Predictor object was provided.")
+            raise AttributeError("No valid FeatureSelector, ChangeDetector or Predictor object was provided.")
 
         if self.change_detector:
             if self.change_detector.error_based and not issubclass(type(self.predictor), BasePredictor):
-                raise AttributeError("An error-based Concept Drift Detector cannot be used without a valid Predictor "
+                raise AttributeError("An error-based Change Detector cannot be used without a valid Predictor "
                                      "object.")
 
         if self.feature_selector:
@@ -370,8 +371,7 @@ class BasePipeline(metaclass=ABCMeta):
                 **{'Model': [type(self.feature_selector).__name__.split('.')[-1]],
                    'Avg. Comp. Time': [np.mean(self.feature_selection_evaluator.comp_times)]},
                 **{'Avg. ' + key: [value['mean'][-1]] for key, value in self.feature_selection_evaluator.result.items()}
-            }
-                , headers="keys", tablefmt='github'))
+            }, headers="keys", tablefmt='github'))
 
         if self.change_detector:
             print('----------------------')

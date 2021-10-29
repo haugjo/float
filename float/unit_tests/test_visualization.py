@@ -1,12 +1,10 @@
 import unittest
+import float.visualization as fvis
 
 
-class TestVisualizer(unittest.TestCase):
+class TestVisualization(unittest.TestCase):
     def __init__(self, method_name):
         super().__init__(method_name)
-
-    def test_init(self):
-        pass
 
     def test_plot(self):
         pass

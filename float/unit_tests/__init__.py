@@ -42,9 +42,9 @@ from .test_change_detection_evaluator import TestChangeDetectionEvaluator
 from .test_prequential_pipeline import TestPrequentialPipeline
 from .test_holdout_pipeline import TestHoldoutPipeline
 
-from .test_visualizer import TestVisualizer
+from .test_visualization import TestVisualization
 
 __all__ = ['TestDataLoader', 'TestSklearnScaler', 'TestSkmultiflowClassifier', 'TestPredictionEvaluator',
            'TestCancelOutFeatureSelector', 'TestEFS', 'TestFIRES', 'TestFSDS', 'TestOFS', 'TestFeatureSelectionEvaluator',
            'TestERICS', 'TestSkmultiflowDriftDetector', 'TestChangeDetectionEvaluator',
-           'TestPrequentialPipeline', 'TestHoldoutPipeline', 'TestVisualizer']
+           'TestPrequentialPipeline', 'TestHoldoutPipeline', 'TestVisualization']
