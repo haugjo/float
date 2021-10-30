@@ -1,5 +1,5 @@
-import unittest
 import float.visualization as fvis
+import unittest
 
 
 class TestVisualization(unittest.TestCase):

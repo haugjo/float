@@ -1,9 +1,9 @@
-import unittest
-import numpy as np
-from skmultiflow.neural_networks import PerceptronMask
 from float.data import DataLoader
 from float.prediction.skmultiflow import SkmultiflowClassifier
+import numpy as np
 from skmultiflow.core import ClassifierMixin
+from skmultiflow.neural_networks import PerceptronMask
+import unittest
 
 
 class TestSkmultiflowClassifier(unittest.TestCase):

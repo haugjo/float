@@ -1,7 +1,7 @@
-import unittest
-import numpy as np
 from float.data.data_loader import DataLoader
 from float.feature_selection.fires import FIRES
+import numpy as np
+import unittest
 
 
 class TestFIRES(unittest.TestCase):

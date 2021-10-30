@@ -1,6 +1,6 @@
-import unittest
-from float.data.data_loader import DataLoader
 from float.change_detection.erics import ERICS
+from float.data.data_loader import DataLoader
+import unittest
 
 
 class TestERICS(unittest.TestCase):

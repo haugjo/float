@@ -1,9 +1,9 @@
-import unittest
-import numpy as np
 from float.data.data_loader import DataLoader
-from float.feature_selection.fires import FIRES
 from float.feature_selection.evaluation.feature_selection_evaluator import FeatureSelectionEvaluator
 from float.feature_selection.evaluation.measures.nogueira_stability import nogueira_stability
+from float.feature_selection.fires import FIRES
+import numpy as np
+import unittest
 
 
 class TestFeatureSelectionEvaluator(unittest.TestCase):

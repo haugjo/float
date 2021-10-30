@@ -1,7 +1,7 @@
-import unittest
 from float.data import DataLoader
 from float.data.preprocessing import SklearnScaler
 from sklearn.preprocessing import MinMaxScaler
+import unittest
 
 
 class TestSklearnScaler(unittest.TestCase):

@@ -1,11 +1,11 @@
-import unittest
-import numpy as np
 from float.data.data_loader import DataLoader
-from float.prediction.skmultiflow.skmultiflow_classifier import SkmultiflowClassifier
-from float.prediction.evaluation.prediction_evaluator import PredictionEvaluator
 from float.prediction.evaluation.measures import mean_drift_restoration_time, mean_drift_performance_deterioration, noise_variability
-from skmultiflow.neural_networks.perceptron import PerceptronMask
+from float.prediction.evaluation.prediction_evaluator import PredictionEvaluator
+from float.prediction.skmultiflow.skmultiflow_classifier import SkmultiflowClassifier
+import numpy as np
 from sklearn.metrics import accuracy_score, zero_one_loss
+from skmultiflow.neural_networks.perceptron import PerceptronMask
+import unittest
 
 
 class TestPredictionEvaluator(unittest.TestCase):

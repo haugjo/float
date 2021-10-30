@@ -1,7 +1,7 @@
-import unittest
+from float.change_detection.skmultiflow.skmultiflow_change_detector import SkmultiflowChangeDetector
 from skmultiflow.drift_detection.base_drift_detector import BaseDriftDetector
 from skmultiflow.drift_detection.ddm import DDM
-from float.change_detection.skmultiflow.skmultiflow_change_detector import SkmultiflowChangeDetector
+import unittest
 
 
 class TestSkmultiflowDriftDetector(unittest.TestCase):

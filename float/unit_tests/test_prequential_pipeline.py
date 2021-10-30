@@ -1,15 +1,17 @@
-import unittest
-import numpy as np
-from float.data import DataLoader
-from float.change_detection.skmultiflow import SkmultiflowChangeDetector
 from float.change_detection.evaluation import ChangeDetectionEvaluator
+from float.change_detection.skmultiflow import SkmultiflowChangeDetector
+from float.data import DataLoader
 from float.feature_selection import OFS
 from float.feature_selection.evaluation import FeatureSelectionEvaluator
+from float.feature_selection.evaluation.measures import nogueira_stability
 from float.pipeline import PrequentialPipeline
-from float.prediction.skmultiflow import SkmultiflowClassifier
 from float.prediction.evaluation import PredictionEvaluator
+from float.prediction.skmultiflow import SkmultiflowClassifier
+import numpy as np
+from sklearn.metrics import zero_one_loss
 from skmultiflow.drift_detection import ADWIN
 from skmultiflow.neural_networks import PerceptronMask
+import unittest
 
 
 class TestPrequentialPipeline(unittest.TestCase):
@@ -21,9 +23,9 @@ class TestPrequentialPipeline(unittest.TestCase):
         batch_size = 10
         self.prequential_pipeline = PrequentialPipeline(data_loader=self.data_loader,
                                                         predictor=SkmultiflowClassifier(PerceptronMask(), classes=self.data_loader.stream.target_values),
-                                                        prediction_evaluator=PredictionEvaluator([]),
+                                                        prediction_evaluator=PredictionEvaluator([zero_one_loss]),
                                                         feature_selector=OFS(n_total_features=self.data_loader.stream.n_features, n_selected_features=10),
-                                                        feature_selection_evaluator=FeatureSelectionEvaluator([]),
+                                                        feature_selection_evaluator=FeatureSelectionEvaluator([nogueira_stability]),
                                                         change_detector=SkmultiflowChangeDetector(ADWIN()),
                                                         change_detection_evaluator=ChangeDetectionEvaluator([], batch_size=batch_size, known_drifts=known_drifts, n_total=self.data_loader.stream.n_samples, n_delay=list(range(100, 1000)), n_init_tolerance=100),
                                                         batch_size=10,
@@ -52,7 +54,9 @@ class TestPrequentialPipeline(unittest.TestCase):
         self.prequential_pipeline.run()
         self.assertIsInstance(self.prequential_pipeline.predictor.model.classifier.coef_, np.ndarray, msg='run() sets the classifier\'s weights')
         self.assertEqual(len(self.prequential_pipeline.prediction_evaluator.training_comp_times), self.prequential_pipeline.time_step, msg='run() adds a prediction training computation time for each time step')
+        self.assertEqual(len(self.prequential_pipeline.prediction_evaluator.result['zero_one_loss']['measures']), self.prequential_pipeline.time_step, msg='run() adds a prediction evaluation measure for each time step')
         self.assertEqual(len(self.prequential_pipeline.feature_selector.selected_features_history), self.prequential_pipeline.time_step, msg='run() adds a list of selected features for every time step')
         self.assertEqual(len(self.prequential_pipeline.feature_selection_evaluator.comp_times), self.prequential_pipeline.time_step, msg='run() adds a feature selection computation time for each time step')
+        self.assertEqual(len(self.prequential_pipeline.feature_selection_evaluator.result['nogueira_stability']['measures']), self.prequential_pipeline.time_step, msg='run() adds a feature selection evaluation measure for each time step')
         self.assertEqual(len(self.prequential_pipeline.change_detection_evaluator.comp_times), self.prequential_pipeline.time_step, msg='run() adds a change detection computation time for each time step')
         self.assertEqual(self.prequential_pipeline.data_loader.stream.sample_idx, 0, msg='run() restarts the data stream')

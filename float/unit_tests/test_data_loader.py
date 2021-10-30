@@ -1,7 +1,7 @@
-import unittest
 from float.data.data_loader import DataLoader
-from skmultiflow.data.base_stream import Stream
 import numpy as np
+from skmultiflow.data.base_stream import Stream
+import unittest
 
 
 class TestDataLoader(unittest.TestCase):
