@@ -24,6 +24,7 @@ SOFTWARE.
 """
 from .visualization import plot, scatter, bar, feature_selection_scatter, feature_selection_bar,\
     concept_drift_detection_scatter
+from .spider_chart import spider_chart
 
 __all__ = ['plot', 'scatter', 'bar', 'feature_selection_scatter', 'feature_selection_bar',
-           'concept_drift_detection_scatter']
+           'concept_drift_detection_scatter', 'spider_chart']

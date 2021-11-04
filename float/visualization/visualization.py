@@ -178,7 +178,7 @@ def bar(measures: List[list],
 def feature_selection_scatter(selected_features: list,
                               fig_size: tuple = (13, 5),
                               font_size: int = 16) -> Axes:
-    """Return a scatter plot that illustrate the selected features over time.
+    """Return a scatter plot that illustrates the selected features over time.
 
     Args:
         selected_features:
