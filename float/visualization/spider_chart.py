@@ -7,8 +7,6 @@ import warnings
 _PALETTE = ['#003366', '#88ccee', '#44aa99', '#117733', '#999933', '#ddcc77', '#cc3311', '#ee3377', '#bbbbbb', '#000000']
 
 
-# TODO make plot look good
-
 def _scale_data(measures: List[float],
                 ranges: List[Tuple]) -> List[float]:
     """
@@ -77,7 +75,7 @@ def spider_chart(measures: List[List],
     # set up figure and axes for each metric
     fig = plt.figure()
     angles = np.arange(0, 360, 360. / len(metric_names))
-    axes = [fig.add_axes([0.1, 0.1, 0.9, 0.81], polar=True, label="axes{}".format(i)) for i in range(len(metric_names))]
+    axes = [fig.add_axes([0.1, 0.1, 1.06, 0.81], polar=True, label="axes{}".format(i)) for i in range(len(metric_names))]
 
     # draw metric names
     _, text = axes[0].set_thetagrids(angles, labels=metric_names)
@@ -85,7 +83,7 @@ def spider_chart(measures: List[List],
     for label, angle in zip(text, angles):
         x, y = label.get_position()
         lab = axes[0].text(x, y - 0.03, label.get_text(), transform=label.get_transform(), ha=label.get_ha(), va=label.get_va())
-        lab.set_rotation(angle - 90)
+        lab.set_rotation(angle - 90) if angle < 180 else lab.set_rotation(angle + 90)
         labels.append(lab)
     axes[0].set_xticklabels([])
 
@@ -108,6 +106,6 @@ def spider_chart(measures: List[List],
         data_scaled = _scale_data(measures[i], ranges)
         ax.plot(angle, np.r_[data_scaled, data_scaled[0]], color=_PALETTE[i], label=legend_names[i])
         ax.fill(angle, np.r_[data_scaled, data_scaled[0]], color=_PALETTE[i], alpha=0.2)
-        ax.legend(loc='lower left', bbox_to_anchor=(-0.41, -0.12))
+        ax.legend(loc='lower left', bbox_to_anchor=(-0.54, -0.12), frameon=False)
 
     return ax
