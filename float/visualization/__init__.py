@@ -1,6 +1,8 @@
-"""Visualizer Module.
+"""Visualization Module.
 
-This module contains functions to plot evaluation results of online learning models.
+This module contains visualizations that may be used to illustrate the test results of online predictive models,
+online feature selection methods and concept drift detection methods. We recommend combining these visualizations with
+the float evaluator and pipeline modules to deliver high-quality and standardized experiments.
 
 Copyright (C) 2021 Johannes Haug
 
@@ -22,8 +24,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from .visualization import plot, scatter, bar, feature_selection_scatter, feature_selection_bar,\
-    concept_drift_detection_scatter
+from .plot import plot
+from .scatter import scatter
+from .bar import bar
+from .feature_selection_scatter import feature_selection_scatter
+from .feature_selection_bar import feature_selection_bar
+from .concept_drift_detection_scatter import concept_drift_detection_scatter
 from .spider_chart import spider_chart
 
 __all__ = ['plot', 'scatter', 'bar', 'feature_selection_scatter', 'feature_selection_bar',
