@@ -22,24 +22,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from .test_bar import TestBar
 from .test_cancel_out import TestCancelOutFeatureSelector
 from .test_change_detection_evaluator import TestChangeDetectionEvaluator
+from .test_concept_drift_detection_scatter import TestConceptDriftDetectionScatter
 from .test_data_loader import TestDataLoader
 from .test_efs import TestEFS
 from .test_erics import TestERICS
 from .test_fires import TestFIRES
+from .test_feature_selection_bar import TestFeatureSelectionBar
 from .test_feature_selection_evaluator import TestFeatureSelectionEvaluator
+from .test_feature_selection_scatter import TestFeatureSelectionScatter
 from .test_fsds import TestFSDS
 from .test_holdout_pipeline import TestHoldoutPipeline
 from .test_ofs import TestOFS
+from .test_plot import TestPlot
 from .test_prediction_evaluator import TestPredictionEvaluator
 from .test_prequential_pipeline import TestPrequentialPipeline
+from .test_scatter import TestScatter
 from .test_sklearn_scaler import TestSklearnScaler
 from .test_skmultiflow_classifier import TestSkmultiflowClassifier
 from .test_skmultiflow_drift_detector import TestSkmultiflowDriftDetector
-from .test_visualization import TestVisualization
+from .test_spider_chart import TestSpiderChart
 
-__all__ = ['TestDataLoader', 'TestSklearnScaler', 'TestSkmultiflowClassifier', 'TestPredictionEvaluator',
-           'TestCancelOutFeatureSelector', 'TestEFS', 'TestFIRES', 'TestFSDS', 'TestOFS', 'TestFeatureSelectionEvaluator',
-           'TestERICS', 'TestSkmultiflowDriftDetector', 'TestChangeDetectionEvaluator',
-           'TestPrequentialPipeline', 'TestHoldoutPipeline', 'TestVisualization']
+__all__ = ['TestBar',  'TestCancelOutFeatureSelector',  'TestChangeDetectionEvaluator', 'TestConceptDriftDetectionScatter',
+           'TestDataLoader', 'TestEFS', 'TestERICS', 'TestFIRES', 'TestFeatureSelectionBar', 'TestFeatureSelectionEvaluator',
+           'TestFeatureSelectionScatter', 'TestFSDS', 'TestHoldoutPipeline', 'TestOFS', 'TestPlot', 'TestPredictionEvaluator',
+           'TestPrequentialPipeline', 'TestScatter', 'TestSklearnScaler', 'TestSkmultiflowClassifier',
+           'TestSkmultiflowDriftDetector', 'TestSpiderChart']
