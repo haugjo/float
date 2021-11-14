@@ -121,7 +121,7 @@ class BaseFeatureSelector(metaclass=ABCMeta):
         if np.any(self.weights < 0):
             abs_weights = abs(self.weights)
             if not self._scale_warning_issued:
-                warnings.warn("The weight vector contains negative values. The sbsolute weights will be used for "
+                warnings.warn("The weight vector contains negative values. The absolute weights will be used for "
                               "feature selection.")
                 self._scale_warning_issued = True
         else:

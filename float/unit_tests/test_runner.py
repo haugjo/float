@@ -6,13 +6,13 @@ class TestRunner:
     Class to run all unit tests in the unit_tests directory.
     """
     def __init__(self):
-        loader = unittest.TestLoader()
-        start_dir = '../unit_tests'
-        self.suite = loader.discover(start_dir)
-        self.runner = unittest.TextTestRunner()
+        self.loader = unittest.TestLoader()
+        self.start_dir = './'
 
     def run(self):
         """
         Run all unit tests in the unit_tests directory.
         """
-        self.runner.run(self.suite)
+        suite = self.loader.discover(self.start_dir)
+        runner = unittest.TextTestRunner()
+        runner.run(suite)

@@ -1,13 +1,13 @@
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 import warnings
 
 _PALETTE = ['#003366', '#88ccee', '#44aa99', '#117733', '#999933', '#ddcc77', '#cc3311', '#ee3377', '#bbbbbb', '#000000']
 
 
-# TODO refactor code to have more meaningful variables and be more understandable, add comments, make plot look good
+# TODO make plot look good
 
 def _scale_data(measures: List[float],
                 ranges: List[Tuple]) -> List[float]:
@@ -21,28 +21,31 @@ def _scale_data(measures: List[float],
     Returns:
         List[float]: the rescaled measures
     """
-    # TODO simplify if possible
-    for d, (y1, y2) in zip(measures[1:], ranges[1:]):
-        assert (y1 <= d <= y2) or (y2 <= d <= y1)
-    x1, x2 = ranges[0]
-    d = measures[0]
-    if x1 > x2:
-        d = x2 - (d - x1)
-        x1, x2 = x2, x1
-    data_scaled = [d]
-    for d, (y1, y2) in zip(measures[1:], ranges[1:]):
-        if y1 > y2:
-            d = y2 - (d - y1)
-            y1, y2 = y2, y1
-        data_scaled.append((d - y1) / (y2 - y1) * (x2 - x1) + x1)
-    return data_scaled
+    # rescale the first measure and save its range
+    range_min_init, range_max_init = ranges[0]
+    measure = measures[0]
+    if range_min_init > range_max_init:
+        # update measure if range is inverted
+        measure = range_max_init - (measure - range_min_init)
+        range_min_init, range_max_init = range_max_init, range_min_init
+    measures_scaled = [measure]
+
+    # rescale the remaining measures w.r.t. to their own range and the range of the first measure
+    for measure, (range_min, range_max) in zip(measures[1:], ranges[1:]):
+        if range_min > range_max:
+            # update measure if range is inverted
+            measure = range_max - (measure - range_min)
+            range_min, range_max = range_max, range_min
+        measures_scaled.append((measure - range_min) / (range_max - range_min) *
+                               (range_max_init - range_min_init) + range_min_init)
+    return measures_scaled
 
 
 def spider_chart(measures: List[List],
                  metric_names: List[str],
                  legend_names: List[str],
-                 ranges: List[Tuple],
-                 invert: List[bool]) -> Axes:
+                 ranges: Optional[List[Tuple]] = None,
+                 invert: Optional[List[bool]] = None) -> Axes:
     """
     Returns a spider chart that shows the specified metric values.
 
@@ -50,28 +53,33 @@ def spider_chart(measures: List[List],
         measures: A list of lists, where each list corresponds to a series of measurements.
         metric_names: The name of the performance metrics that are displayed.
         legend_names: Labels for each list of measurements. These labels will be used in the legend.
-        ranges: The ranges for each of the metrics.
-        invert: A list of bool values corresponding to if the metric should be inverted.
+        ranges:
+            The ranges for each of the metrics. If None, will be set to (0,1) for each metric. If not None, each tuple
+            in the list corresponds to a metric and will be set to (0,1) if None.
+        invert:
+            A list of bool values corresponding to if the metric should be inverted or not. If None, will be set to False
+            for each value.
 
     Returns:
         Axes: The Axes object containing the plot.
-
     """
     if len(measures) > 3:
         warnings.warn('Plotting more than three measures in a spider chart can make it difficult to read.')
 
-    # TODO figure out how to handle ranges that have a different scale than [0,1]
-    # ranges = []
-    # for i in range(len(measures[0])):
-    #     metric_max = np.max([val[i] for val in measures])
-    #     ranges.append((metric_max + 0.1 * metric_max, 0)) if invert[i] else ranges.append((0, metric_max + 0.1 * metric_max))
+    if len(metric_names) > 8:
+        warnings.warn('Plotting more than eight variables in a spider chart can make it difficult to read.')
 
-    # add axes for each metric
+    # set up ranges for each metric
+    invert = invert if invert else [False for _ in range(len(metric_names))]
+    ranges = [r if r else (0, 1) for r in ranges] if ranges else [(0, 1) for _ in range(len(metric_names))]
+    ranges = [(r2, r1) if i else (r1, r2) for (r1, r2), i in zip(ranges, invert)]
+
+    # set up figure and axes for each metric
     fig = plt.figure()
     angles = np.arange(0, 360, 360. / len(metric_names))
     axes = [fig.add_axes([0.1, 0.1, 0.9, 0.81], polar=True, label="axes{}".format(i)) for i in range(len(metric_names))]
 
-    # plot metric names
+    # draw metric names
     _, text = axes[0].set_thetagrids(angles, labels=metric_names)
     labels = []
     for label, angle in zip(text, angles):
@@ -81,13 +89,11 @@ def spider_chart(measures: List[List],
         labels.append(lab)
     axes[0].set_xticklabels([])
 
-    # initialize grid
+    # set up grid
     for ax in axes[1:]:
         ax.patch.set_visible(False)
         ax.grid("off")
         ax.xaxis.set_visible(False)
-
-    # set up grid
     for i, ax in enumerate(axes):
         grid = np.linspace(*ranges[i], num=6)
         grid_label = ["{}".format(round(x, 2)) for x in grid]
