@@ -5,8 +5,8 @@ from scipy.signal import savgol_filter
 from typing import List, Optional
 
 # Global color palette
-# dark blue, light blue, teal, dark green, olive, yellow green, red, magenta, grey, black
-_PALETTE = ['#003366', '#88ccee', '#44aa99', '#117733', '#999933', '#ddcc77', '#cc3311', '#ee3377', '#bbbbbb', '#000000']
+# dark blue, teal, light blue, dark green, olive, yellow green, red, magenta, grey, black
+_PALETTE = ['#003366', '#44aa99', '#88ccee', '#117733', '#999933', '#ddcc77', '#cc3311', '#ee3377', '#bbbbbb', '#000000']
 
 
 def plot(measures: List[list],

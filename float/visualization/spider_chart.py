@@ -4,7 +4,9 @@ import numpy as np
 from typing import List, Tuple, Optional
 import warnings
 
-_PALETTE = ['#003366', '#88ccee', '#44aa99', '#117733', '#999933', '#ddcc77', '#cc3311', '#ee3377', '#bbbbbb', '#000000']
+# Global color palette
+# dark blue, teal, light blue, dark green, olive, yellow green, red, magenta, grey, black
+_PALETTE = ['#003366', '#44aa99', '#88ccee', '#117733', '#999933', '#ddcc77', '#cc3311', '#ee3377', '#bbbbbb', '#000000']
 
 
 def _scale_data(measures: List[float],
@@ -104,7 +106,7 @@ def spider_chart(measures: List[List],
     ax = axes[0]
     for i in range(len(measures)):
         data_scaled = _scale_data(measures[i], ranges)
-        ax.plot(angle, np.r_[data_scaled, data_scaled[0]], color=_PALETTE[i], label=legend_names[i])
+        ax.plot(angle, np.r_[data_scaled, data_scaled[0]], linewidth=2, color=_PALETTE[i], label=legend_names[i])
         ax.fill(angle, np.r_[data_scaled, data_scaled[0]], color=_PALETTE[i], alpha=0.2)
         ax.legend(loc='lower left', bbox_to_anchor=(-0.54, -0.12), frameon=False)
 
