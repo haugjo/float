@@ -3,7 +3,7 @@ import unittest
 
 class TestRunner:
     """
-    Class to run all unit tests in the unit_tests directory.
+    Class to run all unit tests in the unit_tests directory. Must be run from within the unit_test directory.
     """
     def __init__(self):
         self.loader = unittest.TestLoader()
