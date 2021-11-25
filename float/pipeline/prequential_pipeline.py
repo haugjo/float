@@ -49,6 +49,7 @@ class PrequentialPipeline(BasePipeline):
                  batch_size: int = 1,
                  n_pretrain: int = 100,
                  n_max: int = np.inf,
+                 label_delay_range: Optional[tuple] = None,
                  known_drifts: Optional[Union[List[int], List[tuple]]] = None,
                  estimate_memory_alloc: bool = False,
                  random_state: int = 0):
@@ -65,6 +66,9 @@ class PrequentialPipeline(BasePipeline):
             batch_size: Batch size, i.e. no. of observations drawn from the data loader at one time step.
             n_pretrain: Number of observations used for the initial training of the predictive model.
             n_max: Maximum number of observations used in the evaluation.
+            label_delay_range:
+                The min and max delay in the availability of labels in time steps. The delay is sampled uniformly from
+                this range.
             known_drifts: The positions in the dataset (indices) corresponding to known concept drifts.
             estimate_memory_alloc:
                 Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
@@ -82,6 +86,7 @@ class PrequentialPipeline(BasePipeline):
                          batch_size=batch_size,
                          n_pretrain=n_pretrain,
                          n_max=n_max,
+                         label_delay_range=label_delay_range,
                          known_drifts=known_drifts,
                          estimate_memory_alloc=estimate_memory_alloc,
                          test_interval=1,  # Defaults to one for a prequential evaluation.
@@ -112,7 +117,14 @@ class PrequentialPipeline(BasePipeline):
             if self.n_total + n_batch >= self.n_max:
                 last_iteration = True
 
-            train_set = self.data_loader.get_data(n_batch=n_batch)
+            X, y = self.data_loader.get_data(n_batch=n_batch)
+            if self.label_delay_range:
+                self.sample_buffer.extend([(X_i, y_i, self.time_step + np.random.randint(self.label_delay_range[0], self.label_delay_range[1])) for X_i, y_i in zip(X, y)])
+                # next two lines only here for debugging purposes (should be before adding of new instances to buffer)
+                train_set = (np.array([X for (X, _, time_step) in self.sample_buffer if time_step == self.time_step]), np.array([y for (_, y, time_step) in self.sample_buffer if time_step == self.time_step]))
+                self.sample_buffer = [(X, y, time_step) for (X, y, time_step) in self.sample_buffer if self.time_step < time_step]
+            else:
+                train_set = (X, y)
 
             try:
                 self._run_iteration(train_set=train_set, last_iteration=last_iteration)

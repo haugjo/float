@@ -62,6 +62,9 @@ class BasePipeline(metaclass=ABCMeta):
         batch_size (int | None): Batch size, i.e. no. of observations drawn from the data loader at one time step.
         n_pretrain (int | None): Number of observations used for the initial training of the predictive model.
         n_max (int | None): Maximum number of observations used in the evaluation.
+        label_delay_range:
+            The min and max delay in the availability of labels in time steps. The delay is sampled uniformly from
+            this range.
         known_drifts (List[int] | List[tuple] | None):
             The positions in the dataset (indices) corresponding to known concept drifts.
         estimate_memory_alloc (bool):
@@ -88,6 +91,7 @@ class BasePipeline(metaclass=ABCMeta):
                  batch_size: int,
                  n_pretrain: int,
                  n_max: int,
+                 label_delay_range: Optional[tuple],
                  known_drifts: Optional[Union[List[int], List[tuple]]],
                  estimate_memory_alloc: bool,
                  test_interval: int,
@@ -128,10 +132,14 @@ class BasePipeline(metaclass=ABCMeta):
         self.batch_size = batch_size
         self.n_pretrain = n_pretrain
         self.n_max = n_max
+        self.label_delay_range = label_delay_range
         self.known_drifts = known_drifts
         self.estimate_memory_alloc = estimate_memory_alloc
         self.test_interval = test_interval
         self.rng = np.random.default_rng(seed=random_state)
+
+        if self.label_delay_range:
+            self.sample_buffer = list()
 
         self.start_time = 0
         self.time_step = 0
