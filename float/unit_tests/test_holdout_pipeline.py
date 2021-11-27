@@ -30,6 +30,7 @@ class TestHoldoutPipeline(unittest.TestCase):
                                                 change_detection_evaluator=ChangeDetectionEvaluator([], batch_size=batch_size, known_drifts=known_drifts, n_total=self.data_loader.stream.n_samples, n_delay=list(range(100, 1000)), n_init_tolerance=100),
                                                 batch_size=10,
                                                 n_max=self.data_loader.stream.n_samples - 10,
+                                                label_delay_range=(10, 20),
                                                 random_state=0,
                                                 test_interval=7,
                                                 test_replace_interval=10,

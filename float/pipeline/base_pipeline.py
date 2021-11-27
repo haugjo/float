@@ -326,7 +326,7 @@ class BasePipeline(metaclass=ABCMeta):
         """
         X, y = self.data_loader.get_data(n_batch=n_batch)
         if self.label_delay_range:
-            self.sample_buffer.extend([(X_i, y_i, self.time_step + np.random.randint(self.label_delay_range[0], self.label_delay_range[1])) for X_i, y_i in zip(X, y)])
+            self.sample_buffer.extend(list(zip(X, y, self.time_step + np.random.randint(self.label_delay_range[0], self.label_delay_range[1], X.shape[0]))))
             if self.time_step >= self.label_delay_range[1]:
                 train_set = (np.array([X for (X, _, time_step) in self.sample_buffer if time_step <= self.time_step]), np.array([y for (_, y, time_step) in self.sample_buffer if time_step <= self.time_step]))
                 self.sample_buffer = [(X, y, time_step) for (X, y, time_step) in self.sample_buffer if self.time_step < time_step]

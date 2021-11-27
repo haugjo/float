@@ -159,7 +159,7 @@ class HoldoutPipeline(BasePipeline):
                     X_test, y_test = self.test_set
             else:
                 # Check if we need to replace the oldest test instance in this iteration
-                mods = (np.arange(1, n_batch + 1) + self.n_total) % self.test_replace_interval
+                mods = (np.arange(1, X_train.shape[0] + 1) + self.n_total) % self.test_replace_interval
                 new_test_X = X_train[mods == 0]
                 new_test_y = y_train[mods == 0]
 
