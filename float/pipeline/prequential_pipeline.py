@@ -117,14 +117,7 @@ class PrequentialPipeline(BasePipeline):
             if self.n_total + n_batch >= self.n_max:
                 last_iteration = True
 
-            X, y = self.data_loader.get_data(n_batch=n_batch)
-            if self.label_delay_range:
-                self.sample_buffer.extend([(X_i, y_i, self.time_step + np.random.randint(self.label_delay_range[0], self.label_delay_range[1])) for X_i, y_i in zip(X, y)])
-                # next two lines only here for debugging purposes (should be before adding of new instances to buffer)
-                train_set = (np.array([X for (X, _, time_step) in self.sample_buffer if time_step == self.time_step]), np.array([y for (_, y, time_step) in self.sample_buffer if time_step == self.time_step]))
-                self.sample_buffer = [(X, y, time_step) for (X, y, time_step) in self.sample_buffer if self.time_step < time_step]
-            else:
-                train_set = (X, y)
+            train_set = self._get_train_set(n_batch)
 
             try:
                 self._run_iteration(train_set=train_set, last_iteration=last_iteration)

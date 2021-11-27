@@ -60,6 +60,7 @@ class HoldoutPipeline(BasePipeline):
                  feature_selection_evaluator: Optional[FeatureSelectionEvaluator] = None,
                  batch_size: int = 1,
                  n_pretrain: int = 100, n_max: int = np.inf,
+                 label_delay_range: Optional[tuple] = None,
                  known_drifts: Optional[Union[List[int], List[tuple]]] = None,
                  estimate_memory_alloc: bool = False,
                  test_interval: int = 10,
@@ -78,6 +79,9 @@ class HoldoutPipeline(BasePipeline):
             batch_size: Batch size, i.e. no. of observations drawn from the data loader at one time step.
             n_pretrain: Number of observations used for the initial training of the predictive model.
             n_max: Maximum number of observations used in the evaluation.
+            label_delay_range:
+                The min and max delay in the availability of labels in time steps. The delay is sampled uniformly from
+                this range.
             known_drifts: The positions in the dataset (indices) corresponding to known concept drifts.
             estimate_memory_alloc:
                 Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
@@ -101,6 +105,7 @@ class HoldoutPipeline(BasePipeline):
                          batch_size=batch_size,
                          n_pretrain=n_pretrain,
                          n_max=n_max,
+                         label_delay_range=label_delay_range,
                          known_drifts=known_drifts,
                          estimate_memory_alloc=estimate_memory_alloc,
                          test_interval=test_interval,
@@ -145,7 +150,7 @@ class HoldoutPipeline(BasePipeline):
             if self.n_total + n_batch >= self.n_max:
                 last_iteration = True
 
-            X_train, y_train = self.data_loader.get_data(n_batch=n_batch)
+            X_train, y_train = self._get_train_set(n_batch)
 
             if self.test_replace_interval is None:
                 if self.test_set is None:

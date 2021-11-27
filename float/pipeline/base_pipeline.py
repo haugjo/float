@@ -315,6 +315,27 @@ class BasePipeline(metaclass=ABCMeta):
             n_batch = self.n_max - self.n_total
         return n_batch
 
+    def _get_train_set(self, n_batch: int) -> Tuple[ArrayLike, ArrayLike]:
+        """Returns the training set to be used for the current iteration.
+
+        Args:
+            n_batch: the batch size
+
+        Returns:
+            Tuple[ArrayLike, ArrayLike]: the samples and their labels to be used for training
+        """
+        X, y = self.data_loader.get_data(n_batch=n_batch)
+        if self.label_delay_range:
+            self.sample_buffer.extend([(X_i, y_i, self.time_step + np.random.randint(self.label_delay_range[0], self.label_delay_range[1])) for X_i, y_i in zip(X, y)])
+            if self.time_step >= self.label_delay_range[1]:
+                train_set = (np.array([X for (X, _, time_step) in self.sample_buffer if time_step <= self.time_step]), np.array([y for (_, y, time_step) in self.sample_buffer if time_step <= self.time_step]))
+                self.sample_buffer = [(X, y, time_step) for (X, y, time_step) in self.sample_buffer if self.time_step < time_step]
+            else:
+                train_set = (X, y)
+        else:
+            train_set = (X, y)
+        return train_set
+
     @staticmethod
     def _get_memory_snapshot_diff(start_snapshot: Snapshot) -> float:
         """Returns the absolute different in allocated memory between two snapshots.
