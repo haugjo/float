@@ -86,7 +86,7 @@ class RiverChangeDetector(BaseChangeDetector):
         """
         if isinstance(self.detector, (ADWIN, DDM, EDDM, HDDM_A, HDDM_W, PageHinkley)):
             return True
-        elif isinstance(self.detector, KSWIN):  # TODO also the case for river?
+        elif isinstance(self.detector, KSWIN):
             return False
         else:
             raise TypeError("River drift detector class {} is not supported.".format(type(self.detector)))

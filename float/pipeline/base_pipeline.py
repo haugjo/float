@@ -36,6 +36,7 @@ import time
 import tracemalloc
 from tracemalloc import Snapshot
 from typing import Optional, Union, List, Tuple
+import warnings
 
 from float.data.data_loader import DataLoader
 from float.feature_selection import BaseFeatureSelector
@@ -45,6 +46,7 @@ from float.change_detection.skmultiflow import SkmultiflowChangeDetector
 from float.change_detection.evaluation import ChangeDetectionEvaluator
 from float.prediction import BasePredictor
 from float.prediction.evaluation import PredictionEvaluator
+from float.prediction.river import RiverClassifier
 from float.prediction.skmultiflow import SkmultiflowClassifier
 
 
@@ -175,6 +177,11 @@ class BasePipeline(metaclass=ABCMeta):
             if not self.feature_selector.supports_multi_class and self.data_loader.stream.n_classes > 2:
                 raise AttributeError("The provided Feature Selector does not support multiclass targets.")
 
+        if type(self.predictor) is RiverClassifier:
+            if not self.predictor.can_mini_batch:
+                warnings.warn('This classifier does not support batch processing. The batch size is set to 1 regardless of the specified batch size.')
+                self.batch_size = 1
+
     def _start_evaluation(self):
         """Starts the evaluation."""
         if self.estimate_memory_alloc:
@@ -190,6 +197,13 @@ class BasePipeline(metaclass=ABCMeta):
 
         if self.predictor:
             X, y = self.data_loader.get_data(self.n_pretrain)
+
+            if type(self.predictor) is RiverClassifier:
+                if not self.predictor.can_mini_batch:
+                    for x, y in zip(X, y):
+                        self.predictor.partial_fit(X=x, y=y)
+                    self.n_total += self.n_pretrain
+                    return
 
             self.predictor.partial_fit(X=copy.copy(X), y=copy.copy(y))
             self.n_total += self.n_pretrain
