@@ -39,14 +39,16 @@ from .test_ofs import TestOFS
 from .test_plot import TestPlot
 from .test_prediction_evaluator import TestPredictionEvaluator
 from .test_prequential_pipeline import TestPrequentialPipeline
+from .test_river_change_detector import TestRiverChangeDetector
+from .test_river_classifier import TestRiverClassifier
 from .test_scatter import TestScatter
 from .test_sklearn_scaler import TestSklearnScaler
 from .test_skmultiflow_classifier import TestSkmultiflowClassifier
-from .test_skmultiflow_drift_detector import TestSkmultiflowDriftDetector
+from .test_skmultiflow_change_detector import TestSkmultiflowChangeDetector
 from .test_spider_chart import TestSpiderChart
 
 __all__ = ['TestBar',  'TestCancelOutFeatureSelector',  'TestChangeDetectionEvaluator', 'TestConceptDriftDetectionScatter',
            'TestDataLoader', 'TestEFS', 'TestERICS', 'TestFIRES', 'TestFeatureSelectionBar', 'TestFeatureSelectionEvaluator',
            'TestFeatureSelectionScatter', 'TestFSDS', 'TestHoldoutPipeline', 'TestOFS', 'TestPlot', 'TestPredictionEvaluator',
-           'TestPrequentialPipeline', 'TestScatter', 'TestSklearnScaler', 'TestSkmultiflowClassifier',
-           'TestSkmultiflowDriftDetector', 'TestSpiderChart']
+           'TestPrequentialPipeline', 'TestRiverChangeDetector', 'TestRiverClassifier', 'TestScatter', 'TestSklearnScaler',
+           'TestSkmultiflowClassifier', 'TestSkmultiflowChangeDetector', 'TestSpiderChart']

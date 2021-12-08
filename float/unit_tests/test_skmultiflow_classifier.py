@@ -34,7 +34,8 @@ class TestSkmultiflowClassifier(unittest.TestCase):
     def test_predict_prob(self):
         X, y = self.data_loader.get_data(10)
         self.assertEqual((y.shape[0], 2), self.skmultiflow_classifier.predict_proba(X).shape, msg='predict_proba() returns the correct shape')
-        self.assertTrue(((self.skmultiflow_classifier.predict_proba(X).flatten() >= 0) | (self.skmultiflow_classifier.predict_proba(X).flatten() <= 1)).all(), msg='predict_proba() only returns values between 0 and 1')
+        proba = self.skmultiflow_classifier.predict_proba(X).flatten()
+        self.assertTrue(((proba >= 0) | (proba <= 1)).all(), msg='predict_proba() only returns values between 0 and 1')
 
     def test_reset(self):
         coef = self.skmultiflow_classifier.model.classifier.coef_.copy()
