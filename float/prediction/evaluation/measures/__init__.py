@@ -22,8 +22,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from .noise_variability import noise_variability
 from .mean_drift_performance_deterioration import mean_drift_performance_deterioration
 from .mean_drift_restoration_time import mean_drift_restoration_time
+from .noise_variability import noise_variability
+from .river_classification_metric import river_classification_metric
 
-__all__ = ['noise_variability', 'mean_drift_performance_deterioration', 'mean_drift_restoration_time']
+__all__ = ['mean_drift_performance_deterioration', 'mean_drift_restoration_time', 'noise_variability', 'river_classification_metric']

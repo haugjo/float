@@ -80,18 +80,19 @@ class PredictionEvaluator:
         for measure_func in measure_funcs:
             self._validate_func(measure_func, kwargs)
 
-            self.result[measure_func.__name__] = dict()
-            self.result[measure_func.__name__]['measures'] = []
-            self.result[measure_func.__name__]['mean'] = []
-            self.result[measure_func.__name__]['var'] = []
+            measure_name = type(self.kwargs['metric']).__name__.lower() if measure_func.__name__ == 'river_classification_metric' else measure_func.__name__
+            self.result[measure_name] = dict()
+            self.result[measure_name]['measures'] = []
+            self.result[measure_name]['mean'] = []
+            self.result[measure_name]['var'] = []
 
             if self.decay_rate:
-                self.result[measure_func.__name__]['mean_decay'] = []
-                self.result[measure_func.__name__]['var_decay'] = []
+                self.result[measure_name]['mean_decay'] = []
+                self.result[measure_name]['var_decay'] = []
 
             if self.window_size:
-                self.result[measure_func.__name__]['mean_window'] = []
-                self.result[measure_func.__name__]['var_window'] = []
+                self.result[measure_name]['mean_window'] = []
+                self.result[measure_name]['var_window'] = []
 
     def run(self, y_true: ArrayLike, y_pred: ArrayLike, X: ArrayLike, predictor: BasePredictor, rng: Generator):
         """Updates relevant statistics and computes the evaluation measures.
@@ -123,30 +124,31 @@ class PredictionEvaluator:
 
                 # Make function call and save measurement
                 new_measure_val = measure_func(**call_args)
-                self.result[measure_func.__name__]['measures'].append(new_measure_val)
-                self.result[measure_func.__name__]['mean'].append(np.mean(self.result[measure_func.__name__]['measures']))
-                self.result[measure_func.__name__]['var'].append(np.var(self.result[measure_func.__name__]['measures']))
+                measure_name = type(self.kwargs['metric']).__name__.lower() if measure_func.__name__ == 'river_classification_metric' else measure_func.__name__
+                self.result[measure_name]['measures'].append(new_measure_val)
+                self.result[measure_name]['mean'].append(np.mean(self.result[measure_name]['measures']))
+                self.result[measure_name]['var'].append(np.var(self.result[measure_name]['measures']))
 
                 if self.decay_rate:
-                    if len(self.result[measure_func.__name__]['mean_decay']) > 0:
-                        delta = new_measure_val - self.result[measure_func.__name__]['mean_decay'][-1]
-                        self.result[measure_func.__name__]['mean_decay'].append(
-                            self.result[measure_func.__name__]['mean_decay'][-1] + self.decay_rate * delta
+                    if len(self.result[measure_name]['mean_decay']) > 0:
+                        delta = new_measure_val - self.result[measure_name]['mean_decay'][-1]
+                        self.result[measure_name]['mean_decay'].append(
+                            self.result[measure_name]['mean_decay'][-1] + self.decay_rate * delta
                         )
-                        self.result[measure_func.__name__]['var_decay'].append(
+                        self.result[measure_name]['var_decay'].append(
                             (1 - self.decay_rate) * (
-                                        self.result[measure_func.__name__]['var_decay'][-1] + self.decay_rate * delta ** 2)
+                                        self.result[measure_name]['var_decay'][-1] + self.decay_rate * delta ** 2)
                         )
                     else:
-                        self.result[measure_func.__name__]['mean_decay'].append(new_measure_val)
-                        self.result[measure_func.__name__]['var_decay'].append(.0)
+                        self.result[measure_name]['mean_decay'].append(new_measure_val)
+                        self.result[measure_name]['var_decay'].append(.0)
 
                 if self.window_size:
-                    self.result[measure_func.__name__]['mean_window'].append(
-                        np.mean(self.result[measure_func.__name__]['measures'][-self.window_size:])
+                    self.result[measure_name]['mean_window'].append(
+                        np.mean(self.result[measure_name]['measures'][-self.window_size:])
                     )
-                    self.result[measure_func.__name__]['var_window'].append(
-                        np.var(self.result[measure_func.__name__]['measures'][-self.window_size:])
+                    self.result[measure_name]['var_window'].append(
+                        np.var(self.result[measure_name]['measures'][-self.window_size:])
                     )
             except TypeError:
                 traceback.print_exc()
