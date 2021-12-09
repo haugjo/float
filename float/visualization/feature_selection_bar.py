@@ -33,7 +33,7 @@ def feature_selection_bar(selected_features: List[list],
     """
     width = 0.8
     n_models = len(selected_features)
-    n_features = len(feature_names) if top_n_features is None else top_n_features
+    n_features = top_n_features if top_n_features else len(feature_names)
 
     fig, ax = plt.subplots(figsize=fig_size)
     ax.set_axisbelow(True)

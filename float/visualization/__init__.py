@@ -29,8 +29,9 @@ from .scatter import scatter
 from .bar import bar
 from .feature_selection_scatter import feature_selection_scatter
 from .feature_selection_bar import feature_selection_bar
+from .feature_weight_box_plot import feature_weight_box_plot
 from .concept_drift_detection_scatter import concept_drift_detection_scatter
 from .spider_chart import spider_chart
 
-__all__ = ['plot', 'scatter', 'bar', 'feature_selection_scatter', 'feature_selection_bar',
+__all__ = ['plot', 'scatter', 'bar', 'feature_selection_scatter', 'feature_selection_bar', 'feature_weight_box_plot',
            'concept_drift_detection_scatter', 'spider_chart']
