@@ -26,7 +26,7 @@ from river.base import DriftDetector
 from river.drift import ADWIN, DDM, EDDM, HDDM_A, HDDM_W, PageHinkley, KSWIN
 from typing import Tuple, Any
 
-from float.change_detection.base_change_detector import BaseChangeDetector
+from float.change_detection import BaseChangeDetector
 
 
 class RiverChangeDetector(BaseChangeDetector):
@@ -43,8 +43,9 @@ class RiverChangeDetector(BaseChangeDetector):
             reset_after_drift: See description of base class.
         """
         self.detector = detector
-        error_based = self._validate()
-        super().__init__(reset_after_drift=reset_after_drift, error_based=error_based)
+        self.error_based = False
+        self._validate()
+        super().__init__(reset_after_drift=reset_after_drift, error_based=self.error_based)
 
     def reset(self):
         """Resets the change detector."""
@@ -75,18 +76,13 @@ class RiverChangeDetector(BaseChangeDetector):
         """Detects a warning zone."""
         return self.detector.warning_detected
 
-    def _validate(self) -> bool:
+    def _validate(self):
         """Validate the provided river drift detector object.
-
-        Returns:
-            bool: Boolean indicating whether the method requires error measurements from a predictor.
 
         Raises:
             TypeError: If the provided detector is not a valid river drift detection method.
         """
         if isinstance(self.detector, (ADWIN, DDM, EDDM, HDDM_A, HDDM_W, PageHinkley)):
-            return True
-        elif isinstance(self.detector, KSWIN):
-            return False
+            self.error_based = True
         else:
             raise TypeError("River drift detector class {} is not supported.".format(type(self.detector)))
