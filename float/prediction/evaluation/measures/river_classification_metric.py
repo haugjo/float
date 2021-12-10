@@ -1,5 +1,6 @@
-from numpy.typing import Any, ArrayLike
+from numpy.typing import ArrayLike
 from river.metrics import ClassificationMetric
+from typing import Any
 
 
 def river_classification_metric(y_true: ArrayLike,
@@ -7,7 +8,7 @@ def river_classification_metric(y_true: ArrayLike,
                                 metric: ClassificationMetric,
                                 **kwargs) -> Any:
     """
-    Acts as a wrapper for river classification methods.
+    Acts as a wrapper for river classification metrics.
 
     Args:
         y_true: True target labels.

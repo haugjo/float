@@ -175,7 +175,7 @@ class PredictionEvaluator:
         param_list.extend(['y_true', 'y_pred', 'X', 'predictor', 'result'])  # Arguments will be passed directly by the evaluator
 
         for arg in inspect.signature(func).parameters.values():
-            if arg.default is arg.empty and arg.name not in param_list:
+            if arg.default is arg.empty and arg.name not in param_list and arg.name != 'kwargs':
                 raise AttributeError("The non-keyword argument '{}' of the evaluation measure '{}' has not been provided. "
                                      "Please provide the parameter in the constructor of the PredictionEvaluator object "
                                      "or use another evaluation measure.".format(arg.name, func.__name__, arg.name))

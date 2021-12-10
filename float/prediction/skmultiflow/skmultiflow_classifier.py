@@ -26,7 +26,7 @@ from numpy.typing import ArrayLike
 from skmultiflow.core import ClassifierMixin
 from typing import Optional
 
-from float.prediction.base_predictor import BasePredictor
+from float.prediction import BasePredictor
 
 
 class SkmultiflowClassifier(BasePredictor):
