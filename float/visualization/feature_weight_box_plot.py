@@ -73,7 +73,7 @@ def feature_weight_box_plot(feature_weights: List[list],
                labels=np.asarray(top_feature_names),
                rotation=20,
                ha='right')
-    plt.ylabel('Feature weights', size=font_size, labelpad=1.5)
+    plt.ylabel('Feature Weights', size=font_size, labelpad=1.5)
     plt.xlabel('Input Feature', size=font_size, labelpad=1.6)
     plt.legend(handles=legend_lines, frameon=True, loc='best', fontsize=font_size * 0.8, borderpad=0.3, handletextpad=0.5)
     plt.margins(0.01, 0.03)
