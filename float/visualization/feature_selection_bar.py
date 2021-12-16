@@ -18,7 +18,7 @@ def feature_selection_bar(selected_features: List[list],
 
     Args:
         selected_features:
-            A list of lists, where each list corresponds the selected feature vectors of one feature selection model.
+            A list of lists, where each list corresponds to the selected feature vectors of one feature selection model.
         model_names: Names of the feature selection models. These labels will be used in the legend.
         feature_names: The names of all input features. The feature names will be used as x-tick labels.
         top_n_features:
@@ -45,7 +45,7 @@ def feature_selection_bar(selected_features: List[list],
         meas = np.array(selected_features[i]).flatten()
         uniques, counts = np.unique(meas, return_counts=True)
 
-        if top_n_features is not None:
+        if top_n_features:
             if order is None:  # We order the features according to the first provided model.
                 order = np.argsort(counts)[::-1][:top_n_features]
                 name_idx = uniques[order]
