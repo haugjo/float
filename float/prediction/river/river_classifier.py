@@ -26,7 +26,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 import pandas as pd
 from river.base import Classifier
-from typing import Optional
+from typing import Optional, List
 
 from float.prediction import BasePredictor
 
@@ -36,19 +36,19 @@ class RiverClassifier(BasePredictor):
 
     Attributes:
         model (ClassifierMixin): The river predictor object.
-        features (list): A list of all features.
+        feature_names (List[str]): A list of all feature names.
     """
-    def __init__(self, model: Classifier, features: list, reset_after_drift: bool = False):
+    def __init__(self, model: Classifier, feature_names: List[str], reset_after_drift: bool = False):
         """Inits the river predictor.
 
         Args:
             model: The river predictor object.
-            features: A list of all features.
+            feature_names: A list of all feature names.
             reset_after_drift: A boolean indicating if the predictor will be reset after a drift was detected.
         """
         self.init_model = model.clone()
         self.model = model
-        self.features = features
+        self.feature_names = feature_names
 
         self.can_mini_batch = False
         self._validate()
@@ -57,34 +57,34 @@ class RiverClassifier(BasePredictor):
     def partial_fit(self, X: ArrayLike, y: ArrayLike, sample_weight: Optional[ArrayLike] = None):
         """Updates the predictor."""
         if self.can_mini_batch:
-            X = pd.DataFrame(X, columns=self.features)
+            X = pd.DataFrame(X, columns=self.feature_names)
             y = pd.Series(y)
             self.model.learn_many(X=X, y=y)
         else:
-            x = {key: value[0] for key, value in zip(self.features, X.reshape((-1, 1)))}
+            x = {key: value[0] for key, value in zip(self.feature_names, X.reshape((-1, 1)))}
             self.model.learn_one(x=x, y=bool(y))
 
     def predict(self, X: ArrayLike) -> ArrayLike:
         """Predicts the target values."""
         if self.can_mini_batch:
-            X = pd.DataFrame(X, columns=self.features)
+            X = pd.DataFrame(X, columns=self.feature_names)
             return self.model.predict_many(X=X)
         else:
-            x = {key: value[0] for key, value in zip(self.features, X.reshape((-1, 1)))}
+            x = {key: value[0] for key, value in zip(self.feature_names, X.reshape((-1, 1)))}
             return np.array([self.model.predict_one(x=x)])
 
     def predict_proba(self, X: ArrayLike) -> ArrayLike:
         """Predicts the probability of target values."""
         if self.can_mini_batch:
-            X = pd.DataFrame(X, columns=self.features)
+            X = pd.DataFrame(X, columns=self.feature_names)
             return self.model.predict_proba_many(X=X)
         else:
-            x = {key: value[0] for key, value in zip(self.features, X.reshape((-1, 1)))}
+            x = {key: value[0] for key, value in zip(self.feature_names, X.reshape((-1, 1)))}
             return np.array([self.model.predict_proba_one(x=x)])
 
     def reset(self, X: ArrayLike, y: ArrayLike):
         """Resets the predictor and fits to given sample."""
-        self.__init__(self.init_model, self.features, self.reset_after_drift)
+        self.__init__(self.init_model, self.feature_names, self.reset_after_drift)
         self.partial_fit(X=X, y=y)
 
     def _validate(self):

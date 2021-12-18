@@ -11,14 +11,14 @@ class TestRiverClassifier(unittest.TestCase):
         super().__init__(method_name)
         self.rng = np.random.default_rng(seed=0)
         self.data_loader = DataLoader(path='../data/datasets/spambase.csv', target_col=-1)
-        self.river_classifier = RiverClassifier(model=Perceptron(), features=self.data_loader.stream.feature_names)
+        self.river_classifier = RiverClassifier(model=Perceptron(), feature_names=self.data_loader.stream.feature_names)
         X, y = self.data_loader.get_data(10)
         self.river_classifier.partial_fit(X, y)
 
     def test_init(self):
         self.assertEqual(self.river_classifier.reset_after_drift, False, msg='attribute reset_after_drift is initialized correctly')
         self.assertIsInstance(self.river_classifier.model, Classifier, msg='attribute model is initialized correctly')
-        self.assertIsInstance(self.river_classifier.features, list, msg='attribute classes is initialized correctly')
+        self.assertIsInstance(self.river_classifier.feature_names, list, msg='attribute classes is initialized correctly')
 
     def test_partial_fit(self):
         n_iterations = self.river_classifier.model.optimizer.n_iterations

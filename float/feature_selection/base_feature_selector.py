@@ -137,7 +137,7 @@ class BaseFeatureSelector(metaclass=ABCMeta):
 
         return X_new
 
-    def _get_baseline(self, X: ArrayLike, rng: Generator):
+    def _get_baseline(self, X: ArrayLike, rng: Generator) -> ArrayLike:
         """Returns a matrix/vector filled with the baseline.
 
         Please cite:
