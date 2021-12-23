@@ -42,8 +42,10 @@ from float.data.data_loader import DataLoader
 from float.feature_selection import BaseFeatureSelector
 from float.feature_selection.evaluation import FeatureSelectionEvaluator
 from float.change_detection import BaseChangeDetector
-from float.change_detection.skmultiflow import SkmultiflowChangeDetector
 from float.change_detection.evaluation import ChangeDetectionEvaluator
+from float.change_detection.river import RiverChangeDetector
+from float.change_detection.skmultiflow import SkmultiflowChangeDetector
+from float import pipeline
 from float.prediction import BasePredictor
 from float.prediction.evaluation import PredictionEvaluator
 from float.prediction.river import RiverClassifier
@@ -55,8 +57,8 @@ class BasePipeline(metaclass=ABCMeta):
 
     Attributes:
         data_loader (DataLoader): Data loader object.
-        predictor (BasePredictor | None): Predictive model.
-        prediction_evaluator (PredictionEvaluator | None): Evaluator for predictive model.
+        predictors (List[BasePredictor] | None): Predictive model.
+        prediction_evaluators (List[PredictionEvaluator] | None): Evaluator for predictive model.
         change_detector (ConceptDriftDetector | None): Concept drift detection model.
         change_detection_evaluator (ChangeDetectionEvaluator | None): Evaluator for active concept drift detection.
         feature_selector (BaseFeatureSelector | None): Online feature selection model.
@@ -84,8 +86,8 @@ class BasePipeline(metaclass=ABCMeta):
 
     def __init__(self,
                  data_loader: DataLoader,
-                 predictor: Optional[BasePredictor],
-                 prediction_evaluator: Optional[PredictionEvaluator],
+                 predictors: Optional[List[BasePredictor]],
+                 prediction_evaluators: Optional[List[PredictionEvaluator]],
                  change_detector: Optional[BaseChangeDetector],
                  change_detection_evaluator: Optional[ChangeDetectionEvaluator],
                  feature_selector: Optional[BaseFeatureSelector],
@@ -102,8 +104,8 @@ class BasePipeline(metaclass=ABCMeta):
 
         Args:
             data_loader: Data loader object.
-            predictor: Predictive model.
-            prediction_evaluator: Evaluator for predictive model.
+            predictors: Predictive model(s).
+            prediction_evaluators: Evaluator(s) for predictive model(s).
             change_detector: Concept drift detection model.
             change_detection_evaluator: Evaluator for active concept drift detection.
             feature_selector: Online feature selection model.
@@ -125,8 +127,8 @@ class BasePipeline(metaclass=ABCMeta):
             AttributeError: If one of the provided objects is not valid.
         """
         self.data_loader = data_loader
-        self.predictor = predictor
-        self.prediction_evaluator = prediction_evaluator
+        self.predictors = predictors
+        self.prediction_evaluators = prediction_evaluators
         self.change_detector = change_detector
         self.change_detection_evaluator = change_detection_evaluator
         self.feature_selector = feature_selector
@@ -161,26 +163,43 @@ class BasePipeline(metaclass=ABCMeta):
             AttributeError: If a crucial parameter to run the pipeline is missing or is invalid.
         """
         if type(self.data_loader) is not DataLoader:
-            raise AttributeError("No valid DataLoader object was provided.")
+            raise AttributeError('No valid DataLoader object was provided.')
 
         if not issubclass(type(self.feature_selector), BaseFeatureSelector) and \
                 not issubclass(type(self.change_detector), BaseChangeDetector) and \
-                not issubclass(type(self.predictor), BasePredictor):
-            raise AttributeError("No valid FeatureSelector, ChangeDetector or Predictor object was provided.")
+                not (any(issubclass(type(predictor), BasePredictor) for predictor in self.predictors)):
+            raise AttributeError('No valid FeatureSelector, ChangeDetector or Predictor object was provided.')
+
+        if self.predictors and len(self.predictors) != len(self.prediction_evaluators):
+            raise AttributeError('A PredictionEvaluator object needs to be provided for every Predictor object.')
+
+        for i in range(len(self.predictors)):
+            if type(self.predictors[i]) is RiverClassifier:
+                if not self.predictors[i].can_mini_batch:
+                    warnings.warn('This classifier does not support batch processing. The batch size is set to 1 for all '
+                                  'predictors regardless of the specified batch size.')
+                    self.batch_size = 1
 
         if self.change_detector:
-            if self.change_detector.error_based and not issubclass(type(self.predictor), BasePredictor):
-                raise AttributeError("An error-based Change Detector cannot be used without a valid Predictor "
-                                     "object.")
+            if self.change_detector.error_based and \
+                    not any(issubclass(type(predictor), BasePredictor) for predictor in self.predictors):
+                raise AttributeError('An error-based Change Detector cannot be used without a valid Predictor '
+                                     'object.')
+
+            if not self.change_detection_evaluator:
+                raise AttributeError('A ChangeDetectionEvaluator object needs to be provided when a ChangeDetector 7'
+                                     'object is provided.')
 
         if self.feature_selector:
             if not self.feature_selector.supports_multi_class and self.data_loader.stream.n_classes > 2:
-                raise AttributeError("The provided Feature Selector does not support multiclass targets.")
+                raise AttributeError('The provided Feature Selector does not support multiclass targets.')
 
-        if type(self.predictor) is RiverClassifier:
-            if not self.predictor.can_mini_batch:
-                warnings.warn('This classifier does not support batch processing. The batch size is set to 1 regardless of the specified batch size.')
-                self.batch_size = 1
+            if not self.feature_selection_evaluator:
+                raise AttributeError('A FeatureSelectionEvaluator object needs to be provided when a FeatureSelector '
+                                     'object is provided.')
+
+        if len(self.predictors) == 1 and type(self) is pipeline.DistributedFoldPipeline:
+            raise AttributeError('The DistributedFoldPipeline can only be used with more than one predictor object.')
 
     def _start_evaluation(self):
         """Starts the evaluation."""
@@ -195,30 +214,48 @@ class BasePipeline(metaclass=ABCMeta):
         """Pretrains the predictive model."""
         print("Pretrain the predictor with {} observation(s).".format(self.n_pretrain))
 
-        if self.predictor:
-            X, y = self.data_loader.get_data(self.n_pretrain)
+        if self.predictors:
+            for i in range(len(self.predictors)):
+                X, y = self.data_loader.get_data(self.n_pretrain)
 
-            if type(self.predictor) is RiverClassifier:
-                if not self.predictor.can_mini_batch:
-                    for x, y in zip(X, y):
-                        self.predictor.partial_fit(X=x, y=y)
-                    self.n_total += self.n_pretrain
-                    return
+                if type(self.predictors[i]) is RiverClassifier:
+                    if not self.predictors[i].can_mini_batch:
+                        for x, y in zip(X, y):
+                            self.predictors[i].partial_fit(X=x, y=y)
+                        self.n_total += self.n_pretrain
+                        return
 
-            self.predictor.partial_fit(X=copy.copy(X), y=copy.copy(y))
-            self.n_total += self.n_pretrain
+                self.predictors[i].partial_fit(X=copy.copy(X), y=copy.copy(y))
+                self.n_total += self.n_pretrain
 
-    def _run_iteration(self, train_set: Tuple[ArrayLike, ArrayLike],
-                       test_set: Optional[Tuple[ArrayLike, ArrayLike]] = None, last_iteration: bool = False):
+    def _run_iteration(self,
+                       train_set: Tuple[ArrayLike, ArrayLike],
+                       test_set: Optional[Tuple[ArrayLike, ArrayLike]] = None,
+                       predictor_train_idx: Optional[List[int]] = None,
+                       predictor_test_idx: Optional[List[int]] = None,
+                       train_weights: Optional[List[int]] = None,
+                       last_iteration: bool = False):
         """Runs an evaluation iteration.
 
         Args:
             train_set: The observations and labels used for training in the current iteration.
             test_set: The observations and labels used for testing in the current iteration.
+            predictor_train_idx:
+                (only used for DistributedFoldPipeline) The indices for which predictors should be
+                used for training in this iteration.
+            predictor_test_idx:
+                (only used for DistributedFoldPipeline) The indices for which predictors should be
+                used for testing in this iterations
+            train_weights:
+                (only used for DistributedFoldPipeline in bootstrap mode) The weights that determine
+                how much the current training sample/batch should be weighted for each predictor.
             last_iteration (bool): True if this is the last evaluation iteration, False otherwise.
         """
         X_train, y_train = train_set
         X_test, y_test = test_set if test_set else train_set
+
+        predictor_train_idx = predictor_train_idx if predictor_train_idx is not None else [0]
+        predictor_test_idx = predictor_test_idx if predictor_test_idx is not None else [0]
 
         # ----------------------------------------
         # Online Feature Selection
@@ -245,29 +282,36 @@ class BasePipeline(metaclass=ABCMeta):
         # Prediction
         # ----------------------------------------
         y_pred = None
-        if self.predictor:
+        if self.predictors:
             if (self.n_pretrain > 0 or self.time_step > 0) and X_test.shape[0] > 0:  # Predict/Test if model has already been trained.
                 start_time = time.time()
-                y_pred = self.predictor.predict(X_test)
-                self.prediction_evaluator.testing_comp_times.append(time.time() - start_time)
+                for i in predictor_test_idx:
+                    y_pred = self.predictors[i].predict(X_test)
+                    self.prediction_evaluators[i].testing_comp_times.append(time.time() - start_time)
 
-                if not self.time_step % self.test_interval:
-                    self.prediction_evaluator.run(y_true=copy.copy(y_test),
-                                                  y_pred=copy.copy(y_pred),
-                                                  X=copy.copy(X_test),
-                                                  predictor=self.predictor,
-                                                  rng=self.rng)
+                    if not self.time_step % self.test_interval:
+                        self.prediction_evaluators[i].run(y_true=copy.copy(y_test),
+                                                          y_pred=copy.copy(y_pred),
+                                                          X=copy.copy(X_test),
+                                                          predictor=self.predictors[i],
+                                                          rng=self.rng)
 
-            if self.estimate_memory_alloc:
-                start_snapshot = tracemalloc.take_snapshot()
+            for i, idx in enumerate(predictor_train_idx):
+                if self.estimate_memory_alloc:
+                    start_snapshot = tracemalloc.take_snapshot()
 
-            start_time = time.time()
-            self.predictor.partial_fit(X_train, y_train)
-            self.prediction_evaluator.training_comp_times.append(time.time() - start_time)
+                start_time = time.time()
+                X_train_weighted = X_train.copy()
+                y_train_weighted = y_train.copy()
+                if train_weights:
+                    X_train_weighted, y_train_weighted = np.repeat(X_train, train_weights[i], axis=0), np.repeat(y_train, train_weights[i])
 
-            if self.estimate_memory_alloc:
-                self.prediction_evaluator.memory_changes.append(
-                    self._get_memory_snapshot_diff(start_snapshot=start_snapshot))
+                self.predictors[idx].partial_fit(X_train_weighted, y_train_weighted)
+                self.prediction_evaluators[idx].training_comp_times.append(time.time() - start_time)
+
+                if self.estimate_memory_alloc:
+                    self.prediction_evaluators[idx].memory_changes.append(
+                        self._get_memory_snapshot_diff(start_snapshot=start_snapshot))
 
         # ----------------------------------------
         # Concept Drift Detection
@@ -303,9 +347,10 @@ class BasePipeline(metaclass=ABCMeta):
                 if self.feature_selector:
                     if self.feature_selector.reset_after_drift:
                         self.feature_selector.reset()
-                if self.predictor:
-                    if self.predictor.reset_after_drift:
-                        self.predictor.reset(X=copy.copy(X_train), y=copy.copy(y_train))
+                if self.predictors:
+                    for i in range(len(self.predictors)):
+                        if self.predictors[i].reset_after_drift:
+                            self.predictors[i].reset(X=copy.copy(X_train), y=copy.copy(y_train))
                 if self.change_detector:
                     if self.change_detector.reset_after_drift:
                         self.change_detector.reset()
@@ -420,9 +465,9 @@ class BasePipeline(metaclass=ABCMeta):
             print('----------------------')
             print('Concept Drift Detection:')
             print(tabulate({
-                **{'Model': [type(self.change_detector.detector).__name__ if type(
-                    self.change_detector) is SkmultiflowChangeDetector else
-                             type(self.change_detector).__name__.split('.')[-1]],
+                **{'Model': [type(self.change_detector).__name__.split('.')[-1] + '.' + type(self.change_detector.detector).__name__
+                             if type(self.change_detector) in [SkmultiflowChangeDetector, RiverChangeDetector]
+                             else type(self.change_detector).__name__.split('.')[-1]],
                    'Avg. Comp. Time': [np.mean(self.change_detection_evaluator.comp_times)],
                    'Detected Global Drifts': [self.change_detector.drifts] if len(
                        self.change_detector.drifts) <= 5 else [
@@ -431,15 +476,18 @@ class BasePipeline(metaclass=ABCMeta):
                 if type(value) is list else [value['mean']] for key, value in self.change_detection_evaluator.result.items()}
             }, headers="keys", tablefmt='github'))
 
-        if self.predictor:
-            print('----------------------')
-            print('Prediction:')
-            print(tabulate({
-                **{'Model': [type(self.predictor.model).__name__ if type(
-                    self.predictor) is SkmultiflowClassifier else
-                             type(self.predictor).__name__.split('.')[-1]],
-                   'Avg. Test Comp. Time': [np.mean(self.prediction_evaluator.testing_comp_times)],
-                   'Avg. Train Comp. Time': [np.mean(self.prediction_evaluator.training_comp_times)]},
-                **{'Avg. ' + key: [value['mean'][-1]] for key, value in self.prediction_evaluator.result.items()}
-            }, headers="keys", tablefmt='github'))
+        if self.predictors:
+            for i in range(len(self.predictors)):
+                print('----------------------')
+                print('Prediction:')
+                if len(self.predictors) > 1:
+                    print(f'Predictor {i}:')
+                print(tabulate({
+                    **{'Model': [type(self.predictors[i]).__name__.split('.')[-1] + '.' + type(self.predictors[i].model).__name__
+                                 if type(self.predictors[i]) in [SkmultiflowClassifier, RiverClassifier] else
+                                 type(self.predictors[i]).__name__.split('.')[-1]],
+                       'Avg. Test Comp. Time': [np.mean(self.prediction_evaluators[i].testing_comp_times)] if self.prediction_evaluators[i].testing_comp_times else ['N/A'],
+                       'Avg. Train Comp. Time': [np.mean(self.prediction_evaluators[i].training_comp_times)] if self.prediction_evaluators[i].training_comp_times else ['N/A']},
+                    **{'Avg. ' + key: [value['mean'][-1]] if value['mean'] else ['N/A'] for key, value in self.prediction_evaluators[i].result.items()}
+                }, headers="keys", tablefmt='github'))
         print('#############################################################################')

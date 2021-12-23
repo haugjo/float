@@ -24,7 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from .base_pipeline import BasePipeline
+from .distributed_fold_pipeline import DistributedFoldPipeline
 from .holdout_pipeline import HoldoutPipeline
 from .prequential_pipeline import PrequentialPipeline
 
-__all__ = ['BasePipeline', 'PrequentialPipeline', 'HoldoutPipeline']
+__all__ = ['BasePipeline', 'DistributedFoldPipeline', 'HoldoutPipeline', 'PrequentialPipeline']

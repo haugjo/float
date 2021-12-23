@@ -77,8 +77,8 @@ class PrequentialPipeline(BasePipeline):
             random_state: A random integer seed used to specify a random number generator.
         """
         super().__init__(data_loader=data_loader,
-                         predictor=predictor,
-                         prediction_evaluator=prediction_evaluator,
+                         predictors=[predictor],
+                         prediction_evaluators=[prediction_evaluator],
                          change_detector=change_detector,
                          change_detection_evaluator=change_detection_evaluator,
                          feature_selector=feature_selector,

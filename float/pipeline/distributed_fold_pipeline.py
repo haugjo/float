@@ -1,6 +1,21 @@
-"""Periodic Holdout Pipeline Module.
+"""Distributed Fold Pipeline Module.
 
-This module implements a pipeline following the periodic holdout evaluation strategy.
+This module implements a pipeline following the k-fold distributed validation
+techniques proposed by Albert Bifet, Gianmarco de Francisci Morales, Jesse Read,
+Geoff Holmes, and Bernhard Pfahringer. 2015. Efficient Online Evaluation of Big
+Data Stream Classifiers. In Proceedings of the 21th ACM SIGKDD International
+Conference on Knowledge Discovery and Data Mining (KDD '15). Association for
+Computing Machinery, New York, NY, USA, 59–68.
+
+The following three modes are implemented:
+1. k-fold distributed cross-validation: each example is used for testing in one
+classifier selected randomly, and used for training by all the others;
+2. k-fold distributed split-validation: each example is used for training in one
+classifier selected randomly, and for testing in the other classifiers;
+3. k-fold distributed bootstrap validation: each example is used for training in
+each classifier according to a weight from a Poisson(1) distribution. This results
+in each example being used for training in approximately two thirds of the classifiers,
+ with a separate weight in each classifier, and for testing in the rest.
 
 Copyright (C) 2021 Johannes Haug
 
@@ -23,10 +38,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import numpy as np
-from numpy.typing import ArrayLike
 import traceback
 import warnings
-from typing import Optional, Union, List, Tuple
+from typing import Optional, Union, List
 
 from float.pipeline.base_pipeline import BasePipeline
 from float.data.data_loader import DataLoader
@@ -38,40 +52,31 @@ from float.prediction import BasePredictor
 from float.prediction.evaluation import PredictionEvaluator
 
 
-class HoldoutPipeline(BasePipeline):
-    """Pipeline class for periodic holdout evaluation.
-
-    Attributes:
-        test_set (Tuple[ArrayLike, ArrayLike] | None):
-            A tuple containing the initial test observations and labels used for the holdout evaluation.
-        test_replace_interval (int | None):
-                This integer specifies in which interval we replace the oldest test observation. For example, if
-                test_replace_interval=10 then we will use every 10th observation to replace the currently oldest test
-                observation. Note that test observations will not be used for training, hence this interval should not
-                be chosen too small. If argument is None, we use the complete batch at testing time in the evluation.
+class DistributedFoldPipeline(BasePipeline):
+    """
+    Pipeline for k-fold distributed validation.
     """
     def __init__(self, data_loader: DataLoader,
-                 test_set: Optional[Tuple[ArrayLike, ArrayLike]] = None,
-                 predictor: Optional[BasePredictor] = None,
-                 prediction_evaluator: Optional[PredictionEvaluator] = None,
+                 predictors: List[BasePredictor],
+                 prediction_evaluators: List[PredictionEvaluator],
                  change_detector: Optional[BaseChangeDetector] = None,
                  change_detection_evaluator: Optional[ChangeDetectionEvaluator] = None,
                  feature_selector: Optional[BaseFeatureSelector] = None,
                  feature_selection_evaluator: Optional[FeatureSelectionEvaluator] = None,
                  batch_size: int = 1,
-                 n_pretrain: int = 100, n_max: int = np.inf,
+                 n_pretrain: int = 100,
+                 n_max: int = np.inf,
                  label_delay_range: Optional[tuple] = None,
                  known_drifts: Optional[Union[List[int], List[tuple]]] = None,
                  estimate_memory_alloc: bool = False,
-                 test_interval: int = 10,
-                 test_replace_interval: Optional[int] = None,
+                 validation_mode: str = 'cross',
                  random_state: int = 0):
         """Initializes the pipeline.
+
         Args:
             data_loader: Data loader object.
-            test_set: A tuple containing the initial test observations and labels used for the holdout evaluation.
-            predictor: Predictive model.
-            prediction_evaluator: Evaluator for predictive model.
+            predictors: Predictive models.
+            prediction_evaluators: Evaluators for predictive models.
             change_detector: Concept drift detection model.
             change_detection_evaluator: Evaluator for active concept drift detection.
             feature_selector: Online feature selection model.
@@ -87,17 +92,15 @@ class HoldoutPipeline(BasePipeline):
                 Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
                 Note that this delivers only an indication of the approximate memory consumption and can significantly
                 increase the total run time of the pipeline.
-            test_interval: The interval/frequency at which the online learning models are evaluated.
-            test_replace_interval:
-                This integer specifies in which interval we replace the oldest test observation. For example, if
-                test_replace_interval=10 then we will use every 10th observation to replace the currently oldest test
-                observation. Note that test observations will not be used for training, hence this interval should not
-                be chosen too small. If argument is None, we use the complete batch at testing time in the evluation.
+            validation_mode:
+                A string indicating the k-fold distributed validation mode to use. One of 'cross', 'batch' and
+                'bootstrap'.
             random_state: A random integer seed used to specify a random number generator.
         """
+        self.validation_mode = validation_mode
         super().__init__(data_loader=data_loader,
-                         predictors=[predictor],
-                         prediction_evaluators=[prediction_evaluator],
+                         predictors=predictors,
+                         prediction_evaluators=prediction_evaluators,
                          change_detector=change_detector,
                          change_detection_evaluator=change_detection_evaluator,
                          feature_selector=feature_selector,
@@ -108,41 +111,27 @@ class HoldoutPipeline(BasePipeline):
                          label_delay_range=label_delay_range,
                          known_drifts=known_drifts,
                          estimate_memory_alloc=estimate_memory_alloc,
-                         test_interval=test_interval,
+                         test_interval=1,  # Defaults to one for a distributed fold evaluation.
                          random_state=random_state)
 
-        self.test_set = test_set
-        self.test_replace_interval = test_replace_interval
-        if self.test_set is None:
-            warnings.warn("No initial test set has been provided. By default, the holdout pipeline will use a test set "
-                          "with the same size as the batch size. If the replace interval is None, the pipeline will "
-                          "use the current data batch for testing, resembling a prequential evaluation.")
-            self._test_set_size = self.batch_size
-        else:
-            self._test_set_size = self.test_set[0].shape[0]
-
-        if self.test_replace_interval is None:
-            warnings.warn("The test_replace_interval is None, which means that the test set will not be updated "
-                          "over time. This can lead to invalid results!")
+    def _validate(self):
+        super()._validate()
+        if self.validation_mode not in ['cross', 'split', 'bootstrap']:
+            raise AttributeError('Please choose one of the validation modes "cross", "split", or "bootstrap".')
 
     def run(self):
-        """ Runs the pipeline."""
+        """Runs the pipeline."""
         if (self.data_loader.stream.n_remaining_samples() > 0) and \
                 (self.data_loader.stream.n_remaining_samples() < self.n_max):
             self.n_max = self.data_loader.stream.n_samples
-            warnings.warn("Parameter max_n_samples exceeds the size of data_loader and will be automatically reset.",
+            warnings.warn("Parameter n_max exceeds the size of data_loader and will be automatically reset.",
                           stacklevel=2)
 
         self._start_evaluation()
-        self._run_holdout()
+        self._run_distributed_fold()
         self._finish_evaluation()
 
-    def _run_holdout(self):
-        """Runs the holdout evaluation strategy.
-
-        Raises:
-            BaseException: If the holdout evaluation runs into an error.
-        """
+    def _run_distributed_fold(self):
         while self.n_total < self.n_max:
             last_iteration = False
             n_batch = self._get_n_batch()
@@ -150,39 +139,26 @@ class HoldoutPipeline(BasePipeline):
             if self.n_total + n_batch >= self.n_max:
                 last_iteration = True
 
-            X_train, y_train = self._get_train_set(n_batch)
+            train_set = self._get_train_set(n_batch)
 
-            if self.test_replace_interval is None:
-                if self.test_set is None:
-                    X_test, y_test = X_train, y_train
-                else:
-                    X_test, y_test = self.test_set
-            else:
-                # Check if we need to replace the oldest test instance in this iteration
-                mods = (np.arange(1, X_train.shape[0] + 1) + self.n_total) % self.test_replace_interval
-                new_test_X = X_train[mods == 0]
-                new_test_y = y_train[mods == 0]
-
-                X_train = X_train[mods != 0]  # Drop test instances from training set
-                y_train = y_train[mods != 0]
-
-                if self.test_set is not None:
-                    X_test, y_test = self.test_set
-                    X_test = np.append(X_test, new_test_X, axis=0)
-                    y_test = np.append(y_test, new_test_y, axis=0)
-                else:
-                    X_test = new_test_X
-                    y_test = new_test_y
-
-                if X_test.shape[0] >= self._test_set_size:  # Drop old instances.
-                    n_remove = X_test.shape[0] - self._test_set_size
-                    X_test = X_test[n_remove:, :]
-                    y_test = y_test[n_remove:]
+            predictor_train_idx = []
+            predictor_test_idx = []
+            weights = None
+            if self.validation_mode == 'cross':
+                predictor_test_idx = [np.random.randint(0, len(self.predictors) - 1)]
+                predictor_train_idx = [i for i in range(len(self.predictors)) if i not in predictor_test_idx]
+            elif self.validation_mode == 'split':
+                predictor_train_idx = [np.random.randint(0, len(self.predictors) - 1)]
+                predictor_test_idx = [i for i in range(len(self.predictors)) if i not in predictor_train_idx]
+            elif self.validation_mode == 'bootstrap':
+                weights = np.random.poisson(1, len(self.predictors))
+                predictor_test_idx = [i for i in range(len(self.predictors)) if weights[i] == 0]
+                predictor_train_idx = [i for i in range(len(self.predictors)) if weights[i] != 0]
+                weights = [i for i in weights if i != 0]
 
             try:
-                train_set = (X_train, y_train)
-                self.test_set = (X_test, y_test)
-                self._run_iteration(last_iteration=last_iteration)
+                self._run_iteration(predictor_train_idx=predictor_train_idx, predictor_test_idx=predictor_test_idx,
+                                    train_weights=weights, train_set=train_set, last_iteration=last_iteration)
             except BaseException:  # This exception is left unspecific on purpose to fetch all possible errors.
                 traceback.print_exc()
                 break
