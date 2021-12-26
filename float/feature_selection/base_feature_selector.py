@@ -118,7 +118,7 @@ class BaseFeatureSelector(metaclass=ABCMeta):
         Returns:
             ArrayLike: The observations with all non-selected features replaced by the baseline value.
         """
-        if np.any(self.weights < 0):
+        if np.any(self.weights < 0) and not hasattr(self, 'feature_selector'):
             abs_weights = abs(self.weights)
             if not self._scale_warning_issued:
                 warnings.warn("The weight vector contains negative values. The absolute weights will be used for "

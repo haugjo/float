@@ -40,6 +40,7 @@ import warnings
 
 from float.data.data_loader import DataLoader
 from float.feature_selection import BaseFeatureSelector
+from float.feature_selection.river import RiverFeatureSelector
 from float.feature_selection.evaluation import FeatureSelectionEvaluator
 from float.change_detection import BaseChangeDetector
 from float.change_detection.evaluation import ChangeDetectionEvaluator
@@ -456,7 +457,9 @@ class BasePipeline(metaclass=ABCMeta):
             print('Feature Selection ({}/{} features):'.format(self.feature_selector.n_selected_features,
                                                                self.feature_selector.n_total_features))
             print(tabulate({
-                **{'Model': [type(self.feature_selector).__name__.split('.')[-1]],
+                **{'Model': [type(self.feature_selector).__name__.split('.')[-1] + '.' + type(self.feature_selector.feature_selector).__name__
+                             if type(self.feature_selector) is RiverFeatureSelector else
+                             type(self.feature_selector).__name__.split('.')[-1]],
                    'Avg. Comp. Time': [np.mean(self.feature_selection_evaluator.comp_times)]},
                 **{'Avg. ' + key: [value['mean'][-1]] for key, value in self.feature_selection_evaluator.result.items()}
             }, headers="keys", tablefmt='github'))

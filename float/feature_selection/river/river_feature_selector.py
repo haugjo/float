@@ -26,6 +26,8 @@ import numpy as np
 from numpy.random import Generator
 from numpy.typing import ArrayLike
 from river.base import Transformer
+from river.feature_selection.k_best import SelectKBest
+from river.feature_selection.random import PoissonInclusion
 from river.feature_selection.variance import VarianceThreshold
 from typing import Union, List
 
@@ -55,27 +57,43 @@ class RiverFeatureSelector(BaseFeatureSelector):
         self.feature_selector = feature_selector
         self.feature_names = feature_names
         super().__init__(n_total_features=n_total_features,
-                         n_selected_features=None,  # the number of selected features must be passed to the Transformer object directly (if applicable)
+                         n_selected_features=self.feature_selector.k if type(self.feature_selector) is SelectKBest else None,
                          supports_multi_class=False,
                          reset_after_drift=reset_after_drift,
                          baseline=baseline,
                          ref_sample=ref_sample)
 
     def weight_features(self, X: ArrayLike, y: ArrayLike):
-        # TODO: set weights and weights_history
-        for x, y_i in zip(X, y):
-            x = {key: value for key, value in zip(self.feature_names, x)}
-            self.feature_selector.learn_one(x=x) if type(self.feature_selector) is VarianceThreshold else self.feature_selector.learn_one(x=x, y=bool(y_i))
+        if type(self.feature_selector) is not PoissonInclusion:
+            for x, y_i in zip(X, y):
+                x = {key: value for key, value in zip(self.feature_names, x)}
+                self.feature_selector.learn_one(x=x) if type(self.feature_selector) is VarianceThreshold else self.feature_selector.learn_one(x=x, y=bool(y_i))
+
+            self.weights = np.array(list(self.feature_selector.leaderboard.values())) if type(self.feature_selector) is SelectKBest else np.array([var.get() for var in self.feature_selector.variances.values()])
 
     def select_features(self, X: ArrayLike, rng: Generator) -> ArrayLike:
         selected_features = []
-        X_new = self._get_baseline(X=X, rng=rng)
-        for i in range(len(X)):
-            x_dict = {key: value for key, value in zip(self.feature_names, X[i])}
+        if type(self.feature_selector) is SelectKBest:
+            return super().select_features(X, rng)
+
+        elif type(self.feature_selector) is VarianceThreshold:
+            X_new = self._get_baseline(X=X, rng=rng)
+            x_dict = {key: value for key, value in zip(self.feature_names, X[0])}
             selected_features = np.where(np.isin(self.feature_names, list(self.feature_selector.transform_one(x_dict).keys())))[0]
-            X_new[i, selected_features] = X[i, selected_features]
+            X_new[:, selected_features] = X[:, selected_features]
+
+        elif type(self.feature_selector) is PoissonInclusion:
+            X_new = self._get_baseline(X=X, rng=rng)
+            self.weights = np.zeros(shape=(57,))
+            for i in range(len(X)):
+                x_dict = {key: value for key, value in zip(self.feature_names, X[i])}
+                selected_features = np.where(np.isin(self.feature_names, list(self.feature_selector.transform_one(x_dict).keys())))[0]
+                self.weights += np.array([1 if i in selected_features else 0 for i in range(len(self.feature_names))])
+                X_new[i, selected_features] = X[i, selected_features]
+            self.weights /= len(X)
 
         self.selected_features = selected_features
+        self.weights_history.append(self.weights)
         self.selected_features_history.append(selected_features)
         X_new = self._get_baseline(X=X, rng=rng)
         X_new[:, self.selected_features] = X[:, self.selected_features]
