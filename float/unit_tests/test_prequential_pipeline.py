@@ -53,9 +53,9 @@ class TestPrequentialPipeline(unittest.TestCase):
 
     def test_run(self):
         self.prequential_pipeline.run()
-        self.assertIsInstance(self.prequential_pipeline.predictor.model.classifier.coef_, np.ndarray, msg='run() sets the classifier\'s weights')
-        self.assertEqual(len(self.prequential_pipeline.prediction_evaluator.training_comp_times), self.prequential_pipeline.time_step, msg='run() adds a prediction training computation time for each time step')
-        self.assertEqual(len(self.prequential_pipeline.prediction_evaluator.result['zero_one_loss']['measures']), self.prequential_pipeline.time_step, msg='run() adds a prediction evaluation measure for each time step')
+        self.assertIsInstance(self.prequential_pipeline.predictors[0].model.classifier.coef_, np.ndarray, msg='run() sets the classifier\'s weights')
+        self.assertEqual(len(self.prequential_pipeline.prediction_evaluators[0].training_comp_times), self.prequential_pipeline.time_step, msg='run() adds a prediction training computation time for each time step')
+        self.assertEqual(len(self.prequential_pipeline.prediction_evaluators[0].result['zero_one_loss']['measures']), self.prequential_pipeline.time_step, msg='run() adds a prediction evaluation measure for each time step')
         self.assertEqual(len(self.prequential_pipeline.feature_selector.selected_features_history), self.prequential_pipeline.time_step, msg='run() adds a list of selected features for every time step')
         self.assertEqual(len(self.prequential_pipeline.feature_selection_evaluator.comp_times), self.prequential_pipeline.time_step, msg='run() adds a feature selection computation time for each time step')
         self.assertEqual(len(self.prequential_pipeline.feature_selection_evaluator.result['nogueira_stability']['measures']), self.prequential_pipeline.time_step, msg='run() adds a feature selection evaluation measure for each time step')

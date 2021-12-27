@@ -182,7 +182,7 @@ class HoldoutPipeline(BasePipeline):
             try:
                 train_set = (X_train, y_train)
                 self.test_set = (X_test, y_test)
-                self._run_iteration(last_iteration=last_iteration)
+                self._run_iteration(train_set=train_set, test_set=self.test_set, last_iteration=last_iteration)
             except BaseException:  # This exception is left unspecific on purpose to fetch all possible errors.
                 traceback.print_exc()
                 break
