@@ -53,9 +53,7 @@ from float.prediction.evaluation import PredictionEvaluator
 
 
 class DistributedFoldPipeline(BasePipeline):
-    """
-    Pipeline for k-fold distributed validation.
-    """
+    """Pipeline for k-fold distributed validation."""
     def __init__(self, data_loader: DataLoader,
                  predictors: List[BasePredictor],
                  prediction_evaluators: List[PredictionEvaluator],
@@ -132,6 +130,11 @@ class DistributedFoldPipeline(BasePipeline):
         self._finish_evaluation()
 
     def _run_distributed_fold(self):
+        """Runs the distributed fold evaluation strategy.
+
+        Raises:
+            BaseException: If the distributed fold evaluation runs into an error.
+        """
         while self.n_total < self.n_max:
             last_iteration = False
             n_batch = self._get_n_batch()
