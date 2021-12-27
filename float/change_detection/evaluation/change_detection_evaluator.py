@@ -102,8 +102,8 @@ class ChangeDetectionEvaluator:
                     mes = []
                     for ndel in self.n_delay:
                         mes.append(measure_func(evaluator=self, drifts=drifts, n_delay=ndel))
-                    mean = np.mean(mes)
-                    var = np.var(mes)
+                    mean = np.nanmean(mes)
+                    var = np.nanvar(mes)
 
                 self.result[measure_func.__name__]['measures'] = mes
                 self.result[measure_func.__name__]['mean'] = mean

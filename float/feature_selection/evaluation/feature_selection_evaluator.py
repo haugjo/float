@@ -88,8 +88,8 @@ class FeatureSelectionEvaluator:
             try:
                 new_measure_val = measure_func(selected_features_history, n_total_features)
                 self.result[measure_func.__name__]['measures'].append(new_measure_val)
-                self.result[measure_func.__name__]['mean'].append(np.mean(self.result[measure_func.__name__]['measures']))
-                self.result[measure_func.__name__]['var'].append(np.var(self.result[measure_func.__name__]['measures']))
+                self.result[measure_func.__name__]['mean'].append(np.nanmean(self.result[measure_func.__name__]['measures']))
+                self.result[measure_func.__name__]['var'].append(np.nanvar(self.result[measure_func.__name__]['measures']))
 
                 if self.decay_rate:
                     if len(self.result[measure_func.__name__]['mean_decay']) > 0:
@@ -106,10 +106,10 @@ class FeatureSelectionEvaluator:
 
                 if self.window_size:
                     self.result[measure_func.__name__]['mean_window'].append(
-                        np.mean(self.result[measure_func.__name__]['measures'][-self.window_size:])
+                        np.nanmean(self.result[measure_func.__name__]['measures'][-self.window_size:])
                     )
                     self.result[measure_func.__name__]['var_window'].append(
-                        np.var(self.result[measure_func.__name__]['measures'][-self.window_size:])
+                        np.nanvar(self.result[measure_func.__name__]['measures'][-self.window_size:])
                     )
             except TypeError:
                 traceback.print_exc()

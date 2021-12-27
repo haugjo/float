@@ -258,6 +258,11 @@ class BasePipeline(metaclass=ABCMeta):
         predictor_train_idx = predictor_train_idx if predictor_train_idx is not None else [0]
         predictor_test_idx = predictor_test_idx if predictor_test_idx is not None else [0]
 
+        if len(X_train) == 0:
+            warnings.warn('No samples available with which to train. Metrics will be set to None this iteration.')
+            self._set_metrics_to_nan(predictor_test_idx, predictor_train_idx)
+            return
+
         # ----------------------------------------
         # Online Feature Selection
         # ----------------------------------------
@@ -363,6 +368,48 @@ class BasePipeline(metaclass=ABCMeta):
             if last_iteration:  # The concept drift detection is only evaluated in the last iteration.
                 self.change_detection_evaluator.run(self.change_detector.drifts)
 
+    def _set_metrics_to_nan(self, predictor_test_idx: List[int], predictor_train_idx: List[int]):
+        """
+        Set all evaluation metrics to np.nan for when there are no samples with which to train.
+
+        Args:
+            predictor_train_idx:
+                (only used for DistributedFoldPipeline) The indices for which predictors should be
+                used for training in this iteration.
+            predictor_test_idx:
+                (only used for DistributedFoldPipeline) The indices for which predictors should be
+                used for testing in this iterations
+        """
+        self.feature_selection_evaluator.comp_times.append(np.nan)
+        for i in predictor_test_idx:
+            self.prediction_evaluators[i].testing_comp_times.append(np.nan)
+        for i in predictor_train_idx:
+            self.prediction_evaluators[i].training_comp_times.append(np.nan)
+        self.change_detection_evaluator.comp_times.append(np.nan)
+
+        if not self.time_step % self.test_interval:
+            for measure_func in self.feature_selection_evaluator.measure_funcs:
+                self.feature_selection_evaluator.result[measure_func.__name__]['measures'].append(np.nan)
+                self.feature_selection_evaluator.result[measure_func.__name__]['mean'].append(np.nan)
+                self.feature_selection_evaluator.result[measure_func.__name__]['var'].append(np.nan)
+
+            for i in predictor_test_idx:
+                for measure_func in self.prediction_evaluators[i].measure_funcs:
+                    self.prediction_evaluators[i].result[measure_func.__name__]['measures'].append(np.nan)
+                    self.prediction_evaluators[i].result[measure_func.__name__]['mean'].append(np.nan)
+                    self.prediction_evaluators[i].result[measure_func.__name__]['var'].append(np.nan)
+
+            for measure_func in self.change_detection_evaluator.measure_funcs:
+                self.change_detection_evaluator.result[measure_func.__name__]['measures'] = np.nan
+                self.change_detection_evaluator.result[measure_func.__name__]['mean'] = np.nan
+                self.change_detection_evaluator.result[measure_func.__name__]['var'] = np.nan
+
+        if self.estimate_memory_alloc:
+            self.feature_selection_evaluator.memory_changes.append(np.nan)
+            for i in range(len(self.prediction_evaluators)):
+                self.prediction_evaluators[i].memory_changes.append(np.nan)
+            self.change_detection_evaluator.memory_changes.append(np.nan)
+
     def _get_n_batch(self) -> int:
         """Returns the number of observations that need to be drawn in this iteration.
 
@@ -460,7 +507,7 @@ class BasePipeline(metaclass=ABCMeta):
                 **{'Model': [type(self.feature_selector).__name__.split('.')[-1] + '.' + type(self.feature_selector.feature_selector).__name__
                              if type(self.feature_selector) is RiverFeatureSelector else
                              type(self.feature_selector).__name__.split('.')[-1]],
-                   'Avg. Comp. Time': [np.mean(self.feature_selection_evaluator.comp_times)]},
+                   'Avg. Comp. Time': [np.nanmean(self.feature_selection_evaluator.comp_times)]},
                 **{'Avg. ' + key: [value['mean'][-1]] for key, value in self.feature_selection_evaluator.result.items()}
             }, headers="keys", tablefmt='github'))
 
@@ -471,11 +518,11 @@ class BasePipeline(metaclass=ABCMeta):
                 **{'Model': [type(self.change_detector).__name__.split('.')[-1] + '.' + type(self.change_detector.detector).__name__
                              if type(self.change_detector) in [SkmultiflowChangeDetector, RiverChangeDetector]
                              else type(self.change_detector).__name__.split('.')[-1]],
-                   'Avg. Comp. Time': [np.mean(self.change_detection_evaluator.comp_times)],
+                   'Avg. Comp. Time': [np.nanmean(self.change_detection_evaluator.comp_times)],
                    'Detected Global Drifts': [self.change_detector.drifts] if len(
                        self.change_detector.drifts) <= 5 else [
                        str(self.change_detector.drifts[:5])[:-1] + ', ...]']},
-                **{'Avg. ' + key: [np.mean([x for x in value if x is not None]) if len([x for x in value if x is not None]) > 0 else 'N/A']
+                **{'Avg. ' + key: [np.nanmean([x for x in value if x is not None]) if len([x for x in value if x is not None]) > 0 else 'N/A']
                 if type(value) is list else [value['mean']] for key, value in self.change_detection_evaluator.result.items()}
             }, headers="keys", tablefmt='github'))
 
@@ -489,8 +536,8 @@ class BasePipeline(metaclass=ABCMeta):
                     **{'Model': [type(self.predictors[i]).__name__.split('.')[-1] + '.' + type(self.predictors[i].model).__name__
                                  if type(self.predictors[i]) in [SkmultiflowClassifier, RiverClassifier] else
                                  type(self.predictors[i]).__name__.split('.')[-1]],
-                       'Avg. Test Comp. Time': [np.mean(self.prediction_evaluators[i].testing_comp_times)] if self.prediction_evaluators[i].testing_comp_times else ['N/A'],
-                       'Avg. Train Comp. Time': [np.mean(self.prediction_evaluators[i].training_comp_times)] if self.prediction_evaluators[i].training_comp_times else ['N/A']},
+                       'Avg. Test Comp. Time': [np.nanmean(self.prediction_evaluators[i].testing_comp_times)] if self.prediction_evaluators[i].testing_comp_times else ['N/A'],
+                       'Avg. Train Comp. Time': [np.nanmean(self.prediction_evaluators[i].training_comp_times)] if self.prediction_evaluators[i].training_comp_times else ['N/A']},
                     **{'Avg. ' + key: [value['mean'][-1]] if value['mean'] else ['N/A'] for key, value in self.prediction_evaluators[i].result.items()}
                 }, headers="keys", tablefmt='github'))
         print('#############################################################################')
