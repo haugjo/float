@@ -148,10 +148,10 @@ class DistributedFoldPipeline(BasePipeline):
             predictor_test_idx = []
             weights = None
             if self.validation_mode == 'cross':
-                predictor_test_idx = [np.random.randint(0, len(self.predictors) - 1)]
+                predictor_test_idx = [np.random.randint(0, len(self.predictors))]
                 predictor_train_idx = [i for i in range(len(self.predictors)) if i not in predictor_test_idx]
             elif self.validation_mode == 'split':
-                predictor_train_idx = [np.random.randint(0, len(self.predictors) - 1)]
+                predictor_train_idx = [np.random.randint(0, len(self.predictors))]
                 predictor_test_idx = [i for i in range(len(self.predictors)) if i not in predictor_train_idx]
             elif self.validation_mode == 'bootstrap':
                 weights = np.random.poisson(1, len(self.predictors))
