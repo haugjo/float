@@ -64,6 +64,8 @@ class RiverFeatureSelector(BaseFeatureSelector):
                          ref_sample=ref_sample)
 
     def weight_features(self, X: ArrayLike, y: ArrayLike):
+        """Updates feature weights."""
+        # PoissonInclusion uses random selection so weights do not need to be set
         if type(self.feature_selector) is not PoissonInclusion:
             for x, y_i in zip(X, y):
                 x = {key: value for key, value in zip(self.feature_names, x)}
@@ -72,22 +74,28 @@ class RiverFeatureSelector(BaseFeatureSelector):
             self.weights = np.array(list(self.feature_selector.leaderboard.values())) if type(self.feature_selector) is SelectKBest else np.array([var.get() for var in self.feature_selector.variances.values()])
 
     def select_features(self, X: ArrayLike, rng: Generator) -> ArrayLike:
+        """Selects features with highest absolute weights."""
         selected_features = []
+        # SelectKBest can be used with the superclass function as it selects a fixed number of features
         if type(self.feature_selector) is SelectKBest:
             return super().select_features(X, rng)
 
-        elif type(self.feature_selector) is VarianceThreshold:
-            X_new = self._get_baseline(X=X, rng=rng)
+        X_new = self._get_baseline(X=X, rng=rng)
+
+        # VarianceThreshold selects a variable number of features so explicit handling is necessary
+        if type(self.feature_selector) is VarianceThreshold:
             x_dict = {key: value for key, value in zip(self.feature_names, X[0])}
+            # features get selected from the keys of the return value of the transform_one function (same result for all samples until the FS is trained again)
             selected_features = np.where(np.isin(self.feature_names, list(self.feature_selector.transform_one(x_dict).keys())))[0]
             X_new[:, selected_features] = X[:, selected_features]
 
+        # PoissonInclusion selects random features for each sample
         elif type(self.feature_selector) is PoissonInclusion:
-            X_new = self._get_baseline(X=X, rng=rng)
             self.weights = np.zeros(shape=(57,))
             for i in range(len(X)):
                 x_dict = {key: value for key, value in zip(self.feature_names, X[i])}
                 selected_features = np.where(np.isin(self.feature_names, list(self.feature_selector.transform_one(x_dict).keys())))[0]
+                # weights are set to 1 for selected and 0 for non-selected and averaged over the batch size for the sake of completeness
                 self.weights += np.array([1 if i in selected_features else 0 for i in range(len(self.feature_names))])
                 X_new[i, selected_features] = X[i, selected_features]
             self.weights /= len(X)
@@ -95,12 +103,11 @@ class RiverFeatureSelector(BaseFeatureSelector):
         self.selected_features = selected_features
         self.weights_history.append(self.weights)
         self.selected_features_history.append(selected_features)
-        X_new = self._get_baseline(X=X, rng=rng)
-        X_new[:, self.selected_features] = X[:, self.selected_features]
 
         return X_new
 
     def reset(self):
+        """Resets the feature selector."""
         self.__init__(feature_selector=self.init_feature_selector,
                       feature_names=self.feature_names,
                       n_total_features=self.n_total_features,
