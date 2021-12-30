@@ -171,15 +171,14 @@ class BasePipeline(metaclass=ABCMeta):
                 not (any(issubclass(type(predictor), BasePredictor) for predictor in self.predictors)):
             raise AttributeError('No valid FeatureSelector, ChangeDetector or Predictor object was provided.')
 
-        if self.predictors and len(self.predictors) != len(self.prediction_evaluators):
-            raise AttributeError('A PredictionEvaluator object needs to be provided for every Predictor object.')
+        if self.predictors and not self.prediction_evaluators:
+            raise AttributeError('A PredictionEvaluator object needs to be provided when a Predictor object is provided.')
 
-        for i in range(len(self.predictors)):
-            if type(self.predictors[i]) is RiverClassifier:
-                if not self.predictors[i].can_mini_batch:
-                    warnings.warn('This classifier does not support batch processing. The batch size is set to 1 for all '
-                                  'predictors regardless of the specified batch size.')
-                    self.batch_size = 1
+        if type(self.predictors[0]) is RiverClassifier:
+            if not self.predictors[0].can_mini_batch:
+                warnings.warn('This classifier does not support batch processing. The batch size is set to 1 regardless '
+                              'of the specified batch size.')
+                self.batch_size = 1
 
         if self.change_detector:
             if self.change_detector.error_based and \
@@ -187,8 +186,12 @@ class BasePipeline(metaclass=ABCMeta):
                 raise AttributeError('An error-based Change Detector cannot be used without a valid Predictor '
                                      'object.')
 
+            if self.change_detector.error_based and type(self) is pipeline.DistributedFoldPipeline:
+                warnings.warn('An error-based Change Detector is being used with multiple Predictor objects. The '
+                              'predicted y will always be predicted by the first predictor for consistency.')
+
             if not self.change_detection_evaluator:
-                raise AttributeError('A ChangeDetectionEvaluator object needs to be provided when a ChangeDetector 7'
+                raise AttributeError('A ChangeDetectionEvaluator object needs to be provided when a ChangeDetector '
                                      'object is provided.')
 
         if self.feature_selector:
@@ -198,9 +201,6 @@ class BasePipeline(metaclass=ABCMeta):
             if not self.feature_selection_evaluator:
                 raise AttributeError('A FeatureSelectionEvaluator object needs to be provided when a FeatureSelector '
                                      'object is provided.')
-
-        if len(self.predictors) == 1 and type(self) is pipeline.DistributedFoldPipeline:
-            raise AttributeError('The DistributedFoldPipeline can only be used with more than one predictor object.')
 
     def _start_evaluation(self):
         """Starts the evaluation."""
@@ -287,19 +287,18 @@ class BasePipeline(metaclass=ABCMeta):
         # ----------------------------------------
         # Prediction
         # ----------------------------------------
-        y_pred = None
         if self.predictors:
             if (self.n_pretrain > 0 or self.time_step > 0) and X_test.shape[0] > 0:  # Predict/Test if model has already been trained.
                 start_time = time.time()
-                for i in predictor_test_idx:
-                    y_pred = self.predictors[i].predict(X_test)
-                    self.prediction_evaluators[i].testing_comp_times.append(time.time() - start_time)
+                for idx in predictor_test_idx:
+                    y_pred = self.predictors[idx].predict(X_test)
+                    self.prediction_evaluators[idx].testing_comp_times.append(time.time() - start_time)
 
                     if not self.time_step % self.test_interval:
-                        self.prediction_evaluators[i].run(y_true=copy.copy(y_test),
+                        self.prediction_evaluators[idx].run(y_true=copy.copy(y_test),
                                                           y_pred=copy.copy(y_pred),
                                                           X=copy.copy(X_test),
-                                                          predictor=self.predictors[i],
+                                                          predictor=self.predictors[idx],
                                                           rng=self.rng)
 
             for i, idx in enumerate(predictor_train_idx):
@@ -328,6 +327,8 @@ class BasePipeline(metaclass=ABCMeta):
 
             start_time = time.time()
             if self.change_detector.error_based:
+                # always use the same predictor for predicting y_pred to be used in the training of the change detector
+                y_pred = self.predictors[0].predict(X_test)
                 if y_pred is not None:
                     # If the predictor has not been pre-trained, then there is no prediction in the first time step.
                     for val in (y_pred == y_test):
@@ -370,7 +371,8 @@ class BasePipeline(metaclass=ABCMeta):
 
     def _set_metrics_to_nan(self, predictor_test_idx: List[int], predictor_train_idx: List[int]):
         """
-        Set all evaluation metrics to np.nan for when there are no samples with which to train.
+        Set all evaluation metrics to np.nan for when there are no samples with which to train. This can
+        happen when label_delay_range is set with a small batch size.
 
         Args:
             predictor_train_idx:
@@ -381,10 +383,10 @@ class BasePipeline(metaclass=ABCMeta):
                 used for testing in this iterations
         """
         self.feature_selection_evaluator.comp_times.append(np.nan)
-        for i in predictor_test_idx:
-            self.prediction_evaluators[i].testing_comp_times.append(np.nan)
-        for i in predictor_train_idx:
-            self.prediction_evaluators[i].training_comp_times.append(np.nan)
+        for idx in predictor_test_idx:
+            self.prediction_evaluators[idx].testing_comp_times.append(np.nan)
+        for idx in predictor_train_idx:
+            self.prediction_evaluators[idx].training_comp_times.append(np.nan)
         self.change_detection_evaluator.comp_times.append(np.nan)
 
         if not self.time_step % self.test_interval:
@@ -393,11 +395,11 @@ class BasePipeline(metaclass=ABCMeta):
                 self.feature_selection_evaluator.result[measure_func.__name__]['mean'].append(np.nan)
                 self.feature_selection_evaluator.result[measure_func.__name__]['var'].append(np.nan)
 
-            for i in predictor_test_idx:
-                for measure_func in self.prediction_evaluators[i].measure_funcs:
-                    self.prediction_evaluators[i].result[measure_func.__name__]['measures'].append(np.nan)
-                    self.prediction_evaluators[i].result[measure_func.__name__]['mean'].append(np.nan)
-                    self.prediction_evaluators[i].result[measure_func.__name__]['var'].append(np.nan)
+            for idx in predictor_test_idx:
+                for measure_func in self.prediction_evaluators[idx].measure_funcs:
+                    self.prediction_evaluators[idx].result[measure_func.__name__]['measures'].append(np.nan)
+                    self.prediction_evaluators[idx].result[measure_func.__name__]['mean'].append(np.nan)
+                    self.prediction_evaluators[idx].result[measure_func.__name__]['var'].append(np.nan)
 
             for measure_func in self.change_detection_evaluator.measure_funcs:
                 self.change_detection_evaluator.result[measure_func.__name__]['measures'] = np.nan
@@ -527,17 +529,16 @@ class BasePipeline(metaclass=ABCMeta):
             }, headers="keys", tablefmt='github'))
 
         if self.predictors:
-            for i in range(len(self.predictors)):
-                print('----------------------')
-                print('Prediction:')
-                if len(self.predictors) > 1:
-                    print(f'Predictor {i}:')
-                print(tabulate({
-                    **{'Model': [type(self.predictors[i]).__name__.split('.')[-1] + '.' + type(self.predictors[i].model).__name__
-                                 if type(self.predictors[i]) in [SkmultiflowClassifier, RiverClassifier] else
-                                 type(self.predictors[i]).__name__.split('.')[-1]],
-                       'Avg. Test Comp. Time': [np.nanmean(self.prediction_evaluators[i].testing_comp_times)] if self.prediction_evaluators[i].testing_comp_times else ['N/A'],
-                       'Avg. Train Comp. Time': [np.nanmean(self.prediction_evaluators[i].training_comp_times)] if self.prediction_evaluators[i].training_comp_times else ['N/A']},
-                    **{'Avg. ' + key: [value['mean'][-1]] if value['mean'] else ['N/A'] for key, value in self.prediction_evaluators[i].result.items()}
-                }, headers="keys", tablefmt='github'))
+            print('----------------------')
+            print('Prediction:')
+            print(tabulate({
+                **{'Model': [type(self.predictors[0]).__name__.split('.')[-1] + '.' + type(self.predictors[0].model).__name__
+                             if type(self.predictors[0]) in [SkmultiflowClassifier, RiverClassifier] else
+                             type(self.predictors[0]).__name__.split('.')[-1]],
+                   'Avg. Test Comp. Time': [np.nanmean([np.nanmean(prediction_evaluator.testing_comp_times) for prediction_evaluator in self.prediction_evaluators])],
+                   'Avg. Train Comp. Time': [np.nanmean([np.nanmean(prediction_evaluator.training_comp_times) for prediction_evaluator in self.prediction_evaluators])]},
+                **{'Avg. ' + key: [np.nanmean([[prediction_evaluator.result[key]['mean'][-1]] if prediction_evaluator.result[key]['mean'] else np.nan
+                                              for prediction_evaluator in self.prediction_evaluators])]
+                   for key in self.prediction_evaluators[0].result.keys()}
+            }, headers="keys", tablefmt='github'))
         print('#############################################################################')

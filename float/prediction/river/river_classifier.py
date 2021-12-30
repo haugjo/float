@@ -98,3 +98,7 @@ class RiverClassifier(BasePredictor):
                 self.can_mini_batch = True
         else:
             raise TypeError('River classifier class {} is not supported.'.format(type(self.model)))
+
+    def clone(self):
+        """Returns a clone of this predictor with the weights reset."""
+        return type(self)(self.init_model, self.feature_names, self.reset_after_drift)

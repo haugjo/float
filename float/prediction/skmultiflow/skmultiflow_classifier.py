@@ -44,9 +44,10 @@ class SkmultiflowClassifier(BasePredictor):
             classes: A list of all unique classes.
             reset_after_drift: A boolean indicating if the predictor will be reset after a drift was detected.
         """
-        super().__init__(reset_after_drift=reset_after_drift)
+        # self.init_model = model.copy()
         self.model = model
         self.classes = classes
+        super().__init__(reset_after_drift=reset_after_drift)
 
     def partial_fit(self, X: ArrayLike, y: ArrayLike, sample_weight: Optional[ArrayLike] = None):
         """Updates the predictor."""
@@ -64,3 +65,8 @@ class SkmultiflowClassifier(BasePredictor):
         """Resets the predictor and fits to given sample."""
         self.model.reset()
         self.partial_fit(X=X, y=y)
+
+    def clone(self):
+        """Returns a clone of this predictor with the weights reset."""
+        self.model.reset()
+        return type(self)(self.model, self.classes, self.reset_after_drift)

@@ -18,14 +18,14 @@ class TestDistributedFoldPipeline(unittest.TestCase):
     def __init__(self, method_name):
         super().__init__(method_name)
         self.data_loader = DataLoader(path='../data/datasets/spambase.csv', target_col=-1)
-        self.predictors = [SkmultiflowClassifier(PerceptronMask(), classes=self.data_loader.stream.target_values) for _ in range(3)]
-        self.prediction_evaluators = [PredictionEvaluator([zero_one_loss]) for _ in range(3)]
+        self.predictor = SkmultiflowClassifier(PerceptronMask(), classes=self.data_loader.stream.target_values)
+        self.prediction_evaluator = PredictionEvaluator([zero_one_loss])
         known_drifts = [round(self.data_loader.stream.n_samples * 0.2), round(self.data_loader.stream.n_samples * 0.4),
                         round(self.data_loader.stream.n_samples * 0.6), round(self.data_loader.stream.n_samples * 0.8)]
         batch_size = 10
         self.distributed_fold_pipeline = DistributedFoldPipeline(data_loader=self.data_loader,
-                                                                 predictors=self.predictors,
-                                                                 prediction_evaluators=self.prediction_evaluators,
+                                                                 predictor=self.predictor,
+                                                                 prediction_evaluator=self.prediction_evaluator,
                                                                  feature_selector=OFS(n_total_features=self.data_loader.stream.n_features, n_selected_features=10),
                                                                  feature_selection_evaluator=FeatureSelectionEvaluator([nogueira_stability]),
                                                                  change_detector=SkmultiflowChangeDetector(ADWIN()),
@@ -40,20 +40,10 @@ class TestDistributedFoldPipeline(unittest.TestCase):
         self.assertEqual(self.distributed_fold_pipeline.time_step, 0, msg='attribute time_step is initialized correctly')
         self.assertEqual(self.distributed_fold_pipeline.n_total, 0, msg='attribute n_total is initialized correctly')
 
-        with self.assertRaises(AttributeError, msg='AttributeError when passing only one Predictor object.'):
-            DistributedFoldPipeline(data_loader=self.data_loader,
-                                    predictors=self.predictors[:1],
-                                    prediction_evaluators=self.prediction_evaluators[:1])
-
-        with self.assertRaises(AttributeError, msg='AttributeError when an error-based Change Detector is passed but no Predictor'):
-            DistributedFoldPipeline(data_loader=self.data_loader,
-                                    predictors=self.predictors,
-                                    prediction_evaluators=self.prediction_evaluators[:1])
-
         with self.assertRaises(AttributeError, msg='AttributeError when an unknown string is passed for validation_mode.'):
             DistributedFoldPipeline(data_loader=self.data_loader,
-                                    predictors=self.predictors,
-                                    prediction_evaluators=self.prediction_evaluators,
+                                    predictor=self.predictor,
+                                    prediction_evaluator=self.prediction_evaluator,
                                     validation_mode='test')
 
         data_loader = DataLoader(path='../data/datasets/gas.csv', target_col=-1)
@@ -61,8 +51,8 @@ class TestDistributedFoldPipeline(unittest.TestCase):
         with self.assertRaises(AttributeError, msg='AttributeError when a multiclass dataset is used but the Feature Selector'
                                                    'does not support multiclass targets'):
             DistributedFoldPipeline(data_loader=data_loader,
-                                    predictors=self.predictors,
-                                    prediction_evaluators=self.prediction_evaluators,
+                                    predictor=self.predictor,
+                                    prediction_evaluator=self.prediction_evaluator,
                                     feature_selector=feature_selector)
 
     def test_run(self):

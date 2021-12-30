@@ -1,11 +1,16 @@
 """Distributed Fold Pipeline Module.
 
-This module implements a pipeline following the k-fold distributed validation
-techniques proposed by Albert Bifet, Gianmarco de Francisci Morales, Jesse Read,
+This module implements a pipeline similar to the k-fold distributed validation
+techniques proposed in Albert Bifet, Gianmarco de Francisci Morales, Jesse Read,
 Geoff Holmes, and Bernhard Pfahringer. 2015. Efficient Online Evaluation of Big
 Data Stream Classifiers. In Proceedings of the 21th ACM SIGKDD International
 Conference on Knowledge Discovery and Data Mining (KDD '15). Association for
 Computing Machinery, New York, NY, USA, 59–68.
+
+It serves the purpose of testing a predictor and its hyperparameter configurations
+more robustly by not just training and evaluating one instance of the predictor,
+but several. To this end, one predictor object is passed by the used and then
+cloned for further use in the specified validation mode.
 
 The following three modes are implemented:
 1. k-fold distributed cross-validation: each example is used for testing in one
@@ -55,8 +60,8 @@ from float.prediction.evaluation import PredictionEvaluator
 class DistributedFoldPipeline(BasePipeline):
     """Pipeline for k-fold distributed validation."""
     def __init__(self, data_loader: DataLoader,
-                 predictors: List[BasePredictor],
-                 prediction_evaluators: List[PredictionEvaluator],
+                 predictor: BasePredictor,
+                 prediction_evaluator: PredictionEvaluator,
                  change_detector: Optional[BaseChangeDetector] = None,
                  change_detection_evaluator: Optional[ChangeDetectionEvaluator] = None,
                  feature_selector: Optional[BaseFeatureSelector] = None,
@@ -67,14 +72,15 @@ class DistributedFoldPipeline(BasePipeline):
                  label_delay_range: Optional[tuple] = None,
                  known_drifts: Optional[Union[List[int], List[tuple]]] = None,
                  estimate_memory_alloc: bool = False,
+                 n_predictor_instances: int = 2,
                  validation_mode: str = 'cross',
                  random_state: int = 0):
         """Initializes the pipeline.
 
         Args:
             data_loader: Data loader object.
-            predictors: Predictive models.
-            prediction_evaluators: Evaluators for predictive models.
+            predictor: Predictive model.
+            prediction_evaluator: Evaluator for predictive model.
             change_detector: Concept drift detection model.
             change_detection_evaluator: Evaluator for active concept drift detection.
             feature_selector: Online feature selection model.
@@ -93,12 +99,17 @@ class DistributedFoldPipeline(BasePipeline):
             validation_mode:
                 A string indicating the k-fold distributed validation mode to use. One of 'cross', 'batch' and
                 'bootstrap'.
+            n_predictor_instances:
+                How many object instances of the passed predictor object should be used for training and evaluation.
             random_state: A random integer seed used to specify a random number generator.
         """
         self.validation_mode = validation_mode
+        self.n_predictor_instances = n_predictor_instances
+        self.predictors = [predictor.clone() for _ in range(self.n_predictor_instances)]
+        self.prediction_evaluators = [prediction_evaluator.clone() for _ in range(self.n_predictor_instances)]
         super().__init__(data_loader=data_loader,
-                         predictors=predictors,
-                         prediction_evaluators=prediction_evaluators,
+                         predictors=self.predictors,
+                         prediction_evaluators=self.prediction_evaluators,
                          change_detector=change_detector,
                          change_detection_evaluator=change_detection_evaluator,
                          feature_selector=feature_selector,
@@ -116,6 +127,10 @@ class DistributedFoldPipeline(BasePipeline):
         super()._validate()
         if self.validation_mode not in ['cross', 'split', 'bootstrap']:
             raise AttributeError('Please choose one of the validation modes "cross", "split", or "bootstrap".')
+
+        if self.n_predictor_instances < 2:
+            raise AttributeError('At least two Predictor need to be created for the DistributedFoldPipeline. If you'
+                                 'only want to run one instance, use the PrequentialPipeline or HoldoutPipeline.')
 
     def run(self):
         """Runs the pipeline."""
