@@ -219,6 +219,7 @@ class BasePipeline(metaclass=ABCMeta):
             for i in range(len(self.predictors)):
                 X, y = self.data_loader.get_data(self.n_pretrain)
 
+                # If a RiverClassifier is used which does not support mini batches, train with each sample individually
                 if type(self.predictors[i]) is RiverClassifier:
                     if not self.predictors[i].can_mini_batch:
                         for x, y in zip(X, y):
@@ -255,6 +256,7 @@ class BasePipeline(metaclass=ABCMeta):
         X_train, y_train = train_set
         X_test, y_test = test_set if test_set else train_set
 
+        # If the DistributedFoldPipeline is not used, use the single predictor for both training and testing
         predictor_train_idx = predictor_train_idx if predictor_train_idx is not None else [0]
         predictor_test_idx = predictor_test_idx if predictor_test_idx is not None else [0]
 
@@ -290,17 +292,19 @@ class BasePipeline(metaclass=ABCMeta):
         if self.predictors:
             if (self.n_pretrain > 0 or self.time_step > 0) and X_test.shape[0] > 0:  # Predict/Test if model has already been trained.
                 start_time = time.time()
+                # Only test with and evaluate predictors which are specified in the predictor_test_idx
                 for idx in predictor_test_idx:
                     y_pred = self.predictors[idx].predict(X_test)
                     self.prediction_evaluators[idx].testing_comp_times.append(time.time() - start_time)
 
                     if not self.time_step % self.test_interval:
                         self.prediction_evaluators[idx].run(y_true=copy.copy(y_test),
-                                                          y_pred=copy.copy(y_pred),
-                                                          X=copy.copy(X_test),
-                                                          predictor=self.predictors[idx],
-                                                          rng=self.rng)
+                                                            y_pred=copy.copy(y_pred),
+                                                            X=copy.copy(X_test),
+                                                            predictor=self.predictors[idx],
+                                                            rng=self.rng)
 
+            # Only train predictors which are specified in the predictor_train_idx
             for i, idx in enumerate(predictor_train_idx):
                 if self.estimate_memory_alloc:
                     start_snapshot = tracemalloc.take_snapshot()
@@ -309,6 +313,7 @@ class BasePipeline(metaclass=ABCMeta):
                 X_train_weighted = X_train.copy()
                 y_train_weighted = y_train.copy()
                 if train_weights:
+                    # Add copies of the training samples to the batch according to their weights for each predictor respectively
                     X_train_weighted, y_train_weighted = np.repeat(X_train, train_weights[i], axis=0), np.repeat(y_train, train_weights[i])
 
                 self.predictors[idx].partial_fit(X_train_weighted, y_train_weighted)
@@ -327,7 +332,7 @@ class BasePipeline(metaclass=ABCMeta):
 
             start_time = time.time()
             if self.change_detector.error_based:
-                # always use the same predictor for predicting y_pred to be used in the training of the change detector
+                # Always use the same predictor for predicting y_pred to be used in the training of the change detector
                 y_pred = self.predictors[0].predict(X_test)
                 if y_pred is not None:
                     # If the predictor has not been pre-trained, then there is no prediction in the first time step.
@@ -382,6 +387,7 @@ class BasePipeline(metaclass=ABCMeta):
                 (only used for DistributedFoldPipeline) The indices for which predictors should be
                 used for testing in this iterations
         """
+        # Set computation times to nan
         self.feature_selection_evaluator.comp_times.append(np.nan)
         for idx in predictor_test_idx:
             self.prediction_evaluators[idx].testing_comp_times.append(np.nan)
@@ -389,6 +395,7 @@ class BasePipeline(metaclass=ABCMeta):
             self.prediction_evaluators[idx].training_comp_times.append(np.nan)
         self.change_detection_evaluator.comp_times.append(np.nan)
 
+        # Set evaluation measures to nan
         if not self.time_step % self.test_interval:
             for measure_func in self.feature_selection_evaluator.measure_funcs:
                 self.feature_selection_evaluator.result[measure_func.__name__]['measures'].append(np.nan)
@@ -406,6 +413,7 @@ class BasePipeline(metaclass=ABCMeta):
                 self.change_detection_evaluator.result[measure_func.__name__]['mean'] = np.nan
                 self.change_detection_evaluator.result[measure_func.__name__]['var'] = np.nan
 
+        # Set memory changes to nan
         if self.estimate_memory_alloc:
             self.feature_selection_evaluator.memory_changes.append(np.nan)
             for i in range(len(self.prediction_evaluators)):
@@ -525,7 +533,7 @@ class BasePipeline(metaclass=ABCMeta):
                        self.change_detector.drifts) <= 5 else [
                        str(self.change_detector.drifts[:5])[:-1] + ', ...]']},
                 **{'Avg. ' + key: [np.nanmean([x for x in value if x is not None]) if len([x for x in value if x is not None]) > 0 else 'N/A']
-                if type(value) is list else [value['mean']] for key, value in self.change_detection_evaluator.result.items()}
+                    if type(value) is list else [value['mean']] for key, value in self.change_detection_evaluator.result.items()}
             }, headers="keys", tablefmt='github'))
 
         if self.predictors:
@@ -535,10 +543,11 @@ class BasePipeline(metaclass=ABCMeta):
                 **{'Model': [type(self.predictors[0]).__name__.split('.')[-1] + '.' + type(self.predictors[0].model).__name__
                              if type(self.predictors[0]) in [SkmultiflowClassifier, RiverClassifier] else
                              type(self.predictors[0]).__name__.split('.')[-1]],
+                   # Take the mean over all time steps and over all PredictionEvaluators (in the case of the DistributedFoldPipeline) for computation times and evaluation measures
                    'Avg. Test Comp. Time': [np.nanmean([np.nanmean(prediction_evaluator.testing_comp_times) for prediction_evaluator in self.prediction_evaluators])],
                    'Avg. Train Comp. Time': [np.nanmean([np.nanmean(prediction_evaluator.training_comp_times) for prediction_evaluator in self.prediction_evaluators])]},
                 **{'Avg. ' + key: [np.nanmean([[prediction_evaluator.result[key]['mean'][-1]] if prediction_evaluator.result[key]['mean'] else np.nan
-                                              for prediction_evaluator in self.prediction_evaluators])]
+                                               for prediction_evaluator in self.prediction_evaluators])]
                    for key in self.prediction_evaluators[0].result.keys()}
             }, headers="keys", tablefmt='github'))
         print('#############################################################################')
