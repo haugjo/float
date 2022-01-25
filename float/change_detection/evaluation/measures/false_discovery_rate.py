@@ -52,14 +52,16 @@ def false_discovery_rate(evaluator: ChangeDetectionEvaluator, drifts: list, n_de
         # Find end of considered search space
         if isinstance(drift, tuple):  # Incremental/gradual drifts involve a starting and end point
             end_search = drift[0]
+            end_drift = drift[1]
         else:
             end_search = drift
+            end_drift = drift
 
         relevant_drifts = [det for det in detections if start_search <= det < end_search]
         false_discoveries += len(relevant_drifts)
 
         # Update starting point
-        start_search = end_search + n_delay
+        start_search = end_drift + n_delay
 
         drift = next(iter_drifts, None)
 

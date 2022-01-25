@@ -52,18 +52,20 @@ def detected_change_rate(evaluator: ChangeDetectionEvaluator, drifts: list, n_de
         # Find start of a known drift
         if isinstance(drift, tuple):  # Incremental/gradual drifts involve a starting and end point
             start_search = drift[0]
+            drift_end = drift[1]
         else:
             start_search = drift
+            drift_end = drift
 
         # Find end of considered search space
         drift = next(iter_drifts, None)
         if drift is not None:
             if isinstance(drift, tuple):  # End of search space = start of next known drift OR delay (min value)
-                end_search = min(drift[0], start_search + n_delay)
+                end_search = min(drift[0], drift_end + n_delay)
             else:
-                end_search = min(drift, start_search + n_delay)
+                end_search = min(drift, drift_end + n_delay)
         else:
-            end_search = start_search + n_delay  # If no more known concept drifts, set end search space to max delay
+            end_search = drift_end + n_delay  # If no more known concept drifts, set end search space to max delay
 
         # Find first relevant detection
         relevant_drift = next((det for det in detections if start_search <= det < end_search), None)

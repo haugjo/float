@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from river.base import DriftDetector
-from river.drift import ADWIN, DDM, EDDM, HDDM_A, HDDM_W, PageHinkley, KSWIN
+from river.drift import ADWIN, DDM, EDDM, HDDM_A, HDDM_W, PageHinkley
 from typing import Tuple, Any
 
 from float.change_detection import BaseChangeDetector
@@ -52,8 +52,7 @@ class RiverChangeDetector(BaseChangeDetector):
         self.detector.reset()
 
     def partial_fit(self, input_value: Any):
-        """
-        Update the parameters of the concept drift detection model.
+        """Updates the parameters of the concept drift detection model.
 
         Args:
             input_value: Whatever input value the concept drift detector takes.

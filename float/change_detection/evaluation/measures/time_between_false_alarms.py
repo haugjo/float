@@ -25,6 +25,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import numpy as np
+import warnings
 
 from float.change_detection.evaluation.change_detection_evaluator import ChangeDetectionEvaluator
 
@@ -42,8 +43,10 @@ def time_between_false_alarms(evaluator: ChangeDetectionEvaluator, drifts: list,
     Returns:
         float: The mean time between false alarms in number of observations.
     """
-    if len(drifts) == 0:  # If there is no detected drift, the time between false alarms is zero
-        return 0
+    if len(drifts) == 0:  # If there is no detected drift, the time between false alarms is maximal.
+        warnings.warn('There was no concept drift detected. In this case, the mean_time_between_false_alarms '
+                      'equals the total number of observations per default.')
+        return evaluator.n_total
 
     iter_drifts = iter(evaluator.known_drifts)
     detections = np.asarray(drifts) * evaluator.batch_size  # Translate drifts to relative position in dataset
@@ -56,8 +59,10 @@ def time_between_false_alarms(evaluator: ChangeDetectionEvaluator, drifts: list,
         # Find end of considered search space
         if isinstance(drift, tuple):  # Incremental/gradual drifts involve a starting and end point
             end_search = drift[0]
+            end_drift = drift[1]
         else:
             end_search = drift
+            end_drift = drift
 
         relevant_drifts = [det for det in detections if start_search <= det < end_search]
         diffs = np.diff(relevant_drifts)
@@ -67,10 +72,11 @@ def time_between_false_alarms(evaluator: ChangeDetectionEvaluator, drifts: list,
             if last_false_alarm != 0:
                 diffs = np.append(diffs, relevant_drifts[0] - last_false_alarm)
             last_false_alarm = relevant_drifts[-1]
+
         time_between += np.sum(diffs)
         n_diffs += len(diffs)
 
-        start_search = end_search + n_delay
+        start_search = end_drift + n_delay
         drift = next(iter_drifts, None)
 
     # Finally, add all false discoveries after the last known drift
@@ -86,4 +92,6 @@ def time_between_false_alarms(evaluator: ChangeDetectionEvaluator, drifts: list,
     if n_diffs > 0:
         return time_between / n_diffs
     else:
-        return 0
+        warnings.warn('There were less than two false concept drift detections. In this case, the '
+                      'mean_time_between_false_alarms equals the total number of observations per default.')
+        return evaluator.n_total

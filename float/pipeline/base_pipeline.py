@@ -194,6 +194,12 @@ class BasePipeline(metaclass=ABCMeta):
                 raise AttributeError('A ChangeDetectionEvaluator object needs to be provided when a ChangeDetector '
                                      'object is provided.')
 
+            if self.n_pretrain is not None and self.n_pretrain > 0:
+                self.change_detection_evaluator.n_pretrain = self.n_pretrain
+                self.change_detection_evaluator.correct_known_drifts()
+                warnings.warn('Known drift positions have been automatically corrected with respect to the number of '
+                              'observations used for pre-training (n_pretrain)')
+
         if self.feature_selector:
             if not self.feature_selector.supports_multi_class and self.data_loader.stream.n_classes > 2:
                 raise AttributeError('The provided Feature Selector does not support multiclass targets.')

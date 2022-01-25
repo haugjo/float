@@ -39,6 +39,7 @@ class ChangeDetectionEvaluator:
             The positions in the dataset (indices) corresponding to known concept drifts.
         batch_size (int): The number of observations processed per iteration/time step.
         n_total (int): The total number of observations.
+        n_pretrain (int | None): Number of observations used for the initial training of the predictive model.
         n_delay (int | list): The number of observations after a known concept drift, during which we count
                 the detections made by the model as true positives. If the argument is a list, the evaluator computes
                 results for each delay specified in the list.
@@ -74,6 +75,7 @@ class ChangeDetectionEvaluator:
         self.known_drifts = known_drifts
         self.batch_size = batch_size
         self.n_total = n_total
+        self.n_pretrain = None
         self.n_delay = n_delay
         self.n_init_tolerance = n_init_tolerance
         self.comp_times = []
@@ -111,3 +113,17 @@ class ChangeDetectionEvaluator:
             except TypeError:
                 traceback.print_exc()
                 continue
+
+    def correct_known_drifts(self):
+        """Corrects the known drift positions if we do pre-training.
+
+        We Subtract 'n_pretrain' from all known drift positions, as these observations are not considered in the actual
+        pipeline run.
+        """
+        if self.n_pretrain is not None and self.n_pretrain > 0:
+            for drift in self.known_drifts:
+                if isinstance(drift, tuple):
+                    drift[0] -= self. n_pretrain
+                    drift[1] -= self. n_pretrain
+                else:
+                    drift -= self.n_pretrain
