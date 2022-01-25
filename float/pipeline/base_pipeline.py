@@ -31,7 +31,6 @@ import numpy as np
 from numpy.typing import ArrayLike
 from numpy.random import Generator
 import sys
-from tabulate import tabulate
 import time
 import tracemalloc
 from tracemalloc import Snapshot
@@ -40,17 +39,14 @@ import warnings
 
 from float.data.data_loader import DataLoader
 from float.feature_selection import BaseFeatureSelector
-from float.feature_selection.river import RiverFeatureSelector
 from float.feature_selection.evaluation import FeatureSelectionEvaluator
 from float.change_detection import BaseChangeDetector
 from float.change_detection.evaluation import ChangeDetectionEvaluator
-from float.change_detection.river import RiverChangeDetector
-from float.change_detection.skmultiflow import SkmultiflowChangeDetector
 from float import pipeline
+from float.pipeline.utils import print_summary
 from float.prediction import BasePredictor
 from float.prediction.evaluation import PredictionEvaluator
 from float.prediction.river import RiverClassifier
-from float.prediction.skmultiflow import SkmultiflowClassifier
 
 
 class BasePipeline(metaclass=ABCMeta):
@@ -513,54 +509,4 @@ class BasePipeline(metaclass=ABCMeta):
             tracemalloc.stop()
 
         self.data_loader.stream.restart()
-        self._print_summary()
-
-    def _print_summary(self):
-        """Prints a summary of the evaluation to the console."""
-        print('\n################################## SUMMARY ##################################')
-        print('Evaluation has finished after {}s'.format(time.time() - self.start_time))
-        print(f'Data Set {self.data_loader.path}')
-        print('The pipeline has processed {} instances in total, using batches of size {}.'.format(self.n_total, self.batch_size))
-
-        if self.feature_selector:
-            print('----------------------')
-            print('Feature Selection ({}/{} features):'.format(self.feature_selector.n_selected_features,
-                                                               self.feature_selector.n_total_features))
-            print(tabulate({
-                **{'Model': [type(self.feature_selector).__name__.split('.')[-1] + '.' + type(self.feature_selector.feature_selector).__name__
-                             if type(self.feature_selector) is RiverFeatureSelector else
-                             type(self.feature_selector).__name__.split('.')[-1]],
-                   'Avg. Comp. Time': [np.nanmean(self.feature_selection_evaluator.comp_times)]},
-                **{'Avg. ' + key: [value['mean'][-1]] for key, value in self.feature_selection_evaluator.result.items()}
-            }, headers="keys", tablefmt='github'))
-
-        if self.change_detector:
-            print('----------------------')
-            print('Concept Drift Detection:')
-            print(tabulate({
-                **{'Model': [type(self.change_detector).__name__.split('.')[-1] + '.' + type(self.change_detector.detector).__name__
-                             if type(self.change_detector) in [SkmultiflowChangeDetector, RiverChangeDetector]
-                             else type(self.change_detector).__name__.split('.')[-1]],
-                   'Avg. Comp. Time': [np.nanmean(self.change_detection_evaluator.comp_times)],
-                   'Detected Global Drifts': [self.change_detector.drifts] if len(
-                       self.change_detector.drifts) <= 5 else [
-                       str(self.change_detector.drifts[:5])[:-1] + ', ...]']},
-                **{'Avg. ' + key: [np.nanmean([x for x in value if x is not None]) if len([x for x in value if x is not None]) > 0 else 'N/A']
-                    if type(value) is list else [value['mean']] for key, value in self.change_detection_evaluator.result.items()}
-            }, headers="keys", tablefmt='github'))
-
-        if self.predictors:
-            print('----------------------')
-            print('Prediction:')
-            print(tabulate({
-                **{'Model': [type(self.predictors[0]).__name__.split('.')[-1] + '.' + type(self.predictors[0].model).__name__
-                             if type(self.predictors[0]) in [SkmultiflowClassifier, RiverClassifier] else
-                             type(self.predictors[0]).__name__.split('.')[-1]],
-                   # Take the mean over all time steps and over all PredictionEvaluators (in the case of the DistributedFoldPipeline) for computation times and evaluation measures
-                   'Avg. Test Comp. Time': [np.nanmean([np.nanmean(prediction_evaluator.testing_comp_times) for prediction_evaluator in self.prediction_evaluators])],
-                   'Avg. Train Comp. Time': [np.nanmean([np.nanmean(prediction_evaluator.training_comp_times) for prediction_evaluator in self.prediction_evaluators])]},
-                **{'Avg. ' + key: [np.nanmean([[prediction_evaluator.result[key]['mean'][-1]] if prediction_evaluator.result[key]['mean'] else np.nan
-                                               for prediction_evaluator in self.prediction_evaluators])]
-                   for key in self.prediction_evaluators[0].result.keys()}
-            }, headers="keys", tablefmt='github'))
-        print('#############################################################################')
+        print_summary(self)
