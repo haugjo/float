@@ -122,6 +122,15 @@ class PredictionEvaluator:
                     if arg.name in self.kwargs.keys():
                         call_args[arg.name] = self.kwargs[arg.name]
 
+                        if arg.name == 'reference_measure':
+                            # For the noise_variability measure, we require a reference performance metric.
+                            # Accordingly, we also need to provide the arguments of that reference metric.
+                            ref_meas_call_args = dict()
+                            for ref_meas_arg in inspect.signature(call_args[arg.name]).parameters.values():
+                                if ref_meas_arg.name in self.kwargs.keys() and ref_meas_arg.name not in ['y_true', 'y_pred']:
+                                    ref_meas_call_args[ref_meas_arg.name] = self.kwargs[ref_meas_arg.name]
+                            call_args['reference_measure_kwargs'] = ref_meas_call_args
+
                 # Make function call and save measurement
                 new_measure_val = measure_func(**call_args)
                 measure_name = type(self.kwargs['metric']).__name__.lower() if measure_func.__name__ == 'river_classification_metric' else measure_func.__name__

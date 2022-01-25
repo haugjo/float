@@ -121,9 +121,10 @@ class ChangeDetectionEvaluator:
         pipeline run.
         """
         if self.n_pretrain is not None and self.n_pretrain > 0:
+            corrected_drifts = []
             for drift in self.known_drifts:
                 if isinstance(drift, tuple):
-                    drift[0] -= self. n_pretrain
-                    drift[1] -= self. n_pretrain
+                    corrected_drifts.append((drift[0] - self.n_pretrain, drift[1] - self.n_pretrain))
                 else:
-                    drift -= self.n_pretrain
+                    corrected_drifts.append(drift - self.n_pretrain)
+            self.known_drifts = corrected_drifts

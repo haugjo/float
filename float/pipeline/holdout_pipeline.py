@@ -129,7 +129,7 @@ class HoldoutPipeline(BasePipeline):
         """ Runs the pipeline."""
         if (self.data_loader.stream.n_remaining_samples() > 0) and \
                 (self.data_loader.stream.n_remaining_samples() < self.n_max):
-            self.n_max = self.data_loader.stream.n_samples
+            self.n_max = self.data_loader.stream.n_remaining_samples()
             warnings.warn("Parameter max_n_samples exceeds the size of data_loader and will be automatically reset.",
                           stacklevel=2)
 

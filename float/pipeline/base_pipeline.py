@@ -166,6 +166,13 @@ class BasePipeline(metaclass=ABCMeta):
         if type(self.data_loader) is not DataLoader:
             raise AttributeError('No valid DataLoader object was provided.')
 
+        if self.data_loader.stream.n_remaining_samples() < self.data_loader.stream.n_samples:
+            warnings.warn('The Data Loader object has not been reset. Float continues to run the pipeline on {}/{} '
+                          'observations. If the specified known_drift positions do not account for the actual sample '
+                          'size, float might return invalid performance measures.'.format(
+                            self.data_loader.stream.n_remaining_samples(),
+                            self.data_loader.stream.n_samples))
+
         if not issubclass(type(self.feature_selector), BaseFeatureSelector) and \
                 not issubclass(type(self.change_detector), BaseChangeDetector) and \
                 not (any(issubclass(type(predictor), BasePredictor) for predictor in self.predictors)):
@@ -197,8 +204,8 @@ class BasePipeline(metaclass=ABCMeta):
             if self.n_pretrain is not None and self.n_pretrain > 0:
                 self.change_detection_evaluator.n_pretrain = self.n_pretrain
                 self.change_detection_evaluator.correct_known_drifts()
-                warnings.warn('Known drift positions have been automatically corrected with respect to the number of '
-                              'observations used for pre-training (n_pretrain)')
+                warnings.warn('Known drift positions have been automatically corrected for the number of '
+                              'observations used in pre-training (known_drifts - n_pretrain)')
 
         if self.feature_selector:
             if not self.feature_selector.supports_multi_class and self.data_loader.stream.n_classes > 2:

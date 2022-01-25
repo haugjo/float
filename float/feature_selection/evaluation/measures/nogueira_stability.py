@@ -39,7 +39,7 @@ def nogueira_stability(selected_features_history: List[list], n_total_features: 
         float: The feature set stability due to Nogueira et al.
     """
     Z = np.zeros([min(len(selected_features_history), 2), n_total_features])
-    for row, col in enumerate(selected_features_history[-2:]):  # Consider a window of previous feature sets
+    for row, col in enumerate(selected_features_history[-2:]):  # Compare most currently selected feature sets.
         Z[row, col] = 1
 
     try:

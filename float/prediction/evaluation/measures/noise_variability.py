@@ -39,6 +39,7 @@ def noise_variability(y_true: ArrayLike,
                       X: ArrayLike,
                       predictor: BasePredictor,
                       reference_measure: Callable = zero_one_loss,
+                      reference_measure_kwargs: Optional[dict] = None,
                       cont_noise_loc: float = 0,
                       cont_noise_scale: float = 0.1,
                       cat_features: Optional[list] = None,
@@ -53,6 +54,7 @@ def noise_variability(y_true: ArrayLike,
         X: Array/matrix of observations.
         predictor: Predictor object.
         reference_measure: Evaluation measure function.
+        reference_measure_kwargs: Keyword arguments of the reference measure.
         cont_noise_loc: Location (mean) of a normal distribution from which we sample noise for continuous features.
         cont_noise_scale: Scale (variance) of a normal distribution from which we sample noise for continuous features.
         cat_features: List of indices that correspond to categorical features.
@@ -75,7 +77,13 @@ def noise_variability(y_true: ArrayLike,
             cat_noise_dist.append(np.unique(X[:, cat]))
 
     divergence = []
-    old_score = reference_measure(y_true=y_true, y_pred=y_pred)
+    call_args = dict()
+    if reference_measure_kwargs is not None:
+        for arg, val in reference_measure_kwargs.items():
+            call_args[arg] = val
+    call_args['y_true'] = y_true
+    call_args['y_pred'] = y_pred
+    old_score = reference_measure(**call_args)
 
     # Perturb input n times and save difference with original measure
     for ns in range(n_samples):
@@ -95,6 +103,12 @@ def noise_variability(y_true: ArrayLike,
 
         # Predict the perturbed input and recompute the evaluation score
         new_pred = predictor.predict(X_ns)
-        divergence.append(reference_measure(y_true=y_true, y_pred=new_pred) - old_score)
+        call_args = dict()
+        if reference_measure_kwargs is not None:
+            for arg, val in reference_measure_kwargs.items():
+                call_args[arg] = val
+        call_args['y_true'] = y_true
+        call_args['y_pred'] = new_pred
+        divergence.append(reference_measure(**call_args) - old_score)
 
     return np.mean(divergence).item()
