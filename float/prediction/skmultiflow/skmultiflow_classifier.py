@@ -65,8 +65,3 @@ class SkmultiflowClassifier(BasePredictor):
         """Resets the predictor and fits to given sample."""
         self.model.reset()
         self.partial_fit(X=X, y=y)
-
-    def clone(self):
-        """Returns a clone of this predictor with the weights reset."""
-        self.model.reset()
-        return type(self)(self.model, self.classes, self.reset_after_drift)

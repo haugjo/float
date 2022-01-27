@@ -188,12 +188,3 @@ class PredictionEvaluator:
                 raise AttributeError("The non-keyword argument '{}' of the evaluation measure '{}' has not been provided. "
                                      "Please provide the parameter in the constructor of the PredictionEvaluator object "
                                      "or use another evaluation measure.".format(arg.name, func.__name__, arg.name))
-
-    def clone(self):
-        """
-        Returns a clone of this prediction evaluator.
-
-        Returns:
-            PredictionEvaluator: The clone of the prediction evaluator.
-        """
-        return type(self)(self.measure_funcs, self.decay_rate, self.window_size, **self.kwargs)

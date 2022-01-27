@@ -52,7 +52,7 @@ class HoldoutPipeline(BasePipeline):
     """
     def __init__(self, data_loader: DataLoader,
                  test_set: Optional[Tuple[ArrayLike, ArrayLike]] = None,
-                 predictor: Optional[BasePredictor] = None,
+                 predictor: Optional[Union[BasePredictor, List[BasePredictor]]] = None,
                  prediction_evaluator: Optional[PredictionEvaluator] = None,
                  change_detector: Optional[BaseChangeDetector] = None,
                  change_detection_evaluator: Optional[ChangeDetectionEvaluator] = None,
@@ -70,7 +70,7 @@ class HoldoutPipeline(BasePipeline):
         Args:
             data_loader: Data loader object.
             test_set: A tuple containing the initial test observations and labels used for the holdout evaluation.
-            predictor: Predictive model.
+            predictor: Predictive model(s).
             prediction_evaluator: Evaluator for predictive model.
             change_detector: Concept drift detection model.
             change_detection_evaluator: Evaluator for active concept drift detection.
@@ -96,8 +96,8 @@ class HoldoutPipeline(BasePipeline):
             random_state: A random integer seed used to specify a random number generator.
         """
         super().__init__(data_loader=data_loader,
-                         predictors=[predictor],
-                         prediction_evaluators=[prediction_evaluator],
+                         predictor=predictor,
+                         prediction_evaluator=prediction_evaluator,
                          change_detector=change_detector,
                          change_detection_evaluator=change_detection_evaluator,
                          feature_selector=feature_selector,
@@ -127,24 +127,12 @@ class HoldoutPipeline(BasePipeline):
 
     def run(self):
         """ Runs the pipeline."""
-        if (self.data_loader.stream.n_remaining_samples() > 0) and \
-                (self.data_loader.stream.n_remaining_samples() < self.n_max):
-            self.n_max = self.data_loader.stream.n_remaining_samples()
-            warnings.warn("Parameter max_n_samples exceeds the size of data_loader and will be automatically reset.",
-                          stacklevel=2)
+        super().run()
 
-        self._start_evaluation()
-        self._run_holdout()
-        self._finish_evaluation()
+        # Run the holdout evaluation.
+        last_iteration = False
 
-    def _run_holdout(self):
-        """Runs the holdout evaluation strategy.
-
-        Raises:
-            BaseException: If the holdout evaluation runs into an error.
-        """
         while self.n_total < self.n_max:
-            last_iteration = False
             n_batch = self._get_n_batch()
 
             if self.n_total + n_batch >= self.n_max:
@@ -158,12 +146,12 @@ class HoldoutPipeline(BasePipeline):
                 else:
                     X_test, y_test = self.test_set
             else:
-                # Check if we need to replace the oldest test instance in this iteration
+                # Check if we need to replace the oldest test instance in this iteration.
                 mods = (np.arange(1, X_train.shape[0] + 1) + self.n_total) % self.test_replace_interval
                 new_test_X = X_train[mods == 0]
                 new_test_y = y_train[mods == 0]
 
-                X_train = X_train[mods != 0]  # Drop test instances from training set
+                X_train = X_train[mods != 0]  # Drop test instances from the training set.
                 y_train = y_train[mods != 0]
 
                 if self.test_set is not None:
@@ -179,12 +167,19 @@ class HoldoutPipeline(BasePipeline):
                     X_test = X_test[n_remove:, :]
                     y_test = y_test[n_remove:]
 
+            train_set = (X_train, y_train)
+            self.test_set = (X_test, y_test)
+
             try:
-                train_set = (X_train, y_train)
-                self.test_set = (X_test, y_test)
-                self._run_iteration(train_set=train_set, test_set=self.test_set, last_iteration=last_iteration)
+                self._run_iteration(train_set=train_set,
+                                    test_set=self.test_set,
+                                    last_iteration=last_iteration,
+                                    predictors_for_testing=list(np.arange(len(self.predictors))),  # Use all predictors.
+                                    predictors_for_training=list(np.arange(len(self.predictors))))
             except BaseException:  # This exception is left unspecific on purpose to fetch all possible errors.
                 traceback.print_exc()
                 break
 
             self._finish_iteration(n_batch=n_batch)
+
+        self._finish_evaluation()

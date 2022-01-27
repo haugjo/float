@@ -40,7 +40,7 @@ from float.prediction.evaluation import PredictionEvaluator
 class PrequentialPipeline(BasePipeline):
     """Pipeline class for prequential evaluation."""
     def __init__(self, data_loader: DataLoader,
-                 predictor: Optional[BasePredictor] = None,
+                 predictor: Optional[Union[BasePredictor, List[BasePredictor]]] = None,
                  prediction_evaluator: Optional[PredictionEvaluator] = None,
                  change_detector: Optional[BaseChangeDetector] = None,
                  change_detection_evaluator: Optional[ChangeDetectionEvaluator] = None,
@@ -57,7 +57,7 @@ class PrequentialPipeline(BasePipeline):
 
         Args:
             data_loader: Data loader object.
-            predictor: Predictive model.
+            predictor: Predictive model(s).
             prediction_evaluator: Evaluator for predictive model.
             change_detector: Concept drift detection model.
             change_detection_evaluator: Evaluator for active concept drift detection.
@@ -77,8 +77,8 @@ class PrequentialPipeline(BasePipeline):
             random_state: A random integer seed used to specify a random number generator.
         """
         super().__init__(data_loader=data_loader,
-                         predictors=[predictor],
-                         prediction_evaluators=[prediction_evaluator],
+                         predictor=predictor,
+                         prediction_evaluator=prediction_evaluator,
                          change_detector=change_detector,
                          change_detection_evaluator=change_detection_evaluator,
                          feature_selector=feature_selector,
@@ -94,24 +94,12 @@ class PrequentialPipeline(BasePipeline):
 
     def run(self):
         """Runs the pipeline."""
-        if (self.data_loader.stream.n_remaining_samples() > 0) and \
-                (self.data_loader.stream.n_remaining_samples() < self.n_max):
-            self.n_max = self.data_loader.stream.n_remaining_samples()
-            warnings.warn("Parameter n_max exceeds the size of data_loader and will be automatically reset.",
-                          stacklevel=2)
+        super().run()
 
-        self._start_evaluation()
-        self._run_prequential()
-        self._finish_evaluation()
+        # Run the prequential evaluation.
+        last_iteration = False
 
-    def _run_prequential(self):
-        """Runs the prequential evaluation strategy.
-
-        Raises:
-            BaseException: If the prequential evaluation runs into an error.
-        """
         while self.n_total < self.n_max:
-            last_iteration = False
             n_batch = self._get_n_batch()
 
             if self.n_total + n_batch >= self.n_max:
@@ -120,9 +108,15 @@ class PrequentialPipeline(BasePipeline):
             train_set = self._get_train_set(n_batch)
 
             try:
-                self._run_iteration(train_set=train_set, last_iteration=last_iteration)
+                self._run_iteration(train_set=train_set,
+                                    test_set=train_set,  # Use the same set for training and testing.
+                                    last_iteration=last_iteration,
+                                    predictors_for_testing=list(np.arange(len(self.predictors))),  # Use all predictors.
+                                    predictors_for_training=list(np.arange(len(self.predictors))))
             except BaseException:  # This exception is left unspecific on purpose to fetch all possible errors.
                 traceback.print_exc()
                 break
 
             self._finish_iteration(n_batch=n_batch)
+
+        self._finish_evaluation()

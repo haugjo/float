@@ -42,9 +42,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import copy
+
 import numpy as np
 import traceback
-import warnings
 from typing import Optional, Union, List
 
 from float.pipeline.base_pipeline import BasePipeline
@@ -58,10 +59,18 @@ from float.prediction.evaluation import PredictionEvaluator
 
 
 class DistributedFoldPipeline(BasePipeline):
-    """Pipeline for k-fold distributed validation."""
+    """Pipeline for k-fold distributed validation.
+
+    Attributes:
+        validation_mode (str):
+            A string indicating the k-fold distributed validation mode to use. One of 'cross', 'batch' and 'bootstrap'.
+        n_parallel_instances (int):
+            The number of instances of the specified predictor that will be trained in parallel.
+        n_unique_predictors (int): The number of predictor objects originally specified.
+    """
     def __init__(self, data_loader: DataLoader,
-                 predictor: BasePredictor,
-                 prediction_evaluator: PredictionEvaluator,
+                 predictor: Optional[Union[BasePredictor, List[BasePredictor]]] = None,
+                 prediction_evaluator: Optional[PredictionEvaluator] = None,
                  change_detector: Optional[BaseChangeDetector] = None,
                  change_detection_evaluator: Optional[ChangeDetectionEvaluator] = None,
                  feature_selector: Optional[BaseFeatureSelector] = None,
@@ -72,7 +81,7 @@ class DistributedFoldPipeline(BasePipeline):
                  label_delay_range: Optional[tuple] = None,
                  known_drifts: Optional[Union[List[int], List[tuple]]] = None,
                  estimate_memory_alloc: bool = False,
-                 n_predictor_instances: int = 2,
+                 n_parallel_instances: int = 2,
                  validation_mode: str = 'cross',
                  random_state: int = 0):
         """Initializes the pipeline.
@@ -99,17 +108,15 @@ class DistributedFoldPipeline(BasePipeline):
             validation_mode:
                 A string indicating the k-fold distributed validation mode to use. One of 'cross', 'batch' and
                 'bootstrap'.
-            n_predictor_instances:
-                How many object instances of the passed predictor object should be used for training and evaluation.
+            n_parallel_instances:
+                The number of instances of the specified predictor that will be trained in parallel.
             random_state: A random integer seed used to specify a random number generator.
         """
         self.validation_mode = validation_mode
-        self.n_predictor_instances = n_predictor_instances
-        self.predictors = [predictor.clone() for _ in range(self.n_predictor_instances)]
-        self.prediction_evaluators = [prediction_evaluator.clone() for _ in range(self.n_predictor_instances)]
+        self.n_parallel_instances = n_parallel_instances
         super().__init__(data_loader=data_loader,
-                         predictors=self.predictors,
-                         prediction_evaluators=self.prediction_evaluators,
+                         predictor=predictor,
+                         prediction_evaluator=prediction_evaluator,
                          change_detector=change_detector,
                          change_detection_evaluator=change_detection_evaluator,
                          feature_selector=feature_selector,
@@ -123,35 +130,24 @@ class DistributedFoldPipeline(BasePipeline):
                          test_interval=1,  # Defaults to one for a distributed fold evaluation.
                          random_state=random_state)
 
-    def _validate(self):
-        super()._validate()
-        if self.validation_mode not in ['cross', 'split', 'bootstrap']:
-            raise AttributeError('Please choose one of the validation modes "cross", "split", or "bootstrap".')
-
-        if self.n_predictor_instances < 2:
-            raise AttributeError('At least two Predictor need to be created for the DistributedFoldPipeline. If you'
-                                 'only want to run one instance, use the PrequentialPipeline or HoldoutPipeline.')
+        # Create multiple instances of the predictor(s) and evaluator(s)
+        self.n_unique_predictors = len(self.predictors)
+        dist_val_predictors = []
+        dist_val_evaluators = []
+        for predictor, prediction_evaluator in zip(self.predictors, self.prediction_evaluators):
+            dist_val_predictors.append([copy.deepcopy(predictor) for _ in range(n_parallel_instances)])
+            dist_val_evaluators.append([copy.deepcopy(prediction_evaluator) for _ in range(n_parallel_instances)])
+        self.predictors = dist_val_predictors
+        self.prediction_evaluators = dist_val_evaluators
 
     def run(self):
         """Runs the pipeline."""
-        if (self.data_loader.stream.n_remaining_samples() > 0) and \
-                (self.data_loader.stream.n_remaining_samples() < self.n_max):
-            self.n_max = self.data_loader.stream.n_remaining_samples()
-            warnings.warn("Parameter n_max exceeds the size of data_loader and will be automatically reset.",
-                          stacklevel=2)
+        super().run()
 
-        self._start_evaluation()
-        self._run_distributed_fold()
-        self._finish_evaluation()
+        # Run the distributed fold evaluation.
+        last_iteration = False
 
-    def _run_distributed_fold(self):
-        """Runs the distributed fold evaluation strategy.
-
-        Raises:
-            BaseException: If the distributed fold evaluation runs into an error.
-        """
         while self.n_total < self.n_max:
-            last_iteration = False
             n_batch = self._get_n_batch()
 
             if self.n_total + n_batch >= self.n_max:
@@ -159,26 +155,65 @@ class DistributedFoldPipeline(BasePipeline):
 
             train_set = self._get_train_set(n_batch)
 
-            predictor_train_idx = []
-            predictor_test_idx = []
-            weights = None
+            predictors_for_testing = []
+            predictors_for_training = []
+            predictors_training_weights = None
             if self.validation_mode == 'cross':
-                predictor_test_idx = [np.random.randint(0, len(self.predictors))]
-                predictor_train_idx = [i for i in range(len(self.predictors)) if i not in predictor_test_idx]
+                # "Each example is used for testing in one classifier selected randomly, and used for training by all
+                # the others." (Bifet et al. 2015)
+                for p_idx in range(self.n_unique_predictors):
+                    p_test_idx = np.random.randint(self.n_parallel_instances)
+                    p_train_idx = np.setdiff1d(np.arange(self.n_parallel_instances), p_test_idx)
+                    predictors_for_testing.append(p_test_idx + p_idx * self.n_parallel_instances)
+                    predictors_for_training.append(p_train_idx + p_idx * self.n_parallel_instances)
             elif self.validation_mode == 'split':
-                predictor_train_idx = [np.random.randint(0, len(self.predictors))]
-                predictor_test_idx = [i for i in range(len(self.predictors)) if i not in predictor_train_idx]
+                # "Each example is used for training in one classifier selected randomly, and for testing in the
+                # other classifiers." (Bifet et al. 2015)
+                for p_idx in range(self.n_unique_predictors):
+                    p_train_idx = np.random.randint(self.n_parallel_instances)
+                    p_test_idx = np.setdiff1d(np.arange(self.n_parallel_instances), p_train_idx)
+                    predictors_for_testing.append(p_test_idx + p_idx * self.n_parallel_instances)
+                    predictors_for_training.append(p_train_idx + p_idx * self.n_parallel_instances)
             elif self.validation_mode == 'bootstrap':
-                weights = np.random.poisson(1, len(self.predictors))
-                predictor_test_idx = [i for i in range(len(self.predictors)) if weights[i] == 0]
-                predictor_train_idx = [i for i in range(len(self.predictors)) if weights[i] != 0]
-                weights = [i for i in weights if i != 0]
+                # "Each example is used for training in each classifier according to a weight from a Poisson(1)
+                # distribution. This results in each example being used for training in approximately two thirds of
+                # the classifiers, with a separate weight in each classifier, and for testing in the rest."
+                # (Bifet et al. 2015)
+                predictors_training_weights = []
+                for p_idx in range(self.n_unique_predictors):
+                    weights = np.random.poisson(1, self.n_parallel_instances)
+                    predictors_for_testing.append(np.argwhere(weights == 0) + p_idx * self.n_parallel_instances)
+                    predictors_for_training.append(np.argwhere(weights != 0) + p_idx * self.n_parallel_instances)
+                    predictors_training_weights.append(weights[weights != 0])
 
             try:
-                self._run_iteration(predictor_train_idx=predictor_train_idx, predictor_test_idx=predictor_test_idx,
-                                    train_weights=weights, train_set=train_set, last_iteration=last_iteration)
+                self._run_iteration(train_set=train_set,
+                                    test_set=train_set,  # As in the preq. evaluation, test/train are the same sample.
+                                    last_iteration=last_iteration,
+                                    predictors_for_testing=predictors_for_testing,
+                                    predictors_for_training=predictors_for_training,
+                                    predictors_training_weights=predictors_training_weights)
             except BaseException:  # This exception is left unspecific on purpose to fetch all possible errors.
                 traceback.print_exc()
                 break
 
             self._finish_iteration(n_batch=n_batch)
+
+        self._finish_evaluation()
+
+    def _finish_evaluation(self):
+        """Finishes the Distributed Fold Pipeline Evaluation.
+
+        For ease of implementation, we have cloned the initially provided predictors to train multiple instances in
+        parallel. Accordingly, the predictors and predictor_evaluators are one long list of classifier instances.
+        For the final result, we regroup the instances per unique classifier, returning a more intuitive list of lists.
+        """
+        final_predictors = []
+        final_prediction_evaluators = []
+        for p_idx in range(self.n_unique_predictors):
+            final_predictors.append(self.predictors[p_idx * self.n_parallel_instances:
+                                                    p_idx + 1 * self.n_parallel_instances])
+            final_prediction_evaluators.append(self.prediction_evaluators[p_idx * self.n_parallel_instances:
+                                                                          p_idx + 1 * self.n_parallel_instances])
+
+        super()._finish_evaluation()

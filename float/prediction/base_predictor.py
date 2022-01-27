@@ -87,13 +87,3 @@ class BasePredictor(metaclass=ABCMeta):
             y: Array of corresponding labels.
         """
         raise NotImplementedError
-
-    @abstractmethod
-    def clone(self):
-        """
-        Returns a clone of this predictor with the weights reset.
-
-        Returns:
-            BasePredictor: The clone of the predictor.
-        """
-        raise NotImplementedError
