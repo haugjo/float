@@ -30,7 +30,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import math
-from typing import Tuple
+from typing import Tuple, List
 
 from float.change_detection.base_change_detector import BaseChangeDetector
 
@@ -68,51 +68,52 @@ class FHDDMSAdd(BaseChangeDetector):
         self._mu_max_large = 0
         self._num_ones = 0
 
-    def partial_fit(self, pr):
+    def partial_fit(self, pr_scores: List[bool]):
         """Updates the change detector.
 
         Args:
-            pr: Boolean indicating a correct prediction.
+            pr_scores: Boolean vector indicating correct predictions.
                 If True the prediction by the online learner was correct, False otherwise.
         """
         self._active_change = False
 
-        self._counter += 1
+        for pr in pr_scores:
+            self._counter += 1
 
-        if self._counter == (len(self._stack) * self._ELEMENT_SIZE) + 1:
-            self._counter -= self._ELEMENT_SIZE
-            self._num_ones -= self._stack[0]
-            self._stack.pop(0)
-            self._stack.append(0.0)
+            if self._counter == (len(self._stack) * self._ELEMENT_SIZE) + 1:
+                self._counter -= self._ELEMENT_SIZE
+                self._num_ones -= self._stack[0]
+                self._stack.pop(0)
+                self._stack.append(0.0)
+                if self._first_round is True:
+                    self._first_round = False
+
             if self._first_round is True:
-                self._first_round = False
+                index = int(self._counter / self._ELEMENT_SIZE)
+                if index == len(self._stack):
+                    index -= 1
+            else:
+                index = len(self._stack) - 1
 
-        if self._first_round is True:
-            index = int(self._counter / self._ELEMENT_SIZE)
-            if index == len(self._stack):
-                index -= 1
-        else:
-            index = len(self._stack) - 1
+            if pr is True:
+                self._stack[index] += 1
+                self._num_ones += 1
 
-        if pr is True:
-            self._stack[index] += 1
-            self._num_ones += 1
+            # TESTING THE NEW SUB-WINDOWS
+            if self._counter % self._ELEMENT_SIZE == 0:
+                m_temp = self._stack[index] / self._ELEMENT_SIZE
+                if self._mu_max_short < m_temp:
+                    self._mu_max_short = m_temp
+                if self._mu_max_short - m_temp > self.__cal_hoeffding_bound(n=self._ELEMENT_SIZE):
+                    self._active_change = True
 
-        # TESTING THE NEW SUB-WINDOWS
-        if self._counter % self._ELEMENT_SIZE == 0:
-            m_temp = self._stack[index] / self._ELEMENT_SIZE
-            if self._mu_max_short < m_temp:
-                self._mu_max_short = m_temp
-            if self._mu_max_short - m_temp > self.__cal_hoeffding_bound(n=self._ELEMENT_SIZE):
-                self._active_change = True
-
-        # TESTING THE WHOLE WINDOW
-        if self._counter == len(self._stack) * self._ELEMENT_SIZE:
-            m_temp = self._num_ones / (len(self._stack) * self._ELEMENT_SIZE)
-            if self._mu_max_large < m_temp:
-                self._mu_max_large = m_temp
-            if self._mu_max_large - m_temp > self.__cal_hoeffding_bound(n=len(self._stack) * self._ELEMENT_SIZE):
-                self._active_change = True
+            # TESTING THE WHOLE WINDOW
+            if self._counter == len(self._stack) * self._ELEMENT_SIZE:
+                m_temp = self._num_ones / (len(self._stack) * self._ELEMENT_SIZE)
+                if self._mu_max_large < m_temp:
+                    self._mu_max_large = m_temp
+                if self._mu_max_large - m_temp > self.__cal_hoeffding_bound(n=len(self._stack) * self._ELEMENT_SIZE):
+                    self._active_change = True
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""

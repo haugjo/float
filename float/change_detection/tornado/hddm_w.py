@@ -32,7 +32,7 @@ SOFTWARE.
 """
 import math
 import sys
-from typing import Tuple
+from typing import Tuple, List
 
 from float.change_detection.base_change_detector import BaseChangeDetector
 
@@ -74,40 +74,41 @@ class HDDMW(BaseChangeDetector):
         """Resets the change detector."""
         self._reset_parameters()
 
-    def partial_fit(self, pr: bool):
+    def partial_fit(self, pr_scores: List[bool]):
         """Updates the change detector.
 
         Args:
-            pr: Boolean indicating a correct prediction.
+            pr_scores: Boolean vector indicating correct predictions.
                 If True the prediction by the online learner was correct, False otherwise.
         """
-        pr = 1.0 if pr is False else 0.0
-        self._active_change = False
-        self._active_warning = False
+        for pr in pr_scores:
+            pr = 1.0 if pr is False else 0.0
+            self._active_change = False
+            self._active_warning = False
 
-        # 1. UPDATING STATS
-        aux_decay_rate = 1 - self._lambda_
-        if self._total.EWMA_estimator < 0.0:
-            self._total.EWMA_estimator = pr
-            self._total.independent_bounded_condition_sum = 1.0
-        else:
-            self._total.EWMA_estimator = self._lambda_ * pr + aux_decay_rate * self._total.EWMA_estimator
-            self._total.independent_bounded_condition_sum = self._lambda_ * self._lambda_ + aux_decay_rate \
-                                                            * aux_decay_rate \
-                                                            * self._total.independent_bounded_condition_sum
+            # 1. UPDATING STATS
+            aux_decay_rate = 1 - self._lambda_
+            if self._total.EWMA_estimator < 0.0:
+                self._total.EWMA_estimator = pr
+                self._total.independent_bounded_condition_sum = 1.0
+            else:
+                self._total.EWMA_estimator = self._lambda_ * pr + aux_decay_rate * self._total.EWMA_estimator
+                self._total.independent_bounded_condition_sum = self._lambda_ * self._lambda_ + aux_decay_rate \
+                                                                * aux_decay_rate \
+                                                                * self._total.independent_bounded_condition_sum
 
-        self._update_incr_statistics(pr=pr)
+            self._update_incr_statistics(pr=pr)
 
-        if self._monitor_mean_incr(self._drift_confidence):
-            self._reset_parameters()
-            self._active_change = True
-        elif self._monitor_mean_incr(self._warning_confidence):
-            self._active_warning = True
+            if self._monitor_mean_incr(self._drift_confidence):
+                self._reset_parameters()
+                self._active_change = True
+            elif self._monitor_mean_incr(self._warning_confidence):
+                self._active_warning = True
 
-        self._update_decr_statistics(pr=pr)
+            self._update_decr_statistics(pr=pr)
 
-        if self._test_type != 'one-sided' and self._monitor_mean_decr(confidence_level=self._drift_confidence):
-            self._reset_parameters()
+            if self._test_type != 'one-sided' and self._monitor_mean_decr(confidence_level=self._drift_confidence):
+                self._reset_parameters()
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""

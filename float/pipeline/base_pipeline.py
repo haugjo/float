@@ -232,7 +232,7 @@ class BasePipeline(metaclass=ABCMeta):
                     # Ae always use the first predictor for predicting y_pred, which is then used for change detection.
                     # Besides, we use the train set to update the change detector!
                     y_pred = self.predictors[0].predict(X_train)
-                    self.change_detector.partial_fit([y_pred == y_train])
+                    self.change_detector.partial_fit(np.asarray(y_pred == y_train).flatten())
                 else:
                     self.change_detector.partial_fit(X=copy.copy(X_train), y=copy.copy(y_train))
                 self.change_detection_evaluator.comp_times.append(time.time() - start_time)

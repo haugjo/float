@@ -33,7 +33,7 @@ SOFTWARE.
 import math
 import random
 import sys
-from typing import Tuple
+from typing import Tuple, List
 
 from float.change_detection.base_change_detector import BaseChangeDetector
 
@@ -59,14 +59,15 @@ class SeqDrift2(BaseChangeDetector):
         """Resets the change detector."""
         self._seq_drift2 = _SeqDrift2Tornado(_significanceLevel=self._DELTA, _blockSize=self._BLOCK_SIZE)
 
-    def partial_fit(self, pr: bool):
+    def partial_fit(self, pr_scores: List[bool]):
         """Updates the change detector.
 
         Args:
-            pr: Boolean indicating a correct prediction.
+            pr_scores: Boolean vector indicating correct predictions.
                 If True the prediction by the online learner was correct, False otherwise.
         """
-        self._active_change = self._seq_drift2.setInput(_inputValue=pr)
+        for pr in pr_scores:
+            self._active_change = self._seq_drift2.setInput(_inputValue=pr)
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""

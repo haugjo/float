@@ -30,7 +30,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from typing import Tuple
+from typing import Tuple, List
 
 from float.change_detection.base_change_detector import BaseChangeDetector
 
@@ -63,26 +63,27 @@ class Cusum(BaseChangeDetector):
         self._x_mean = 0
         self._sum = 0
 
-    def partial_fit(self, pr: bool):
+    def partial_fit(self, pr_scores: List[bool]):
         """Updates the change detector.
 
         Args:
-            pr: Boolean indicating a correct prediction.
+            pr_scores: Boolean vector indicating correct predictions.
                 If True the prediction by the online learner was correct, False otherwise.
         """
-        pr = 1 if pr is False else 0
+        for pr in pr_scores:
+            pr = 1 if pr is False else 0
 
-        self._active_change = False
+            self._active_change = False
 
-        # 1. UPDATING STATS
-        self._x_mean = self._x_mean + (pr - self._x_mean) / self._m_n
-        self._sum = max([0, self._sum + pr - self._x_mean - self._delta])
-        self._m_n += 1
+            # 1. UPDATING STATS
+            self._x_mean = self._x_mean + (pr - self._x_mean) / self._m_n
+            self._sum = max([0, self._sum + pr - self._x_mean - self._delta])
+            self._m_n += 1
 
-        # 2. UPDATING WARNING AND DRIFT STATUSES
-        if self._m_n >= self._MINIMUM_NUM_INSTANCES:
-            if self._sum > self._lambda_:
-                self._active_change = True
+            # 2. UPDATING WARNING AND DRIFT STATUSES
+            if self._m_n >= self._MINIMUM_NUM_INSTANCES:
+                if self._sum > self._lambda_:
+                    self._active_change = True
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""

@@ -31,7 +31,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import math
-from typing import Tuple
+from typing import Tuple, List
 
 from float.change_detection.base_change_detector import BaseChangeDetector
 
@@ -74,52 +74,53 @@ class HDDMA(BaseChangeDetector):
         self._n_max = 0
         self._c_max = 0
 
-    def partial_fit(self, pr: bool):
+    def partial_fit(self, pr_scores: List[bool]):
         """Updates the change detector.
 
         Args:
-            pr: Boolean indicating a correct prediction.
+            pr_scores: Boolean vector indicating correct predictions.
                 If True the prediction by the online learner was correct, False otherwise.
         """
-        pr = 1 if pr is False else 0
+        for pr in pr_scores:
+            pr = 1 if pr is False else 0
 
-        self._active_change = False
-        self._active_warning = False
+            self._active_change = False
+            self._active_warning = False
 
-        # 1. UPDATING STATS
-        self._total_n += 1
-        self._total_c += pr
+            # 1. UPDATING STATS
+            self._total_n += 1
+            self._total_c += pr
 
-        if self._n_min == 0:
-            self._n_min = self._total_n
-            self._c_min = self._total_c
+            if self._n_min == 0:
+                self._n_min = self._total_n
+                self._c_min = self._total_c
 
-        if self._n_max == 0:
-            self._n_max = self._total_n
-            self._c_max = self._total_c
+            if self._n_max == 0:
+                self._n_max = self._total_n
+                self._c_max = self._total_c
 
-        cota = math.sqrt((1.0 / (2 * self._n_min)) * math.log(1.0 / self._drift_confidence, math.e))
-        cota1 = math.sqrt((1.0 / (2 * self._total_n)) * math.log(1.0 / self._drift_confidence, math.e))
-        if self._c_min / self._n_min + cota >= self._total_c / self._total_n + cota1:
-            self._c_min = self._total_c
-            self._n_min = self._total_n
+            cota = math.sqrt((1.0 / (2 * self._n_min)) * math.log(1.0 / self._drift_confidence, math.e))
+            cota1 = math.sqrt((1.0 / (2 * self._total_n)) * math.log(1.0 / self._drift_confidence, math.e))
+            if self._c_min / self._n_min + cota >= self._total_c / self._total_n + cota1:
+                self._c_min = self._total_c
+                self._n_min = self._total_n
 
-        cota = math.sqrt((1.0 / (2 * self._n_max)) * math.log(1.0 / self._drift_confidence, math.e))
-        if self._c_max / self._n_max - cota <= self._total_c / self._total_n - cota1:
-            self._c_max = self._total_c
-            self._n_max = self._total_n
+            cota = math.sqrt((1.0 / (2 * self._n_max)) * math.log(1.0 / self._drift_confidence, math.e))
+            if self._c_max / self._n_max - cota <= self._total_c / self._total_n - cota1:
+                self._c_max = self._total_c
+                self._n_max = self._total_n
 
-        if self._mean_incr(confidence_level=self._drift_confidence):
-            self._n_min = self._n_max = self._total_n = 0
-            self._c_min = self._c_max = self._total_c = 0
-            self._active_change = True
-        elif self._mean_incr(confidence_level=self._warning_confidence):
-            self._active_warning = True
+            if self._mean_incr(confidence_level=self._drift_confidence):
+                self._n_min = self._n_max = self._total_n = 0
+                self._c_min = self._c_max = self._total_c = 0
+                self._active_change = True
+            elif self._mean_incr(confidence_level=self._warning_confidence):
+                self._active_warning = True
 
-        # 2. UPDATING WARNING AND DRIFT STATUSES
-        if self._test_type == 'two-sided' and self._mean_decr():
-            self._n_min = self._n_max = self._total_n = 0
-            self._c_min = self._c_max = self._total_c = 0
+            # 2. UPDATING WARNING AND DRIFT STATUSES
+            if self._test_type == 'two-sided' and self._mean_decr():
+                self._n_min = self._n_max = self._total_n = 0
+                self._c_min = self._c_max = self._total_c = 0
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""

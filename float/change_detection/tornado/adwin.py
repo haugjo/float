@@ -31,7 +31,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import math
-from typing import Tuple
+from typing import Tuple, List
 
 from float.change_detection.base_change_detector import BaseChangeDetector
 
@@ -55,14 +55,15 @@ class Adwin(BaseChangeDetector):
         """Resets the change detector."""
         self._adaptive_windowing = _AdaptiveWindowing(self._delta)
 
-    def partial_fit(self, pr: bool):
+    def partial_fit(self, pr_scores: List[bool]):
         """Updates the change detector.
 
         Args:
-            pr: Boolean indicating a correct prediction.
+            pr_scores: Boolean vector indicating correct predictions.
                 If True the prediction by the online learner was correct, False otherwise.
         """
-        self._active_change = self._adaptive_windowing.set_input(pr=pr)
+        for pr in pr_scores:
+            self._active_change = self._adaptive_windowing.set_input(pr=pr)
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""
@@ -171,7 +172,7 @@ class _AdaptiveWindowing:
                 u2 = cursor.get_total(1) / n2
                 inc_variance = n1 * n2 * (u1 - u2) * (u1 - u2) / (n1 + n2)
                 next_node.insert_bucket(cursor.get_total(0) + cursor.get_total(1), cursor.get_variance(0) +
-                                        cursor.get_variance(1) + inc_variance)
+                                         cursor.get_variance(1) + inc_variance)
                 self._bucket_number += 1
                 cursor.compress_buckets_row(2)
                 if next_node.bucket_size_row <= self._MAXBUCKETS:
@@ -305,7 +306,7 @@ class _ListItem:
     """
     def __init__(self, next_node=None, previous_node=None):
 
-        self._bucket_size_row = 0
+        self.bucket_size_row = 0
         self._MAXBUCKETS = 5
 
         self._bucket_total = []
@@ -314,7 +315,7 @@ class _ListItem:
             self._bucket_total.append(0)
             self._bucket_variance.append(0)
 
-        self._next = next_node
+        self.next = next_node
         self.previous = previous_node
         if next_node is not None:
             next_node.previous = self
@@ -324,7 +325,7 @@ class _ListItem:
         self._clear()
 
     def _clear(self):
-        self._bucket_size_row = 0
+        self.bucket_size_row = 0
         for k in range(0, self._MAXBUCKETS + 1):
             self._clear_bucket(k)
 
@@ -332,36 +333,36 @@ class _ListItem:
         self._set_total(0, k)
         self._set_variance(0, k)
 
-    def _insert_bucket(self, value, variance):
-        k = self._bucket_size_row
-        self._bucket_size_row += 1
+    def insert_bucket(self, value, variance):
+        k = self.bucket_size_row
+        self.bucket_size_row += 1
         self._set_total(value, k)
         self._set_variance(variance, k)
 
-    def _remove_bucket(self):
-        self._compress_buckets_row(1)
+    def remove_bucket(self):
+        self.compress_buckets_row(1)
 
-    def _compress_buckets_row(self, number_items_deleted):
+    def compress_buckets_row(self, number_items_deleted):
         for k in range(number_items_deleted, self._MAXBUCKETS + 1):
             self._bucket_total[k - number_items_deleted] = self._bucket_total[k]
             self._bucket_variance[k - number_items_deleted] = self._bucket_variance[k]
         for k in range(1, number_items_deleted + 1):
             self._clear_bucket(self._MAXBUCKETS - k + 1)
-        self._bucket_size_row -= number_items_deleted
+        self.bucket_size_row -= number_items_deleted
 
     def _set_previous(self, previous_node):
         self.previous = previous_node
 
-    def _set_next(self, next_node):
-        self._next = next_node
+    def set_next(self, next_node):
+        self.next = next_node
 
-    def _get_total(self, k):
+    def get_total(self, k):
         return self._bucket_total[k]
 
     def _set_total(self, value, k):
         self._bucket_total[k] = value
 
-    def _get_variance(self, k):
+    def get_variance(self, k):
         return self._bucket_variance[k]
 
     def _set_variance(self, value, k):

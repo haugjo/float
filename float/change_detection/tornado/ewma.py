@@ -31,7 +31,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import math
-from typing import Tuple
+from typing import Tuple, List
 
 from float.change_detection.base_change_detector import BaseChangeDetector
 
@@ -66,38 +66,39 @@ class EWMA(BaseChangeDetector):
         self._m_s = 0
         self._z_t = 0
 
-    def partial_fit(self, pr: bool):
+    def partial_fit(self, pr_scores: List[bool]):
         """Updates the change detector.
 
         Args:
-            pr: Boolean indicating a correct prediction.
+            pr_scores: Boolean vector indicating correct predictions.
                 If True the prediction by the online learner was correct, False otherwise.
         """
-        pr = 1 if pr is False else 0
+        for pr in pr_scores:
+            pr = 1 if pr is False else 0
 
-        self._active_change = False
-        self._active_warning = False
+            self._active_change = False
+            self._active_warning = False
 
-        # 1. UPDATING STATS
-        self._m_sum += pr
-        self._m_p = self._m_sum / self._m_n
-        self._m_s = math.sqrt(
-            self._m_p * (1.0 - self._m_p) * self._lambda_ * (1.0 - math.pow(1.0 - self._lambda_, 2.0 * self._m_n)) / (
-                        2.0 - self._lambda_))
-        self._m_n += 1
+            # 1. UPDATING STATS
+            self._m_sum += pr
+            self._m_p = self._m_sum / self._m_n
+            self._m_s = math.sqrt(
+                self._m_p * (1.0 - self._m_p) * self._lambda_ * (1.0 - math.pow(1.0 - self._lambda_, 2.0 * self._m_n)) / (
+                            2.0 - self._lambda_))
+            self._m_n += 1
 
-        self._z_t += self._lambda_ * (pr - self._z_t)
-        L_t = 3.97 - 6.56 * self._m_p + 48.73 * math.pow(self._m_p, 3) - 330.13 * math.pow(self._m_p, 5) \
-              + 848.18 * math.pow(self._m_p, 7)
+            self._z_t += self._lambda_ * (pr - self._z_t)
+            L_t = 3.97 - 6.56 * self._m_p + 48.73 * math.pow(self._m_p, 3) - 330.13 * math.pow(self._m_p, 5) \
+                  + 848.18 * math.pow(self._m_p, 7)
 
-        # 2. UPDATING WARNING AND DRIFT STATUSES
-        if self._m_n < self._MINIMUM_NUM_INSTANCES:
-            return
+            # 2. UPDATING WARNING AND DRIFT STATUSES
+            if self._m_n < self._MINIMUM_NUM_INSTANCES:
+                return
 
-        if self._z_t > self._m_p + L_t * self._m_s:
-            self._active_change = True
-        elif self._z_t > self._m_p + 0.5 * L_t * self._m_s:
-            self._active_warning = True
+            if self._z_t > self._m_p + L_t * self._m_s:
+                self._active_change = True
+            elif self._z_t > self._m_p + 0.5 * L_t * self._m_s:
+                self._active_warning = True
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""

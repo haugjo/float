@@ -31,7 +31,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import math
-from typing import Tuple
+from typing import Tuple, List
 
 from float.change_detection.base_change_detector import BaseChangeDetector
 
@@ -62,23 +62,24 @@ class MDDME(BaseChangeDetector):
         self._win.clear()
         self._u_max = 0
 
-    def partial_fit(self, pr: bool):
+    def partial_fit(self, pr_scores: List[bool]):
         """Updates the change detector.
 
         Args:
-            pr: Boolean indicating a correct prediction.
+            pr_scores: Boolean vector indicating correct predictions.
                 If True the prediction by the online learner was correct, False otherwise.
         """
         self._active_change = False
 
-        if len(self._win) == self._n:
-            self._win.pop(0)
-        self._win.append(pr)
+        for pr in pr_scores:
+            if len(self._win) == self._n:
+                self._win.pop(0)
+            self._win.append(pr)
 
-        if len(self._win) == self._n:
-            u = self._cal_w_sigma()
-            self._u_max = u if u > self._u_max else self._u_max
-            self._active_change = True if (self._u_max - u > self._e) else False
+            if len(self._win) == self._n:
+                u = self._cal_w_sigma()
+                self._u_max = u if u > self._u_max else self._u_max
+                self._active_change = True if (self._u_max - u > self._e) else False
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""

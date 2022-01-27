@@ -30,7 +30,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import math
-from typing import Tuple
+from typing import Tuple, List
 
 from float.change_detection.base_change_detector import BaseChangeDetector
 
@@ -63,36 +63,37 @@ class FHDDMS(BaseChangeDetector):
         self._mu_max_short = 0
         self._mu_max_large = 0
 
-    def partial_fit(self, pr: bool):
+    def partial_fit(self, pr_scores: List[bool]):
         """Updates the change detector.
 
         Args:
-            pr: Boolean indicating a correct prediction.
+            pr_scores: Boolean vector indicating correct predictions.
                 If True the prediction by the online learner was correct, False otherwise.
         """
         self._active_change = False
 
-        if len(self._WIN) >= self._WIN_SIZE:
-            self._WIN.pop(0)
-        self._WIN.append(pr)
+        for pr in pr_scores:
+            if len(self._WIN) >= self._WIN_SIZE:
+                self._WIN.pop(0)
+            self._WIN.append(pr)
 
-        if len(self._WIN) == self._WIN_SIZE:
-            # TESTING THE SHORT WINDOW
-            sub_wins_mu = []
-            for i in range(0, self._S_WIN_NUM):
-                sub_win = self._WIN[i * self._S_WIN_SIZE: (i + 1) * self._S_WIN_SIZE]
-                sub_wins_mu.append(sub_win.count(True) / len(sub_win))
-            if self._mu_max_short < sub_wins_mu[self._S_WIN_NUM - 1]:
-                self._mu_max_short = sub_wins_mu[self._S_WIN_NUM - 1]
-            if self._mu_max_short - sub_wins_mu[self._S_WIN_NUM - 1] > self.__cal_hoeffding_bound(self._S_WIN_SIZE):
-                self._active_change = True
+            if len(self._WIN) == self._WIN_SIZE:
+                # TESTING THE SHORT WINDOW
+                sub_wins_mu = []
+                for i in range(0, self._S_WIN_NUM):
+                    sub_win = self._WIN[i * self._S_WIN_SIZE: (i + 1) * self._S_WIN_SIZE]
+                    sub_wins_mu.append(sub_win.count(True) / len(sub_win))
+                if self._mu_max_short < sub_wins_mu[self._S_WIN_NUM - 1]:
+                    self._mu_max_short = sub_wins_mu[self._S_WIN_NUM - 1]
+                if self._mu_max_short - sub_wins_mu[self._S_WIN_NUM - 1] > self.__cal_hoeffding_bound(self._S_WIN_SIZE):
+                    self._active_change = True
 
-            # TESTING THE LONG WINDOW
-            mu_long = sum(sub_wins_mu) / self._S_WIN_NUM
-            if self._mu_max_large < mu_long:
-                self._mu_max_large = mu_long
-            if self._mu_max_large - mu_long > self.__cal_hoeffding_bound(self._WIN_SIZE):
-                self._active_change = True
+                # TESTING THE LONG WINDOW
+                mu_long = sum(sub_wins_mu) / self._S_WIN_NUM
+                if self._mu_max_large < mu_long:
+                    self._mu_max_large = mu_long
+                if self._mu_max_large - mu_long > self.__cal_hoeffding_bound(self._WIN_SIZE):
+                    self._active_change = True
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""

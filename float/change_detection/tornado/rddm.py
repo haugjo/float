@@ -32,7 +32,7 @@ SOFTWARE.
 """
 import math
 import sys
-from typing import Tuple
+from typing import Tuple, List
 
 from float.change_detection.base_change_detector import BaseChangeDetector
 
@@ -97,95 +97,96 @@ class RDDM(BaseChangeDetector):
         self._m_s_min = sys.maxsize
         self._m_p_s_min = sys.maxsize
 
-    def partial_fit(self, pr):
+    def partial_fit(self, pr_scores: List[bool]):
         """Updates the change detector.
 
         Args:
-            pr: Boolean indicating a correct prediction.
+            pr_scores: Boolean vector indicating correct predictions.
                 If True the prediction by the online learner was correct, False otherwise.
         """
-        pr = 1 if pr is False else 0
+        for pr in pr_scores:
+            pr = 1 if pr is False else 0
 
-        self._active_change = False
-        self._active_warning = False
+            self._active_change = False
+            self._active_warning = False
 
-        if self._rddm_drift:  #
-            self._reset_rddm()  #
-            if self._last_warn_pos != -1:  #
-                self._first_pos = self._last_warn_pos  #
-                self._num_stored_instances = self._last_pos - self._first_pos + 1  #
-                if self._num_stored_instances <= 0:  #
-                    self._num_stored_instances += self._min_size_stable_concept  #
+            if self._rddm_drift:  #
+                self._reset_rddm()  #
+                if self._last_warn_pos != -1:  #
+                    self._first_pos = self._last_warn_pos  #
+                    self._num_stored_instances = self._last_pos - self._first_pos + 1  #
+                    if self._num_stored_instances <= 0:  #
+                        self._num_stored_instances += self._min_size_stable_concept  #
 
-            pos = self._first_pos  #
-            for i in range(0, self._num_stored_instances):  #
-                self._m_p += ((self._stored_predictions[pos] - self._m_p) / self._m_n)  #
-                self._m_s = math.sqrt(self._m_p * (1 - self._m_p) / self._m_n)
-                if self._is_change_detected and (self._m_n > self._min_num_instance) and (
-                        self._m_p + self._m_s < self._m_p_s_min):
-                    self._m_p_min = self._m_p
-                    self._m_s_min = self._m_s
-                    self._m_p_s_min = self._m_p + self._m_s
-                self._m_n += 1
-                pos = (pos + 1) % self._min_size_stable_concept
+                pos = self._first_pos  #
+                for i in range(0, self._num_stored_instances):  #
+                    self._m_p += ((self._stored_predictions[pos] - self._m_p) / self._m_n)  #
+                    self._m_s = math.sqrt(self._m_p * (1 - self._m_p) / self._m_n)
+                    if self._is_change_detected and (self._m_n > self._min_num_instance) and (
+                            self._m_p + self._m_s < self._m_p_s_min):
+                        self._m_p_min = self._m_p
+                        self._m_s_min = self._m_s
+                        self._m_p_s_min = self._m_p + self._m_s
+                    self._m_n += 1
+                    pos = (pos + 1) % self._min_size_stable_concept
 
-            self._last_warn_pos = -1
-            self._last_warn_inst = -1
-            self._rddm_drift = False
-            self._is_change_detected = False
-
-        self._last_pos = (self._last_pos + 1) % self._min_size_stable_concept
-        self._stored_predictions[self._last_pos] = pr
-        if self._num_stored_instances < self._min_size_stable_concept:
-            self._num_stored_instances += 1
-        else:
-            self._first_pos = (self._first_pos + 1) % self._min_size_stable_concept
-            if self._last_warn_pos == self._last_pos:
-                self._last_warn_pos = -1
-
-        self._m_p += (pr - self._m_p) / self._m_n
-        self._m_s = math.sqrt(self._m_p * (1 - self._m_p) / self._m_n)
-
-        self._inst_num += 1
-        self._m_n += 1
-        self._is_warning_zone = False
-
-        if self._m_n <= self._min_num_instance:
-            return
-
-        if self._m_p + self._m_s < self._m_p_s_min:
-            self._m_p_min = self._m_p
-            self._m_s_min = self._m_s
-            self._m_p_s_min = self._m_p + self._m_s
-
-        if self._m_p + self._m_s > self._m_p_min + self._drift_level * self._m_s_min:
-            self._is_change_detected, self._active_change = True, True
-            self._rddm_drift = True
-            if self._last_warn_inst == -1:
-                self._first_pos = self._last_pos
-                self._num_stored_instances = 1
-            return
-
-        if self._m_p + self._m_s > self._m_p_min + self._warning_level * self._m_s_min:
-            if (self._last_warn_inst != -1) and (self._last_warn_inst + self._warn_limit <= self._inst_num):
-                self._is_change_detected, self._active_change = True, True
-                self._rddm_drift = True
-                self._first_pos = self._last_pos
-                self._num_stored_instances = 1
                 self._last_warn_pos = -1
                 self._last_warn_inst = -1
+                self._rddm_drift = False
+                self._is_change_detected = False
+
+            self._last_pos = (self._last_pos + 1) % self._min_size_stable_concept
+            self._stored_predictions[self._last_pos] = pr
+            if self._num_stored_instances < self._min_size_stable_concept:
+                self._num_stored_instances += 1
+            else:
+                self._first_pos = (self._first_pos + 1) % self._min_size_stable_concept
+                if self._last_warn_pos == self._last_pos:
+                    self._last_warn_pos = -1
+
+            self._m_p += (pr - self._m_p) / self._m_n
+            self._m_s = math.sqrt(self._m_p * (1 - self._m_p) / self._m_n)
+
+            self._inst_num += 1
+            self._m_n += 1
+            self._is_warning_zone = False
+
+            if self._m_n <= self._min_num_instance:
                 return
 
-            self._is_warning_zone, self._active_warning = True, True
-            if self._last_warn_inst == -1:
-                self._last_warn_inst = self._inst_num
-                self._last_warn_pos = self._last_pos
-        else:
-            self._last_warn_inst = -1
-            self._last_warn_pos = -1
+            if self._m_p + self._m_s < self._m_p_s_min:
+                self._m_p_min = self._m_p
+                self._m_s_min = self._m_s
+                self._m_p_s_min = self._m_p + self._m_s
 
-        if self._m_n > self._max_concept_size and self._is_warning_zone is False:
-            self._rddm_drift = True
+            if self._m_p + self._m_s > self._m_p_min + self._drift_level * self._m_s_min:
+                self._is_change_detected, self._active_change = True, True
+                self._rddm_drift = True
+                if self._last_warn_inst == -1:
+                    self._first_pos = self._last_pos
+                    self._num_stored_instances = 1
+                return
+
+            if self._m_p + self._m_s > self._m_p_min + self._warning_level * self._m_s_min:
+                if (self._last_warn_inst != -1) and (self._last_warn_inst + self._warn_limit <= self._inst_num):
+                    self._is_change_detected, self._active_change = True, True
+                    self._rddm_drift = True
+                    self._first_pos = self._last_pos
+                    self._num_stored_instances = 1
+                    self._last_warn_pos = -1
+                    self._last_warn_inst = -1
+                    return
+
+                self._is_warning_zone, self._active_warning = True, True
+                if self._last_warn_inst == -1:
+                    self._last_warn_inst = self._inst_num
+                    self._last_warn_pos = self._last_pos
+            else:
+                self._last_warn_inst = -1
+                self._last_warn_pos = -1
+
+            if self._m_n > self._max_concept_size and self._is_warning_zone is False:
+                self._rddm_drift = True
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""

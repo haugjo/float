@@ -32,7 +32,7 @@ SOFTWARE.
 """
 import math
 import sys
-from typing import Tuple
+from typing import Tuple, List
 
 from float.change_detection.base_change_detector import BaseChangeDetector
 
@@ -65,41 +65,42 @@ class DDM(BaseChangeDetector):
         self.__P_min = sys.maxsize
         self.__S_min = sys.maxsize
 
-    def partial_fit(self, pr: bool):
+    def partial_fit(self, pr_scores: List[bool]):
         """Updates the change detector.
 
         Args:
-            pr: Boolean indicating a correct prediction.
+            pr_scores: Boolean vector indicating correct predictions.
                 If True the prediction by the online learner was correct, False otherwise.
         """
         self._active_change = False
         self._active_warning = False
 
-        pr = 1 if pr is False else 0
+        for pr in pr_scores:
+            pr = 1 if pr is False else 0
 
-        # 1. UPDATING STATS
-        self.__P += (pr - self.__P) / self._NUM_INSTANCES_SEEN
-        self.__S = math.sqrt(self.__P * (1 - self.__P) / self._NUM_INSTANCES_SEEN)
+            # 1. UPDATING STATS
+            self.__P += (pr - self.__P) / self._NUM_INSTANCES_SEEN
+            self.__S = math.sqrt(self.__P * (1 - self.__P) / self._NUM_INSTANCES_SEEN)
 
-        self._NUM_INSTANCES_SEEN += 1
+            self._NUM_INSTANCES_SEEN += 1
 
-        if self._NUM_INSTANCES_SEEN < self._MINIMUM_NUM_INSTANCES:
-            return
+            if self._NUM_INSTANCES_SEEN < self._MINIMUM_NUM_INSTANCES:
+                return
 
-        if self.__P + self.__S <= self.__P_min + self.__S_min:
-            self.__P_min = self.__P
-            self.__S_min = self.__S
+            if self.__P + self.__S <= self.__P_min + self.__S_min:
+                self.__P_min = self.__P
+                self.__S_min = self.__S
 
-        # 2. UPDATING WARNING AND DRIFT STATUSES
-        current_level = self.__P + self.__S
-        warning_level = self.__P_min + 2 * self.__S_min
-        drift_level = self.__P_min + 3 * self.__S_min
+            # 2. UPDATING WARNING AND DRIFT STATUSES
+            current_level = self.__P + self.__S
+            warning_level = self.__P_min + 2 * self.__S_min
+            drift_level = self.__P_min + 3 * self.__S_min
 
-        if current_level > warning_level:
-            self._active_warning = True
+            if current_level > warning_level:
+                self._active_warning = True
 
-        if current_level > drift_level:
-            self._active_change = True
+            if current_level > drift_level:
+                self._active_change = True
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""

@@ -30,7 +30,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import math
-from typing import Tuple
+from typing import Tuple, List
 
 from float.change_detection.base_change_detector import BaseChangeDetector
 
@@ -69,41 +69,42 @@ class EDDM(BaseChangeDetector):
         self._SECOND_LATEST_E_LOCATION = 0
         self._NUM_INSTANCES_SEEN = 0
 
-    def partial_fit(self, pr: bool):
+    def partial_fit(self, pr_scores: List[bool]):
         """Updates the change detector.
 
         Args:
-            pr: Boolean indicating a correct prediction.
+            pr_scores: Boolean vector indicating correct predictions.
                 If True the prediction by the online learner was correct, False otherwise.
         """
         self._active_change = False
         self._active_warning = False
 
-        self._NUM_INSTANCES_SEEN += 1
+        for pr in pr_scores:
+            self._NUM_INSTANCES_SEEN += 1
 
-        if pr is False:
-            self._NUM_ERRORS += 1
+            if pr is False:
+                self._NUM_ERRORS += 1
 
-            self._SECOND_LATEST_E_LOCATION = self._LATEST_E_LOCATION
-            self._LATEST_E_LOCATION = self._NUM_INSTANCES_SEEN
-            distance = self._LATEST_E_LOCATION - self._SECOND_LATEST_E_LOCATION
+                self._SECOND_LATEST_E_LOCATION = self._LATEST_E_LOCATION
+                self._LATEST_E_LOCATION = self._NUM_INSTANCES_SEEN
+                distance = self._LATEST_E_LOCATION - self._SECOND_LATEST_E_LOCATION
 
-            old_p = self._P
-            self._P += (distance - self._P) / self._NUM_ERRORS
-            self._S_TEMP += (distance - self._P) * (distance - old_p)
+                old_p = self._P
+                self._P += (distance - self._P) / self._NUM_ERRORS
+                self._S_TEMP += (distance - self._P) * (distance - old_p)
 
-            s = math.sqrt(self._S_TEMP / self._NUM_ERRORS)
-            m2s = self._P + 2 * s
+                s = math.sqrt(self._S_TEMP / self._NUM_ERRORS)
+                m2s = self._P + 2 * s
 
-            if self._NUM_INSTANCES_SEEN > self._MINIMUM_NUM_INSTANCES:
-                if m2s > self._M2S_max:
-                    self._M2S_max = m2s
-                elif self._NUM_ERRORS > self._MINIMUM_NUM_ERRORS:
-                    r = m2s / self._M2S_max
-                    if r < self._WARNING_LEVEL:
-                        self._active_warning = True
-                    if r < self._OUT_CONTROL_LEVEL:
-                        self._active_change = True
+                if self._NUM_INSTANCES_SEEN > self._MINIMUM_NUM_INSTANCES:
+                    if m2s > self._M2S_max:
+                        self._M2S_max = m2s
+                    elif self._NUM_ERRORS > self._MINIMUM_NUM_ERRORS:
+                        r = m2s / self._M2S_max
+                        if r < self._WARNING_LEVEL:
+                            self._active_warning = True
+                        if r < self._OUT_CONTROL_LEVEL:
+                            self._active_change = True
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""

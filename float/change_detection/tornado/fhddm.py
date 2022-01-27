@@ -31,7 +31,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import math
-from typing import Tuple
+from typing import Tuple, List
 
 from float.change_detection.base_change_detector import BaseChangeDetector
 
@@ -60,24 +60,25 @@ class FHDDM(BaseChangeDetector):
         self.__WIN.clear()
         self.__MU_M = 0
 
-    def partial_fit(self, pr: bool):
+    def partial_fit(self, pr_scores: List[bool]):
         """Updates the change detector.
 
         Args:
-            pr: Boolean indicating a correct prediction.
+            pr_scores: Boolean vector indicating correct predictions.
                 If True the prediction by the online learner was correct, False otherwise.
         """
         self._active_change = False
 
-        if len(self.__WIN) >= self.__N:
-            self.__WIN.pop(0)
-        self.__WIN.append(pr)
+        for pr in pr_scores:
+            if len(self.__WIN) >= self.__N:
+                self.__WIN.pop(0)
+            self.__WIN.append(pr)
 
-        if len(self.__WIN) >= self.__N:
-            mu_t = self.__WIN.count(True) / self.__N
-            if self.__MU_M < mu_t:
-                self.__MU_M = mu_t
-            self._active_change = (self.__MU_M - mu_t) > self.__E
+            if len(self.__WIN) >= self.__N:
+                mu_t = self.__WIN.count(True) / self.__N
+                if self.__MU_M < mu_t:
+                    self.__MU_M = mu_t
+                self._active_change = (self.__MU_M - mu_t) > self.__E
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""

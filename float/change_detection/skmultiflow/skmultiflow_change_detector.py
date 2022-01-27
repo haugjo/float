@@ -24,7 +24,7 @@ SOFTWARE.
 """
 from skmultiflow.drift_detection.base_drift_detector import BaseDriftDetector
 from skmultiflow.drift_detection import ADWIN, DDM, EDDM, HDDM_A, HDDM_W, PageHinkley
-from typing import Tuple, Any
+from typing import Tuple, List
 
 from float.change_detection import BaseChangeDetector
 
@@ -43,21 +43,22 @@ class SkmultiflowChangeDetector(BaseChangeDetector):
             reset_after_drift: See description of base class.
         """
         self.detector = detector
-        self.error_based = False
         self._validate()
-        super().__init__(reset_after_drift=reset_after_drift, error_based=self.error_based)
+        super().__init__(reset_after_drift=reset_after_drift, error_based=True)
 
     def reset(self):
         """Resets the change detector."""
         self.detector.reset()
 
-    def partial_fit(self, input_value: Any):
+    def partial_fit(self, pr_scores: List[bool]):
         """Updates the parameters of the concept drift detection model.
 
         Args:
-            input_value: Whatever input value the concept drift detector takes.
+            pr_scores: Boolean vector indicating correct predictions.
+                If True the prediction by the online learner was correct, False otherwise.
         """
-        self.detector.add_element(input_value)
+        for pr in pr_scores:
+            self.detector.add_element(pr)
 
     def detect_change(self) -> bool:
         """Detects global concept drift."""
@@ -76,12 +77,10 @@ class SkmultiflowChangeDetector(BaseChangeDetector):
         return self.detector.detected_warning_zone()
 
     def _validate(self):
-        """Validate the provided river drift detector object.
+        """Validates the provided river drift detector object.
 
         Raises:
             TypeError: If the provided detector is not a valid river drift detection method.
         """
-        if isinstance(self.detector, (ADWIN, DDM, EDDM, HDDM_A, HDDM_W, PageHinkley)):
-            self.error_based = True
-        else:
+        if not isinstance(self.detector, (ADWIN, DDM, EDDM, HDDM_A, HDDM_W, PageHinkley)):
             raise TypeError("Scikit-multiflow drift detector class {} is not supported.".format(type(self.detector)))
