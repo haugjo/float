@@ -126,8 +126,8 @@ class BasePipeline(metaclass=ABCMeta):
         if isinstance(predictor, list):
             self.predictors = predictor
             self.prediction_evaluators = []  # Make copies of the PredictionEvaluator for each predictor object.
-            for i in range(len(self.predictors)):
-                self.prediction_evaluators[i] = copy.deepcopy(prediction_evaluator)
+            for _ in range(len(self.predictors)):
+                self.prediction_evaluators.append(copy.deepcopy(prediction_evaluator))
         else:
             self.predictors = [predictor]
             self.prediction_evaluators = [prediction_evaluator]
@@ -180,16 +180,17 @@ class BasePipeline(metaclass=ABCMeta):
         """Pretrains the predictive model."""
         print("Pretrain the predictor with {} observation(s).".format(self.n_pretrain))
 
-        for predictor in self.predictors:
-            X, y = self.data_loader.get_data(self.n_pretrain)
+        X, y = self.data_loader.get_data(self.n_pretrain)
+        self.n_total += self.n_pretrain
 
+        for predictor in self.predictors:
             if isinstance(predictor, RiverClassifier) and not predictor.can_mini_batch:
                 # Some River classifiers do not support batch-processing. In this case, we pretrain iteratively.
                 for x_i, y_i in zip(X, y):
                     predictor.partial_fit(X=x_i, y=y_i)
             else:
                 predictor.partial_fit(X=copy.copy(X), y=copy.copy(y))
-            self.n_total += self.n_pretrain
+            predictor.has_been_trained = True
 
     def _run_iteration(self,
                        train_set: Tuple[ArrayLike, ArrayLike],
@@ -218,59 +219,109 @@ class BasePipeline(metaclass=ABCMeta):
         X_train, y_train = train_set
         X_test, y_test = test_set
 
-        if len(X_train) == 0:  # Todo: find better solution
-            warnings.warn('No samples available with which to train. Metrics will be set to None this iteration.')
-            self._set_metrics_to_nan(predictors_for_training, predictors_for_testing)
-            return
+        # ----------------------------------------
+        # Concept Drift Detection
+        # ----------------------------------------
+        if self.change_detector is not None:
+            if X_train.shape[0] > 0 and self.predictors[0].has_been_trained:
+                if self.estimate_memory_alloc:
+                    start_snapshot = tracemalloc.take_snapshot()
+
+                start_time = time.time()
+                if self.change_detector.error_based:
+                    # Ae always use the first predictor for predicting y_pred, which is then used for change detection.
+                    # Besides, we use the train set to update the change detector!
+                    y_pred = self.predictors[0].predict(X_train)
+                    self.change_detector.partial_fit([y_pred == y_train])
+                else:
+                    self.change_detector.partial_fit(X=copy.copy(X_train), y=copy.copy(y_train))
+                self.change_detection_evaluator.comp_times.append(time.time() - start_time)
+
+                if self.estimate_memory_alloc:
+                    self.change_detection_evaluator.memory_changes.append(
+                        self._get_memory_snapshot_diff(start_snapshot=start_snapshot))
+
+                if self.change_detector.detect_warning_zone():
+                    self.change_detector.warnings.append(self.time_step)
+
+                if self.change_detector.detect_change():
+                    self.change_detector.drifts.append(self.time_step)
+
+                    # Reset modules
+                    if self.data_loader.scaler is not None and self.data_loader.scaler.reset_after_drift:
+                        self.data_loader.scaler.reset()
+                    if self.feature_selector is not None and self.feature_selector.reset_after_drift:
+                        self.feature_selector.reset()
+                    for predictor in self.predictors:
+                        if predictor is not None and predictor.reset_after_drift:
+                            predictor.reset()
+                    if self.change_detector is not None and self.change_detector.reset_after_drift:
+                        self.change_detector.reset()
+
+                partial_change_detected, partial_change_features = self.change_detector.detect_partial_change()
+                if partial_change_detected:
+                    self.change_detector.partial_drifts.append((self.time_step, partial_change_features))
+            else:
+                self._add_nan_measure(evaluator=self.change_detection_evaluator, is_test=False, is_train=True)
+
+            if last_iteration:  # The concept drift detection is only evaluated in the last iteration.
+                self.change_detection_evaluator.run(drifts=self.change_detector.drifts)
 
         # ----------------------------------------
         # Online Feature Selection
         # ----------------------------------------
         if self.feature_selector is not None:
-            if self.estimate_memory_alloc:
-                start_snapshot = tracemalloc.take_snapshot()
+            if X_train.shape[0] > 0:
+                if self.estimate_memory_alloc:
+                    start_snapshot = tracemalloc.take_snapshot()
 
-            start_time = time.time()
-            self.feature_selector.weight_features(X=copy.copy(X_train), y=copy.copy(y_train))
-            self.feature_selection_evaluator.comp_times.append(time.time() - start_time)
+                start_time = time.time()
+                self.feature_selector.weight_features(X=copy.copy(X_train), y=copy.copy(y_train))
+                self.feature_selection_evaluator.comp_times.append(time.time() - start_time)
 
-            if self.estimate_memory_alloc:
-                self.feature_selection_evaluator.memory_changes.append(
-                    self._get_memory_snapshot_diff(start_snapshot=start_snapshot))
+                if self.estimate_memory_alloc:
+                    self.feature_selection_evaluator.memory_changes.append(
+                        self._get_memory_snapshot_diff(start_snapshot=start_snapshot))
 
-            X_train = self.feature_selector.select_features(X=copy.copy(X_train), rng=self.rng)
+                X_train = self.feature_selector.select_features(X=copy.copy(X_train), rng=self.rng)
 
-            if not self.time_step % self.test_interval:
-                self.feature_selection_evaluator.run(self.feature_selector.selected_features_history,
-                                                     self.feature_selector.n_total_features)
+                if self.time_step % self.test_interval == 0:
+                    self.feature_selection_evaluator.run(self.feature_selector.selected_features_history,
+                                                         self.feature_selector.n_total_features)
+                else:
+                    self._add_nan_measure(evaluator=self.feature_selection_evaluator, is_test=True, is_train=False)
+            else:
+                self._add_nan_measure(evaluator=self.feature_selection_evaluator, is_test=True, is_train=True)
 
         # ----------------------------------------
         # Prediction
         # ----------------------------------------
         if self.predictors is not None:
             for pred_idx, (predictor, prediction_evaluator) in enumerate(zip(self.predictors, self.prediction_evaluators)):
-                # Test, if the predictor has already been trained and the test set is not empty.
-                if (self.n_pretrain > 0 or self.time_step > 0) and X_test.shape[0] > 0:
-                    # Test in the specified frequency (the interval is 1 for all but the HoldoutPipeline)
-                    if pred_idx in predictors_for_testing and self.time_step % self.test_interval == 0:
-                        start_time = time.time()
-                        y_pred = predictor.predict(X_test)
-                        prediction_evaluator.testing_comp_times.append(time.time() - start_time)
-                        prediction_evaluator.run(y_true=copy.copy(y_test),
-                                                 y_pred=copy.copy(y_pred),
-                                                 X=copy.copy(X_test),
-                                                 predictor=predictor,
-                                                 rng=self.rng)
+                # Test in the specified frequency (the interval is 1 for all but the HoldoutPipeline)
+                if pred_idx in predictors_for_testing \
+                        and self.time_step % self.test_interval == 0 \
+                        and predictor.has_been_trained:
+                    start_time = time.time()
+                    y_pred = predictor.predict(X_test)
+                    prediction_evaluator.testing_comp_times.append(time.time() - start_time)
+                    prediction_evaluator.run(y_true=copy.copy(y_test),
+                                             y_pred=copy.copy(y_pred),
+                                             X=copy.copy(X_test),
+                                             predictor=predictor,
+                                             rng=self.rng)
+                else:
+                    self._add_nan_measure(evaluator=prediction_evaluator, is_test=True, is_train=False)
 
                 # Train the predictor.
-                if pred_idx in predictors_for_training:
+                if pred_idx in predictors_for_training and X_train.shape[0] > 0:
                     if self.estimate_memory_alloc:
                         start_snapshot = tracemalloc.take_snapshot()
 
                     start_time = time.time()
                     X_train_weighted = X_train.copy()
                     y_train_weighted = y_train.copy()
-                    if predictors_training_weights:
+                    if predictors_training_weights is not None:
                         # Repeat/Weight training observations acc. to the specified weight.
                         X_train_weighted = np.repeat(X_train, predictors_training_weights[pred_idx], axis=0)
                         y_train_weighted = np.repeat(y_train, predictors_training_weights[pred_idx])
@@ -278,101 +329,54 @@ class BasePipeline(metaclass=ABCMeta):
                     predictor.partial_fit(X_train_weighted, y_train_weighted)
                     prediction_evaluator.training_comp_times.append(time.time() - start_time)
 
+                    if not predictor.has_been_trained:
+                        predictor.has_been_trained = True
+
                     if self.estimate_memory_alloc:
                         prediction_evaluator.memory_changes.append(
                             self._get_memory_snapshot_diff(start_snapshot=start_snapshot))
+                else:
+                    self._add_nan_measure(evaluator=prediction_evaluator, is_test=False, is_train=True)
 
-        # ----------------------------------------
-        # Concept Drift Detection
-        # ----------------------------------------
-        if self.change_detector is not None:
-            if self.estimate_memory_alloc:
-                start_snapshot = tracemalloc.take_snapshot()
+    def _add_nan_measure(self,
+                         evaluator: Union[PredictionEvaluator, FeatureSelectionEvaluator, ChangeDetectionEvaluator],
+                         is_test: bool,
+                         is_train: bool):
+        """Add nan to all measures of the evaluator.
 
-            start_time = time.time()
-            if self.change_detector.error_based:
-                # Always use the first predictor for predicting y_pred, which is used for change detection.
-                y_pred = self.predictors[0].predict(X_test)
-                if y_pred is not None:
-                    # If the predictor has not been pre-trained, then there is no prediction in the first time step.
-                    self.change_detector.partial_fit([y_pred == y_test])
-            else:
-                self.change_detector.partial_fit(X=copy.copy(X_train), y=copy.copy(y_train))
-            self.change_detection_evaluator.comp_times.append(time.time() - start_time)
-
-            if self.estimate_memory_alloc:
-                self.change_detection_evaluator.memory_changes.append(
-                    self._get_memory_snapshot_diff(start_snapshot=start_snapshot))
-
-            if self.change_detector.detect_warning_zone():
-                self.change_detector.warnings.append(self.time_step)
-
-            if self.change_detector.detect_change():
-                self.change_detector.drifts.append(self.time_step)
-
-                # Reset modules
-                if self.data_loader.scaler is not None and self.data_loader.scaler.reset_after_drift:
-                    self.data_loader.scaler.reset()
-                if self.feature_selector is not None and self.feature_selector.reset_after_drift:
-                    self.feature_selector.reset()
-                for predictor in self.predictors:
-                    if predictor is not None and predictor.reset_after_drift:
-                        predictor.reset(X=copy.copy(X_train), y=copy.copy(y_train))
-                if self.change_detector is not None and self.change_detector.reset_after_drift:
-                    self.change_detector.reset()
-
-            partial_change_detected, partial_change_features = self.change_detector.detect_partial_change()
-            if partial_change_detected:
-                self.change_detector.partial_drifts.append((self.time_step, partial_change_features))
-
-            if last_iteration:  # The concept drift detection is only evaluated in the last iteration.
-                self.change_detection_evaluator.run(self.change_detector.drifts)
-
-    def _set_metrics_to_nan(self, predictor_test_idx: List[int], predictor_train_idx: List[int]):
-        """
-        Set all evaluation metrics to np.nan for when there are no samples with which to train. This can
-        happen when label_delay_range is set with a small batch size.
+        For some pipelines and configurations (e.g. when using label delay) it can happen that a classifier is not
+        trained or tested at a given iteration. In this case, we cannot compute performance measures. Instead, we append
+        nan to obtain equally sized vectors at the end of training.
 
         Args:
-            predictor_train_idx:
-                (only used for DistributedFoldPipeline) The indices for which predictors should be
-                used for training in this iteration.
-            predictor_test_idx:
-                (only used for DistributedFoldPipeline) The indices for which predictors should be
-                used for testing in this iterations
+            evaluator: Evaluator object.
+            is_test: Indicates whether we add nan for the testing measures.
+            is_test: Indicates whether we add nan for the training measures.
         """
-        # Set computation times to nan
-        self.feature_selection_evaluator.comp_times.append(np.nan)
-        for idx in predictor_test_idx:
-            self.prediction_evaluators[idx].testing_comp_times.append(np.nan)
-        for idx in predictor_train_idx:
-            self.prediction_evaluators[idx].training_comp_times.append(np.nan)
-        self.change_detection_evaluator.comp_times.append(np.nan)
+        if is_test:
+            if isinstance(evaluator, PredictionEvaluator):
+                evaluator.testing_comp_times.append(np.nan)
 
-        # Set evaluation measures to nan
-        if not self.time_step % self.test_interval:
-            for measure_func in self.feature_selection_evaluator.measure_funcs:
-                self.feature_selection_evaluator.result[measure_func.__name__]['measures'].append(np.nan)
-                self.feature_selection_evaluator.result[measure_func.__name__]['mean'].append(np.nan)
-                self.feature_selection_evaluator.result[measure_func.__name__]['var'].append(np.nan)
+            for measure_name in evaluator.result:
+                for stat in evaluator.result[measure_name]:
+                    if stat in ['mean_decay', 'var_decay']:
+                        # For decayed measures we only append nan in the first time step. Otherwise, we repeat the
+                        # previous measure.
+                        if len(evaluator.result[measure_name][stat]) > 0:
+                            evaluator.result[measure_name][stat].append(evaluator.result[measure_name][stat][-1])
+                        else:
+                            evaluator.result[measure_name][stat] = [np.nan]
+                    else:
+                        evaluator.result[measure_name][stat].append(np.nan)
 
-            for idx in predictor_test_idx:
-                for measure_func in self.prediction_evaluators[idx].measure_funcs:
-                    self.prediction_evaluators[idx].result[measure_func.__name__]['measures'].append(np.nan)
-                    self.prediction_evaluators[idx].result[measure_func.__name__]['mean'].append(np.nan)
-                    self.prediction_evaluators[idx].result[measure_func.__name__]['var'].append(np.nan)
+        if is_train:
+            if isinstance(evaluator, PredictionEvaluator):
+                evaluator.training_comp_times.append(np.nan)
+            else:
+                evaluator.comp_times.append(np.nan)
 
-            for measure_func in self.change_detection_evaluator.measure_funcs:
-                self.change_detection_evaluator.result[measure_func.__name__]['measures'] = np.nan
-                self.change_detection_evaluator.result[measure_func.__name__]['mean'] = np.nan
-                self.change_detection_evaluator.result[measure_func.__name__]['var'] = np.nan
-
-        # Set memory changes to nan
-        if self.estimate_memory_alloc:
-            self.feature_selection_evaluator.memory_changes.append(np.nan)
-            for i in range(len(self.prediction_evaluators)):
-                self.prediction_evaluators[i].memory_changes.append(np.nan)
-            self.change_detection_evaluator.memory_changes.append(np.nan)
+            if self.estimate_memory_alloc:
+                evaluator.memory_changes.append(np.nan)
 
     def _get_n_batch(self) -> int:
         """Returns the number of observations that need to be drawn in this iteration.
@@ -386,26 +390,36 @@ class BasePipeline(metaclass=ABCMeta):
             n_batch = self.n_max - self.n_total
         return n_batch
 
-    def _get_train_set(self, n_batch: int) -> Tuple[ArrayLike, ArrayLike]:  # Todo: revise!!
-        """Returns the training set to be used for the current iteration.
+    def _draw_observations(self, n_batch: int) -> Tuple[Tuple[ArrayLike, ArrayLike], Tuple[ArrayLike, ArrayLike]]:
+        """Returns the training and test set to be used for the current iteration.
+
+        If there is no label delay, the returned train and test set are equivalent.
 
         Args:
-            n_batch: the batch size
+            n_batch: The batch size.
 
         Returns:
-            Tuple[ArrayLike, ArrayLike]: the samples and their labels to be used for training
+            Tuple[Tuple[ArrayLike, ArrayLike], Tuple[ArrayLike, ArrayLike]]:
+                The training and test observations and their corresponding labels.
         """
         X, y = self.data_loader.get_data(n_batch=n_batch)
+        test_set = (X, y)
+
         if self.label_delay_range:
-            self.sample_buffer.extend(list(zip(X, y, self.time_step + np.random.randint(self.label_delay_range[0], self.label_delay_range[1], X.shape[0]))))
-            if self.time_step >= self.label_delay_range[1]:
-                train_set = (np.array([X for (X, _, time_step) in self.sample_buffer if time_step <= self.time_step]), np.array([y for (_, y, time_step) in self.sample_buffer if time_step <= self.time_step]))
-                self.sample_buffer = [(X, y, time_step) for (X, y, time_step) in self.sample_buffer if self.time_step < time_step]
-            else:
-                train_set = (X, y)
+            # Save observations to buffer.
+            self.sample_buffer.extend(list(zip(X, y, self.time_step + np.random.randint(self.label_delay_range[0],
+                                                                                        self.label_delay_range[1],
+                                                                                        X.shape[0]))))
+
+            # Draw all available observations at current time step from buffer.
+            train_set = (np.array([X for (X, _, time_step) in self.sample_buffer if time_step <= self.time_step]),
+                         np.array([y for (_, y, time_step) in self.sample_buffer if time_step <= self.time_step]))
+            self.sample_buffer = [(X, y, time_step) for (X, y, time_step) in self.sample_buffer
+                                  if time_step > self.time_step]
         else:
-            train_set = (X, y)
-        return train_set
+            train_set = copy.deepcopy(test_set)
+
+        return train_set, test_set
 
     @staticmethod
     def _get_memory_snapshot_diff(start_snapshot: Snapshot) -> float:

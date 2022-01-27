@@ -61,7 +61,7 @@ class SkmultiflowClassifier(BasePredictor):
         """Predicts the probability of target values."""
         return self.model.predict_proba(X=X)
 
-    def reset(self, X: ArrayLike, y: ArrayLike):
-        """Resets the predictor and fits to given sample."""
+    def reset(self):
+        """Resets the predictor."""
         self.model.reset()
-        self.partial_fit(X=X, y=y)
+        self.has_been_trained = False

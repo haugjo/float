@@ -154,8 +154,9 @@ def update_progress_bar(pipeline: 'BasePipeline'):
     if pipeline.change_detector:
         n_detections = len(pipeline.change_detector.drifts)
         last_drift = pipeline.change_detector.drifts[-1] if n_detections > 0 else 0
-        out_text = "[%-20s] %d%%, No. of detected drifts: %d, Last detected drift at t=%d." % (
-            '=' * int(0.2 * progress), progress, n_detections, last_drift)
+        last_drift_percent = math.ceil(last_drift * pipeline.batch_size / pipeline.n_max * 100)
+        out_text = "[%-20s] %d%%, No. of detected drifts: %d, Last detected drift at t=%d (i.e., at %d%% progress)." % (
+            '=' * int(0.2 * progress), progress, n_detections, last_drift, last_drift_percent)
     else:
         out_text = "[%-20s] %d%%" % ('=' * int(0.2 * progress), progress)
 
@@ -180,22 +181,45 @@ def print_evaluation_summary(pipeline: 'BasePipeline'):
     if None not in pipeline.predictors:
         print('-------------------------------------------------------------------------')
         print('*** Prediction ***')
-        # Todo: account for distributed fold pipeline
 
-        for predictor, prediction_evaluator in zip(pipeline.predictors, pipeline.prediction_evaluators):
-            if isinstance(predictor, SkmultiflowClassifier) or isinstance(predictor, RiverClassifier):
-                model_name = type(predictor).__name__.split('.')[-1] + '.' + type(predictor.model).__name__
+        for p_idx, (predictor, prediction_evaluator) in enumerate(zip(pipeline.predictors,
+                                                                      pipeline.prediction_evaluators)):
+            if isinstance(predictor, list):  # The Distributed Pipeline returns a list of multiple classifier instances.
+                if isinstance(predictor[0], SkmultiflowClassifier) or isinstance(predictor[0], RiverClassifier):
+                    model_name = type(predictor[0]).__name__.split('.')[-1] + '.' + type(predictor[0].model).__name__ \
+                                 + ' (' + str(pipeline.n_parallel_instances) + ' parallel instances)'
+                else:
+                    model_name = type(predictor[0]).__name__.split('.')[-1] \
+                                 + ' (' + str(pipeline.n_parallel_instances) + ' parallel instances)'
+                print('* Model No. {}: {}'.format(p_idx + 1, model_name))
+
+                test_times = [np.nanmean(evaluator.testing_comp_times) for evaluator in prediction_evaluator]
+                train_times = [np.nanmean(evaluator.training_comp_times) for evaluator in prediction_evaluator]
+                tab_data = [['Avg. Test Comp. Time', np.nanmean(test_times)],
+                            ['Avg. Train Comp. Time', np.nanmean(train_times)]]  # Aggregate data
+
+                measures = dict()
+                for evaluator in prediction_evaluator:
+                    for meas in evaluator.result:
+                        if meas in measures:
+                            measures[meas].append(evaluator.result[meas]['mean'][-1])
+                        else:
+                            measures[meas] = [evaluator.result[meas]['mean'][-1]]
+
+                tab_data.extend([['Avg. {}'.format(key), np.nanmean(value)] for key, value in measures.items()])
             else:
-                model_name = type(predictor).__name__.split('.')[-1]
-            print('Model Name: {}'.format(model_name))
+                if isinstance(predictor, SkmultiflowClassifier) or isinstance(predictor, RiverClassifier):
+                    model_name = type(predictor).__name__.split('.')[-1] + '.' + type(predictor.model).__name__
+                else:
+                    model_name = type(predictor).__name__.split('.')[-1]
+                print('Model: {}'.format(model_name))
 
-            tab_data = [['Avg. Test Comp. Time', np.nanmean(prediction_evaluator.testing_comp_times)],
-                        ['Avg. Train Comp. Time',
-                         np.nanmean(prediction_evaluator.training_comp_times)]]  # Aggregate data
-            tab_data.extend([['Avg. {}'.format(key), value['mean'][-1]]
-                             for key, value in prediction_evaluator.result.items()])
+                tab_data = [['Avg. Test Comp. Time', np.nanmean(prediction_evaluator.testing_comp_times)],
+                            ['Avg. Train Comp. Time',
+                             np.nanmean(prediction_evaluator.training_comp_times)]]  # Aggregate data
+                tab_data.extend([['Avg. {}'.format(key), value['mean'][-1]]
+                                 for key, value in prediction_evaluator.result.items()])
             print(tabulate(tab_data, headers=['Performance Measure', 'Value'], tablefmt='github'))
-            print('------')
 
     if pipeline.change_detector is not None:
         print('-------------------------------------------------------------------------')
@@ -206,7 +230,7 @@ def print_evaluation_summary(pipeline: 'BasePipeline'):
                 pipeline.change_detector.detector).__name__
         else:
             model_name = type(pipeline.change_detector).__name__.split('.')[-1]
-        print('Model Name: {}'.format(model_name))
+        print('Model: {}'.format(model_name))
 
         if len(pipeline.change_detector.drifts) <= 5:
             print('Detected Global Drifts: {} ({} in total)'.format(str(pipeline.change_detector.drifts),
@@ -230,7 +254,7 @@ def print_evaluation_summary(pipeline: 'BasePipeline'):
         else:
             model_name = type(pipeline.feature_selector).__name__.split('.')[-1]
 
-        print('Model Name: {}'.format(model_name))
+        print('Model: {}'.format(model_name))
         print('Selected Features: {}/{}'.format(pipeline.feature_selector.n_selected_features,
                                                 pipeline.feature_selector.n_total_features))
 

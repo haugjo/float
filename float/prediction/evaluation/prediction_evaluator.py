@@ -133,13 +133,15 @@ class PredictionEvaluator:
 
                 # Make function call and save measurement
                 new_measure_val = measure_func(**call_args)
-                measure_name = type(self.kwargs['metric']).__name__.lower() if measure_func.__name__ == 'river_classification_metric' else measure_func.__name__
+                measure_name = type(self.kwargs['metric']).__name__.lower() \
+                    if measure_func.__name__ == 'river_classification_metric' else measure_func.__name__
                 self.result[measure_name]['measures'].append(new_measure_val)
                 self.result[measure_name]['mean'].append(np.nanmean(self.result[measure_name]['measures']))
                 self.result[measure_name]['var'].append(np.nanvar(self.result[measure_name]['measures']))
 
                 if self.decay_rate:
-                    if len(self.result[measure_name]['mean_decay']) > 0:
+                    if len(self.result[measure_name]['mean_decay']) > 0 \
+                            and not np.isnan(self.result[measure_name]['mean_decay'][-1]):
                         delta = new_measure_val - self.result[measure_name]['mean_decay'][-1]
                         self.result[measure_name]['mean_decay'].append(
                             self.result[measure_name]['mean_decay'][-1] + self.decay_rate * delta

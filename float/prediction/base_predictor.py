@@ -33,6 +33,7 @@ class BasePredictor(metaclass=ABCMeta):
 
     Attributes:
         reset_after_drift (bool): A boolean indicating if the predictor will be reset after a drift was detected.
+        has_been_trained (bool): A boolean indicating if the predictor has been trained at least once.
     """
 
     def __init__(self, reset_after_drift: bool):
@@ -42,6 +43,7 @@ class BasePredictor(metaclass=ABCMeta):
             reset_after_drift: A boolean indicating if the predictor will be reset after a drift was detected.
         """
         self.reset_after_drift = reset_after_drift
+        self.has_been_trained = False
 
     @abstractmethod
     def partial_fit(self, X: ArrayLike, y: ArrayLike, sample_weight: Optional[ArrayLike] = None):
@@ -79,11 +81,6 @@ class BasePredictor(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def reset(self, X: ArrayLike, y: ArrayLike):
-        """Resets the predictor and fits to given sample.
-
-        Args:
-            X: Array/matrix of observations.
-            y: Array of corresponding labels.
-        """
+    def reset(self):
+        """Resets the predictor."""
         raise NotImplementedError

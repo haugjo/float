@@ -138,12 +138,10 @@ class HoldoutPipeline(BasePipeline):
             if self.n_total + n_batch >= self.n_max:
                 last_iteration = True
 
-            X_train, y_train = self._get_train_set(n_batch)
+            (X_train, y_train), (X_test, y_test) = self._draw_observations(n_batch=n_batch)
 
             if self.test_replace_interval is None:
-                if self.test_set is None:
-                    X_test, y_test = X_train, y_train
-                else:
+                if self.test_set is not None:
                     X_test, y_test = self.test_set
             else:
                 # Check if we need to replace the oldest test instance in this iteration.

@@ -107,7 +107,7 @@ class RiverFeatureSelector(BaseFeatureSelector):
         return X_new
 
     def reset(self):
-        """Resets the feature selector."""
+        """Resets the feature selector."""  # Todo: revise
         self.__init__(feature_selector=self.init_feature_selector,
                       feature_names=self.feature_names,
                       n_total_features=self.n_total_features,

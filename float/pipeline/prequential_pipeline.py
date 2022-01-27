@@ -105,11 +105,11 @@ class PrequentialPipeline(BasePipeline):
             if self.n_total + n_batch >= self.n_max:
                 last_iteration = True
 
-            train_set = self._get_train_set(n_batch)
+            train_set, test_set = self._draw_observations(n_batch=n_batch)
 
             try:
                 self._run_iteration(train_set=train_set,
-                                    test_set=train_set,  # Use the same set for training and testing.
+                                    test_set=test_set,
                                     last_iteration=last_iteration,
                                     predictors_for_testing=list(np.arange(len(self.predictors))),  # Use all predictors.
                                     predictors_for_training=list(np.arange(len(self.predictors))))

@@ -135,8 +135,8 @@ class DistributedFoldPipeline(BasePipeline):
         dist_val_predictors = []
         dist_val_evaluators = []
         for predictor, prediction_evaluator in zip(self.predictors, self.prediction_evaluators):
-            dist_val_predictors.append([copy.deepcopy(predictor) for _ in range(n_parallel_instances)])
-            dist_val_evaluators.append([copy.deepcopy(prediction_evaluator) for _ in range(n_parallel_instances)])
+            dist_val_predictors.extend([copy.deepcopy(predictor) for _ in range(n_parallel_instances)])
+            dist_val_evaluators.extend([copy.deepcopy(prediction_evaluator) for _ in range(n_parallel_instances)])
         self.predictors = dist_val_predictors
         self.prediction_evaluators = dist_val_evaluators
 
@@ -153,7 +153,7 @@ class DistributedFoldPipeline(BasePipeline):
             if self.n_total + n_batch >= self.n_max:
                 last_iteration = True
 
-            train_set = self._get_train_set(n_batch)
+            train_set, test_set = self._draw_observations(n_batch=n_batch)
 
             predictors_for_testing = []
             predictors_for_training = []
@@ -162,18 +162,18 @@ class DistributedFoldPipeline(BasePipeline):
                 # "Each example is used for testing in one classifier selected randomly, and used for training by all
                 # the others." (Bifet et al. 2015)
                 for p_idx in range(self.n_unique_predictors):
-                    p_test_idx = np.random.randint(self.n_parallel_instances)
+                    p_test_idx = np.asarray([np.random.randint(self.n_parallel_instances)])
                     p_train_idx = np.setdiff1d(np.arange(self.n_parallel_instances), p_test_idx)
-                    predictors_for_testing.append(p_test_idx + p_idx * self.n_parallel_instances)
-                    predictors_for_training.append(p_train_idx + p_idx * self.n_parallel_instances)
+                    predictors_for_testing.extend(p_test_idx + p_idx * self.n_parallel_instances)
+                    predictors_for_training.extend(p_train_idx + p_idx * self.n_parallel_instances)
             elif self.validation_mode == 'split':
                 # "Each example is used for training in one classifier selected randomly, and for testing in the
                 # other classifiers." (Bifet et al. 2015)
                 for p_idx in range(self.n_unique_predictors):
-                    p_train_idx = np.random.randint(self.n_parallel_instances)
+                    p_train_idx = np.asarray([np.random.randint(self.n_parallel_instances)])
                     p_test_idx = np.setdiff1d(np.arange(self.n_parallel_instances), p_train_idx)
-                    predictors_for_testing.append(p_test_idx + p_idx * self.n_parallel_instances)
-                    predictors_for_training.append(p_train_idx + p_idx * self.n_parallel_instances)
+                    predictors_for_testing.extend(p_test_idx + p_idx * self.n_parallel_instances)
+                    predictors_for_training.extend(p_train_idx + p_idx * self.n_parallel_instances)
             elif self.validation_mode == 'bootstrap':
                 # "Each example is used for training in each classifier according to a weight from a Poisson(1)
                 # distribution. This results in each example being used for training in approximately two thirds of
@@ -182,13 +182,15 @@ class DistributedFoldPipeline(BasePipeline):
                 predictors_training_weights = []
                 for p_idx in range(self.n_unique_predictors):
                     weights = np.random.poisson(1, self.n_parallel_instances)
-                    predictors_for_testing.append(np.argwhere(weights == 0) + p_idx * self.n_parallel_instances)
-                    predictors_for_training.append(np.argwhere(weights != 0) + p_idx * self.n_parallel_instances)
-                    predictors_training_weights.append(weights[weights != 0])
+                    predictors_for_testing.extend(np.argwhere(weights == 0).flatten()
+                                                  + p_idx * self.n_parallel_instances)
+                    predictors_for_training.extend(np.argwhere(weights != 0).flatten()
+                                                   + p_idx * self.n_parallel_instances)
+                    predictors_training_weights.extend(weights)
 
             try:
                 self._run_iteration(train_set=train_set,
-                                    test_set=train_set,  # As in the preq. evaluation, test/train are the same sample.
+                                    test_set=test_set,
                                     last_iteration=last_iteration,
                                     predictors_for_testing=predictors_for_testing,
                                     predictors_for_training=predictors_for_training,
@@ -215,5 +217,8 @@ class DistributedFoldPipeline(BasePipeline):
                                                     p_idx + 1 * self.n_parallel_instances])
             final_prediction_evaluators.append(self.prediction_evaluators[p_idx * self.n_parallel_instances:
                                                                           p_idx + 1 * self.n_parallel_instances])
+
+        self.predictors = final_predictors
+        self.prediction_evaluators = final_prediction_evaluators
 
         super()._finish_evaluation()

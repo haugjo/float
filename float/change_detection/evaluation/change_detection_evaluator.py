@@ -86,7 +86,10 @@ class ChangeDetectionEvaluator:
             self.result[measure_func.__name__] = dict()
 
     def run(self, drifts: List):
-        """Updates relevant statistics and computes the evaluation measures.
+        """Computes the evaluation measures.
+
+        Other than the PredictionEvaluator and FeatureSelectionEvaluator, the ChangeDetectionEvaluator is only run
+        once at the end of the evaluation.
 
         Args:
             drifts: List of time steps corresponding to detected concept drifts.

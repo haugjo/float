@@ -92,7 +92,8 @@ class FeatureSelectionEvaluator:
                 self.result[measure_func.__name__]['var'].append(np.nanvar(self.result[measure_func.__name__]['measures']))
 
                 if self.decay_rate:
-                    if len(self.result[measure_func.__name__]['mean_decay']) > 0:
+                    if len(self.result[measure_func.__name__]['mean_decay']) > 0 \
+                            and not np.isnan(self.result[measure_func.__name__]['mean_decay'][-1]):
                         delta = new_measure_val - self.result[measure_func.__name__]['mean_decay'][-1]
                         self.result[measure_func.__name__]['mean_decay'].append(
                             self.result[measure_func.__name__]['mean_decay'][-1] + self.decay_rate * delta

@@ -50,8 +50,14 @@ class RiverClassifier(BasePredictor):
         self.model = model
         self.feature_names = feature_names
 
-        self.can_mini_batch = False
-        self._validate()
+        if isinstance(self.model, Classifier):
+            if getattr(self.model, 'learn_many', None):
+                self.can_mini_batch = True
+            else:
+                self.can_mini_batch = False
+        else:
+            raise TypeError('River classifier class {} is not supported.'.format(type(self.model)))
+
         super().__init__(reset_after_drift=reset_after_drift)
 
     def partial_fit(self, X: ArrayLike, y: ArrayLike, sample_weight: Optional[ArrayLike] = None):
@@ -82,19 +88,7 @@ class RiverClassifier(BasePredictor):
             x = {key: value[0] for key, value in zip(self.feature_names, X.reshape((-1, 1)))}
             return np.array([self.model.predict_proba_one(x=x)])
 
-    def reset(self, X: ArrayLike, y: ArrayLike):
-        """Resets the predictor and fits to given sample."""
-        self.__init__(self.init_model, self.feature_names, self.reset_after_drift)
-        self.partial_fit(X=X, y=y)
-
-    def _validate(self):
-        """Validate the provided river classifier object.
-
-        Raises:
-            TypeError: If the provided classifier is not a valid river classification method.
-        """
-        if isinstance(self.model, Classifier):
-            if getattr(self.model, 'learn_many', None):
-                self.can_mini_batch = True
-        else:
-            raise TypeError('River classifier class {} is not supported.'.format(type(self.model)))
+    def reset(self):
+        """Resets the predictor."""
+        self.model = self.init_model.clone()
+        self.has_been_trained = False
