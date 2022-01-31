@@ -15,7 +15,9 @@ class TestFeatureSelectionBar(unittest.TestCase):
                                         feature_names=[f'Feature {i}' for i in range(50)],
                                         top_n_features=10)
         self.assertIsInstance(ax, plt.Axes, msg='feature_selection_bar() returns an object of type Axes')
-        self.assertEqual(len(ax.patches), len(self.sample_selected_features) * 10, msg='feature_selection_bar() draws the correct amount of bars')
+        self.assertEqual(len(ax.patches), len(self.sample_selected_features) * 10,
+                         msg='feature_selection_bar() draws the correct amount of bars')
         self.assertEqual(ax.get_xlabel(), 'Input Feature', msg='feature_selection_bar() sets the correct xlabel')
         self.assertEqual(ax.get_ylabel(), 'No. Times Selected', msg='feature_selection_bar() sets the correct ylabel')
-        self.assertEqual([text.get_text() for text in ax.get_legend().texts], [f'Model {i}' for i in range(3)], msg='feature_selection_bar() sets the right legend texts')
+        self.assertEqual([text.get_text() for text in ax.get_legend().texts], [f'Model {i}' for i in range(3)],
+                         msg='feature_selection_bar() sets the right legend texts')

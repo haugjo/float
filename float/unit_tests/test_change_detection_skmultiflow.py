@@ -14,6 +14,9 @@ class TestSkmultiflowChangeDetector(unittest.TestCase):
         self.assertIsInstance(self.skmultiflow_change_detector.detector, BaseDriftDetector,
                               msg='attribute detector is initialized correctly')
 
+        with self.assertRaises(TypeError, msg="TypeError when passing unsupported change detector."):
+            SkmultiflowChangeDetector(None)
+
     def test_reset(self):
         self.skmultiflow_change_detector.detector.in_concept_change = True
         self.skmultiflow_change_detector.detector.in_warning_zone = True
@@ -30,16 +33,9 @@ class TestSkmultiflowChangeDetector(unittest.TestCase):
         self.assertEqual(self.skmultiflow_change_detector.detector.sample_count, 1, "reset() sets sample_count to 1")
 
     def test_detect_change(self):
-        self.assertEqual(self.skmultiflow_change_detector.detect_change(), False,
-                         "detected_global_change() returns False initially")
-        self.skmultiflow_change_detector.partial_fit(0)
-        self.assertEqual(self.skmultiflow_change_detector.detect_change(), False,
-                         "detected_global_change() returns False for the same concept")
-        for i in range(50):
-            self.skmultiflow_change_detector.partial_fit(0)
-        self.skmultiflow_change_detector.partial_fit(1)
-        self.assertEqual(self.skmultiflow_change_detector.detect_change(), True,
-                         "detected_global_change() returns True for a different concept")
+        self.skmultiflow_change_detector.partial_fit([True, False, True])
+        self.assertIsInstance(self.skmultiflow_change_detector.detect_change(), bool,
+                              msg="detect change returns bool indicator.")
 
     def test_detect_partial_change(self):
         self.assertEqual(self.skmultiflow_change_detector.detect_partial_change(), (False, []),
@@ -52,8 +48,14 @@ class TestSkmultiflowChangeDetector(unittest.TestCase):
     def test_partial_fit(self):
         sample_count = self.skmultiflow_change_detector.detector.sample_count
         miss_prob = self.skmultiflow_change_detector.detector.miss_prob
-        self.skmultiflow_change_detector.partial_fit(0)
-        self.assertEqual(self.skmultiflow_change_detector.detector.sample_count, sample_count + 1,
-                         "partial_fit() increases sample_count by 1")
+        self.skmultiflow_change_detector.partial_fit([True, False, True])
+        self.assertEqual(self.skmultiflow_change_detector.detector.sample_count, sample_count + 3,
+                         "partial_fit() increases sample_count by 3")
         self.assertNotEqual(self.skmultiflow_change_detector.detector.miss_prob, miss_prob,
                             "partial_fit() updates miss_prob")
+        self.assertIsInstance(self.skmultiflow_change_detector.detect_change(), bool,
+                              msg="detect_change returns a bool indicator.")
+        self.assertIsInstance(self.skmultiflow_change_detector.detect_warning_zone(), bool,
+                              msg="detect_warning returns a bool indicator.")
+        self.assertIsInstance(self.skmultiflow_change_detector.detect_partial_change(), tuple,
+                              msg="detect partial change returns a tuple.")

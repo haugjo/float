@@ -51,8 +51,8 @@ class BasePipeline(metaclass=ABCMeta):
 
     Attributes:
         data_loader (DataLoader): Data loader object.
-        predictors (BasePredictor | List[BasePredictor] | None): Predictive model(s).
-        prediction_evaluators (PredictionEvaluator | List[PredictionEvaluator] | None):
+        predictors (BasePredictor | List[BasePredictor]): Predictive model(s).
+        prediction_evaluators (PredictionEvaluator | List[PredictionEvaluator]):
             Evaluator(s) for the predictive model(s).
         change_detector (ConceptDriftDetector | None): Concept drift detection model.
         change_detection_evaluator (ChangeDetectionEvaluator | None): Evaluator for active concept drift detection.
@@ -81,8 +81,8 @@ class BasePipeline(metaclass=ABCMeta):
 
     def __init__(self,
                  data_loader: DataLoader,
-                 predictor: Optional[Union[BasePredictor, List[BasePredictor]]],
-                 prediction_evaluator: Optional[PredictionEvaluator],
+                 predictor: Union[BasePredictor, List[BasePredictor]],
+                 prediction_evaluator: PredictionEvaluator,
                  change_detector: Optional[BaseChangeDetector],
                  change_detection_evaluator: Optional[ChangeDetectionEvaluator],
                  feature_selector: Optional[BaseFeatureSelector],

@@ -96,12 +96,12 @@ class DataLoader:
             FileNotFoundError: If the provided file path does not exist.
             ValueError: If the .csv cannot be converted to a scikit multiflow FileStream.
         """
-        if not type(self.stream) is Stream:
-            if not type(self.path) is str:
+        if not isinstance(self.stream, Stream):
+            if not isinstance(self.path, str):
                 raise AttributeError("Neither a valid scikit-multiflow Stream object nor a file path was provided.")
             elif not self.path.endswith('.csv'):
                 raise AttributeError("Neither a valid scikit-multiflow Stream object nor a .csv-file path was provided.")
-            elif not type(self.target_col) is int:
+            elif not isinstance(self.target_col, int):
                 raise AttributeError("The parameter target_col needs to be an integer.")
             else:
                 try:
@@ -110,3 +110,6 @@ class DataLoader:
                     raise FileNotFoundError("The file path provided does not exist.")
                 except ValueError:
                     raise ValueError("The .csv file cannot be converted to a scikit-multiflow FileStream.")
+
+        if self.scaler is not None and not isinstance(self.scaler, BaseScaler):
+            raise AttributeError("The provided scaler is not a valid Scaler object.")

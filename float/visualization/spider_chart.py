@@ -9,45 +9,12 @@ import warnings
 _PALETTE = ['#003366', '#44aa99', '#88ccee', '#117733', '#999933', '#ddcc77', '#cc3311', '#ee3377', '#bbbbbb', '#000000']
 
 
-def _scale_data(measures: List[float],
-                ranges: List[Tuple]) -> List[float]:
-    """
-    Scale measures to specified range and invert them if the range is reversed.
-
-    Args:
-        measures: A list containing a series of measurements.
-        ranges: The ranges for each of the metrics.
-
-    Returns:
-        List[float]: the rescaled measures
-    """
-    # rescale the first measure and save its range
-    range_min_init, range_max_init = ranges[0]
-    measure = measures[0]
-    if range_min_init > range_max_init:
-        # update measure if range is inverted
-        measure = range_max_init - (measure - range_min_init)
-        range_min_init, range_max_init = range_max_init, range_min_init
-    measures_scaled = [measure]
-
-    # rescale the remaining measures w.r.t. to their own range and the range of the first measure
-    for measure, (range_min, range_max) in zip(measures[1:], ranges[1:]):
-        if range_min > range_max:
-            # update measure if range is inverted
-            measure = range_max - (measure - range_min)
-            range_min, range_max = range_max, range_min
-        measures_scaled.append((measure - range_min) / (range_max - range_min) *
-                               (range_max_init - range_min_init) + range_min_init)
-    return measures_scaled
-
-
 def spider_chart(measures: List[List],
                  metric_names: List[str],
                  legend_names: List[str],
                  ranges: Optional[List[Tuple]] = None,
                  invert: Optional[List[bool]] = None) -> Axes:
-    """
-    Returns a spider chart that shows the specified metric values.
+    """Returns a spider chart that shows the specified metric values.
 
     Args:
         measures: A list of lists, where each list corresponds to a series of measurements.
@@ -69,17 +36,17 @@ def spider_chart(measures: List[List],
     if len(metric_names) > 8:
         warnings.warn('Plotting more than eight variables in a spider chart can make it difficult to read.')
 
-    # set up ranges for each metric
+    # Set up ranges for each metric
     invert = invert if invert else [False for _ in range(len(metric_names))]
     ranges = [r if r else (0, 1) for r in ranges] if ranges else [(0, 1) for _ in range(len(metric_names))]
     ranges = [(r2, r1) if i else (r1, r2) for (r1, r2), i in zip(ranges, invert)]
 
-    # set up figure and axes for each metric
+    # Set up figure and axes for each metric
     fig = plt.figure()
     angles = np.arange(0, 360, 360. / len(metric_names))
     axes = [fig.add_axes([0.1, 0.1, 1.06, 0.81], polar=True, label="axes{}".format(i)) for i in range(len(metric_names))]
 
-    # draw metric names
+    # Draw metric names
     _, text = axes[0].set_thetagrids(angles, labels=metric_names)
     labels = []
     for label, angle in zip(text, angles):
@@ -89,7 +56,7 @@ def spider_chart(measures: List[List],
         labels.append(lab)
     axes[0].set_xticklabels([])
 
-    # set up grid
+    # Set up grid
     for ax in axes[1:]:
         ax.patch.set_visible(False)
         ax.grid("off")
@@ -101,7 +68,7 @@ def spider_chart(measures: List[List],
         ax.set_rgrids(grid, labels=grid_label, angle=angles[i])
         ax.set_ylim(*ranges[i])
 
-    # plot the measures
+    # Plot the measures
     angle = np.deg2rad(np.r_[angles, angles[0]])
     ax = axes[0]
     for i in range(len(measures)):
@@ -111,3 +78,34 @@ def spider_chart(measures: List[List],
         ax.legend(loc='lower left', bbox_to_anchor=(-0.54, -0.12), frameon=False)
 
     return ax
+
+
+def _scale_data(measures: List[float],
+                ranges: List[Tuple]) -> List[float]:
+    """Scales measures to specified range and inverts them if the range is reversed.
+
+    Args:
+        measures: A list containing a series of measurements.
+        ranges: The ranges for each of the metrics.
+
+    Returns:
+        List[float]: the rescaled measures
+    """
+    # Rescale the first measure and save its range
+    range_min_init, range_max_init = ranges[0]
+    measure = measures[0]
+    if range_min_init > range_max_init:
+        # Update measure if range is inverted
+        measure = range_max_init - (measure - range_min_init)
+        range_min_init, range_max_init = range_max_init, range_min_init
+    measures_scaled = [measure]
+
+    # Rescale the remaining measures w.r.t. to their own range and the range of the first measure
+    for measure, (range_min, range_max) in zip(measures[1:], ranges[1:]):
+        if range_min > range_max:
+            # Update measure if range is inverted
+            measure = range_max - (measure - range_min)
+            range_min, range_max = range_max, range_min
+        measures_scaled.append((measure - range_min) / (range_max - range_min) *
+                               (range_max_init - range_min_init) + range_min_init)
+    return measures_scaled

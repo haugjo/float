@@ -17,7 +17,11 @@ class TestPredictionEvaluator(unittest.TestCase):
                         round(self.data_loader.stream.n_samples * 0.6), round(self.data_loader.stream.n_samples * 0.8)]
         batch_size = 10
         self.predictor = SkmultiflowClassifier(PerceptronMask(), self.data_loader.stream.target_values, reset_after_drift=True)  # todo: can we get rid of the target values parameter?
-        self.prediction_evaluator = PredictionEvaluator([accuracy_score, zero_one_loss, mean_drift_performance_deterioration, mean_drift_restoration_time, noise_variability],
+        self.prediction_evaluator = PredictionEvaluator([accuracy_score,
+                                                         zero_one_loss,
+                                                         mean_drift_performance_deterioration,
+                                                         mean_drift_restoration_time,
+                                                         noise_variability],
                                                         decay_rate=0.1,
                                                         window_size=10,
                                                         known_drifts=known_drifts,
@@ -34,6 +38,9 @@ class TestPredictionEvaluator(unittest.TestCase):
         y_pred = self.predictor.predict(X)
         self.prediction_evaluator.run(y, y_pred, X, self.predictor, self.rng)
         for measure_func in self.prediction_evaluator.measure_funcs:
-            self.assertTrue(len(self.prediction_evaluator.result[measure_func.__name__]['measures']) > 0, msg='run() adds a value to the measure dict')
-            self.assertTrue(len(self.prediction_evaluator.result[measure_func.__name__]['measures']) > 0, msg='run() adds a value to the mean dict')
-            self.assertTrue(len(self.prediction_evaluator.result[measure_func.__name__]['measures']) > 0, msg='run() adds a value to the var dict')
+            self.assertTrue(len(self.prediction_evaluator.result[measure_func.__name__]['measures']) > 0,
+                            msg='run() adds a value to the measure dict')
+            self.assertTrue(len(self.prediction_evaluator.result[measure_func.__name__]['mean']) > 0,
+                            msg='run() adds a value to the mean dict')
+            self.assertTrue(len(self.prediction_evaluator.result[measure_func.__name__]['var']) > 0,
+                            msg='run() adds a value to the var dict')

@@ -36,6 +36,8 @@ class SklearnScaler(BaseScaler):
 
     Attributes:
         scaler_obj (Any): A scikit-learn scaler object (e.g. MinMaxScaler)
+        _has_partial_fit (bool) : Indicates whether the scikit-learn scaler can be fitted incrementally.
+        _must_be_fitted (bool): Indicates whether the scikit-learn scaler must be fitted once.
     """
     def __init__(self, scaler_obj: Any, reset_after_drift: bool = False):
         """Inits the sklearn scaler.

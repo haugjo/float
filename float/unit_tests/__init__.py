@@ -22,30 +22,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from .test_bar import TestBar
-from .test_cancel_out import TestCancelOutFeatureSelector
+from .test_visualization_bar import TestBar
+from .test_feature_selection_cancel_out import TestCancelOutFeatureSelector
 from .test_change_detection_evaluator import TestChangeDetectionEvaluator
-from .test_concept_drift_detection_scatter import TestConceptDriftDetectionScatter
-from .test_data_loader import TestDataLoader
-from .test_efs import TestEFS
-from .test_erics import TestERICS
-from .test_fires import TestFIRES
-from .test_feature_selection_bar import TestFeatureSelectionBar
+from .test_visualization_concept_drift_detection_scatter import TestConceptDriftDetectionScatter
+from float.unit_tests.test_data_loader import TestDataLoader
+from .test_feature_selection_efs import TestEFS
+from .test_change_detection_erics import TestERICS
+from .test_feature_selection_fires import TestFIRES
+from .test_visualization_feature_selection_bar import TestFeatureSelectionBar
 from .test_feature_selection_evaluator import TestFeatureSelectionEvaluator
-from .test_feature_selection_scatter import TestFeatureSelectionScatter
-from .test_fsds import TestFSDS
-from .test_holdout_pipeline import TestHoldoutPipeline
-from .test_ofs import TestOFS
-from .test_plot import TestPlot
+from .test_visualization_feature_selection_scatter import TestFeatureSelectionScatter
+from .test_feature_selection_fsds import TestFSDS
+from .test_pipeline_holdout import TestHoldoutPipeline
+from .test_feature_selection_ofs import TestOFS
+from .test_visualization_plot import TestPlot
 from .test_prediction_evaluator import TestPredictionEvaluator
-from .test_prequential_pipeline import TestPrequentialPipeline
-from .test_river_change_detector import TestRiverChangeDetector
-from .test_river_classifier import TestRiverClassifier
-from .test_scatter import TestScatter
-from .test_sklearn_scaler import TestSklearnScaler
-from .test_skmultiflow_classifier import TestSkmultiflowClassifier
-from .test_skmultiflow_change_detector import TestSkmultiflowChangeDetector
-from .test_spider_chart import TestSpiderChart
+from .test_pipeline_prequential import TestPrequentialPipeline
+from .test_change_detection_river import TestRiverChangeDetector
+from .test_prediction_river_classifier import TestRiverClassifier
+from .test_visualization_scatter import TestScatter
+from float.unit_tests.test_data_sklearn_scaler import TestSklearnScaler
+from .test_prediction_skmultiflow_classifier import TestSkmultiflowClassifier
+from .test_change_detection_skmultiflow import TestSkmultiflowChangeDetector
+from .test_visualization_spider_chart import TestSpiderChart
 
 __all__ = ['TestBar',  'TestCancelOutFeatureSelector',  'TestChangeDetectionEvaluator', 'TestConceptDriftDetectionScatter',
            'TestDataLoader', 'TestEFS', 'TestERICS', 'TestFIRES', 'TestFeatureSelectionBar', 'TestFeatureSelectionEvaluator',

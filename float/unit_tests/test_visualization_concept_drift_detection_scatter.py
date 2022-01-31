@@ -17,7 +17,11 @@ class TestConceptDriftDetectionScatter(unittest.TestCase):
                                                   batch_size=10,
                                                   n_pretrain=0)
         self.assertIsInstance(ax, plt.Axes, msg='concept_drift_detection_scatter() returns an object of type Axes')
-        self.assertEqual(len(ax.collections), 3, msg='concept_drift_detection_scatter() draws the correct amount of plots')
-        self.assertEqual(ax.get_xlabel(), 'Time Step $t$', msg='concept_drift_detection_scatter() sets the correct xlabel')
-        self.assertEqual([text.get_text() for text in ax.get_yticklabels()], [f'Model {i}' for i in range(3)], msg='concept_drift_detection_scatter() sets the correct yticklabels')
-        self.assertEqual([text.get_text() for text in ax.get_legend().texts], ['Known drifts', 'Detected drifts'], msg='concept_drift_detection_scatter() sets the right legend texts')
+        self.assertEqual(len(ax.collections), 3,
+                         msg='concept_drift_detection_scatter() draws the correct amount of plots')
+        self.assertEqual(ax.get_xlabel(), 'Time Step $t$',
+                         msg='concept_drift_detection_scatter() sets the correct xlabel')
+        self.assertEqual([text.get_text() for text in ax.get_yticklabels()], [f'Model {i}' for i in range(3)],
+                         msg='concept_drift_detection_scatter() sets the correct yticklabels')
+        self.assertEqual([text.get_text() for text in ax.get_legend().texts], ['Known drifts', 'Detected drifts'],
+                         msg='concept_drift_detection_scatter() sets the right legend texts')

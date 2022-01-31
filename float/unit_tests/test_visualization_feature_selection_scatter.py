@@ -14,4 +14,5 @@ class TestFeatureSelectionScatter(unittest.TestCase):
         self.assertIsInstance(ax, plt.Axes, msg='feature_selection_scatter() returns an object of type Axes')
         self.assertEqual(ax.get_xlabel(), 'Time Step $t$', msg='feature_selection_scatter() sets the correct xlabel')
         self.assertEqual(ax.get_ylabel(), 'Feature Index', msg='feature_selection_scatter() sets the correct ylabel')
-        self.assertEqual(ax.get_legend().texts[0].get_text(), 'Selected Feature Indicator', msg='feature_selection_scatter() sets the right legend text')
+        self.assertEqual(ax.get_legend().texts[0].get_text(), 'Selected Feature Indicator',
+                         msg='feature_selection_scatter() sets the right legend text')

@@ -44,7 +44,6 @@ class SkmultiflowClassifier(BasePredictor):
             classes: A list of all unique classes.
             reset_after_drift: A boolean indicating if the predictor will be reset after a drift was detected.
         """
-        # self.init_model = model.copy()
         self.model = model
         self.classes = classes
         super().__init__(reset_after_drift=reset_after_drift)

@@ -22,15 +22,17 @@ class TestFeatureSelectionEvaluator(unittest.TestCase):
         self.feature_selection_evaluator = FeatureSelectionEvaluator([nogueira_stability])
 
     def test_init(self):
-        self.assertTrue(nogueira_stability.__name__ in self.feature_selection_evaluator.result.keys())
-        self.assertTrue('measures' in self.feature_selection_evaluator.result[nogueira_stability.__name__].keys())
-        self.assertTrue(self.feature_selection_evaluator.result[nogueira_stability.__name__]['measures'] == [])
+        for measure_func in self.feature_selection_evaluator.measure_funcs:
+            self.assertTrue(measure_func.__name__ in self.feature_selection_evaluator.result.keys())
 
     def test_run(self):
         X, y = self.data_loader.get_data(10)
         self.fires.weight_features(X, y)
         _ = self.fires.select_features(X, self.rng)
         self.feature_selection_evaluator.run(self.fires.selected_features_history, self.fires.n_total_features)
-        self.assertTrue(len(self.feature_selection_evaluator.result[nogueira_stability.__name__]['measures']) > 0, msg='run() adds a value to the measure dict')
-        self.assertTrue(len(self.feature_selection_evaluator.result[nogueira_stability.__name__]['mean']) > 0, msg='run() adds a value to the mean dict')
-        self.assertTrue(len(self.feature_selection_evaluator.result[nogueira_stability.__name__]['var']) > 0, msg='run() adds a value to the var dict')
+        self.assertTrue(len(self.feature_selection_evaluator.result[nogueira_stability.__name__]['measures']) > 0,
+                        msg='run() adds a value to the measure dict')
+        self.assertTrue(len(self.feature_selection_evaluator.result[nogueira_stability.__name__]['mean']) > 0,
+                        msg='run() adds a value to the mean dict')
+        self.assertTrue(len(self.feature_selection_evaluator.result[nogueira_stability.__name__]['var']) > 0,
+                        msg='run() adds a value to the var dict')

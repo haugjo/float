@@ -18,7 +18,12 @@ class TestSpiderChart(unittest.TestCase):
         self.assertIsInstance(ax, plt.PolarAxes, msg='spider_chart() returns an object of type PolarAxes')
         self.assertEqual(len(ax.lines), 3, msg='spider_chart() draws the correct amount of plots')
         self.assertEqual(len(ax.patches), 3, msg='spider_chart() draws the correct amount of plots')
-        self.assertEqual([text.get_text() for text in ax.axes.texts], [f'metric_{i}' for i in range(4)], msg='spider_chart() sets the correct xticklabels (metric names)')
-        self.assertEqual([text.get_text() for text in ax.get_yticklabels()], ['', '0.2', '0.4', '0.6', '0.8', '1.0'], msg='spider_chart() sets the correct yticklabels)')
-        self.assertEqual([text.get_text() for text in ax.get_legend().texts], [f'Model {i}' for i in range(3)], msg='spider_chart() sets the right legend texts')
-        self.assertEqual([self.sample_measures[0][0], 1 - self.sample_measures[0][1], self.sample_measures[0][2] / 2, 1 - (self.sample_measures[0][3] / 2)], [x[1] for x in ax.patches[0].xy][:-1], msg='spider_chart() takes ranges and invert correctly into account')
+        self.assertEqual([text.get_text() for text in ax.axes.texts], [f'metric_{i}' for i in range(4)],
+                         msg='spider_chart() sets the correct xticklabels (metric names)')
+        self.assertEqual([text.get_text() for text in ax.get_yticklabels()], ['', '0.2', '0.4', '0.6', '0.8', '1.0'],
+                         msg='spider_chart() sets the correct yticklabels)')
+        self.assertEqual([text.get_text() for text in ax.get_legend().texts], [f'Model {i}' for i in range(3)],
+                         msg='spider_chart() sets the right legend texts')
+        self.assertEqual([self.sample_measures[0][0], 1 - self.sample_measures[0][1],
+                          self.sample_measures[0][2] / 2, 1 - (self.sample_measures[0][3] / 2)], [x[1] for x in ax.patches[0].xy][:-1],
+                         msg='spider_chart() takes ranges and invert correctly into account')

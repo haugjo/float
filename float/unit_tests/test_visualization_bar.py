@@ -15,4 +15,5 @@ class TestBar(unittest.TestCase):
         self.assertEqual(len(ax.lines), len(self.sample_measures), msg='bar() draws the correct amount of plots')
         self.assertEqual(ax.get_xlabel(), 'Time Step $t$', msg='bar() sets the correct xlabel')
         self.assertEqual(ax.get_ylabel(), 'Measure', msg='bar() sets the correct ylabel')
-        self.assertEqual([text.get_text() for text in ax.get_legend().texts], [f'Model {i}' for i in range(3)], msg='bar() sets the right legend texts')
+        self.assertEqual([text.get_text() for text in ax.get_legend().texts], [f'Model {i}' for i in range(3)],
+                         msg='bar() sets the right legend texts')

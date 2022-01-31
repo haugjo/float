@@ -51,9 +51,8 @@ class HoldoutPipeline(BasePipeline):
                 be chosen too small. If argument is None, we use the complete batch at testing time in the evluation.
     """
     def __init__(self, data_loader: DataLoader,
-                 test_set: Optional[Tuple[ArrayLike, ArrayLike]] = None,
-                 predictor: Optional[Union[BasePredictor, List[BasePredictor]]] = None,
-                 prediction_evaluator: Optional[PredictionEvaluator] = None,
+                 predictor: Union[BasePredictor, List[BasePredictor]],
+                 prediction_evaluator: PredictionEvaluator,
                  change_detector: Optional[BaseChangeDetector] = None,
                  change_detection_evaluator: Optional[ChangeDetectionEvaluator] = None,
                  feature_selector: Optional[BaseFeatureSelector] = None,
@@ -63,13 +62,13 @@ class HoldoutPipeline(BasePipeline):
                  label_delay_range: Optional[tuple] = None,
                  known_drifts: Optional[Union[List[int], List[tuple]]] = None,
                  estimate_memory_alloc: bool = False,
+                 test_set: Optional[Tuple[ArrayLike, ArrayLike]] = None,
                  test_interval: int = 10,
                  test_replace_interval: Optional[int] = None,
                  random_state: int = 0):
         """Initializes the pipeline.
         Args:
             data_loader: Data loader object.
-            test_set: A tuple containing the initial test observations and labels used for the holdout evaluation.
             predictor: Predictive model(s).
             prediction_evaluator: Evaluator for predictive model.
             change_detector: Concept drift detection model.
@@ -87,6 +86,7 @@ class HoldoutPipeline(BasePipeline):
                 Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
                 Note that this delivers only an indication of the approximate memory consumption and can significantly
                 increase the total run time of the pipeline.
+            test_set: A tuple containing the initial test observations and labels used for the holdout evaluation.
             test_interval: The interval/frequency at which the online learning models are evaluated.
             test_replace_interval:
                 This integer specifies in which interval we replace the oldest test observation. For example, if

@@ -113,10 +113,6 @@ def validate_pipeline_attrs(pipeline: 'BasePipeline'):
                     'required but has not been provided.')
 
         if pipeline.change_detector.error_based:
-            if pipeline.predictors is None:
-                raise AttributeError('An error-based ChangeDetector cannot be used without a valid Predictor '
-                                     'object.')
-
             if isinstance(pipeline, float.pipeline.DistributedFoldPipeline):
                 warnings.warn('An error-based ChangeDetector is being used in a DistributedFoldPipeline. Float '
                               'will use the prediction of the first predictor instance for the change detection.')

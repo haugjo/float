@@ -69,8 +69,8 @@ class DistributedFoldPipeline(BasePipeline):
         n_unique_predictors (int): The number of predictor objects originally specified.
     """
     def __init__(self, data_loader: DataLoader,
-                 predictor: Optional[Union[BasePredictor, List[BasePredictor]]] = None,
-                 prediction_evaluator: Optional[PredictionEvaluator] = None,
+                 predictor: Union[BasePredictor, List[BasePredictor]],
+                 prediction_evaluator: PredictionEvaluator,
                  change_detector: Optional[BaseChangeDetector] = None,
                  change_detection_evaluator: Optional[ChangeDetectionEvaluator] = None,
                  feature_selector: Optional[BaseFeatureSelector] = None,
