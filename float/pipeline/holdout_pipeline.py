@@ -58,13 +58,13 @@ class HoldoutPipeline(BasePipeline):
                  feature_selector: Optional[BaseFeatureSelector] = None,
                  feature_selection_evaluator: Optional[FeatureSelectionEvaluator] = None,
                  batch_size: int = 1,
-                 n_pretrain: int = 100, n_max: int = np.inf,
+                 n_pretrain: int = 100,
+                 n_max: int = np.inf,
                  label_delay_range: Optional[tuple] = None,
-                 known_drifts: Optional[Union[List[int], List[tuple]]] = None,
-                 estimate_memory_alloc: bool = False,
                  test_set: Optional[Tuple[ArrayLike, ArrayLike]] = None,
                  test_interval: int = 10,
                  test_replace_interval: Optional[int] = None,
+                 estimate_memory_alloc: bool = False,
                  random_state: int = 0):
         """Initializes the pipeline.
         Args:
@@ -81,18 +81,17 @@ class HoldoutPipeline(BasePipeline):
             label_delay_range:
                 The min and max delay in the availability of labels in time steps. The delay is sampled uniformly from
                 this range.
-            known_drifts: The positions in the dataset (indices) corresponding to known concept drifts.
-            estimate_memory_alloc:
-                Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
-                Note that this delivers only an indication of the approximate memory consumption and can significantly
-                increase the total run time of the pipeline.
             test_set: A tuple containing the initial test observations and labels used for the holdout evaluation.
             test_interval: The interval/frequency at which the online learning models are evaluated.
             test_replace_interval:
                 This integer specifies in which interval we replace the oldest test observation. For example, if
                 test_replace_interval=10 then we will use every 10th observation to replace the currently oldest test
                 observation. Note that test observations will not be used for training, hence this interval should not
-                be chosen too small. If argument is None, we use the complete batch at testing time in the evluation.
+                be chosen too small. If argument is None, we use the complete batch at testing time in the evaluation.
+            estimate_memory_alloc:
+                Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
+                Note that this delivers only an indication of the approximate memory consumption and can significantly
+                increase the total run time of the pipeline.
             random_state: A random integer seed used to specify a random number generator.
         """
         super().__init__(data_loader=data_loader,
@@ -106,9 +105,8 @@ class HoldoutPipeline(BasePipeline):
                          n_pretrain=n_pretrain,
                          n_max=n_max,
                          label_delay_range=label_delay_range,
-                         known_drifts=known_drifts,
-                         estimate_memory_alloc=estimate_memory_alloc,
                          test_interval=test_interval,
+                         estimate_memory_alloc=estimate_memory_alloc,
                          random_state=random_state)
 
         self.test_set = test_set

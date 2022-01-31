@@ -50,7 +50,6 @@ class PrequentialPipeline(BasePipeline):
                  n_pretrain: int = 100,
                  n_max: int = np.inf,
                  label_delay_range: Optional[tuple] = None,
-                 known_drifts: Optional[Union[List[int], List[tuple]]] = None,
                  estimate_memory_alloc: bool = False,
                  random_state: int = 0):
         """Initializes the pipeline.
@@ -69,7 +68,6 @@ class PrequentialPipeline(BasePipeline):
             label_delay_range:
                 The min and max delay in the availability of labels in time steps. The delay is sampled uniformly from
                 this range.
-            known_drifts: The positions in the dataset (indices) corresponding to known concept drifts.
             estimate_memory_alloc:
                 Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
                 Note that this delivers only an indication of the approximate memory consumption and can significantly
@@ -87,9 +85,8 @@ class PrequentialPipeline(BasePipeline):
                          n_pretrain=n_pretrain,
                          n_max=n_max,
                          label_delay_range=label_delay_range,
-                         known_drifts=known_drifts,
-                         estimate_memory_alloc=estimate_memory_alloc,
                          test_interval=1,  # Defaults to one for a prequential evaluation.
+                         estimate_memory_alloc=estimate_memory_alloc,
                          random_state=random_state)
 
     def run(self):

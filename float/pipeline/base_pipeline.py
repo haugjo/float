@@ -24,7 +24,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 import copy
 import numpy as np
 from numpy.typing import ArrayLike
@@ -40,7 +40,7 @@ from float.feature_selection import BaseFeatureSelector
 from float.feature_selection.evaluation import FeatureSelectionEvaluator
 from float.change_detection import BaseChangeDetector
 from float.change_detection.evaluation import ChangeDetectionEvaluator
-from float.pipeline.utils import validate_pipeline_attrs, update_progress_bar, print_evaluation_summary
+from float.pipeline.utils_pipeline import validate_pipeline_attrs, update_progress_bar, print_evaluation_summary
 from float.prediction import BasePredictor
 from float.prediction.evaluation import PredictionEvaluator
 from float.prediction.river import RiverClassifier
@@ -64,8 +64,6 @@ class BasePipeline(metaclass=ABCMeta):
         label_delay_range:
             The min and max delay in the availability of labels in time steps. The delay is sampled uniformly from
             this range.
-        known_drifts (List[int] | List[tuple] | None):
-            The positions in the dataset (indices) corresponding to known concept drifts.
         estimate_memory_alloc (bool):
             Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
             Note that this delivers only an indication of the approximate memory consumption and can significantly
@@ -91,9 +89,8 @@ class BasePipeline(metaclass=ABCMeta):
                  n_pretrain: int,
                  n_max: int,
                  label_delay_range: Optional[tuple],
-                 known_drifts: Optional[Union[List[int], List[tuple]]],
-                 estimate_memory_alloc: bool,
                  test_interval: int,
+                 estimate_memory_alloc: bool,
                  random_state: int):
         """Initializes the pipeline.
 
@@ -108,14 +105,13 @@ class BasePipeline(metaclass=ABCMeta):
             batch_size: Batch size, i.e. no. of observations drawn from the data loader at one time step.
             n_pretrain: Number of observations used for the initial training of the predictive model.
             n_max: Maximum number of observations used in the evaluation.
-            known_drifts: The positions in the dataset (indices) corresponding to known concept drifts.
+            test_interval:
+                The interval/frequency at which the online learning models are evaluated. This parameter is always 1 for
+                a prequential evaluation.
             estimate_memory_alloc:
                 Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
                 Note that this delivers only an indication of the approximate memory consumption and can significantly
                 increase the total run time of the pipeline.
-            test_interval:
-                The interval/frequency at which the online learning models are evaluated. This parameter is always 1 for
-                a prequential evaluation.
             random_state: A random integer seed used to specify a random number generator.
 
         Raises:
@@ -140,9 +136,8 @@ class BasePipeline(metaclass=ABCMeta):
         self.n_pretrain = n_pretrain
         self.n_max = n_max
         self.label_delay_range = label_delay_range
-        self.known_drifts = known_drifts
-        self.estimate_memory_alloc = estimate_memory_alloc
         self.test_interval = test_interval
+        self.estimate_memory_alloc = estimate_memory_alloc
         self.rng = np.random.default_rng(seed=random_state)
 
         if self.label_delay_range:
@@ -319,8 +314,8 @@ class BasePipeline(metaclass=ABCMeta):
                         start_snapshot = tracemalloc.take_snapshot()
 
                     start_time = time.time()
-                    X_train_weighted = X_train.copy()
-                    y_train_weighted = y_train.copy()
+                    X_train_weighted = copy.copy(X_train)
+                    y_train_weighted = copy.copy(y_train)
                     if predictors_training_weights is not None:
                         # Repeat/Weight training observations acc. to the specified weight.
                         X_train_weighted = np.repeat(X_train, predictors_training_weights[pred_idx], axis=0)

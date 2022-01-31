@@ -47,6 +47,7 @@ import copy
 import numpy as np
 import traceback
 from typing import Optional, Union, List
+import warnings
 
 from float.pipeline.base_pipeline import BasePipeline
 from float.data.data_loader import DataLoader
@@ -79,10 +80,9 @@ class DistributedFoldPipeline(BasePipeline):
                  n_pretrain: int = 100,
                  n_max: int = np.inf,
                  label_delay_range: Optional[tuple] = None,
-                 known_drifts: Optional[Union[List[int], List[tuple]]] = None,
-                 estimate_memory_alloc: bool = False,
-                 n_parallel_instances: int = 2,
                  validation_mode: str = 'cross',
+                 n_parallel_instances: int = 2,
+                 estimate_memory_alloc: bool = False,
                  random_state: int = 0):
         """Initializes the pipeline.
 
@@ -100,20 +100,21 @@ class DistributedFoldPipeline(BasePipeline):
             label_delay_range:
                 The min and max delay in the availability of labels in time steps. The delay is sampled uniformly from
                 this range.
-            known_drifts: The positions in the dataset (indices) corresponding to known concept drifts.
-            estimate_memory_alloc:
-                Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
-                Note that this delivers only an indication of the approximate memory consumption and can significantly
-                increase the total run time of the pipeline.
             validation_mode:
                 A string indicating the k-fold distributed validation mode to use. One of 'cross', 'batch' and
                 'bootstrap'.
             n_parallel_instances:
                 The number of instances of the specified predictor that will be trained in parallel.
+            estimate_memory_alloc:
+                Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.
+                Note that this delivers only an indication of the approximate memory consumption and can significantly
+                increase the total run time of the pipeline.
             random_state: A random integer seed used to specify a random number generator.
         """
         self.validation_mode = validation_mode
         self.n_parallel_instances = n_parallel_instances
+        self._validate()
+
         super().__init__(data_loader=data_loader,
                          predictor=predictor,
                          prediction_evaluator=prediction_evaluator,
@@ -125,9 +126,8 @@ class DistributedFoldPipeline(BasePipeline):
                          n_pretrain=n_pretrain,
                          n_max=n_max,
                          label_delay_range=label_delay_range,
-                         known_drifts=known_drifts,
-                         estimate_memory_alloc=estimate_memory_alloc,
                          test_interval=1,  # Defaults to one for a distributed fold evaluation.
+                         estimate_memory_alloc=estimate_memory_alloc,
                          random_state=random_state)
 
         # Create multiple instances of the predictor(s) and evaluator(s)
@@ -222,3 +222,19 @@ class DistributedFoldPipeline(BasePipeline):
         self.prediction_evaluators = final_prediction_evaluators
 
         super()._finish_evaluation()
+
+    def _validate(self):
+        """Validates the additional attributes of the pipeline.
+
+        Raises:
+            AttributeError: If the specified validation_mode is not implemented.
+        """
+        if self.validation_mode not in ['cross', 'split', 'bootstrap']:
+            raise AttributeError(
+                'Please choose one of the validation modes "cross", "split", or "bootstrap" that are '
+                'provided by the DistributedFoldPipeline.')
+
+        if self.n_parallel_instances < 2:
+            warnings.warn('The DistributedFoldPipeline should use at least two instances of each provided '
+                          'predictor for valid results. If you want to run a single instance, consider using the '
+                          'PrequentialPipeline instead.')

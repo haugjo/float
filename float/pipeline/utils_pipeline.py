@@ -23,8 +23,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-
-import copy
 import math
 import numpy as np
 import sys
@@ -60,17 +58,6 @@ def validate_pipeline_attrs(pipeline: 'BasePipeline'):
     Raises:
         AttributeError: If a crucial parameter to run the pipeline is missing or is invalid.
     """
-    # Pipeline Validity Checks.
-    if isinstance(pipeline, float.pipeline.DistributedFoldPipeline):
-        if pipeline.validation_mode not in ['cross', 'split', 'bootstrap']:
-            raise AttributeError('Please choose one of the validation modes "cross", "split", or "bootstrap" that are '
-                                 'provided by the DistributedFoldPipeline.')
-
-        if pipeline.n_parallel_instances < 2:
-            warnings.warn('The DistributedFoldPipeline should use at least two instances of each provided '
-                          'predictor for valid results. If you want to run a single instance, consider using the '
-                          'PrequentialPipeline instead.')
-
     # Data Loader Validity Checks.
     if not isinstance(pipeline.data_loader, DataLoader):
         raise AttributeError('No valid DataLoader object was provided.')
@@ -120,9 +107,8 @@ def validate_pipeline_attrs(pipeline: 'BasePipeline'):
         if pipeline.n_pretrain is not None and pipeline.n_pretrain > 0:
             pipeline.change_detection_evaluator.n_pretrain = pipeline.n_pretrain
             pipeline.change_detection_evaluator.correct_known_drifts()
-            pipeline.known_drifts = copy.copy(pipeline.change_detection_evaluator.known_drifts)
             warnings.warn('Known drift positions have been automatically corrected for the number of '
-                          'observations used in pre-training, i.e. known_drift_position - n_pretrain')
+                          'observations used in pre-training, i.e. known_drift_position -= n_pretrain')
 
     # Feature Selector Validity Checks.
     if pipeline.feature_selector is not None:

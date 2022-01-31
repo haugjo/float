@@ -24,6 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from abc import ABCMeta, abstractmethod
+import copy
 import numpy as np
 from numpy.typing import ArrayLike
 from numpy.random import Generator
@@ -132,7 +133,7 @@ class BaseFeatureSelector(metaclass=ABCMeta):
         self.weights_history.append(abs_weights.tolist())
         self.selected_features_history.append(self.selected_features.tolist())
 
-        X_new = self._get_baseline(X=X, rng=rng)
+        X_new = self._get_baseline(X=copy.copy(X), rng=rng)
         X_new[:, self.selected_features] = X[:, self.selected_features]
 
         return X_new
