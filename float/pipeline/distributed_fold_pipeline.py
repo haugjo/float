@@ -101,7 +101,7 @@ class DistributedFoldPipeline(BasePipeline):
                 The min and max delay in the availability of labels in time steps. The delay is sampled uniformly from
                 this range.
             validation_mode:
-                A string indicating the k-fold distributed validation mode to use. One of 'cross', 'batch' and
+                A string indicating the k-fold distributed validation mode to use. One of 'cross', 'split' and
                 'bootstrap'.
             n_parallel_instances:
                 The number of instances of the specified predictor that will be trained in parallel.
@@ -135,8 +135,8 @@ class DistributedFoldPipeline(BasePipeline):
         dist_val_predictors = []
         dist_val_evaluators = []
         for predictor, prediction_evaluator in zip(self.predictors, self.prediction_evaluators):
-            dist_val_predictors.extend([copy.deepcopy(predictor) for _ in range(n_parallel_instances)])
-            dist_val_evaluators.extend([copy.deepcopy(prediction_evaluator) for _ in range(n_parallel_instances)])
+            dist_val_predictors.extend([copy.deepcopy(predictor) for _ in range(self.n_parallel_instances)])
+            dist_val_evaluators.extend([copy.deepcopy(prediction_evaluator) for _ in range(self.n_parallel_instances)])
         self.predictors = dist_val_predictors
         self.prediction_evaluators = dist_val_evaluators
 
@@ -214,9 +214,9 @@ class DistributedFoldPipeline(BasePipeline):
         final_prediction_evaluators = []
         for p_idx in range(self.n_unique_predictors):
             final_predictors.append(self.predictors[p_idx * self.n_parallel_instances:
-                                                    p_idx + 1 * self.n_parallel_instances])
+                                                    (p_idx + 1) * self.n_parallel_instances])
             final_prediction_evaluators.append(self.prediction_evaluators[p_idx * self.n_parallel_instances:
-                                                                          p_idx + 1 * self.n_parallel_instances])
+                                                                          (p_idx + 1) * self.n_parallel_instances])
 
         self.predictors = final_predictors
         self.prediction_evaluators = final_prediction_evaluators

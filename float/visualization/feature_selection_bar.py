@@ -2,6 +2,7 @@ from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
 from typing import List, Optional
+import warnings
 
 # Global color palette
 # dark blue, teal, light blue, dark green, olive, yellow green, red, magenta, grey, black
@@ -49,7 +50,18 @@ def feature_selection_bar(selected_features: List[list],
             if order is None:  # We order the features according to the first provided model.
                 order = np.argsort(counts)[::-1][:top_n_features]
                 name_idx = uniques[order]
-            y = counts[order]
+            y = []
+            for ni in name_idx:  # Select correct counts
+                count_i = np.argwhere(uniques == ni)
+                if len(count_i) == 0:
+                    y.append(0)
+                else:
+                    y.extend(counts[count_i[0]])
+
+            if len(y) < top_n_features:
+                n_features = len(y)
+                warnings.warn('The reference model has only selected {} unique features. The number of displayed '
+                              'features is automatically reset'.format(len(y)))
         else:
             y = np.zeros(n_features)
             y[uniques] = counts

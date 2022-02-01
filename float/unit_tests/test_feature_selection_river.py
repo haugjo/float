@@ -83,8 +83,6 @@ class TestRiverFeatureSelector(unittest.TestCase):
 
             if len(self.river_feature_selectors[i].selected_features) \
                     < len(self.river_feature_selectors[i].feature_names):
-                self.assertTrue((X_new[:, ~self.river_feature_selectors[i].selected_features] == 0).all(),
-                                msg=f'select_features() sets the non-selected features correctly to 0 ({k})')
                 self.assertEqual(X.shape, X_new.shape,
                                  msg=f'select_features() preserves the shape of the input array ({k})')
                 self.assertFalse((X == X_new).all(),

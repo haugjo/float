@@ -280,7 +280,7 @@ class BasePipeline(metaclass=ABCMeta):
 
                 X_train = self.feature_selector.select_features(X=copy.copy(X_train), rng=self.rng)
 
-                if self.time_step % self.test_interval == 0:
+                if self.time_step % self.test_interval == 0 or last_iteration:
                     self.feature_selection_evaluator.run(self.feature_selector.selected_features_history,
                                                          self.feature_selector.n_total_features)
                 else:
@@ -295,7 +295,7 @@ class BasePipeline(metaclass=ABCMeta):
             for pred_idx, (predictor, prediction_evaluator) in enumerate(zip(self.predictors, self.prediction_evaluators)):
                 # Test in the specified frequency (the interval is 1 for all but the HoldoutPipeline)
                 if pred_idx in predictors_for_testing \
-                        and self.time_step % self.test_interval == 0 \
+                        and (self.time_step % self.test_interval == 0 or last_iteration) \
                         and predictor.has_been_trained:
                     start_time = time.time()
                     y_pred = predictor.predict(X_test)

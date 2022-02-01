@@ -183,10 +183,16 @@ def print_evaluation_summary(pipeline: 'BasePipeline'):
                 measures = dict()
                 for evaluator in prediction_evaluator:
                     for meas in evaluator.result:
+                        last_mean = np.nan
+                        i = 1
+                        while np.isnan(last_mean):  # Search for the last mean measure that is not nan.
+                            last_mean = evaluator.result[meas]['mean'][-i]
+                            i += 1
+
                         if meas in measures:
-                            measures[meas].append(evaluator.result[meas]['mean'][-1])
+                            measures[meas].append(last_mean)
                         else:
-                            measures[meas] = [evaluator.result[meas]['mean'][-1]]
+                            measures[meas] = [last_mean]
 
                 tab_data.extend([['Avg. {}'.format(key), np.nanmean(value)] for key, value in measures.items()])
             else:

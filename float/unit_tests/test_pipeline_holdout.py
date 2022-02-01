@@ -170,16 +170,20 @@ class TestHoldoutPipeline(unittest.TestCase):
                                   msg='run() sets the classifier\'s weights')
             self.assertEqual(len(pipeline.prediction_evaluators[0].training_comp_times), pipeline.time_step,
                              msg='run() adds a prediction training computation time for each time step')
-            self.assertEqual((~np.isnan(pipeline.prediction_evaluators[0].result['zero_one_loss']['measures'])).sum(),
-                             int(np.ceil(pipeline.time_step / pipeline.test_interval)),
-                             msg='run() adds a prediction evaluation measure for each time step')
+            self.assertTrue(int(np.ceil(pipeline.time_step / pipeline.test_interval)) + 1 <=
+                            (~np.isnan(pipeline.prediction_evaluators[0].result['zero_one_loss']['measures'])).sum() <=
+                            int(np.ceil(pipeline.time_step / pipeline.test_interval)) + 1,
+                            msg='run() adds a prediction evaluation measure for each holdout evaluation iteration '
+                                '(plus one for the last iteration)')
             self.assertEqual(len(pipeline.feature_selector.selected_features_history), pipeline.time_step,
                              msg='run() adds a list of selected features for every time step')
             self.assertEqual(len(pipeline.feature_selection_evaluator.comp_times), pipeline.time_step,
                              msg='run() adds a feature selection computation time for each time step')
-            self.assertEqual((~np.isnan(pipeline.feature_selection_evaluator.result['nogueira_stability']['measures'])).sum(),
-                             int(np.ceil(pipeline.time_step / pipeline.test_interval)),
-                             msg='run() adds a feature selection evaluation measure for each time step')
+            self.assertTrue(int(np.ceil(pipeline.time_step / pipeline.test_interval)) <=
+                            (~np.isnan(pipeline.feature_selection_evaluator.result['nogueira_stability']['measures'])).sum() <=
+                            int(np.ceil(pipeline.time_step / pipeline.test_interval)) + 1,
+                            msg='run() adds a feature selection evaluation measure for each holdout evaluation '
+                                'iteration (plus one for the last iteration)')
             self.assertEqual(len(pipeline.change_detection_evaluator.comp_times), pipeline.time_step,
                              msg='run() adds a change detection computation time for each time step')
             self.assertEqual(len(pipeline.change_detection_evaluator.result['detection_delay']['measures']), len(self.change_detection_evaluator.n_delay),
