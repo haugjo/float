@@ -11,7 +11,7 @@
 </p>
 
 >**Release Notes:**<br>
->*1st Feb. 2022* - Initial release on Github.
+>*02/02/22* - Initial release on Github.
 
 ## Installation
 <!--
@@ -41,8 +41,15 @@ Float is supported by python versions >=3.8.x and has the following package requ
 *[!] Older versions have not been tested, but might also be compatible.*
 
 ## Quickstart
-Below, we show how to run a basic prequential evaluation in float. More extensive examples, 
-including a use of the visualizer module, can be found in the ```./experiments``` folder.
+The easiest way to become familiar with float and its functionality is to look at the experiment notebooks in the ```./experiments``` 
+folder. We provide experiments that showcase each of the three evaluation pipelines *prequential*, *holdout* and 
+*distributed fold*. We also demonstrate the use of the *change detection*, *online feature selection* and 
+*visualization* modules. 
+
+*[!]Note that each module and file of float is fully documented via docstring. A dedicated documentation page is soon 
+to follow. More information about the general package structure is provided in the section below.*
+
+As a quickstart, you can run the following basic experiment:
 ```python
 from skmultiflow.trees import HoeffdingTreeClassifier
 from sklearn.metrics import zero_one_loss
@@ -53,15 +60,16 @@ from float.prediction.evaluation.measures import noise_variability
 from float.pipeline import PrequentialPipeline
 from float.prediction.skmultiflow import SkmultiflowClassifier
 
-# Load a data set from main memory with the DataLoader module.
+# Load a data set from main memory with the DataLoader module. 
+# Alternatively, we can provide a sciki-multiflow FileStream object via the 'stream' attribute.
 data_loader = DataLoader(path='./float/data/datasets/spambase.csv', target_col=-1)
 
-# Set up an online classifier. Note, we need a wrapper to use scikit-multiflow functionality.
+# Set up an online classifier. Note that we need a wrapper to use scikit-multiflow functionality.
 classifier = SkmultiflowClassifier(model=HoeffdingTreeClassifier(),
                                    classes=data_loader.stream.target_values)
 
-# Set up an evaluation object for the classifier:
-# Here, we want to measure the zero_one_loss and the noise_variability as an indication of robustness.
+# Set up an evaluator object for the classifier:
+# Specifically, we want to measure the zero_one_loss and the noise_variability as an indication of robustness.
 # The arguments of the measure functions can be directly added to the Evaluator object constructor,
 # e.g. we may specify the number of samples (n_samples) and the reference_measure used to compute the noise_variability.
 evaluator = PredictionEvaluator(measure_funcs=[zero_one_loss, noise_variability],
@@ -96,9 +104,27 @@ Model: SkmultiflowClassifier.HoeffdingTreeClassifier
 | Avg. noise_variability | 0.241901  |
 #############################################################################
 ```
+## Package Structure
+Float is fully modular. The package has dedicated modules for the data preparation, online prediction, online 
+feature selection, concept drift detection and their evaluation (corresponding to the directories in ```./float```). 
+
+The pipeline module is at the heart of every experiment in float. The pipeline can be run with arbitrary combinations of 
+predictors, online feature selectors and concept drift detectors. 
+
+The results of every experiment are stored in dedicated evaluator objects. Via these evaluators, the user is 
+able to specify the performance measures that will be computed during the evaluation. After running the pipeline, the 
+evaluators can be used to create custom tables and plots or to obtain standardized visualizations with the float visualization module. 
+
+Each of the above-mentioned modules contains an abstract base class that simplifies the integration of custom 
+functionality in the experiment. 
+
+Float also provides wrappers for [scikit-mukltiflow](https://scikit-multiflow.readthedocs.io/en/stable/index.html) 
+and [river](https://riverml.xyz/latest/) functionality wherever available. Besides float integrates the change detectors
+implemented by the [Tornado](https://github.com/alipsgh/tornado) package.
+
 ## Datasets
-float is accompanied by a small set of popular streaming data sets that are required to run the 
-experiment notebooks and unit tests. The fully cleansed and normalized data sets can be found in ```./data/datasets```.
+Float is accompanied by a small set of popular streaming data sets that are required to run the 
+experiment notebooks and unit tests. These fully cleansed and normalized data sets can be found in ```./data/datasets```.
 
 *[!] We will soon introduce an extensive set of benchmark data sets that can be directly accessed 
 from a remote source using the float.DataLoader module.*

@@ -402,9 +402,9 @@ class BasePipeline(metaclass=ABCMeta):
 
         if self.label_delay_range:
             # Save observations to buffer.
-            self.sample_buffer.extend(list(zip(X, y, self.time_step + np.random.randint(self.label_delay_range[0],
-                                                                                        self.label_delay_range[1],
-                                                                                        X.shape[0]))))
+            self.sample_buffer.extend(list(zip(X, y, self.time_step + self.rng.randint(self.label_delay_range[0],
+                                                                                       self.label_delay_range[1],
+                                                                                       X.shape[0]))))
 
             # Draw all available observations at current time step from buffer.
             train_set = (np.array([X for (X, _, time_step) in self.sample_buffer if time_step <= self.time_step]),

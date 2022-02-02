@@ -162,7 +162,7 @@ class DistributedFoldPipeline(BasePipeline):
                 # "Each example is used for testing in one classifier selected randomly, and used for training by all
                 # the others." (Bifet et al. 2015)
                 for p_idx in range(self.n_unique_predictors):
-                    p_test_idx = np.asarray([np.random.randint(self.n_parallel_instances)])
+                    p_test_idx = np.asarray([self.rng.randint(self.n_parallel_instances)])
                     p_train_idx = np.setdiff1d(np.arange(self.n_parallel_instances), p_test_idx)
                     predictors_for_testing.extend(p_test_idx + p_idx * self.n_parallel_instances)
                     predictors_for_training.extend(p_train_idx + p_idx * self.n_parallel_instances)
@@ -170,7 +170,7 @@ class DistributedFoldPipeline(BasePipeline):
                 # "Each example is used for training in one classifier selected randomly, and for testing in the
                 # other classifiers." (Bifet et al. 2015)
                 for p_idx in range(self.n_unique_predictors):
-                    p_train_idx = np.asarray([np.random.randint(self.n_parallel_instances)])
+                    p_train_idx = np.asarray([self.rng.randint(self.n_parallel_instances)])
                     p_test_idx = np.setdiff1d(np.arange(self.n_parallel_instances), p_train_idx)
                     predictors_for_testing.extend(p_test_idx + p_idx * self.n_parallel_instances)
                     predictors_for_training.extend(p_train_idx + p_idx * self.n_parallel_instances)
@@ -181,7 +181,7 @@ class DistributedFoldPipeline(BasePipeline):
                 # (Bifet et al. 2015)
                 predictors_training_weights = []
                 for p_idx in range(self.n_unique_predictors):
-                    weights = np.random.poisson(1, self.n_parallel_instances)
+                    weights = self.rng.poisson(1, self.n_parallel_instances)
                     predictors_for_testing.extend(np.argwhere(weights == 0).flatten()
                                                   + p_idx * self.n_parallel_instances)
                     predictors_for_training.extend(np.argwhere(weights != 0).flatten()
