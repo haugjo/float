@@ -10,7 +10,7 @@ Paper: Pesaranghader, Ali, and Herna L. Viktor. "Fast hoeffding drift detection 
 Published in: Joint European Conference on Machine Learning and Knowledge Discovery in Databases. Springer International Publishing, 2016.
 URL: https://link.springer.com/chapter/10.1007/978-3-319-46227-1_7
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

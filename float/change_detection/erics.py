@@ -12,7 +12,7 @@ The update rules for the Probit model are adopted from:
     In: Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2020.
     S. 1478-1502.
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

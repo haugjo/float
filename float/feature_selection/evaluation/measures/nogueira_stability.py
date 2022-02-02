@@ -4,7 +4,7 @@ This function returns the feature set stability measure introduced by:
 NOGUEIRA, Sarah; SECHIDIS, Konstantinos; BROWN, Gavin. On the stability of feature selection algorithms.
 J. Mach. Learn. Res., 2017, 18. Jg., Nr. 1, S. 6345-6398.
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

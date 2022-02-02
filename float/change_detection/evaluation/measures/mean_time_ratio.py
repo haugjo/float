@@ -4,7 +4,7 @@ This function returns the mean time ration measure as introduced in:
 Bifet, Albert, et al. "CD-MOA: Change detection framework for massive online analysis."
 International Symposium on Intelligent Data Analysis. Springer, Berlin, Heidelberg, 2013.
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

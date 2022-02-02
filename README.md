@@ -126,6 +126,12 @@ implemented by the [Tornado](https://github.com/alipsgh/tornado) package.
 Float is accompanied by a small set of popular streaming data sets that are required to run the 
 experiment notebooks and unit tests. These fully cleansed and normalized data sets can be found in ```./data/datasets```.
 
+There is a general shortage of publicly available streaming data sets. Still, there are useful resources, including the following:
+- https://www.openml.org/search?type=data (search for "data stream" or "concept drift")
+- https://sites.google.com/view/uspdsrepository
+- https://github.com/ogozuacik/concept-drift-datasets-scikit-multiflow
+- https://github.com/vlosing/driftDatasets
+
 *[!] We will soon introduce an extensive set of benchmark data sets that can be directly accessed 
 from a remote source using the float.DataLoader module.*
 

@@ -10,7 +10,7 @@ Paper: Pesaranghader, Ali, et al. "McDiarmid Drift Detection Method for Evolving
 Published in: International Joint Conference on Neural Network (IJCNN 2018)
 URL: https://arxiv.org/abs/1710.02030
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

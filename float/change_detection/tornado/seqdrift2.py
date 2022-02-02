@@ -10,7 +10,7 @@ Paper: Pears, Russel, Sripirakas Sakthithasan, and Yun Sing Koh. "Detecting conc
 Published in: Machine Learning 97.3 (2014): 259-293.
 URL: https://link.springer.com/article/10.1007/s10994-013-5433-9
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

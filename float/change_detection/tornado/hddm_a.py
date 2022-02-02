@@ -10,7 +10,7 @@ Paper: Frías-Blanco, Isvani, et al. "Online and non-parametric drift detection 
 Published in: IEEE Transactions on Knowledge and Data Engineering 27.3 (2015): 810-823.
 URL: http://ieeexplore.ieee.org/abstract/document/6871418/
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

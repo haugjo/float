@@ -4,7 +4,7 @@ This module contains functionality to construct a pipeline and run experiments i
 In general, we recommend building custom experiments around a pipeline object. This abstract BasePipeline class should
 be used as a super class for all specific evaluation pipelines.
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -402,9 +402,9 @@ class BasePipeline(metaclass=ABCMeta):
 
         if self.label_delay_range:
             # Save observations to buffer.
-            self.sample_buffer.extend(list(zip(X, y, self.time_step + self.rng.randint(self.label_delay_range[0],
-                                                                                       self.label_delay_range[1],
-                                                                                       X.shape[0]))))
+            self.sample_buffer.extend(list(zip(X, y, self.time_step + self.rng.integers(self.label_delay_range[0],
+                                                                                        self.label_delay_range[1],
+                                                                                        X.shape[0]))))
 
             # Draw all available observations at current time step from buffer.
             train_set = (np.array([X for (X, _, time_step) in self.sample_buffer if time_step <= self.time_step]),

@@ -4,7 +4,7 @@ This function returns the mean drift restoration time, i.e. the average number o
 known concept drift, before the previous performance has been restored. It is hence a measure to quantify the adaptability of a
 predictor under concept drift.
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

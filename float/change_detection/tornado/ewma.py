@@ -10,7 +10,7 @@ Paper: Ross, Gordon J., et al. "Exponentially weighted moving average charts for
 Published in: Pattern Recognition Letters 33.2 (2012): 191-198.
 URL: https://arxiv.org/pdf/1212.6018.pdf
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

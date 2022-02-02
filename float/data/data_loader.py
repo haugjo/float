@@ -3,7 +3,7 @@
 This module encapsulates functionality to load and preprocess input data. The data loader class uses the
 scikit-multiflow Stream class to simulate streaming data.
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

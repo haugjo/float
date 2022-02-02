@@ -22,7 +22,7 @@ each classifier according to a weight from a Poisson(1) distribution. This resul
 in each example being used for training in approximately two thirds of the classifiers,
  with a separate weight in each classifier, and for testing in the rest.
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -162,7 +162,7 @@ class DistributedFoldPipeline(BasePipeline):
                 # "Each example is used for testing in one classifier selected randomly, and used for training by all
                 # the others." (Bifet et al. 2015)
                 for p_idx in range(self.n_unique_predictors):
-                    p_test_idx = np.asarray([self.rng.randint(self.n_parallel_instances)])
+                    p_test_idx = np.asarray([self.rng.integers(self.n_parallel_instances)])
                     p_train_idx = np.setdiff1d(np.arange(self.n_parallel_instances), p_test_idx)
                     predictors_for_testing.extend(p_test_idx + p_idx * self.n_parallel_instances)
                     predictors_for_training.extend(p_train_idx + p_idx * self.n_parallel_instances)
@@ -170,7 +170,7 @@ class DistributedFoldPipeline(BasePipeline):
                 # "Each example is used for training in one classifier selected randomly, and for testing in the
                 # other classifiers." (Bifet et al. 2015)
                 for p_idx in range(self.n_unique_predictors):
-                    p_train_idx = np.asarray([self.rng.randint(self.n_parallel_instances)])
+                    p_train_idx = np.asarray([self.rng.integers(self.n_parallel_instances)])
                     p_test_idx = np.setdiff1d(np.arange(self.n_parallel_instances), p_train_idx)
                     predictors_for_testing.extend(p_test_idx + p_idx * self.n_parallel_instances)
                     predictors_for_training.extend(p_train_idx + p_idx * self.n_parallel_instances)

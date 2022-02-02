@@ -3,7 +3,7 @@
 This module encapsulates functionality to scale, i.e. normalize, streaming observations. The abstract BaseScaler should
 be used to implement custom scaling methods. A scaler object can be provided to the data loader object.
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

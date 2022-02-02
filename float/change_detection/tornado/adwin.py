@@ -10,7 +10,7 @@ Paper: Bifet, Albert, and Ricard Gavalda. "Learning from time-changing data with
 Published in: Proceedings of the 2007 SIAM International Conference on Data Mining. Society for Industrial and Applied Mathematics, 2007.
 URL: http://www.cs.upc.edu/~GAVALDA/papers/adwin06.pdf
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

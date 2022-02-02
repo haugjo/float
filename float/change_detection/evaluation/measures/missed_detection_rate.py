@@ -7,7 +7,7 @@ International Symposium on Intelligent Data Analysis. Springer, Berlin, Heidelbe
 
 The missed detection rate is equal to 1 - detected_change_rate.
 
-Copyright (C) 2021 Johannes Haug
+Copyright (C) 2022 Johannes Haug
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
