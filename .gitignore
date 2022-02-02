@@ -4,3 +4,4 @@ MANIFEST
 .ipynb_checkpoints/
 poker.csv
 covertype.csv
+.DS_Store
