@@ -41,7 +41,7 @@ Float is supported by python versions >=3.8.x and has the following package requ
 *[!] Older versions have not been tested, but might also be compatible.*
 
 ## Quickstart
-The easiest way to become familiar with float and its functionality is to look at the experiment notebooks in the ```./experiments``` 
+The easiest way to become familiar with float and its functionality is to look at the experiment notebooks in the ```./float/experiments``` 
 folder. We provide experiments that showcase each of the three evaluation pipelines *prequential*, *holdout* and 
 *distributed fold*. We also demonstrate the use of the *change detection*, *online feature selection* and 
 *visualization* modules. 
