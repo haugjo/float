@@ -23,6 +23,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import copy
 import math
 import numpy as np
 import sys
@@ -107,6 +108,11 @@ def validate_pipeline_attrs(pipeline: 'BasePipeline'):
         if pipeline.n_pretrain is not None and pipeline.n_pretrain > 0:
             pipeline.change_detection_evaluator.n_pretrain = pipeline.n_pretrain
             pipeline.change_detection_evaluator.correct_known_drifts()
+            # We might need to update the known drifts in the prediction evaluator as well.
+            for evaluator in pipeline.prediction_evaluators:
+                if hasattr(evaluator.kwargs, 'known_drifts'):
+                    evaluator.kwargs['known_drifts'] = copy.deepcopy(pipeline.change_detection_evaluator.known_drifts)
+
             warnings.warn('Known drift positions have been automatically corrected for the number of '
                           'observations used in pre-training, i.e. known_drift_position -= n_pretrain')
 
