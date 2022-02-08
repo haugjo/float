@@ -123,7 +123,7 @@ class PredictionEvaluator:
                         call_args[arg.name] = self.kwargs[arg.name]
 
                         if arg.name == 'reference_measure':
-                            # For the noise_variability measure, we require a reference performance metric.
+                            # For some measures, we require a reference performance metric.
                             # Accordingly, we also need to provide the arguments of that reference metric.
                             ref_meas_call_args = dict()
                             for ref_meas_arg in inspect.signature(call_args[arg.name]).parameters.values():
@@ -187,6 +187,6 @@ class PredictionEvaluator:
 
         for arg in inspect.signature(func).parameters.values():
             if arg.default is arg.empty and arg.name not in param_list and arg.name != 'kwargs':
-                raise AttributeError("The non-keyword argument '{}' of the evaluation measure '{}' has not been provided. "
+                raise AttributeError("The keyword argument '{}' of the evaluation measure '{}' has not been provided. "
                                      "Please provide the parameter in the constructor of the PredictionEvaluator object "
                                      "or use another evaluation measure.".format(arg.name, func.__name__, arg.name))

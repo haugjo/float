@@ -29,7 +29,7 @@ import numpy as np
 import sys
 from tabulate import tabulate
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union, List
 import warnings
 
 import float.pipeline
@@ -89,6 +89,15 @@ def validate_pipeline_attrs(pipeline: 'BasePipeline'):
                 'Since a Predictor object was specified, a valid PredictionEvaluator object is also required '
                 'but has not been provided.')
 
+        # Update the known drifts in the prediction evaluator if we pretrain the model(s).
+        if pipeline.n_pretrain is not None and pipeline.n_pretrain > 0:
+            if 'known_drifts' in pipeline.prediction_evaluators[i].kwargs:
+                pipeline.prediction_evaluators[i].kwargs['known_drifts'] = _correct_known_drifts(
+                    known_drifts=pipeline.prediction_evaluators[i].kwargs['known_drifts'],
+                    n_pretrain=pipeline.n_pretrain)
+                warnings.warn('Known drift positions have been automatically corrected for the number of '
+                              'observations used in pre-training, i.e. known_drift_position -= n_pretrain')
+
     # Change Detector Validity Checks.
     if pipeline.change_detector is not None:
         if not issubclass(type(pipeline.change_detector), BaseChangeDetector):
@@ -106,13 +115,9 @@ def validate_pipeline_attrs(pipeline: 'BasePipeline'):
                               'will use the prediction of the first predictor instance for the change detection.')
 
         if pipeline.n_pretrain is not None and pipeline.n_pretrain > 0:
-            pipeline.change_detection_evaluator.n_pretrain = pipeline.n_pretrain
-            pipeline.change_detection_evaluator.correct_known_drifts()
-            # We might need to update the known drifts in the prediction evaluator as well.
-            for evaluator in pipeline.prediction_evaluators:
-                if hasattr(evaluator.kwargs, 'known_drifts'):
-                    evaluator.kwargs['known_drifts'] = copy.deepcopy(pipeline.change_detection_evaluator.known_drifts)
-
+            pipeline.change_detection_evaluator.known_drifts = _correct_known_drifts(
+                known_drifts=pipeline.change_detection_evaluator.known_drifts,
+                n_pretrain=pipeline.n_pretrain)
             warnings.warn('Known drift positions have been automatically corrected for the number of '
                           'observations used in pre-training, i.e. known_drift_position -= n_pretrain')
 
@@ -129,6 +134,29 @@ def validate_pipeline_attrs(pipeline: 'BasePipeline'):
 
         if not pipeline.feature_selector.supports_multi_class and pipeline.data_loader.stream.n_classes > 2:
             raise AttributeError('The provided FeatureSelector does not support multiclass targets.')
+
+
+def _correct_known_drifts(known_drifts: Union[List[int], List[tuple]], n_pretrain: int):
+    """Corrects the known drift positions if we do pre-training.
+
+    We Subtract 'n_pretrain' from all known drift positions, as these observations are not considered in the actual
+    pipeline run.
+
+    Args:
+        known_drifts (List[int] | List[tuple]):
+                The positions in the dataset (indices) corresponding to known concept drifts.
+        n_pretrain (int | None): Number of observations used for the initial training of the predictive model.
+
+    Returns:
+        List[int] | List[tuple]: Corrected known drift positions.
+    """
+    corrected_drifts = []
+    for drift in known_drifts:
+        if isinstance(drift, tuple):
+            corrected_drifts.append((drift[0] - n_pretrain, drift[1] - n_pretrain))
+        else:
+            corrected_drifts.append(drift - n_pretrain)
+    return corrected_drifts
 
 
 def update_progress_bar(pipeline: 'BasePipeline'):

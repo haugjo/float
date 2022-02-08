@@ -27,13 +27,14 @@ SOFTWARE.
 import numpy as np
 import warnings
 from sklearn.metrics import zero_one_loss
-from typing import Union, List, Callable
+from typing import Union, List, Callable, Optional
 
 
 def mean_drift_restoration_time(result: dict,
                                 known_drifts: Union[List[int], List[tuple]],
                                 batch_size: int,
                                 reference_measure: Callable = zero_one_loss,
+                                reference_measure_kwargs: Optional[dict] = None,
                                 incr: bool = False,
                                 interval: int = 10) -> float:
     """
@@ -45,11 +46,14 @@ def mean_drift_restoration_time(result: dict,
         known_drifts:
                 The positions in the dataset (indices) corresponding to known concept drifts.
         batch_size: The number of observations processed per iteration/time step.
-        reference_measure: Evaluation measure function
+        reference_measure: Evaluation measure function.
+        reference_measure_kwargs:
+            Keyword arguments of the reference measure. This attribute is maintained for consistency reasons, but is
+            not used by this performance measure.
         incr: Boolean indicating whether the evaluation measure is incremental (i.e. higher is better).
         interval:
             Scalar specifying the size of the interval (i.e. number of time steps) after known concept drift, in which
-            we investigate the a performance decay of the reference measure.
+            we investigate a performance decay of the reference measure.
 
     Returns:
         float: Current mean no. of iterations before recovery from (known) concept drifts.

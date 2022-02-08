@@ -26,7 +26,7 @@ SOFTWARE.
 """
 import numpy as np
 from sklearn.metrics import zero_one_loss
-from typing import Callable, Union, List
+from typing import Callable, Union, List, Optional
 import warnings
 
 
@@ -34,6 +34,7 @@ def mean_drift_performance_deterioration(result: dict,
                                          known_drifts: Union[List[int], List[tuple]],
                                          batch_size: int,
                                          reference_measure: Callable = zero_one_loss,
+                                         reference_measure_kwargs: Optional[dict] = None,
                                          interval: int = 10) -> float:
     """Calculates the mean drift performance deterioration measure.
 
@@ -42,10 +43,13 @@ def mean_drift_performance_deterioration(result: dict,
         known_drifts:
                 The positions in the dataset (indices) corresponding to known concept drifts.
         batch_size: The number of observations processed per iteration/time step.
-        reference_measure: Evaluation measure function
+        reference_measure: Evaluation measure function.
+        reference_measure_kwargs:
+            Keyword arguments of the reference measure. This attribute is maintained for consistency reasons, but is
+            not used by this performance measure.
         interval:
             Scalar specifying the size of the interval (i.e. number of time steps) after known concept drift, in which
-            we investigate the a performance decay of the reference measure.
+            we investigate a performance decay of the reference measure.
 
     Returns:
         float: Current mean performance deterioration after (known) concept drifts regarding the reference measure.
