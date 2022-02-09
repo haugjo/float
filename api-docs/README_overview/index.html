@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Overview - float</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Overview";
+    var mkdocs_page_input_path = "api-docs/README_overview.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> float</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../getting_started/">Getting Started</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../about/">About</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Examples</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../examples/prequential_classification/">Prequential Pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../examples/holdout_classification/">Holdout Pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../examples/distributed_fold_classification/">Distributed Fold Pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../examples/prequential_concept_drift_detection/">Concept Drift Detection</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../examples/prequential_online_feature_selection/">Online Feature Selection</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">API Reference</span></p>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Overview</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#data">Data</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#change-detection">Change Detection</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#online-feature-selection">Online Feature Selection</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#prediction">Prediction</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#pipeline">Pipeline</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#visualization">Visualization</a>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../data.data_loader/">data.data_loader</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../data.preprocessing.base_scaler/">data.preprocessing.base_scaler</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../data.preprocessing.sklearn_scaler/">data.preprocessing.sklearn_scaler</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.base_change_detector/">change_detection.base_change_detector</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.change_detection_evaluator/">change_detection.evaluation.change_detection_evaluator</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.detected_change_rate/">change_detection.evaluation.measures.detected_change_rate</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.detection_delay/">change_detection.evaluation.measures.detection_delay</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.false_discovery_rate/">change_detection.evaluation.measures.false_discovery_rate</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.mean_time_ratio/">change_detection.evaluation.measures.mean_time_ratio</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.missed_detection_rate/">change_detection.evaluation.measures.missed_detection_rate</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.time_between_false_alarms/">change_detection.evaluation.measures.time_between_false_alarms</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.erics/">change_detection.erics</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.river.river_change_detector/">change_detection.river.river_change_detector</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.skmultiflow.skmultiflow_change_detector/">change_detection.skmultiflow.skmultiflow_change_detector</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.adwin/">change_detection.tornado.adwin</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.cusum/">change_detection.tornado.cusum</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.ddm/">change_detection.tornado.ddm</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.eddm/">change_detection.tornado.eddm</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.ewma/">change_detection.tornado.ewma</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.fhddm/">change_detection.tornado.fhddm</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.fhddms/">change_detection.tornado.fhddms</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.fhddms_add/">change_detection.tornado.fhddms_add</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.hddm_a/">change_detection.tornado.hddm_a</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.hddm_w/">change_detection.tornado.hddm_w</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.mddm_a/">change_detection.tornado.mddm_a</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.mddm_e/">change_detection.tornado.mddm_e</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.mddm_g/">change_detection.tornado.mddm_g</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.page_hinkley/">change_detection.tornado.page_hinkley</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.rddm/">change_detection.tornado.rddm</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.seqdrift2/">change_detection.tornado.seqdrift2</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.base_feature_selector/">feature_selection.base_feature_selector</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.evaluation.feature_selection_evaluator/">feature_selection.evaluation.feature_selection_evaluator</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.evaluation.measures.nogueira_stability/">feature_selection.evaluation.measures.nogueira_stability</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.cancel_out/">feature_selection.cancel_out</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.efs/">feature_selection.efs</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.fires/">feature_selection.fires</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.fsds/">feature_selection.fsds</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.ofs/">feature_selection.ofs</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.river.river_feature_selector/">feature_selection.river.river_feature_selector</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.base_predictor/">prediction.base_predictor</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.evaluation.prediction_evaluator/">prediction.evaluation.prediction_evaluator</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.evaluation.measures.mean_drift_performance_deterioration/">prediction.evaluation.measures.mean_drift_performance_deterioration</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.evaluation.measures.mean_drift_restoration_time/">prediction.evaluation.measures.mean_drift_restoration_time</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.evaluation.measures.noise_variability/">prediction.evaluation.measures.noise_variability</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.evaluation.measures.river_classification_metric/">prediction.evaluation.measures.river_classification_metric</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.river.river_classifier/">prediction.river.river_classifier</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.skmultiflow.skmultiflow_classifier/">prediction.skmultiflow.skmultiflow_classifier</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../pipeline.base_pipeline/">pipeline.base_pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../pipeline.distributed_fold_pipeline/">pipeline.distributed_fold_pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../pipeline.holdout_pipeline/">pipeline.holdout_pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../pipeline.prequential_pipeline/">pipeline.prequential_pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../pipeline.utils_pipeline/">pipeline.utils_pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.bar/">visualization.bar</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.change_detection_scatter/">visualization.change_detection_scatter</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.feature_selection_bar/">visualization.feature_selection_bar</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.feature_selection_scatter/">visualization.feature_selection_scatter</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.feature_weight_box/">visualization.feature_weight_box</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.plot/">visualization.plot</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.scatter/">visualization.scatter</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.spider_chart/">visualization.spider_chart</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">float</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>API Reference &raquo;</li>
+        
+      
+    
+    <li>Overview</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <!-- markdownlint-disable -->
+
+<h1 id="api-overview">API Overview</h1>
+<h2 id="data">Data</h2>
+<ul>
+<li><a href="../data.data_loader/#module-datadata_loader"><code>data.data_loader</code></a>: Data Loader.</li>
+<li><a href="../data.preprocessing.base_scaler/#module-datapreprocessingbase_scaler"><code>data.preprocessing.base_scaler</code></a>: Base Scaler.</li>
+<li><a href="../data.preprocessing.sklearn_scaler/#module-datapreprocessingsklearn_scaler"><code>data.preprocessing.sklearn_scaler</code></a>: Sklearn Scaling Function Wrapper.</li>
+</ul>
+<h2 id="change-detection">Change Detection</h2>
+<ul>
+<li><a href="../change_detection.base_change_detector/#module-change_detectionbase_change_detector"><code>change_detection.base_change_detector</code></a>: Base Change Detector.</li>
+<li><a href="../change_detection.evaluation.change_detection_evaluator/#module-change_detectionevaluationchange_detection_evaluator"><code>change_detection.evaluation.change_detection_evaluator</code></a>: Change Detection Evaluator.</li>
+<li><a href="../change_detection.evaluation.measures.detected_change_rate/#module-change_detectionevaluationmeasuresdetected_change_rate"><code>change_detection.evaluation.measures.detected_change_rate</code></a>: Detected Change Rate Measure.</li>
+<li><a href="../change_detection.evaluation.measures.detection_delay/#module-change_detectionevaluationmeasuresdetection_delay"><code>change_detection.evaluation.measures.detection_delay</code></a>: Detection Delay Measure.</li>
+<li><a href="../change_detection.evaluation.measures.false_discovery_rate/#module-change_detectionevaluationmeasuresfalse_discovery_rate"><code>change_detection.evaluation.measures.false_discovery_rate</code></a>: False Discovery Rate Measure.</li>
+<li><a href="../change_detection.evaluation.measures.mean_time_ratio/#module-change_detectionevaluationmeasuresmean_time_ratio"><code>change_detection.evaluation.measures.mean_time_ratio</code></a>: Mean Time Ratio Measure.</li>
+<li><a href="../change_detection.evaluation.measures.missed_detection_rate/#module-change_detectionevaluationmeasuresmissed_detection_rate"><code>change_detection.evaluation.measures.missed_detection_rate</code></a>: Missed Detection Rate Measure.</li>
+<li><a href="../change_detection.evaluation.measures.time_between_false_alarms/#module-change_detectionevaluationmeasurestime_between_false_alarms"><code>change_detection.evaluation.measures.time_between_false_alarms</code></a>: Time Between False Alarms Measure.</li>
+<li><a href="../change_detection.erics/#module-change_detectionerics"><code>change_detection.erics</code></a>: ERICS Change Detection Method.</li>
+<li><a href="../change_detection.river.river_change_detector/#module-change_detectionriverriver_change_detector"><code>change_detection.river.river_change_detector</code></a>: River Change Detection Model Wrapper.</li>
+<li><a href="../change_detection.skmultiflow.skmultiflow_change_detector/#module-change_detectionskmultiflowskmultiflow_change_detector"><code>change_detection.skmultiflow.skmultiflow_change_detector</code></a>: Scikit-Multiflow Change Detection Model Wrapper.</li>
+<li><a href="../change_detection.tornado.adwin/#module-change_detectiontornadoadwin"><code>change_detection.tornado.adwin</code></a>: Adaptive Windowing Drift Detection Method.</li>
+<li><a href="../change_detection.tornado.cusum/#module-change_detectiontornadocusum"><code>change_detection.tornado.cusum</code></a>: Cumulative Sum Drift Detection Method.</li>
+<li><a href="../change_detection.tornado.ddm/#module-change_detectiontornadoddm"><code>change_detection.tornado.ddm</code></a>: Drift Detection Method.</li>
+<li><a href="../change_detection.tornado.eddm/#module-change_detectiontornadoeddm"><code>change_detection.tornado.eddm</code></a>: Early Drift Detection Method.</li>
+<li><a href="../change_detection.tornado.ewma/#module-change_detectiontornadoewma"><code>change_detection.tornado.ewma</code></a>: Exponentially Weigthed Moving Average Drift Detection Method.</li>
+<li><a href="../change_detection.tornado.fhddm/#module-change_detectiontornadofhddm"><code>change_detection.tornado.fhddm</code></a>: Fast Hoeffding Drift Detection Method.</li>
+<li><a href="../change_detection.tornado.fhddms/#module-change_detectiontornadofhddms"><code>change_detection.tornado.fhddms</code></a>: Stacking Fast Hoeffding Drift Detection Method.</li>
+<li><a href="../change_detection.tornado.fhddms_add/#module-change_detectiontornadofhddms_add"><code>change_detection.tornado.fhddms_add</code></a>: Additive Stacking Fast Hoeffding Drift Detection Method.</li>
+<li><a href="../change_detection.tornado.hddm_a/#module-change_detectiontornadohddm_a"><code>change_detection.tornado.hddm_a</code></a>: Hoeffding's Bound based Drift Detection Method (A_test Scheme).</li>
+<li><a href="../change_detection.tornado.hddm_w/#module-change_detectiontornadohddm_w"><code>change_detection.tornado.hddm_w</code></a>: Hoeffding's Bound based Drift Detection Method (W_test Scheme).</li>
+<li><a href="../change_detection.tornado.mddm_a/#module-change_detectiontornadomddm_a"><code>change_detection.tornado.mddm_a</code></a>: McDiarmid Drift Detection Method (Arithmetic Scheme).</li>
+<li><a href="../change_detection.tornado.mddm_e/#module-change_detectiontornadomddm_e"><code>change_detection.tornado.mddm_e</code></a>: McDiarmid Drift Detection Method (Euler Scheme).</li>
+<li><a href="../change_detection.tornado.mddm_g/#module-change_detectiontornadomddm_g"><code>change_detection.tornado.mddm_g</code></a>: McDiarmid Drift Detection Method (Geometric Scheme).</li>
+<li><a href="../change_detection.tornado.page_hinkley/#module-change_detectiontornadopage_hinkley"><code>change_detection.tornado.page_hinkley</code></a>: Page Hinkley Drift Detection Method.</li>
+<li><a href="../change_detection.tornado.rddm/#module-change_detectiontornadorddm"><code>change_detection.tornado.rddm</code></a>: Reactive Drift Detection Method.</li>
+<li><a href="../change_detection.tornado.seqdrift2/#module-change_detectiontornadoseqdrift2"><code>change_detection.tornado.seqdrift2</code></a>: SeqDrift2 Drift Detection Method.</li>
+</ul>
+<h2 id="online-feature-selection">Online Feature Selection</h2>
+<ul>
+<li><a href="../feature_selection.base_feature_selector/#module-feature_selectionbase_feature_selector"><code>feature_selection.base_feature_selector</code></a>: Base Online Feature Selector.</li>
+<li><a href="../feature_selection.evaluation.feature_selection_evaluator/#module-feature_selectionevaluationfeature_selection_evaluator"><code>feature_selection.evaluation.feature_selection_evaluator</code></a>: Online Feature Selection Evaluator.</li>
+<li><a href="../feature_selection.evaluation.measures.nogueira_stability/#module-feature_selectionevaluationmeasuresnogueira_stability"><code>feature_selection.evaluation.measures.nogueira_stability</code></a>: Nogueira Feature Set Stability Measure.</li>
+<li><a href="../feature_selection.cancel_out/#module-feature_selectioncancel_out"><code>feature_selection.cancel_out</code></a>: CancelOut Feature Selection Method.</li>
+<li><a href="../feature_selection.efs/#module-feature_selectionefs"><code>feature_selection.efs</code></a>: Extremal Feature Selection Method.</li>
+<li><a href="../feature_selection.fires/#module-feature_selectionfires"><code>feature_selection.fires</code></a>: FIRES Feature Selection Method.</li>
+<li><a href="../feature_selection.fsds/#module-feature_selectionfsds"><code>feature_selection.fsds</code></a>: Fast Feature Selection on Data Streams Method.</li>
+<li><a href="../feature_selection.ofs/#module-feature_selectionofs"><code>feature_selection.ofs</code></a>: Online Feature Selection Method.</li>
+<li><a href="../feature_selection.river.river_feature_selector/#module-feature_selectionriverriver_feature_selector"><code>feature_selection.river.river_feature_selector</code></a>: River Feature Selection Model Wrapper.</li>
+</ul>
+<h2 id="prediction">Prediction</h2>
+<ul>
+<li><a href="../prediction.base_predictor/#module-predictionbase_predictor"><code>prediction.base_predictor</code></a>: Base Online Predictor.</li>
+<li><a href="../prediction.evaluation.prediction_evaluator/#module-predictionevaluationprediction_evaluator"><code>prediction.evaluation.prediction_evaluator</code></a>: Predictive Model Evaluator.</li>
+<li><a href="../prediction.evaluation.measures.mean_drift_performance_deterioration/#module-predictionevaluationmeasuresmean_drift_performance_deterioration"><code>prediction.evaluation.measures.mean_drift_performance_deterioration</code></a>: Drift Performance Deterioration Measure.</li>
+<li><a href="../prediction.evaluation.measures.mean_drift_restoration_time/#module-predictionevaluationmeasuresmean_drift_restoration_time"><code>prediction.evaluation.measures.mean_drift_restoration_time</code></a>: Drift Restoration Time Measure.</li>
+<li><a href="../prediction.evaluation.measures.noise_variability/#module-predictionevaluationmeasuresnoise_variability"><code>prediction.evaluation.measures.noise_variability</code></a>: Noise Variability Measure.</li>
+<li><a href="../prediction.evaluation.measures.river_classification_metric/#module-predictionevaluationmeasuresriver_classification_metric"><code>prediction.evaluation.measures.river_classification_metric</code></a>: River Classification Metric Wrapper.</li>
+<li><a href="../prediction.river.river_classifier/#module-predictionriverriver_classifier"><code>prediction.river.river_classifier</code></a>: River Predictive Model Wrapper.</li>
+<li><a href="../prediction.skmultiflow.skmultiflow_classifier/#module-predictionskmultiflowskmultiflow_classifier"><code>prediction.skmultiflow.skmultiflow_classifier</code></a>: Scikit-Multiflow Predictive Model Wrapper.</li>
+</ul>
+<h2 id="pipeline">Pipeline</h2>
+<ul>
+<li><a href="../pipeline.base_pipeline/#module-pipelinebase_pipeline"><code>pipeline.base_pipeline</code></a>: Base Pipeline.</li>
+<li><a href="../pipeline.distributed_fold_pipeline/#module-pipelinedistributed_fold_pipeline"><code>pipeline.distributed_fold_pipeline</code></a>: Distributed Fold Pipeline.</li>
+<li><a href="../pipeline.holdout_pipeline/#module-pipelineholdout_pipeline"><code>pipeline.holdout_pipeline</code></a>: Periodic Holdout Pipeline.</li>
+<li><a href="../pipeline.prequential_pipeline/#module-pipelineprequential_pipeline"><code>pipeline.prequential_pipeline</code></a>: Prequential Pipeline.</li>
+<li><a href="../pipeline.utils_pipeline/#module-pipelineutils_pipeline"><code>pipeline.utils_pipeline</code></a>: Pipeline Utils.</li>
+</ul>
+<h2 id="visualization">Visualization</h2>
+<ul>
+<li><a href="../visualization.bar/#module-visualizationbar"><code>visualization.bar</code></a>: Standard Bar Plot.</li>
+<li><a href="../visualization.change_detection_scatter/#module-visualizationchange_detection_scatter"><code>visualization.change_detection_scatter</code></a>: Change Detection Scatter Plot.</li>
+<li><a href="../visualization.feature_selection_bar/#module-visualizationfeature_selection_bar"><code>visualization.feature_selection_bar</code></a>: Feature Selection Bar Plot.</li>
+<li><a href="../visualization.feature_selection_scatter/#module-visualizationfeature_selection_scatter"><code>visualization.feature_selection_scatter</code></a>: Feature Selection Scatter Plot.</li>
+<li><a href="../visualization.feature_weight_box/#module-visualizationfeature_weight_box"><code>visualization.feature_weight_box</code></a>: Feature Weight Box Plot.</li>
+<li><a href="../visualization.plot/#module-visualizationplot"><code>visualization.plot</code></a>: Standard Line Plot.</li>
+<li><a href="../visualization.scatter/#module-visualizationscatter"><code>visualization.scatter</code></a>: Standard Scatter Plot.</li>
+<li><a href="../visualization.spider_chart/#module-visualizationspider_chart"><code>visualization.spider_chart</code></a>: Spider Plot.</li>
+</ul>
+<hr />
+<p><em>This file was automatically generated via <a href="https://github.com/ml-tooling/lazydocs">lazydocs</a>.</em></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../data.data_loader/" class="btn btn-neutral float-right" title="data.data_loader">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../../examples/prequential_online_feature_selection/" class="btn btn-neutral" title="Online Feature Selection"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../examples/prequential_online_feature_selection/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../data.data_loader/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>change_detection.tornado.eddm - float</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "change_detection.tornado.eddm";
+    var mkdocs_page_input_path = "api-docs/change_detection.tornado.eddm.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> float</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../getting_started/">Getting Started</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../about/">About</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Examples</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../examples/prequential_classification/">Prequential Pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../examples/holdout_classification/">Holdout Pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../examples/distributed_fold_classification/">Distributed Fold Pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../examples/prequential_concept_drift_detection/">Concept Drift Detection</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../examples/prequential_online_feature_selection/">Online Feature Selection</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">API Reference</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../README_overview/">Overview</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../data.data_loader/">data.data_loader</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../data.preprocessing.base_scaler/">data.preprocessing.base_scaler</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../data.preprocessing.sklearn_scaler/">data.preprocessing.sklearn_scaler</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.base_change_detector/">change_detection.base_change_detector</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.change_detection_evaluator/">change_detection.evaluation.change_detection_evaluator</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.detected_change_rate/">change_detection.evaluation.measures.detected_change_rate</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.detection_delay/">change_detection.evaluation.measures.detection_delay</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.false_discovery_rate/">change_detection.evaluation.measures.false_discovery_rate</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.mean_time_ratio/">change_detection.evaluation.measures.mean_time_ratio</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.missed_detection_rate/">change_detection.evaluation.measures.missed_detection_rate</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.time_between_false_alarms/">change_detection.evaluation.measures.time_between_false_alarms</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.erics/">change_detection.erics</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.river.river_change_detector/">change_detection.river.river_change_detector</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.skmultiflow.skmultiflow_change_detector/">change_detection.skmultiflow.skmultiflow_change_detector</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.adwin/">change_detection.tornado.adwin</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.cusum/">change_detection.tornado.cusum</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.ddm/">change_detection.tornado.ddm</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">change_detection.tornado.eddm</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#class-eddm">class EDDM</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#method-eddm__init__">method EDDM.__init__</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#method-eddmdetect_change">method EDDM.detect_change</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#method-eddmdetect_partial_change">method EDDM.detect_partial_change</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#method-eddmdetect_warning_zone">method EDDM.detect_warning_zone</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#method-eddmpartial_fit">method EDDM.partial_fit</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#method-eddmreset">method EDDM.reset</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.ewma/">change_detection.tornado.ewma</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.fhddm/">change_detection.tornado.fhddm</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.fhddms/">change_detection.tornado.fhddms</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.fhddms_add/">change_detection.tornado.fhddms_add</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.hddm_a/">change_detection.tornado.hddm_a</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.hddm_w/">change_detection.tornado.hddm_w</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.mddm_a/">change_detection.tornado.mddm_a</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.mddm_e/">change_detection.tornado.mddm_e</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.mddm_g/">change_detection.tornado.mddm_g</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.page_hinkley/">change_detection.tornado.page_hinkley</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.rddm/">change_detection.tornado.rddm</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.seqdrift2/">change_detection.tornado.seqdrift2</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.base_feature_selector/">feature_selection.base_feature_selector</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.evaluation.feature_selection_evaluator/">feature_selection.evaluation.feature_selection_evaluator</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.evaluation.measures.nogueira_stability/">feature_selection.evaluation.measures.nogueira_stability</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.cancel_out/">feature_selection.cancel_out</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.efs/">feature_selection.efs</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.fires/">feature_selection.fires</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.fsds/">feature_selection.fsds</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.ofs/">feature_selection.ofs</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../feature_selection.river.river_feature_selector/">feature_selection.river.river_feature_selector</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.base_predictor/">prediction.base_predictor</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.evaluation.prediction_evaluator/">prediction.evaluation.prediction_evaluator</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.evaluation.measures.mean_drift_performance_deterioration/">prediction.evaluation.measures.mean_drift_performance_deterioration</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.evaluation.measures.mean_drift_restoration_time/">prediction.evaluation.measures.mean_drift_restoration_time</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.evaluation.measures.noise_variability/">prediction.evaluation.measures.noise_variability</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.evaluation.measures.river_classification_metric/">prediction.evaluation.measures.river_classification_metric</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.river.river_classifier/">prediction.river.river_classifier</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../prediction.skmultiflow.skmultiflow_classifier/">prediction.skmultiflow.skmultiflow_classifier</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../pipeline.base_pipeline/">pipeline.base_pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../pipeline.distributed_fold_pipeline/">pipeline.distributed_fold_pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../pipeline.holdout_pipeline/">pipeline.holdout_pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../pipeline.prequential_pipeline/">pipeline.prequential_pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../pipeline.utils_pipeline/">pipeline.utils_pipeline</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.bar/">visualization.bar</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.change_detection_scatter/">visualization.change_detection_scatter</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.feature_selection_bar/">visualization.feature_selection_bar</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.feature_selection_scatter/">visualization.feature_selection_scatter</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.feature_weight_box/">visualization.feature_weight_box</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.plot/">visualization.plot</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.scatter/">visualization.scatter</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../visualization.spider_chart/">visualization.spider_chart</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">float</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>API Reference &raquo;</li>
+        
+      
+    
+    <li>change_detection.tornado.eddm</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <!-- markdownlint-disable -->
+
+<p><a href="https://github.com/haugjo/float/tree/main/float/change_detection/tornado/eddm.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h1 id="module-change_detectiontornadoeddm"><kbd>module</kbd> <code>change_detection.tornado.eddm</code></h1>
+<p>Early Drift Detection Method. </p>
+<p>The source code was adopted from <a href="https://github.com/alipsgh/tornado">tornado</a>, please cite: </p>
+<p>The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com </p>
+<p>Original Paper: Baena-García, Manuel, et al. "Early drift detection method." (2006). URL: <a href="http://www.cs.upc.edu/~abifet/EDDM.pdf">http://www.cs.upc.edu/~abifet/EDDM.pdf</a> </p>
+<p>Copyright (C) 2022 Johannes Haug. </p>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main/float/change_detection/tornado/eddm.py#L20"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h2 id="class-eddm"><kbd>class</kbd> <code>EDDM</code></h2>
+<p>EDDM change detector. </p>
+<p><a href="https://github.com/haugjo/float/tree/main/float/change_detection/tornado/eddm.py#L22"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-eddm__init__"><kbd>method</kbd> <code>EDDM.__init__</code></h3>
+<pre><code class="language-python">__init__(reset_after_drift: bool = False)
+</code></pre>
+<p>Inits the change detector. </p>
+<p><strong>Args:</strong></p>
+<ul>
+<li><b><code>reset_after_drift</code></b>:  A boolean indicating if the change detector will be reset after a drift was detected. </li>
+</ul>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main/float/change_detection/tornado/eddm.py#L92"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-eddmdetect_change"><kbd>method</kbd> <code>EDDM.detect_change</code></h3>
+<pre><code class="language-python">detect_change() → bool
+</code></pre>
+<p>Detects global concept drift. </p>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><b><code>bool</code></b>:  True, if a concept drift was detected, False otherwise. </li>
+</ul>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main/float/change_detection/tornado/eddm.py#L100"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-eddmdetect_partial_change"><kbd>method</kbd> <code>EDDM.detect_partial_change</code></h3>
+<pre><code class="language-python">detect_partial_change() → Tuple[bool, list]
+</code></pre>
+<p>Detects partial concept drift. </p>
+<p><strong>Notes:</strong></p>
+<blockquote>
+<p>EDDM does not detect partial change. </p>
+</blockquote>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main/float/change_detection/tornado/eddm.py#L108"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-eddmdetect_warning_zone"><kbd>method</kbd> <code>EDDM.detect_warning_zone</code></h3>
+<pre><code class="language-python">detect_warning_zone() → bool
+</code></pre>
+<p>Detects a warning zone. </p>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><b><code>bool</code></b>:  True, if the change detector has detected a warning zone, False otherwise. </li>
+</ul>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main/float/change_detection/tornado/eddm.py#L54"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-eddmpartial_fit"><kbd>method</kbd> <code>EDDM.partial_fit</code></h3>
+<pre><code class="language-python">partial_fit(pr_scores: List[bool])
+</code></pre>
+<p>Updates the change detector. </p>
+<p><strong>Args:</strong></p>
+<ul>
+<li><b><code>pr_scores</code></b>: A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'.</li>
+</ul>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main/float/change_detection/tornado/eddm.py#L44"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-eddmreset"><kbd>method</kbd> <code>EDDM.reset</code></h3>
+<pre><code class="language-python">reset()
+</code></pre>
+<p>Resets the change detector. </p>
+<hr />
+<p><em>This file was automatically generated via <a href="https://github.com/ml-tooling/lazydocs">lazydocs</a>.</em></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../change_detection.tornado.ewma/" class="btn btn-neutral float-right" title="change_detection.tornado.ewma">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../change_detection.tornado.ddm/" class="btn btn-neutral" title="change_detection.tornado.ddm"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../change_detection.tornado.ddm/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../change_detection.tornado.ewma/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
