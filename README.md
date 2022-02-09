@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="float" src="logo.png" width="400"/>
+  <img alt="float" src="https://github.com/haugjo/float/raw/main/logo.png" width="400"/>
 </p>
 <p align="center">
     <em>[Placeholder for badges]</em>

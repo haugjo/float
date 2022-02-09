@@ -6,25 +6,7 @@ HAUG, Johannes, et al. Leveraging model inherent variable importance for stable 
 In: Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2020.
 S. 1478-1502.
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 import numpy as np
 from numpy.typing import ArrayLike
@@ -56,8 +38,8 @@ class FIRES(BaseFeatureSelector):
         """Inits the feature selector.
 
         Args:
-            n_total_features: See description of base class.
-            n_selected_features: See description of base class.
+            n_total_features: The total number of features.
+            n_selected_features: The number of selected features.
             classes: A list of unique target values (class labels).
             mu_init:
                 Initial importance, i.e. mean of the parameter distribution. One may either set the initial values
@@ -75,9 +57,14 @@ class FIRES(BaseFeatureSelector):
             lr_mu: Learning rate for the gradient update of the mean.
             lr_sigma: Learning rate for the gradient update of the standard deviation.
             scale_weights: If True, scale feature weights into the range [0,1]. If False, do not scale weights.
-            reset_after_drift: See description of base class.
-            baseline: See description of base class.
-            ref_sample: See description of base class.
+            reset_after_drift: A boolean indicating if the change detector will be reset after a drift was detected.
+            baseline:
+                A string identifier of the baseline method. The baseline is the value that we substitute non-selected
+                features with. This is necessary, because most online learning models are not able to handle arbitrary
+                patterns of missing data.
+            ref_sample:
+                A sample used to compute the baseline. If the constant baseline is used, one needs to provide a single
+                float value.
         """
         super().__init__(n_total_features=n_total_features,
                          n_selected_features=n_selected_features,
@@ -100,7 +87,12 @@ class FIRES(BaseFeatureSelector):
         self._scale_weights = scale_weights
 
     def weight_features(self, X: ArrayLike, y: ArrayLike):
-        """Updates feature weights."""
+        """Updates feature weights.
+
+        Args:
+            X: Array/matrix of observations.
+            y: Array of corresponding labels.
+        """
         # Update estimates of mu and sigma given the predictive model
         self._probit(X=X, y=y)
 

@@ -1,28 +1,10 @@
 """Drift Restoration Time Measure.
 
 This function returns the mean drift restoration time, i.e. the average number of iterations (time steps) after a
-known concept drift, before the previous performance has been restored. It is hence a measure to quantify the adaptability of a
-predictor under concept drift.
+known concept drift, before the previous performance has been restored. It is hence a measure to quantify the
+adaptability of a predictor under concept drift.
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 import numpy as np
 import warnings
@@ -37,9 +19,7 @@ def mean_drift_restoration_time(result: dict,
                                 reference_measure_kwargs: Optional[dict] = None,
                                 incr: bool = False,
                                 interval: int = 10) -> float:
-    """
-    Recovery Time After Concept Drift
-    Return the average no. of iterations (time steps) before recovering the evaluation measure previous of a drift
+    """Calculates the mean restoration time after known concept drifts.
 
     Args:
         result: A result dictionary from the PredictionEvaluator object.

@@ -1,3 +1,10 @@
+"""Feature Weight Box Plot.
+
+This function returns a box plot that illustrates the feature weights of one or multiple online feature selection
+methods.
+
+Copyright (C) 2022 Johannes Haug.
+"""
 from matplotlib.axes import Axes
 import matplotlib.lines as mlines
 import matplotlib.pyplot as plt

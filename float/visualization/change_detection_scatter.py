@@ -1,3 +1,10 @@
+"""Change Detection Scatter Plot.
+
+This function returns a special scatter plot that illustrates the detected concept drifts of one or multiple change
+detection methods.
+
+Copyright (C) 2022 Johannes Haug.
+"""
 from matplotlib.axes import Axes
 import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
@@ -9,15 +16,15 @@ from typing import List, Union
 _PALETTE = ['#003366', '#44aa99', '#88ccee', '#117733', '#999933', '#ddcc77', '#cc3311', '#ee3377', '#bbbbbb', '#000000']
 
 
-def concept_drift_detection_scatter(detected_drifts: List[list],
-                                    model_names: List[str],
-                                    n_samples: int,
-                                    known_drifts: Union[List[int], List[tuple]],
-                                    batch_size: int,
-                                    n_pretrain: int,
-                                    fig_size: tuple = (13, 5),
-                                    font_size: int = 16) -> Axes:
-    """Returns a scatter plot with the known and the detected concept drifts.
+def change_detection_scatter(detected_drifts: List[list],
+                             model_names: List[str],
+                             n_samples: int,
+                             known_drifts: Union[List[int], List[tuple]],
+                             batch_size: int,
+                             n_pretrain: int,
+                             fig_size: tuple = (13, 5),
+                             font_size: int = 16) -> Axes:
+    """Returns a scatter plot showing the known and the detected concept drifts of the provided models.
 
     Args:
         detected_drifts:

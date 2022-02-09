@@ -2,25 +2,7 @@
 
 This module contains an evaluator class for explicit change (i.e. concept drift) detection methods.
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 import numpy as np
 import traceback
@@ -30,8 +12,8 @@ from typing import Callable, List, Union
 class ChangeDetectionEvaluator:
     """Change detection evaluation class.
 
-    This class computes and stores the measure/metric functions and results for the evaluation of explicit
-    change detection methods.
+    This class is required to compute the performance measures and store the corresponding results in the evaluation
+    of the change detection method.
 
     Attributes:
         measure_funcs (List[Callable]): A list of evaluation measure functions.
@@ -39,15 +21,17 @@ class ChangeDetectionEvaluator:
             The positions in the dataset (indices) corresponding to known concept drifts.
         batch_size (int): The number of observations processed per iteration/time step.
         n_total (int): The total number of observations.
-        n_delay (int | list): The number of observations after a known concept drift, during which we count
-                the detections made by the model as true positives. If the argument is a list, the evaluator computes
-                results for each delay specified in the list.
-        n_init_tolerance (int): The number of observations reserved for the initial training. We do not consider
-            these observations in the evaluation.
-        comp_times (list): Computation times of updating the change detector per time step.
+        n_delay (int | list):
+                The number of observations after a known concept drift, during which we count the detections made by
+                the model as true positives. If the argument is a list, the evaluator computes results for each delay
+                specified in the list.
+        n_init_tolerance (int):
+            The number of observations reserved for the initial training. We do not consider these observations in the
+            evaluation.
+        comp_times (list): Computation times for updating the change detector per time step.
         memory_changes (list):
-            List of measured memory changes (GB RAM) per training iteration of the concept drift detector.
-        result (dict): Results (i.e. calculated measurements, mean, and variance) for each evaluation measure function
+            Memory changes (in GB RAM) per training iteration of the change detector.
+        result (dict): Results (i.e. calculated measurements, mean, and variance) for each evaluation measure function.
     """
     def __init__(self,
                  measure_funcs: List[Callable],
@@ -59,16 +43,18 @@ class ChangeDetectionEvaluator:
         """Initializes the change detection evaluation object.
 
         Args:
-            measure_funcs (List[Callable]): A list of evaluation measure functions.
-            known_drifts (List[int] | List[tuple]):
+            measure_funcs: A list of evaluation measure functions.
+            known_drifts:
                 The positions in the dataset (indices) corresponding to known concept drifts.
-            batch_size (int): The number of observations processed per iteration/time step.
-            n_total (int): The total number of observations.
-            n_delay (int | list): The number of observations after a known concept drift, during which we count
-                the detections made by the model as true positives. If the argument is a list, the evaluator computes
-                results for each delay specified in the list.
-            n_init_tolerance (int): The number of observations reserved for the initial training. We do not consider
-                these observations in the evaluation.
+            batch_size: The number of observations processed per iteration/time step.
+            n_total: The total number of observations.
+            n_delay:
+                The number of observations after a known concept drift, during which we count the detections made by
+                the model as true positives. If the argument is a list, the evaluator computes results for each delay
+                specified in the list.
+            n_init_tolerance:
+                The number of observations reserved for the initial training. We do not consider these observations in
+                the evaluation.
         """
         self.measure_funcs = measure_funcs
         self.known_drifts = known_drifts
@@ -93,7 +79,7 @@ class ChangeDetectionEvaluator:
             drifts: List of time steps corresponding to detected concept drifts.
 
         Raises:
-            TypeError: If there occurs an error while executing the provided evaluation measure function.
+            TypeError: Error while executing the provided evaluation measure functions.
         """
         for measure_func in self.measure_funcs:
             try:

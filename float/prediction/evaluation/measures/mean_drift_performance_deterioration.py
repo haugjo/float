@@ -1,28 +1,10 @@
 """Drift Performance Deterioration Measure.
 
-This function returns the drift performance deterioration. This measure corresponds to the mean difference of some
+This function returns the drift performance deterioration. This measure corresponds to the mean difference of a
 performance measure before and after a known concept drift. It is hence a measure to quantify the adaptability of a
 predictor under concept drift.
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 import numpy as np
 from sklearn.metrics import zero_one_loss
@@ -36,7 +18,7 @@ def mean_drift_performance_deterioration(result: dict,
                                          reference_measure: Callable = zero_one_loss,
                                          reference_measure_kwargs: Optional[dict] = None,
                                          interval: int = 10) -> float:
-    """Calculates the mean drift performance deterioration measure.
+    """Calculates the mean performance deterioration after kown concept drifts.
 
     Args:
         result: A result dictionary from the PredictionEvaluator object.

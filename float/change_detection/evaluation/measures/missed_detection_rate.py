@@ -34,6 +34,8 @@ from float.change_detection.evaluation.change_detection_evaluator import ChangeD
 def missed_detection_rate(evaluator: ChangeDetectionEvaluator, drifts: list, n_delay: int) -> float:
     """Calculates the rate of missed known concept drifts.
 
+    The missed detection rate is equal to 1 - the detected change rate.
+
     Args:
         evaluator: The ChangeDetectionEvaluator object.
         drifts: List of time steps corresponding to detected concept drifts.

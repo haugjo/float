@@ -1,28 +1,9 @@
 """Base Pipeline Module.
 
 This module contains functionality to construct a pipeline and run experiments in a standardized and modular fashion.
-In general, we recommend building custom experiments around a pipeline object. This abstract BasePipeline class should
-be used as a super class for all specific evaluation pipelines.
+This abstract BasePipeline class should be used as a super class for all specific evaluation pipelines.
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 from abc import ABCMeta
 import copy
@@ -51,9 +32,8 @@ class BasePipeline(metaclass=ABCMeta):
 
     Attributes:
         data_loader (DataLoader): Data loader object.
-        predictors (BasePredictor | List[BasePredictor]): Predictive model(s).
-        prediction_evaluators (PredictionEvaluator | List[PredictionEvaluator]):
-            Evaluator(s) for the predictive model(s).
+        predictors List[BasePredictor]: Predictive model(s).
+        prediction_evaluators List[PredictionEvaluator]: Evaluator(s) for the predictive model(s).
         change_detector (ConceptDriftDetector | None): Concept drift detection model.
         change_detection_evaluator (ChangeDetectionEvaluator | None): Evaluator for active concept drift detection.
         feature_selector (BaseFeatureSelector | None): Online feature selection model.
@@ -70,7 +50,7 @@ class BasePipeline(metaclass=ABCMeta):
             increase the total run time of the pipeline.
         test_interval (int):
             The interval/frequency at which the online learning models are evaluated. This parameter is always 1 for a
-            prequential evaluation.
+            prequential or distributed fold evaluation.
         rng (Generator): A numpy random number generator object.
         start_time (float): Physical start time.
         time_step (int): Current logical time step, i.e. iteration.
@@ -96,8 +76,8 @@ class BasePipeline(metaclass=ABCMeta):
 
         Args:
             data_loader: Data loader object.
-            predictor: Predictive model(s).
-            prediction_evaluator: Evaluator for the predictive model(s).
+            predictor: Predictor object or list of predictor objects.
+            prediction_evaluator: Evaluator object for the predictive model(s).
             change_detector: Concept drift detection model.
             change_detection_evaluator: Evaluator for active concept drift detection.
             feature_selector: Online feature selection model.

@@ -2,35 +2,17 @@
 
 The ERICS (Effective and Robust Identification of Concept Shift) change detector was proposed by:
 [1] HAUG, Johannes; KASNECI, Gjergji. Learning Parameter Distributions to Detect Concept Drift in Data Streams.
-    In: 2020 25th International Conference on Pattern Recognition (ICPR). IEEE, 2021. S. 9452-9459.
+In: 2020 25th International Conference on Pattern Recognition (ICPR). IEEE, 2021. S. 9452-9459.
 
 The original source code can be obtained here: https://github.com/haugjo/erics
 
-This module provides the ERICS implementation with a Probit base model for binary classification scenarios.
-The update rules for the Probit model are adopted from:
+This module provides the ERICS implementation with a Probit base model for binary classification. The update rules for
+the Probit model are adopted from:
 [2] HAUG, Johannes, et al. Leveraging model inherent variable importance for stable online feature selection.
-    In: Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2020.
-    S. 1478-1502.
+In: Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2020.
+S. 1478-1502.
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 import copy
 import numpy as np
@@ -55,22 +37,28 @@ class ERICS(BaseChangeDetector):
                  lr_mu: float = 0.01,
                  lr_sigma: float = 0.01,
                  reset_after_drift: bool = False):
-        """Inits the ERICS change detector.
+        """Inits the change detector.
 
         Args:
             n_param:
                 The total number of parameters in the Probit model. This corresponds to the number of input features.
             window_mvg_average:
-                he window size for the computation of the moving average of the KL divergence.
-            window_drift_detect: The window size that is used to compute the pairwise differences between
-                subsequent measures of the moving average. This is information is used for the actual change detection.
-            beta: The Update rate of the alpha-threshold.
-            init_mu: The initial mean of the parameter distributions.
-            init_sigma: The initial variance of the parameter distributions.
-            epochs: The number of epochs per the optimization iteration of the parameter distributions.
-            lr_mu: The learning rate for the gradient updates of the mean.
-            lr_sigma: The learning rate for the gradient updates of the variance.
-            reset_after_drift: See description of base class.
+                The window size for the moving average aggregation of KL divergence measures between the model parameter
+                distributions.
+            window_drift_detect:
+                The window size that is used to compute the pairwise differences between subsequent measures of the
+                moving average. This window and information is used for the change detection.
+            beta:
+                The scaling rate for the automatic update of the alpha-threshold, which is in turn applied to the
+                window_drift_detect to detect concept drift.
+            init_mu: The initial mean of the model parameter distributions.
+            init_sigma: The initial variance of the model parameter distributions.
+            epochs: The number of epochs per optimization iteration of the parameter distributions.
+            lr_mu: The learning rate for the gradient updates of the means.
+            lr_sigma: The learning rate for the gradient updates of the variances.
+            reset_after_drift:
+                A boolean indicating if the change detector will be reset after a drift was detected. This is set to
+                False for ERICS, as this change detector does not need to be reset.
         """
         if reset_after_drift:
             warn("The ERICS change detector need not be reset after detecting a concept drift. "
@@ -144,11 +132,20 @@ class ERICS(BaseChangeDetector):
         self._time_step += 1
 
     def detect_change(self) -> bool:
-        """Detects global concept drift."""
+        """Detects global concept drift.
+
+        Returns:
+            bool: True, if a concept drift was detected, False otherwise.
+        """
         return self._drift_detected
 
     def detect_partial_change(self) -> Tuple[bool, list]:
-        """Detects partial concept drift (see base class)."""
+        """Detects partial concept drift.
+
+        Returns:
+            bool: True, if at least one partial concept drift was detected, False otherwise.
+            list: Indices (i.e. relative positions in the feature vector) of input features with detected partial drift.
+        """
         return self._partial_drift_detected, self._partial_drift_features
 
     def detect_warning_zone(self) -> bool:
@@ -163,7 +160,7 @@ class ERICS(BaseChangeDetector):
     # ERICS Functionality (left unchanged)
     # ----------------------------------------
     def _update_param_sum(self):
-        """Retrieve current parameter distribution and compute sum expression according to Eq. (8) [1]."""
+        """Retrieves the current parameter distribution and computes the sum expression according to Eq. (8) [1]."""
         # Retrieve current distribution parameters
         new_mu = copy.copy(self._fires_mu).reshape(1, -1)
         new_sigma = copy.copy(self._fires_sigma).reshape(1, -1)
@@ -182,7 +179,7 @@ class ERICS(BaseChangeDetector):
                                     self._sigma_w[t, :] ** 2
 
     def _compute_moving_average(self):
-        """Compute the moving average (according to Eq. (8) [1])."""
+        """Computes the moving average (according to Eq. (8) [1])."""
         partial_ma = np.zeros(self._n_param)
         score = np.zeros(self._M - 1)
 
@@ -197,7 +194,7 @@ class ERICS(BaseChangeDetector):
         self._partial_info_ma.append(partial_ma)
 
     def _detect_drift(self) -> Tuple[bool, bool, list]:
-        """Detect global and partial concept drift using the adaptive alpha-threshold
+        """Detects global and partial concept drift using the adaptive alpha-threshold.
 
         Returns:
             bool: True, if a concept drift was detected, False otherwise.
@@ -256,7 +253,7 @@ class ERICS(BaseChangeDetector):
         return drift, p_drift, partial_drift_features
 
     def _update_probit(self, X: np.ndarray, y: np.ndarray):
-        """Update parameters of the Probit model.
+        """Updates the parameters of the Probit model.
 
         According to [2], as implemented here https://github.com/haugjo/fires
         We have slightly adjusted the original code to fit our use case.

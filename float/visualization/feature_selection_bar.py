@@ -1,3 +1,10 @@
+"""Feature Selection Bar Plot.
+
+This function returns a special bar plot that illustrates the selected features of one or multiple online feature
+selection methods.
+
+Copyright (C) 2022 Johannes Haug.
+"""
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,7 +22,7 @@ def feature_selection_bar(selected_features: List[list],
                           top_n_features: Optional[int] = None,
                           fig_size: tuple = (13, 5),
                           font_size: int = 16) -> Axes:
-    """Returns a bar plot that shows the number of times a feature was selected (between multiple models).
+    """Returns a bar plot that shows the number of times a feature was selected for the specified models.
 
     Args:
         selected_features:

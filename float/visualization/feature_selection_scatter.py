@@ -1,20 +1,28 @@
+"""Feature Selection Scatter Plot.
+
+This function returns a special scatter plot that illustrates the selected features over time of one or multiple online
+feature selection methods.
+
+Copyright (C) 2022 Johannes Haug.
+"""
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
+from typing import List
 
 # Global color palette
 # dark blue, teal, light blue, dark green, olive, yellow green, red, magenta, grey, black
 _PALETTE = ['#003366', '#44aa99', '#88ccee', '#117733', '#999933', '#ddcc77', '#cc3311', '#ee3377', '#bbbbbb', '#000000']
 
 
-def feature_selection_scatter(selected_features: list,
+def feature_selection_scatter(selected_features: List[list],
                               fig_size: tuple = (13, 5),
                               font_size: int = 16) -> Axes:
-    """Return a scatter plot that illustrates the selected features over time.
+    """Returns a scatter plot that illustrates the selected features over time for the specified models.
 
     Args:
         selected_features:
-            A list corresponding to the selected feature vectors of a feature selection model.
+            A list of lists, where each list corresponds to the selected feature vectors of one feature selector.
         fig_size: The figure size (length x height)
         font_size: The font size of the axis labels.
 

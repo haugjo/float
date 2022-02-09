@@ -1,46 +1,23 @@
 """Distributed Fold Pipeline Module.
 
-This module implements a pipeline similar to the k-fold distributed validation
-techniques proposed in Albert Bifet, Gianmarco de Francisci Morales, Jesse Read,
+This module contains a pipeline that performs a k-fold distributed validation as proposed by
+Albert Bifet, Gianmarco de Francisci Morales, Jesse Read,
 Geoff Holmes, and Bernhard Pfahringer. 2015. Efficient Online Evaluation of Big
 Data Stream Classifiers. In Proceedings of the 21th ACM SIGKDD International
 Conference on Knowledge Discovery and Data Mining (KDD '15). Association for
 Computing Machinery, New York, NY, USA, 59–68.
 
-It serves the purpose of testing a predictor and its hyperparameter configurations
-more robustly by not just training and evaluating one instance of the predictor,
-but several. To this end, one predictor object is passed by the used and then
-cloned for further use in the specified validation mode.
+The distributed fold pipeline maintains multiple parallel instances of each provided predictor object and enables
+more robust and statistically significant results. The following three modes defined by Bifet et al. are implemented:
+1. k-fold distributed cross-validation: each example is used for testing in one classifier instance selected randomly,
+and used for training by all the others;
+2. k-fold distributed split-validation: each example is used for training in one classifier instance selected randomly,
+and for testing in the other classifiers;
+3. k-fold distributed bootstrap validation: each example is used for training in each classifier instance according to a
+weight from a Poisson(1) distribution. This results in each example being used for training in approximately two thirds
+of the classifiers instances,  with a separate weight in each classifier, and for testing in the rest.
 
-The following three modes are implemented:
-1. k-fold distributed cross-validation: each example is used for testing in one
-classifier selected randomly, and used for training by all the others;
-2. k-fold distributed split-validation: each example is used for training in one
-classifier selected randomly, and for testing in the other classifiers;
-3. k-fold distributed bootstrap validation: each example is used for training in
-each classifier according to a weight from a Poisson(1) distribution. This results
-in each example being used for training in approximately two thirds of the classifiers,
- with a separate weight in each classifier, and for testing in the rest.
-
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 import copy
 
@@ -60,14 +37,15 @@ from float.prediction.evaluation import PredictionEvaluator
 
 
 class DistributedFoldPipeline(BasePipeline):
-    """Pipeline for k-fold distributed validation.
+    """Pipeline class for a k-fold distributed evaluation.
 
     Attributes:
         validation_mode (str):
             A string indicating the k-fold distributed validation mode to use. One of 'cross', 'batch' and 'bootstrap'.
-        n_parallel_instances (int):
-            The number of instances of the specified predictor that will be trained in parallel.
+        n_parallel_instances (int): The number of instances of the specified predictor that will be trained in parallel.
         n_unique_predictors (int): The number of predictor objects originally specified.
+        predictors List[BasePredictor]: All instances of the predictive model(s).
+        prediction_evaluators List[PredictionEvaluator]: Evaluator(s) for all instances of the predictive model(s).
     """
     def __init__(self, data_loader: DataLoader,
                  predictor: Union[BasePredictor, List[BasePredictor]],
@@ -88,8 +66,8 @@ class DistributedFoldPipeline(BasePipeline):
 
         Args:
             data_loader: Data loader object.
-            predictor: Predictive model.
-            prediction_evaluator: Evaluator for predictive model.
+            predictor: Predictor object or list of predictor objects.
+            prediction_evaluator: Evaluator object for the predictive model(s).
             change_detector: Concept drift detection model.
             change_detection_evaluator: Evaluator for active concept drift detection.
             feature_selector: Online feature selection model.

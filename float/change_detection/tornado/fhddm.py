@@ -1,34 +1,16 @@
 """Fast Hoeffding Drift Detection Method.
 
-Code adopted from https://github.com/alipsgh/tornado, please cite:
+The source code was adopted from https://github.com/alipsgh/tornado, please cite:
 The Tornado Framework
 By Ali Pesaranghader
 University of Ottawa, Ontario, Canada
 E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com
 ---
-Paper: Pesaranghader, Ali, and Herna L. Viktor. "Fast hoeffding drift detection method for evolving data streams."
+Original Paper: Pesaranghader, Ali, and Herna L. Viktor. "Fast hoeffding drift detection method for evolving data streams."
 Published in: Joint European Conference on Machine Learning and Knowledge Discovery in Databases. Springer International Publishing, 2016.
 URL: https://link.springer.com/chapter/10.1007/978-3-319-46227-1_7
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 import math
 from typing import Tuple, List
@@ -42,9 +24,9 @@ class FHDDM(BaseChangeDetector):
         """Inits the change detector.
 
         Args:
-            n: Todo
-            delta: Todo
-            reset_after_drift: See description of base class.
+            n: Todo (left unspecified by the Tornado library).
+            delta: Todo (left unspecified by the Tornado library).
+            reset_after_drift: A boolean indicating if the change detector will be reset after a drift was detected.
         """
         super().__init__(reset_after_drift=reset_after_drift, error_based=True)
 
@@ -64,8 +46,9 @@ class FHDDM(BaseChangeDetector):
         """Updates the change detector.
 
         Args:
-            pr_scores: Boolean vector indicating correct predictions.
-                If True the prediction by the online learner was correct, False otherwise.
+            pr_scores:
+                A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the
+                online learner was correct, otherwise the vector contains 'False'.
         """
         self._active_change = False
 
@@ -81,7 +64,11 @@ class FHDDM(BaseChangeDetector):
                 self._active_change = (self.__MU_M - mu_t) > self.__E
 
     def detect_change(self) -> bool:
-        """Detects global concept drift."""
+        """Detects global concept drift.
+
+        Returns:
+            bool: True, if a concept drift was detected, False otherwise.
+        """
         return self._active_change
 
     def detect_partial_change(self) -> Tuple[bool, list]:

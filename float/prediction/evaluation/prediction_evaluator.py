@@ -2,25 +2,7 @@
 
 This module contains an evaluator class for online predictive models.
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 import numpy as np
 from numpy.typing import ArrayLike
@@ -38,15 +20,17 @@ class PredictionEvaluator:
     Attributes:
         measure_funcs (List[Callable]): List of evaluation measure functions.
         decay_rate (float |None):
-            If this parameter is set, the measurements are additionally aggregated with a decay/fading factor.
+            If this parameter is not None, the measurements are additionally aggregated with the specific decay/fading
+            factor.
         window_size (int | None):
-            If this parameter is set, the measurements are additionally aggregated in a sliding window.
+            If this parameter is not None, the measurements are additionally aggregated in a sliding window.
         kwargs (dict):
             A dictionary containing additional and specific keyword arguments, which are passed to the evaluation
             functions.
         testing_comp_times (list): List of computation times per testing iteration.
         training_comp_times (list): List of computation times per training iteration.
-        memory_changes (list): List of measured memory changes (GB RAM) per training iteration of the predictor.
+        memory_changes (list):
+            Memory changes (in GB RAM) per training iteration of the online feature selection model.
         result (dict):
             The raw and aggregated measurements of each evaluation measure function.
     """
@@ -61,8 +45,10 @@ class PredictionEvaluator:
         Args:
             measure_funcs: List of evaluation measure functions.
             decay_rate:
-                If this parameter is set, the measurements are additionally aggregated with a decay/fading factor.
-            window_size: If this parameter is set, the measurements are additionally aggregated in a sliding window.
+                If this parameter is not None, the measurements are additionally aggregated with the specific
+                decay/fading factor.
+            window_size:
+                If this parameter is not None, the measurements are additionally aggregated in a sliding window.
             kwargs:
                 A dictionary containing additional and specific keyword arguments, which are passed to the evaluation
                 functions.

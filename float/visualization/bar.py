@@ -1,3 +1,9 @@
+"""Standard Bar Plot.
+
+This function returns a bar plot using the style and coloring of the float framework.
+
+Copyright (C) 2022 Johannes Haug.
+"""
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np

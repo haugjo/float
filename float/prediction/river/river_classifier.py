@@ -1,26 +1,8 @@
 """River Predictive Model Wrapper.
 
-This module contains a wrapper for the river predictive models.
+This module contains a wrapper class for river predictive models.
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 import numpy as np
 from numpy.typing import ArrayLike
@@ -39,7 +21,7 @@ class RiverClassifier(BasePredictor):
         feature_names (List[str]): A list of all feature names.
     """
     def __init__(self, model: Classifier, feature_names: List[str], reset_after_drift: bool = False):
-        """Inits the river predictor.
+        """Inits the wrapper.
 
         Args:
             model: The river predictor object.
@@ -61,7 +43,13 @@ class RiverClassifier(BasePredictor):
         super().__init__(reset_after_drift=reset_after_drift)
 
     def partial_fit(self, X: ArrayLike, y: ArrayLike, sample_weight: Optional[ArrayLike] = None):
-        """Updates the predictor."""
+        """Updates the predictor.
+
+        Args:
+            X: Array/matrix of observations.
+            y: Array of corresponding labels.
+            sample_weight: Weights per sample. If no weights are provided, we weigh observations uniformly.
+        """
         if self.can_mini_batch:
             X = pd.DataFrame(X, columns=self.feature_names)
             y = pd.Series(y)
@@ -71,7 +59,14 @@ class RiverClassifier(BasePredictor):
             self.model.learn_one(x=x, y=bool(y))
 
     def predict(self, X: ArrayLike) -> ArrayLike:
-        """Predicts the target values."""
+        """Predicts the target values.
+
+        Args:
+            X: Array/matrix of observations.
+
+        Returns:
+            ArrayLike: Predicted labels for all observations.
+        """
         if self.can_mini_batch:
             X = pd.DataFrame(X, columns=self.feature_names)
             return self.model.predict_many(X=X)
@@ -80,7 +75,14 @@ class RiverClassifier(BasePredictor):
             return np.array([self.model.predict_one(x=x)])
 
     def predict_proba(self, X: ArrayLike) -> ArrayLike:
-        """Predicts the probability of target values."""
+        """Predicts the probability of target values.
+
+        Args:
+            X: Array/matrix of observations.
+
+        Returns:
+            ArrayLike: Predicted probability per class label for all observations.
+        """
         if self.can_mini_batch:
             X = pd.DataFrame(X, columns=self.feature_names)
             return self.model.predict_proba_many(X=X)

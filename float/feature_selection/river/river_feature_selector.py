@@ -1,26 +1,8 @@
 """River Feature Selection Model Wrapper.
 
-This module contains a wrapper for the river feature selection models.
+This module contains a wrapper class for river feature selection models.
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 import copy
 
@@ -45,15 +27,20 @@ class RiverFeatureSelector(BaseFeatureSelector):
                  reset_after_drift: bool = False,
                  baseline: str = 'constant',
                  ref_sample: Union[float, ArrayLike] = 0):
-        """Inits the feature selector.
+        """Inits the wrapper.
 
         Args:
             model: The river feature selector object (one of SelectKBest, PoissonInclusion or VarianceThreshold).
             feature_names: A list of all feature names.
-            n_total_features: See description of base class.
-            reset_after_drift: See description of base class.
-            baseline: See description of base class.
-            ref_sample: See description of base class.
+            n_total_features: The total number of features.
+            reset_after_drift: A boolean indicating if the change detector will be reset after a drift was detected.
+            baseline:
+                A string identifier of the baseline method. The baseline is the value that we substitute non-selected
+                features with. This is necessary, because most online learning models are not able to handle arbitrary
+                patterns of missing data.
+            ref_sample:
+                A sample used to compute the baseline. If the constant baseline is used, one needs to provide a single
+                float value.
         """
         self.init_model = model.clone()
         self.model = model
@@ -66,7 +53,12 @@ class RiverFeatureSelector(BaseFeatureSelector):
                          ref_sample=ref_sample)
 
     def weight_features(self, X: ArrayLike, y: ArrayLike):
-        """Updates feature weights."""
+        """Updates feature weights.
+
+        Args:
+            X: Array/matrix of observations.
+            y: Array of corresponding labels.
+        """
         # PoissonInclusion uses random selection so weights do not need to be set.
         if not isinstance(self.model, PoissonInclusion):
             for x, y_i in zip(X, y):
@@ -86,6 +78,14 @@ class RiverFeatureSelector(BaseFeatureSelector):
         """Selects features with highest absolute weights.
 
         This overrides the corresponding parent class function.
+
+        Args:
+            X: Array/matrix of observations.
+            rng: A numpy random number generator object.
+
+        Returns:
+            ArrayLike:
+                The observation array/matrix where all non-selected features have been replaced by the baseline value.
         """
         selected_features = []
         # SelectKBest can be used with the superclass function as it selects a fixed number of features

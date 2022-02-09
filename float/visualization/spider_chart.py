@@ -1,3 +1,9 @@
+"""Spider Plot.
+
+This function returns a spider plot that can be used to compare models with respect to different performance measures.
+
+Copyright (C) 2022 Johannes Haug.
+"""
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,7 +21,7 @@ def spider_chart(measures: List[List],
                  invert: Optional[List[bool]] = None,
                  fig_size: tuple = (8, 5),
                  font_size: int = 16) -> Axes:
-    """Returns a spider chart that shows the specified metric values.
+    """Returns a spider chart that displays the specified measures.
 
     Args:
         measures:

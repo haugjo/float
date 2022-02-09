@@ -1,26 +1,8 @@
 """Scikit-Multiflow Predictive Model Wrapper.
 
-This module contains a wrapper for the scikit-multiflow predictive models.
+This module contains a wrapper class for scikit-multiflow predictive models.
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 from numpy.typing import ArrayLike
 from skmultiflow.core import ClassifierMixin
@@ -37,7 +19,7 @@ class SkmultiflowClassifier(BasePredictor):
         classes (list): A list of all unique classes.
     """
     def __init__(self, model: ClassifierMixin, classes: list, reset_after_drift: bool = False):
-        """Inits the scikit-multiflow predictor.
+        """Inits the wrapper.
 
         Args:
             model: The scikit-multiflow predictor object.
@@ -49,15 +31,35 @@ class SkmultiflowClassifier(BasePredictor):
         super().__init__(reset_after_drift=reset_after_drift)
 
     def partial_fit(self, X: ArrayLike, y: ArrayLike, sample_weight: Optional[ArrayLike] = None):
-        """Updates the predictor."""
+        """Updates the predictor.
+
+        Args:
+            X: Array/matrix of observations.
+            y: Array of corresponding labels.
+            sample_weight: Weights per sample. If no weights are provided, we weigh observations uniformly.
+        """
         self.model.partial_fit(X=X, y=y, classes=self.classes, sample_weight=sample_weight)
 
     def predict(self, X: ArrayLike) -> ArrayLike:
-        """Predicts the target values."""
+        """Predicts the target values.
+
+        Args:
+            X: Array/matrix of observations.
+
+        Returns:
+            ArrayLike: Predicted labels for all observations.
+        """
         return self.model.predict(X=X)
 
     def predict_proba(self, X: ArrayLike) -> ArrayLike:
-        """Predicts the probability of target values."""
+        """Predicts the probability of target values.
+
+        Args:
+            X: Array/matrix of observations.
+
+        Returns:
+            ArrayLike: Predicted probability per class label for all observations.
+        """
         return self.model.predict_proba(X=X)
 
     def reset(self):

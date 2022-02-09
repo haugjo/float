@@ -2,25 +2,7 @@
 
 This module contains a wrapper for the scikit-learn scaling functions.
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 from numpy.typing import ArrayLike
 from sklearn.utils.validation import check_is_fitted
@@ -36,15 +18,13 @@ class SklearnScaler(BaseScaler):
 
     Attributes:
         scaler_obj (Any): A scikit-learn scaler object (e.g. MinMaxScaler)
-        _has_partial_fit (bool) : Indicates whether the scikit-learn scaler can be fitted incrementally.
-        _must_be_fitted (bool): Indicates whether the scikit-learn scaler must be fitted once.
     """
     def __init__(self, scaler_obj: Any, reset_after_drift: bool = False):
         """Inits the sklearn scaler.
 
         Args:
             scaler_obj: A scikit-learn scaler object (e.g. MinMaxScaler)
-            reset_after_drift: See description in base class.
+            reset_after_drift: A boolean indicating if the scaler will be reset after a drift was detected.
         """
         super().__init__(reset_after_drift=reset_after_drift)
 
@@ -54,7 +34,11 @@ class SklearnScaler(BaseScaler):
         self._validate()
 
     def partial_fit(self, X: ArrayLike):
-        """Updates the scaler."""
+        """Updates the scaler.
+
+        Args:
+            X: Array/matrix of observations.
+        """
         if self._must_be_fitted:
             self.scaler_obj.fit(X)
             self._must_be_fitted = False
@@ -62,7 +46,14 @@ class SklearnScaler(BaseScaler):
             self.scaler_obj.partial_fit(X)
 
     def transform(self, X: ArrayLike) -> ArrayLike:
-        """Scales the given observations."""
+        """Scales the given observations.
+
+        Args:
+            X: Array/matrix of observations.
+
+        Returns:
+            ArrayLike: The scaled observations.
+        """
         return self.scaler_obj.transform(X)
 
     def reset(self):
@@ -76,8 +67,8 @@ class SklearnScaler(BaseScaler):
         """Validates the provided scaler object.
 
         Raises:
-            TypeError: If scaler object does neither have a partial_fit nor a fit function.
-            TypeError: If scaler object does not have a transform function.
+            TypeError: If the sklearn scaler object does neither have a partial_fit nor a fit function.
+            TypeError: If the sklearn scaler object does not have a transform function.
         """
         # Check if scaler object has a partial fit function
         partial_fit_func = getattr(self.scaler_obj, "partial_fit", None)

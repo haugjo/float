@@ -1,26 +1,8 @@
-"""Scikit-Multiflow Drift Detection Model Wrapper.
+"""Scikit-Multiflow Change Detection Model Wrapper.
 
-This module contains a wrapper for the scikit-multiflow concept drift detection methods.
+This module contains a wrapper class for scikit-multiflow concept drift detection methods.
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 from skmultiflow.drift_detection.base_drift_detector import BaseDriftDetector
 from skmultiflow.drift_detection import ADWIN, DDM, EDDM, HDDM_A, HDDM_W, PageHinkley
@@ -30,17 +12,17 @@ from float.change_detection import BaseChangeDetector
 
 
 class SkmultiflowChangeDetector(BaseChangeDetector):
-    """Wrapper for scikit-multiflow drift detection methods.
+    """Wrapper class for scikit-multiflow change detection classes.
 
     Attributes:
-        detector (BaseDriftDetector): The scikit-multiflow concept drift detector object
+        detector (BaseDriftDetector): The scikit-multiflow concept drift detector object.
     """
     def __init__(self, detector: BaseDriftDetector, reset_after_drift: bool = False):
-        """Inits the scikit-multiflow change detector.
+        """Inits the wrapper.
 
         Args:
-            detector: The scikit-multiflow concept drift detector object
-            reset_after_drift: See description of base class.
+            detector: The scikit-multiflow concept drift detector object.
+            reset_after_drift: A boolean indicating if the change detector will be reset after a drift was detected.
         """
         self.detector = detector
         self._validate()
@@ -51,17 +33,22 @@ class SkmultiflowChangeDetector(BaseChangeDetector):
         self.detector.reset()
 
     def partial_fit(self, pr_scores: List[bool]):
-        """Updates the parameters of the concept drift detection model.
+        """Updates the change detector.
 
         Args:
-            pr_scores: Boolean vector indicating correct predictions.
-                If True the prediction by the online learner was correct, False otherwise.
+            pr_scores:
+                A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the
+                online learner was correct, otherwise the vector contains 'False'.
         """
         for pr in pr_scores:
             self.detector.add_element(pr)
 
     def detect_change(self) -> bool:
-        """Detects global concept drift."""
+        """Detects global concept drift.
+
+        Returns:
+            bool: True, if a concept drift was detected, False otherwise.
+        """
         return self.detector.detected_change()
 
     def detect_partial_change(self) -> Tuple[bool, list]:
@@ -73,14 +60,18 @@ class SkmultiflowChangeDetector(BaseChangeDetector):
         return False, []
 
     def detect_warning_zone(self) -> bool:
-        """Detects a warning zone."""
+        """Detects a warning zone.
+
+        Returns:
+            bool: True, if the change detector has detected a warning zone, False otherwise.
+        """
         return self.detector.detected_warning_zone()
 
     def _validate(self):
-        """Validates the provided river drift detector object.
+        """Validates the provided scikit-multiflow drift detector object.
 
         Raises:
-            TypeError: If the provided detector is not a valid river drift detection method.
+            TypeError: If the provided detector is not a valid scikit-multiflow drift detection object.
         """
         if not isinstance(self.detector, (ADWIN, DDM, EDDM, HDDM_A, HDDM_W, PageHinkley)):
             raise TypeError("Scikit-multiflow drift detector class {} is not supported.".format(type(self.detector)))

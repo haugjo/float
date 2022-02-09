@@ -5,25 +5,7 @@ algorithm without requiring supervision. The method was introduced by:
 HUANG, Hao; YOO, Shinjae; KASIVISWANATHAN, Shiva Prasad. Unsupervised feature selection on data streams.
 In: Proceedings of the 24th ACM International on Conference on Information and Knowledge Management. 2015. S. 1031-1040.
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 import numpy as np
 import numpy.linalg as ln
@@ -51,15 +33,20 @@ class FSDS(BaseFeatureSelector):
         """Inits the feature selector.
 
         Args:
-            n_total_features: See description of base class.
-            n_selected_features: See description of base class.
+            n_total_features: The total number of features.
+            n_selected_features: The number of selected features.
             l: Size of the matrix sketch with l << m.
             m: Size of the feature space (i.e. dimensionality).
             B: Matrix sketch.
             k: Number of singular vectors.
-            reset_after_drift: See description of base class.
-            baseline: See description of base class.
-            ref_sample: See description of base class.
+            reset_after_drift: A boolean indicating if the change detector will be reset after a drift was detected.
+            baseline:
+                A string identifier of the baseline method. The baseline is the value that we substitute non-selected
+                features with. This is necessary, because most online learning models are not able to handle arbitrary
+                patterns of missing data.
+            ref_sample:
+                A sample used to compute the baseline. If the constant baseline is used, one needs to provide a single
+                float value.
         """
         super().__init__(n_total_features=n_total_features,
                          n_selected_features=n_selected_features,
@@ -78,7 +65,11 @@ class FSDS(BaseFeatureSelector):
     def weight_features(self, X: ArrayLike, y: ArrayLike):
         """Updates feature weights.
 
-        FSDS is an unsupervised approach and does not use target information.
+        FSDS is an unsupervised approach and does not use the target information.
+
+        Args:
+            X: Array/matrix of observations.
+            y: Array of corresponding labels.
         """
         Yt = X.T  # Algorithm assumes rows to represent features
 

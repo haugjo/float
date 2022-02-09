@@ -1,3 +1,10 @@
+"""River Classification Metric Wrapper.
+
+This function is a wrapper for river classification metrics. This wrapper is required, as river metrics cannot process
+batches of observations out of the box.
+
+Copyright (C) 2022 Johannes Haug.
+"""
 from numpy.typing import ArrayLike
 from river.metrics import ClassificationMetric
 from typing import Any
@@ -7,8 +14,7 @@ def river_classification_metric(y_true: ArrayLike,
                                 y_pred: ArrayLike,
                                 metric: ClassificationMetric,
                                 **kwargs) -> Any:
-    """
-    Acts as a wrapper for river classification metrics.
+    """Wrapper function for river classification metrics.
 
     Args:
         y_true: True target labels.

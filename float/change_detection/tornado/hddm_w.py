@@ -1,34 +1,16 @@
 """Hoeffding's Bound based Drift Detection Method (W_test Scheme).
 
-Code adopted from https://github.com/alipsgh/tornado, please cite:
+The source code was adopted from https://github.com/alipsgh/tornado, please cite:
 The Tornado Framework
 By Ali Pesaranghader
 University of Ottawa, Ontario, Canada
 E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com
 ---
-Paper: Frías-Blanco, Isvani, et al. "Online and non-parametric drift detection methods based on Hoeffding’s bounds."
+Original Paper: Frías-Blanco, Isvani, et al. "Online and non-parametric drift detection methods based on Hoeffding’s bounds."
 Published in: IEEE Transactions on Knowledge and Data Engineering 27.3 (2015): 810-823.
 URL: http://ieeexplore.ieee.org/abstract/document/6871418/
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 import math
 import sys
@@ -48,11 +30,11 @@ class HDDMW(BaseChangeDetector):
         """ Inits the change detector.
 
         Args:
-            drift_confidence: Todo
-            warning_confidence: Todo
-            lambda_: Todo
-            test_type: Todo
-            reset_after_drift: See description of base class.
+            drift_confidence: Todo (left unspecified by the Tornado library).
+            warning_confidence: Todo (left unspecified by the Tornado library).
+            lambda_: Todo (left unspecified by the Tornado library).
+            test_type: Todo (left unspecified by the Tornado library).
+            reset_after_drift: A boolean indicating if the change detector will be reset after a drift was detected.
         """
         super().__init__(reset_after_drift=reset_after_drift, error_based=True)
 
@@ -78,8 +60,9 @@ class HDDMW(BaseChangeDetector):
         """Updates the change detector.
 
         Args:
-            pr_scores: Boolean vector indicating correct predictions.
-                If True the prediction by the online learner was correct, False otherwise.
+            pr_scores:
+                A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the
+                online learner was correct, otherwise the vector contains 'False'.
         """
         for pr in pr_scores:
             pr = 1.0 if pr is False else 0.0
@@ -111,7 +94,11 @@ class HDDMW(BaseChangeDetector):
                 self._reset_parameters()
 
     def detect_change(self) -> bool:
-        """Detects global concept drift."""
+        """Detects global concept drift.
+
+        Returns:
+            bool: True, if a concept drift was detected, False otherwise.
+        """
         return self._active_change
 
     def detect_partial_change(self) -> Tuple[bool, list]:
@@ -123,7 +110,11 @@ class HDDMW(BaseChangeDetector):
         return False, []
 
     def detect_warning_zone(self) -> bool:
-        """Detects a warning zone."""
+        """Detects a warning zone.
+
+        Returns:
+            bool: True, if the change detector has detected a warning zone, False otherwise.
+        """
         return self._active_warning
 
     # ----------------------------------------

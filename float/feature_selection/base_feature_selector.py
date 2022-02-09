@@ -1,27 +1,9 @@
 """Base Online Feature Selection Module.
 
 This module encapsulates functionality for online feature weighting and selection.
-The abstract BaseFeatureSelector class should be used as super class for all online feature selection methods.
+The abstract BaseFeatureSelector class should be used as a super class for all online feature selection methods.
 
-Copyright (C) 2022 Johannes Haug
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (C) 2022 Johannes Haug.
 """
 from abc import ABCMeta, abstractmethod
 import copy
@@ -40,8 +22,7 @@ class BaseFeatureSelector(metaclass=ABCMeta):
         n_selected_features (int): The number of selected features.
         supports_multi_class (bool):
             True if the feature selection model supports multi-class classification, False otherwise.
-        reset_after_drift (bool):
-            A boolean indicating if the change detector will be reset after a drift was detected.
+        reset_after_drift (bool): A boolean indicating if the change detector will be reset after a drift was detected.
         baseline (str):
             A string identifier of the baseline method. The baseline is the value that we substitute non-selected
             features with. This is necessary, because most online learning models are not able to handle arbitrary
@@ -117,7 +98,8 @@ class BaseFeatureSelector(metaclass=ABCMeta):
             rng: A numpy random number generator object.
 
         Returns:
-            ArrayLike: The observations with all non-selected features replaced by the baseline value.
+            ArrayLike:
+                The observation array/matrix where all non-selected features have been replaced by the baseline value.
         """
         if np.any(self.weights < 0) and not hasattr(self, 'feature_selector'):
             abs_weights = abs(self.weights)
@@ -149,7 +131,7 @@ class BaseFeatureSelector(metaclass=ABCMeta):
             rng: A numpy random number generator object.
 
         Returns:
-            ArrayLike: A matrix in the shape of x, pre-filled with the baseline.
+            ArrayLike: A matrix in the shape of X, pre-filled with the baseline.
         """
         if self.baseline == 'constant':
             # Constant baseline value

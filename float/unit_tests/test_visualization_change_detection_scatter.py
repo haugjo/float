@@ -10,12 +10,12 @@ class TestConceptDriftDetectionScatter(unittest.TestCase):
         self.sample_detected_drifts_list = [list(np.random.randint(0, 100, np.random.randint(0, 50, 1))) for _ in range(3)]
 
     def test_concept_drift_detection_scatter(self):
-        ax = fvis.concept_drift_detection_scatter(detected_drifts=self.sample_detected_drifts_list,
-                                                  model_names=[f'Model {i}' for i in range(3)],
-                                                  n_samples=1000,
-                                                  known_drifts=[200, 400, 600, 800],
-                                                  batch_size=10,
-                                                  n_pretrain=0)
+        ax = fvis.change_detection_scatter(detected_drifts=self.sample_detected_drifts_list,
+                                           model_names=[f'Model {i}' for i in range(3)],
+                                           n_samples=1000,
+                                           known_drifts=[200, 400, 600, 800],
+                                           batch_size=10,
+                                           n_pretrain=0)
         self.assertIsInstance(ax, plt.Axes, msg='concept_drift_detection_scatter() returns an object of type Axes')
         self.assertEqual(len(ax.collections), 3,
                          msg='concept_drift_detection_scatter() draws the correct amount of plots')
