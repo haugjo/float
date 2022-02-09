@@ -5,11 +5,15 @@
 # <kbd>module</kbd> `change_detection.erics`
 ERICS Change Detection Method. 
 
-The ERICS (Effective and Robust Identification of Concept Shift) change detector was proposed by: [1] HAUG, Johannes; KASNECI, Gjergji. Learning Parameter Distributions to Detect Concept Drift in Data Streams. In: 2020 25th International Conference on Pattern Recognition (ICPR). IEEE, 2021. S. 9452-9459. 
+The ERICS (Effective and Robust Identification of Concept Shift) change detector was proposed by: 
 
-The original source code can be obtained here: https://github.com/haugjo/erics 
+[1] HAUG, Johannes; KASNECI, Gjergji. Learning Parameter Distributions to Detect Concept Drift in Data Streams. In: 2020 25th International Conference on Pattern Recognition (ICPR). IEEE, 2021. S. 9452-9459. URL: [https://arxiv.org/pdf/2010.09388.pdf](https://arxiv.org/pdf/2010.09388.pdf)
 
-This module provides the ERICS implementation with a Probit base model for binary classification. The update rules for the Probit model are adopted from: [2] HAUG, Johannes, et al. Leveraging model inherent variable importance for stable online feature selection. In: Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2020. S. 1478-1502. 
+The original source code can be obtained [here](https://github.com/haugjo/erics).
+
+This module provides the ERICS implementation with a Probit base model for binary classification. The update rules for the Probit model are adopted from: 
+
+[2] HAUG, Johannes, et al. Leveraging model inherent variable importance for stable online feature selection. In: Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2020. S. 1478-1502. URL: [https://dl.acm.org/doi/abs/10.1145/3394486.3403200](https://dl.acm.org/doi/abs/10.1145/3394486.3403200)
 
 Copyright (C) 2022 Johannes Haug. 
 
@@ -46,12 +50,17 @@ Inits the change detector.
 
 
 **Args:**
-  n_param:  The total number of parameters in the Probit model. This corresponds to the number of input features.  window_mvg_average:  The window size for the moving average aggregation of KL divergence measures between the model parameter  distributions.  window_drift_detect:  The window size that is used to compute the pairwise differences between subsequent measures of the  moving average. This window and information is used for the change detection.  beta:  The scaling rate for the automatic update of the alpha-threshold, which is in turn applied to the  window_drift_detect to detect concept drift. 
+
+ - <b>`n_param`</b>:  The total number of parameters in the Probit model. This corresponds to the number of input features.  
+ - <b>`window_mvg_average`</b>:  The window size for the moving average aggregation of KL divergence measures between the model parameter  distributions.  
+ - <b>`window_drift_detect`</b>:  The window size that is used to compute the pairwise differences between subsequent measures of the  moving average. This window and information is used for the change detection.  
+ - <b>`beta`</b>:  The scaling rate for the automatic update of the alpha-threshold, which is in turn applied to the  window_drift_detect to detect concept drift. 
  - <b>`init_mu`</b>:  The initial mean of the model parameter distributions. 
  - <b>`init_sigma`</b>:  The initial variance of the model parameter distributions. 
  - <b>`epochs`</b>:  The number of epochs per optimization iteration of the parameter distributions. 
  - <b>`lr_mu`</b>:  The learning rate for the gradient updates of the means. 
- - <b>`lr_sigma`</b>:  The learning rate for the gradient updates of the variances. reset_after_drift:  A boolean indicating if the change detector will be reset after a drift was detected. This is set to  False for ERICS, as this change detector does not need to be reset. 
+ - <b>`lr_sigma`</b>:  The learning rate for the gradient updates of the variances. 
+ - <b>`reset_after_drift`</b>:  A boolean indicating if the change detector will be reset after a drift was detected. This is set to  False for ERICS, as this change detector does not need to be reset. 
 
 
 

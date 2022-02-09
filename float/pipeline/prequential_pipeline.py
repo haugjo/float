@@ -1,4 +1,4 @@
-"""Prequential Pipeline Module.
+"""Prequential Pipeline.
 
 This module implements a pipeline following the prequential (i.e. test-then-train) evaluation strategy.
 

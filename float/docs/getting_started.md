@@ -1,33 +1,17 @@
-<p align="center">
-  <img alt="float" src="https://github.com/haugjo/float/raw/main/logo.png" width="400"/>
-</p>
-<p align="center">
-    <em>[Placeholder for badges]</em>
-</p>
-
-<p align="center">
-    <strong><em>float</em> (<u>f</u>riction<u>l</u>ess <u>o</u>nline model <u>a</u>nalysis and <u>t</u>esting)</strong> is a modular Python-framework for standardized evaluations of online learning methods.
-    <em>float</em> can combine custom code with popular libraries and provides easy access to sensible evaluation strategies, measures and visualisations.
-</p>
-
->**Release Notes:**<br>
->*02/02/22* - Initial release on Github.
-
+# Getting Started
 ## Installation
-<!--
 Install float with pip:
 ```
 pip install float
 ```
--->
-Execute the following code in a command line to clone the float repository from Github:
+Alternatively, clone the float repository from Github:
 ```
 git clone git@github.com:haugjo/float.git
 ```
-*[!] A release of float via the Python Packaging Index (pypi) will follow soon.*
 
 ## Requirements
 Float is supported by python versions >=3.8.x and has the following package requirements:
+
 - numpy~=1.22.1
 - scikit-learn~=1.0.2
 - tabulate~=0.8.5
@@ -40,7 +24,7 @@ Float is supported by python versions >=3.8.x and has the following package requ
 
 *[!] Older versions have not been tested, but might also be compatible.*
 
-## Quickstart
+## Simple Experiment
 The easiest way to become familiar with float and its functionality is to look at the experiment notebooks in the ```./float/experiments``` 
 folder. We provide experiments that showcase each of the three evaluation pipelines *prequential*, *holdout* and 
 *distributed fold*. We also demonstrate the use of the *change detection*, *online feature selection* and 
@@ -104,29 +88,13 @@ Model: SkmultiflowClassifier.HoeffdingTreeClassifier
 | Avg. noise_variability | 0.241901  |
 #############################################################################
 ```
-## Package Structure
-Float is fully modular. The package has dedicated modules for the data preparation, online prediction, online 
-feature selection, concept drift detection and their evaluation (corresponding to the directories in ```./float```). 
-
-The pipeline module is at the heart of every experiment in float. The pipeline can be run with arbitrary combinations of 
-predictors, online feature selectors and concept drift detectors. 
-
-The results of every experiment are stored in dedicated evaluator objects. Via these evaluators, the user is 
-able to specify the performance measures that will be computed during the evaluation. After running the pipeline, the 
-evaluators can be used to create custom tables and plots or to obtain standardized visualizations with the float visualization module. 
-
-Each of the above-mentioned modules contains an abstract base class that simplifies the integration of custom 
-functionality in the experiment. 
-
-Float also provides wrappers for [scikit-mukltiflow](https://scikit-multiflow.readthedocs.io/en/stable/index.html) 
-and [river](https://riverml.xyz/latest/) functionality wherever available. Besides float integrates the change detectors
-implemented by the [Tornado](https://github.com/alipsgh/tornado) package.
 
 ## Datasets
 Float is accompanied by a small set of popular streaming data sets that are required to run the 
 experiment notebooks and unit tests. These fully cleansed and normalized data sets can be found in ```./data/datasets```.
 
 There is a general shortage of publicly available streaming data sets. Still, there are useful resources, including the following:
+
 - https://www.openml.org/search?type=data (search for "data stream" or "concept drift")
 - https://sites.google.com/view/uspdsrepository
 - https://github.com/ogozuacik/concept-drift-datasets-scikit-multiflow
@@ -134,26 +102,3 @@ There is a general shortage of publicly available streaming data sets. Still, th
 
 *[!] We will soon introduce an extensive set of benchmark data sets that can be directly accessed 
 from a remote source using the float.DataLoader module.*
-
-## References
-Please refer to the following paper when using float: *Link will following soon.*
-
-Please also make sure that you acknowledge the corresponding authors, when using one of the provided models (Relevant 
-sources and papers are linked in the docstrings of each file).
-
-## Contribution
-We welcome meaningful contributions by the community. In particular, we encourage contributions of new evaluation strategies, 
-performance measures, expressive visualizations and streaming data sets.
-
-Additionally, we welcome implementations of novel online learning models. 
-However, we discourage contributing models that are already included in one 
-of the major libraries, e.g. [scikit-multiflow](https://scikit-multiflow.readthedocs.io/en/stable/#) or [river](https://riverml.xyz/latest/)
-(i.e., float is primarily an evaluation toolkit and not a library of state-of-the-art online learning methods).
-
-All contributed source code must adhere to the following criteria:
-- Code must conform with the [PEP8](https://www.python.org/dev/peps/pep-0008/) standard.
-- Docstrings must conform with the [Google docstring](https://google.github.io/styleguide/pyguide.html) convention.
-- All tests in ```./unit_tests``` must run successfully. To run the complete test suite, one may execute 
-```./unit_tests/run_test_suite.py```.
-
-Please feel free to contact us, if you plan to make a contribution.

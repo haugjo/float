@@ -7,7 +7,6 @@ Copyright (C) 2022 Johannes Haug.
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.signal import savgol_filter
 from typing import List, Optional
 
 # Global color palette
@@ -21,8 +20,7 @@ def plot(measures: List[list],
          fig_size: tuple = (13, 5),
          font_size: int = 16,
          x_label: str = 'Time Step $t$',
-         variance_measures: Optional[List[list]] = None,
-         apply_smoothing: bool = False) -> Axes:
+         variance_measures: Optional[List[list]] = None) -> Axes:
     """Returns a line plot.
 
     Each list provided in the measures attribute is displayed as one line.
@@ -37,9 +35,6 @@ def plot(measures: List[list],
         variance_measures:
             Optionally, one can depict variances (as shaded areas around the line plot). This parameter must have the
             same dimensionality as 'measures'.
-        apply_smoothing:
-            If true, we apply a savgol_filter to the provided measures. However, note that this may distort the actual
-            results or hide interesting effects. In general, we do not recommend to apply a smoothing.
 
     Returns:
         Axes: The Axes object containing the line plot.
@@ -49,10 +44,7 @@ def plot(measures: List[list],
     ax.grid(True)
 
     for i in range(len(measures)):
-        if apply_smoothing:  # Apply a filter to the provided measurements to smooth the line plots
-            y = savgol_filter(measures[i], 51, 3)
-        else:
-            y = measures[i]
+        y = measures[i]
 
         ax.plot(np.arange(len(measures[i])), y, color=_PALETTE[i], label=legend_labels[i], lw=2)
 

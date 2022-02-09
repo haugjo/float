@@ -5,8 +5,11 @@
 # <kbd>module</kbd> `change_detection.tornado.adwin`
 Adaptive Windowing Drift Detection Method. 
 
-The source code was adopted from https://github.com/alipsgh/tornado, please cite: The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
---- Original Paper: Bifet, Albert, and Ricard Gavalda. "Learning from time-changing data with adaptive windowing." Published in: Proceedings of the 2007 SIAM International Conference on Data Mining. Society for Industrial and Applied Mathematics, 2007. URL: http://www.cs.upc.edu/~GAVALDA/papers/adwin06.pdf 
+The source code was adopted from [tornado](https://github.com/alipsgh/tornado), please cite: 
+
+The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com
+
+Original Paper: Bifet, Albert, and Ricard Gavalda. "Learning from time-changing data with adaptive windowing." Published in: Proceedings of the 2007 SIAM International Conference on Data Mining. Society for Industrial and Applied Mathematics, 2007. URL: [http://www.cs.upc.edu/~GAVALDA/papers/adwin06.pdf](http://www.cs.upc.edu/~GAVALDA/papers/adwin06.pdf) 
 
 Copyright (C) 2022 Johannes Haug. 
 
@@ -108,7 +111,8 @@ Updates the change detector.
 
 
 **Args:**
-  pr_scores:  A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'. 
+
+- <b>`pr_scores`</b>: A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'.
 
 ---
 

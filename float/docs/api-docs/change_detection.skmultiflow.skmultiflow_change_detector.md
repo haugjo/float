@@ -5,7 +5,7 @@
 # <kbd>module</kbd> `change_detection.skmultiflow.skmultiflow_change_detector`
 Scikit-Multiflow Change Detection Model Wrapper. 
 
-This module contains a wrapper class for scikit-multiflow concept drift detection methods. 
+This module contains a wrapper class for [scikit-multiflow](https://scikit-multiflow.readthedocs.io/en/stable/) concept drift detection methods. 
 
 Copyright (C) 2022 Johannes Haug. 
 
@@ -116,7 +116,8 @@ Updates the change detector.
 
 
 **Args:**
-  pr_scores:  A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'. 
+
+- <b>`pr_scores`</b>: A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'. 
 
 ---
 

@@ -1,0 +1,7 @@
+title: Examples
+nav:
+    - prequential_classification.ipynb
+    - holdout_classification.ipynb
+    - distributed_fold_classification.ipynb
+    - prequential_concept_drift_detection.ipynb
+    - prequential_online_feature_selection.ipynb

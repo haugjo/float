@@ -1,4 +1,4 @@
-"""Base Online Feature Selection Module.
+"""Base Online Feature Selector.
 
 This module encapsulates functionality for online feature weighting and selection.
 The abstract BaseFeatureSelector class should be used as a super class for all online feature selection methods.

@@ -21,7 +21,7 @@ mean_drift_performance_deterioration(
     result: dict,
     known_drifts: Union[List[int], List[tuple]],
     batch_size: int,
-    reference_measure: Callable = <function zero_one_loss at 0x1543f79d0>,
+    reference_measure: Callable = <function zero_one_loss at 0x11d1669d0>,
     reference_measure_kwargs: Optional[dict] = None,
     interval: int = 10
 ) → float
@@ -33,9 +33,12 @@ Calculates the mean performance deterioration after kown concept drifts.
 
 **Args:**
  
- - <b>`result`</b>:  A result dictionary from the PredictionEvaluator object. known_drifts:  The positions in the dataset (indices) corresponding to known concept drifts. 
+ - <b>`result`</b>:  A result dictionary from the PredictionEvaluator object. 
+ - <b>`known_drifts`</b>:  The positions in the dataset (indices) corresponding to known concept drifts. 
  - <b>`batch_size`</b>:  The number of observations processed per iteration/time step. 
- - <b>`reference_measure`</b>:  Evaluation measure function. reference_measure_kwargs:  Keyword arguments of the reference measure. This attribute is maintained for consistency reasons, but is  not used by this performance measure. interval:  Scalar specifying the size of the interval (i.e. number of time steps) after known concept drift, in which  we investigate a performance decay of the reference measure. 
+ - <b>`reference_measure`</b>:  Evaluation measure function. 
+ - <b>`reference_measure_kwargs`</b>:  Keyword arguments of the reference measure. This attribute is maintained for consistency reasons, but is  not used by this performance measure. 
+ - <b>`interval`</b>:  Scalar specifying the size of the interval (i.e. number of time steps) after known concept drift, in which  we investigate a performance decay of the reference measure. 
 
 
 

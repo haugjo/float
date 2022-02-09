@@ -31,7 +31,8 @@ Calculates the rate of correctly detected known concept drifts.
 **Args:**
  
  - <b>`evaluator`</b>:  The ChangeDetectionEvaluator object. 
- - <b>`drifts`</b>:  List of time steps corresponding to detected concept drifts. n_delay:  The number of observations after a known concept drift, during which we count the detections made by the  model as true positives. 
+ - <b>`drifts`</b>:  List of time steps corresponding to detected concept drifts. 
+ - <b>`n_delay`</b>:  The number of observations after a known concept drift, during which we count the detections made by the  model as true positives. 
 
 
 

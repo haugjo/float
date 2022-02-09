@@ -5,8 +5,11 @@
 # <kbd>module</kbd> `change_detection.tornado.page_hinkley`
 Page Hinkley Drift Detection Method. 
 
-The source code was adopted from https://github.com/alipsgh/tornado, please cite: The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
---- Original Paper: Page, Ewan S. "Continuous inspection schemes." Published in: Biometrika 41.1/2 (1954): 100-115. URL: http://www.jstor.org/stable/2333009 
+The source code was adopted from [tornado](https://github.com/alipsgh/tornado), please cite: 
+
+The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
+
+Original Paper: Page, Ewan S. "Continuous inspection schemes." Published in: Biometrika 41.1/2 (1954): 100-115. URL: [http://www.jstor.org/stable/2333009](http://www.jstor.org/stable/2333009) 
 
 Copyright (C) 2022 Johannes Haug. 
 
@@ -117,7 +120,8 @@ Updates the change detector.
 
 
 **Args:**
-  pr_scores:  A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'. 
+
+- <b>`pr_scores`</b>: A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'.
 
 ---
 

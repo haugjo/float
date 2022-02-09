@@ -3,7 +3,7 @@
 <a href="https://github.com/haugjo/float/tree/main/float/prediction/evaluation/prediction_evaluator.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `prediction.evaluation.prediction_evaluator`
-Evaluation Module for Online Predictive Models. 
+Predictive Model Evaluator. 
 
 This module contains an evaluator class for online predictive models. 
 
@@ -22,9 +22,14 @@ Online prediction evaluator class.
 
 **Attributes:**
  
- - <b>`measure_funcs`</b> (List[Callable]):  List of evaluation measure functions. decay_rate (float |None):  If this parameter is not None, the measurements are additionally aggregated with the specific decay/fading  factor. window_size (int | None):  If this parameter is not None, the measurements are additionally aggregated in a sliding window. kwargs (dict):  A dictionary containing additional and specific keyword arguments, which are passed to the evaluation  functions. 
+ - <b>`measure_funcs`</b> (List[Callable]):  List of evaluation measure functions. 
+ - <b>`decay_rate`</b> (float |None):  If this parameter is not None, the measurements are additionally aggregated with the specific decay/fading  factor. 
+ - <b>`window_size`</b> (int | None):  If this parameter is not None, the measurements are additionally aggregated in a sliding window. 
+ - <b>`kwargs`</b> (dict):  A dictionary containing additional and specific keyword arguments, which are passed to the evaluation  functions. 
  - <b>`testing_comp_times`</b> (list):  List of computation times per testing iteration. 
- - <b>`training_comp_times`</b> (list):  List of computation times per training iteration. memory_changes (list):  Memory changes (in GB RAM) per training iteration of the online feature selection model. result (dict):  The raw and aggregated measurements of each evaluation measure function. 
+ - <b>`training_comp_times`</b> (list):  List of computation times per training iteration. 
+ - <b>`memory_changes`</b> (list):  Memory changes (in GB RAM) per training iteration of the online feature selection model. 
+ - <b>`result`</b> (dict):  The raw and aggregated measurements of each evaluation measure function. 
 
 <a href="https://github.com/haugjo/float/tree/main/float/prediction/evaluation/prediction_evaluator.py#L38"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
@@ -45,7 +50,9 @@ Inits the prediction evaluation object.
 
 **Args:**
  
- - <b>`measure_funcs`</b>:  List of evaluation measure functions. decay_rate:  If this parameter is not None, the measurements are additionally aggregated with the specific  decay/fading factor. window_size:  If this parameter is not None, the measurements are additionally aggregated in a sliding window. 
+ - <b>`measure_funcs`</b>:  List of evaluation measure functions. 
+ - <b>`decay_rate`</b>:  If this parameter is not None, the measurements are additionally aggregated with the specific  decay/fading factor. 
+ - <b>`window_size`</b>:  If this parameter is not None, the measurements are additionally aggregated in a sliding window. 
 
 **kwargs:**
   A dictionary containing additional and specific keyword arguments, which are passed to the evaluation  functions. 

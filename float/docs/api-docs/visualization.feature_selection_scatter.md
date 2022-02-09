@@ -5,7 +5,7 @@
 # <kbd>module</kbd> `visualization.feature_selection_scatter`
 Feature Selection Scatter Plot. 
 
-This function returns a special scatter plot that illustrates the selected features over time of one or multiple online feature selection methods. 
+This function returns a special scatter plot that illustrates the selected features over time of one online feature selection method. 
 
 Copyright (C) 2022 Johannes Haug. 
 
@@ -29,7 +29,8 @@ Returns a scatter plot that illustrates the selected features over time for the 
 
 
 **Args:**
-  selected_features:  A list of lists, where each list corresponds to the selected feature vectors of one feature selector. 
+
+ - <b>`selected_features`</b>:  A list of lists, where each list corresponds to the selected feature vector at one time step. 
  - <b>`fig_size`</b>:  The figure size (length x height) 
  - <b>`font_size`</b>:  The font size of the axis labels. 
 

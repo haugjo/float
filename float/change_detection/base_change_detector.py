@@ -1,4 +1,4 @@
-"""Base Change Detection Module.
+"""Base Change Detector.
 
 This module encapsulates functionality for global and partial (i.e. feature-wise) concept drift detection.
 The abstract BaseChangeDetector class should be used as super class for all concept drift detection methods.

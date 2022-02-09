@@ -1,4 +1,4 @@
-"""Evaluation Module for Online Predictive Models.
+"""Predictive Model Evaluator.
 
 This module contains an evaluator class for online predictive models.
 

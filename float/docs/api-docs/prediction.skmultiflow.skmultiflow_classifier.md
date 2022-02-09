@@ -5,7 +5,7 @@
 # <kbd>module</kbd> `prediction.skmultiflow.skmultiflow_classifier`
 Scikit-Multiflow Predictive Model Wrapper. 
 
-This module contains a wrapper class for scikit-multiflow predictive models. 
+This module contains a wrapper class for [scikit-multiflow](https://scikit-multiflow.readthedocs.io/en/stable/) predictive models. 
 
 Copyright (C) 2022 Johannes Haug. 
 

@@ -3,10 +3,13 @@
 <a href="https://github.com/haugjo/float/tree/main/float/change_detection/tornado/hddm_a.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `change_detection.tornado.hddm_a`
-Hoeffding's Bound based Drift Detection Method (A_test Scheme). 
+Hoeffding's Bound based Drift Detection Method (A_test Scheme).
 
-The source code was adopted from https://github.com/alipsgh/tornado, please cite: The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
---- Original Paper: Frías-Blanco, Isvani, et al. "Online and non-parametric drift detection methods based on Hoeffding’s bounds." Published in: IEEE Transactions on Knowledge and Data Engineering 27.3 (2015): 810-823. URL: http://ieeexplore.ieee.org/abstract/document/6871418/ 
+The source code was adopted from [tornado](https://github.com/alipsgh/tornado), please cite: 
+
+The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
+
+Original Paper: Frías-Blanco, Isvani, et al. "Online and non-parametric drift detection methods based on Hoeffding’s bounds." Published in: IEEE Transactions on Knowledge and Data Engineering 27.3 (2015): 810-823. URL: [http://ieeexplore.ieee.org/abstract/document/6871418/](http://ieeexplore.ieee.org/abstract/document/6871418/) 
 
 Copyright (C) 2022 Johannes Haug. 
 
@@ -115,7 +118,8 @@ Updates the change detector.
 
 
 **Args:**
-  pr_scores:  A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'. 
+
+- <b>`pr_scores`</b>: A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'.
 
 ---
 

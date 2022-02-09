@@ -1,4 +1,4 @@
-"""Data Loader Module.
+"""Data Loader.
 
 This module encapsulates functionality to load and preprocess input data. The data loader class uses the
 scikit-multiflow Stream class to simulate streaming data.

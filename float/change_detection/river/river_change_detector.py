@@ -1,6 +1,6 @@
 """River Change Detection Model Wrapper.
 
-This module contains a wrapper class for scikit-river concept drift detection methods.
+This module contains a wrapper class for river concept drift detection methods.
 
 Copyright (C) 2022 Johannes Haug.
 """

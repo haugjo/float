@@ -3,7 +3,7 @@
 <a href="https://github.com/haugjo/float/tree/main/float/prediction/base_predictor.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `prediction.base_predictor`
-Base Online Predictor Module. 
+Base Online Predictor. 
 
 This module encapsulates functionality for online predictive modelling. The abstract BasePredictor class should be used as super class for all online predictive models. 
 

@@ -31,8 +31,7 @@ def change_detection_scatter(detected_drifts: List[list],
             A list of lists, where each list corresponds the detected drifts of one concept drift detector.
         model_names: Names of the concept drift detection models. These labels will be used in the legend.
         n_samples: The total number of samples observed.
-        known_drifts (List[int] | List[tuple]):
-            The positions in the dataset (indices) corresponding to known concept drifts.
+        known_drifts: The positions in the dataset (indices) corresponding to known concept drifts.
         batch_size:
             The batch size used for the evaluation of the data stream. This is needed to translate the known drift
             positions to logical time steps (which is the format of the detected drifts).

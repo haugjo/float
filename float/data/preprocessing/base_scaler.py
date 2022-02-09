@@ -1,4 +1,4 @@
-"""Base Scaling Module.
+"""Base Scaler.
 
 This module encapsulates functionality to scale, i.e. normalize, streaming observations. The abstract BaseScaler should
 be used to implement custom scaling methods. A scaler object can be provided to the data loader object.

@@ -22,14 +22,14 @@ noise_variability(
     y_pred: Union[numpy._array_like._SupportsArray[numpy.dtype], numpy._nested_sequence._NestedSequence[numpy._array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy._nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]],
     X: Union[numpy._array_like._SupportsArray[numpy.dtype], numpy._nested_sequence._NestedSequence[numpy._array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy._nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]],
     predictor: float.prediction.base_predictor.BasePredictor,
-    reference_measure: Callable = <function zero_one_loss at 0x1543f79d0>,
+    reference_measure: Callable = <function zero_one_loss at 0x11d1669d0>,
     reference_measure_kwargs: Optional[dict] = None,
     cont_noise_loc: float = 0,
     cont_noise_scale: float = 0.1,
     cat_features: Optional[list] = None,
     cat_noise_dist: Optional[List[list]] = None,
     n_samples: int = 10,
-    rng: numpy.random._generator.Generator = Generator(PCG64) at 0x162473040
+    rng: numpy.random._generator.Generator = Generator(PCG64) at 0x128EB4040
 ) → float
 ```
 

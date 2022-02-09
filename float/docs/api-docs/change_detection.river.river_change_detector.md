@@ -5,7 +5,7 @@
 # <kbd>module</kbd> `change_detection.river.river_change_detector`
 River Change Detection Model Wrapper. 
 
-This module contains a wrapper class for scikit-river concept drift detection methods. 
+This module contains a wrapper class for [river](https://riverml.xyz/latest/) concept drift detection methods. 
 
 Copyright (C) 2022 Johannes Haug. 
 
@@ -116,7 +116,8 @@ Updates the change detector.
 
 
 **Args:**
-  pr_scores:  A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'. 
+
+ - <b>`pr_scores`</b>: A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'. 
 
 ---
 

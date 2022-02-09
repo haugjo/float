@@ -1,6 +1,6 @@
-"""Evaluation Module for Change Detection Methods.
+"""Change Detection Evaluator.
 
-This module contains an evaluator class for explicit change (i.e. concept drift) detection methods.
+This module contains an evaluator class for active change (i.e. concept drift) detection methods.
 
 Copyright (C) 2022 Johannes Haug.
 """

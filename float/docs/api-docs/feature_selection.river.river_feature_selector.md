@@ -5,7 +5,7 @@
 # <kbd>module</kbd> `feature_selection.river.river_feature_selector`
 River Feature Selection Model Wrapper. 
 
-This module contains a wrapper class for river feature selection models. 
+This module contains a wrapper class for [river](https://riverml.xyz/latest/) feature selection models. 
 
 Copyright (C) 2022 Johannes Haug. 
 
@@ -42,7 +42,9 @@ Inits the wrapper.
  - <b>`model`</b>:  The river feature selector object (one of SelectKBest, PoissonInclusion or VarianceThreshold). 
  - <b>`feature_names`</b>:  A list of all feature names. 
  - <b>`n_total_features`</b>:  The total number of features. 
- - <b>`reset_after_drift`</b>:  A boolean indicating if the change detector will be reset after a drift was detected. baseline:  A string identifier of the baseline method. The baseline is the value that we substitute non-selected  features with. This is necessary, because most online learning models are not able to handle arbitrary  patterns of missing data. ref_sample:  A sample used to compute the baseline. If the constant baseline is used, one needs to provide a single  float value. 
+ - <b>`reset_after_drift`</b>:  A boolean indicating if the change detector will be reset after a drift was detected. 
+ - <b>`baseline`</b>:  A string identifier of the baseline method. The baseline is the value that we substitute non-selected  features with. This is necessary, because most online learning models are not able to handle arbitrary  patterns of missing data. 
+ - <b>`ref_sample`</b>:  A sample used to compute the baseline. If the constant baseline is used, one needs to provide a single  float value. 
 
 
 
@@ -86,7 +88,8 @@ This overrides the corresponding parent class function.
 
 
 **Returns:**
- ArrayLike:  The observation array/matrix where all non-selected features have been replaced by the baseline value. 
+
+- <b>`ArrayLike`</b>:  The observation array/matrix where all non-selected features have been replaced by the baseline value. 
 
 ---
 

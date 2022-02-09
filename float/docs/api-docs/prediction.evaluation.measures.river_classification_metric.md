@@ -5,7 +5,7 @@
 # <kbd>module</kbd> `prediction.evaluation.measures.river_classification_metric`
 River Classification Metric Wrapper. 
 
-This function is a wrapper for river classification metrics. This wrapper is required, as river metrics cannot process batches of observations out of the box. 
+This function is a wrapper for [river](https://riverml.xyz/latest/) classification metrics. This wrapper is required, as river metrics cannot process batches of observations out of the box. 
 
 Copyright (C) 2022 Johannes Haug. 
 

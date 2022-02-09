@@ -5,7 +5,7 @@
 # <kbd>module</kbd> `feature_selection.fires`
 FIRES Feature Selection Method. 
 
-This module contains the Fast, Interpretable and Robust Evaluation and Selection of features (FIRES) with a Probit base model and normally distributed parameters as introduced by: HAUG, Johannes, et al. Leveraging model inherent variable importance for stable online feature selection. In: Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2020. S. 1478-1502. 
+This module contains the Fast, Interpretable and Robust Evaluation and Selection of features (FIRES) with a Probit base model and normally distributed parameters as introduced by: HAUG, Johannes, et al. Leveraging model inherent variable importance for stable online feature selection. In: Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2020. S. 1478-1502. URL: [https://dl.acm.org/doi/abs/10.1145/3394486.3403200](https://dl.acm.org/doi/abs/10.1145/3394486.3403200)
 
 Copyright (C) 2022 Johannes Haug. 
 
@@ -49,14 +49,18 @@ Inits the feature selector.
  
  - <b>`n_total_features`</b>:  The total number of features. 
  - <b>`n_selected_features`</b>:  The number of selected features. 
- - <b>`classes`</b>:  A list of unique target values (class labels). mu_init:  Initial importance, i.e. mean of the parameter distribution. One may either set the initial values  separately per feature (by providing a vector), or use the same initial value for all features  (by providing a scalar). sigma_init:  Initial uncertainty, i.e. standard deviation of the parameter distribution. One may either set the  initial values separately per feature (by providing a vector), or use the same initial value for all  features (by providing a scalar). 
+ - <b>`classes`</b>:  A list of unique target values (class labels). 
+ - <b>`mu_init`</b>:  Initial importance, i.e. mean of the parameter distribution. One may either set the initial values  separately per feature (by providing a vector), or use the same initial value for all features  (by providing a scalar). 
+ - <b>`sigma_init`</b>:  Initial uncertainty, i.e. standard deviation of the parameter distribution. One may either set the  initial values separately per feature (by providing a vector), or use the same initial value for all  features (by providing a scalar). 
  - <b>`penalty_s`</b>:  Penalty factor in the optimization of weights w.r.t the uncertainty (corresponds to gamma_s in  the paper). 
  - <b>`penalty_r `</b>:  Penalty factor in the optimization of weights for the regularization (corresponds to gamma_r  in the paper). 
  - <b>`epochs`</b>:  Number of epochs in each update iteration. 
  - <b>`lr_mu`</b>:  Learning rate for the gradient update of the mean. 
  - <b>`lr_sigma`</b>:  Learning rate for the gradient update of the standard deviation. 
  - <b>`scale_weights`</b>:  If True, scale feature weights into the range [0,1]. If False, do not scale weights. 
- - <b>`reset_after_drift`</b>:  A boolean indicating if the change detector will be reset after a drift was detected. baseline:  A string identifier of the baseline method. The baseline is the value that we substitute non-selected  features with. This is necessary, because most online learning models are not able to handle arbitrary  patterns of missing data. ref_sample:  A sample used to compute the baseline. If the constant baseline is used, one needs to provide a single  float value. 
+ - <b>`reset_after_drift`</b>:  A boolean indicating if the change detector will be reset after a drift was detected. 
+ - <b>`baseline`</b>:  A string identifier of the baseline method. The baseline is the value that we substitute non-selected  features with. This is necessary, because most online learning models are not able to handle arbitrary  patterns of missing data. 
+ - <b>`ref_sample`</b>:  A sample used to compute the baseline. If the constant baseline is used, one needs to provide a single  float value. 
 
 
 

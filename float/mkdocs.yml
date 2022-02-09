@@ -2,4 +2,5 @@ site_name: float
 plugins:
   - search
   - awesome-pages
-#theme: readthedocs
+  - mkdocs-jupyter
+theme: readthedocs

@@ -5,7 +5,7 @@
 # <kbd>module</kbd> `prediction.river.river_classifier`
 River Predictive Model Wrapper. 
 
-This module contains a wrapper class for river predictive models. 
+This module contains a wrapper class for [river](https://riverml.xyz/latest/) predictive models. 
 
 Copyright (C) 2022 Johannes Haug. 
 

@@ -1,4 +1,4 @@
-"""Base Pipeline Module.
+"""Base Pipeline.
 
 This module contains functionality to construct a pipeline and run experiments in a standardized and modular fashion.
 This abstract BasePipeline class should be used as a super class for all specific evaluation pipelines.
@@ -32,8 +32,8 @@ class BasePipeline(metaclass=ABCMeta):
 
     Attributes:
         data_loader (DataLoader): Data loader object.
-        predictors List[BasePredictor]: Predictive model(s).
-        prediction_evaluators List[PredictionEvaluator]: Evaluator(s) for the predictive model(s).
+        predictors (List[BasePredictor]): Predictive model(s).
+        prediction_evaluators (List[PredictionEvaluator]): Evaluator(s) for the predictive model(s).
         change_detector (ConceptDriftDetector | None): Concept drift detection model.
         change_detection_evaluator (ChangeDetectionEvaluator | None): Evaluator for active concept drift detection.
         feature_selector (BaseFeatureSelector | None): Online feature selection model.
@@ -41,7 +41,7 @@ class BasePipeline(metaclass=ABCMeta):
         batch_size (int | None): Batch size, i.e. no. of observations drawn from the data loader at one time step.
         n_pretrain (int | None): Number of observations used for the initial training of the predictive model.
         n_max (int | None): Maximum number of observations used in the evaluation.
-        label_delay_range:
+        label_delay_range (tuple | None):
             The min and max delay in the availability of labels in time steps. The delay is sampled uniformly from
             this range.
         estimate_memory_alloc (bool):

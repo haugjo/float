@@ -5,8 +5,11 @@
 # <kbd>module</kbd> `change_detection.tornado.mddm_a`
 McDiarmid Drift Detection Method (Arithmetic Scheme). 
 
-The source code was adopted from https://github.com/alipsgh/tornado, please cite: The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
---- Original Paper: Pesaranghader, Ali, et al. "McDiarmid Drift Detection Method for Evolving Data Streams." Published in: International Joint Conference on Neural Network (IJCNN 2018) URL: https://arxiv.org/abs/1710.02030 
+The source code was adopted from [tornado](https://github.com/alipsgh/tornado), please cite: 
+
+The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
+
+Original Paper: Pesaranghader, Ali, et al. "McDiarmid Drift Detection Method for Evolving Data Streams." Published in: International Joint Conference on Neural Network (IJCNN 2018) URL: [https://arxiv.org/abs/1710.02030](https://arxiv.org/abs/1710.02030) 
 
 Copyright (C) 2022 Johannes Haug. 
 
@@ -115,7 +118,8 @@ Updates the change detector.
 
 
 **Args:**
-  pr_scores:  A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'. 
+
+- <b>`pr_scores`</b>: A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'.
 
 ---
 

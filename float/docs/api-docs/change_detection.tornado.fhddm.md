@@ -5,8 +5,11 @@
 # <kbd>module</kbd> `change_detection.tornado.fhddm`
 Fast Hoeffding Drift Detection Method. 
 
-The source code was adopted from https://github.com/alipsgh/tornado, please cite: The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
---- Original Paper: Pesaranghader, Ali, and Herna L. Viktor. "Fast hoeffding drift detection method for evolving data streams." Published in: Joint European Conference on Machine Learning and Knowledge Discovery in Databases. Springer International Publishing, 2016. URL: https://link.springer.com/chapter/10.1007/978-3-319-46227-1_7 
+The source code was adopted from [tornado](https://github.com/alipsgh/tornado), please cite: 
+
+The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
+
+Original Paper: Pesaranghader, Ali, and Herna L. Viktor. "Fast hoeffding drift detection method for evolving data streams." Published in: Joint European Conference on Machine Learning and Knowledge Discovery in Databases. Springer International Publishing, 2016. URL: [https://link.springer.com/chapter/10.1007/978-3-319-46227-1_7](https://link.springer.com/chapter/10.1007/978-3-319-46227-1_7) 
 
 Copyright (C) 2022 Johannes Haug. 
 
@@ -109,7 +112,8 @@ Updates the change detector.
 
 
 **Args:**
-  pr_scores:  A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'. 
+
+- <b>`pr_scores`</b>: A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'.
 
 ---
 

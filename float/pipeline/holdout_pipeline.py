@@ -1,4 +1,4 @@
-"""Periodic Holdout Pipeline Module.
+"""Periodic Holdout Pipeline.
 
 This module implements a pipeline following the periodic holdout evaluation strategy.
 

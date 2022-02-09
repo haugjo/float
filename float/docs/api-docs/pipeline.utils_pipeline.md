@@ -3,15 +3,11 @@
 <a href="https://github.com/haugjo/float/tree/main/float/pipeline/utils_pipeline.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `pipeline.utils_pipeline`
-Pipeline Utils Module. 
+Pipeline Utils. 
 
 This module contains utility functions for the Pipeline Module. In particular, this module contains functionality to validate provided attributes, update the console progress bar and print a final summary of the evaluation run. 
 
 Copyright (C) 2022 Johannes Haug. 
-
-**Global Variables**
----------------
-- **TYPE_CHECKING**
 
 ---
 

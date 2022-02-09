@@ -3,7 +3,7 @@
 <a href="https://github.com/haugjo/float/tree/main/float/pipeline/base_pipeline.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `pipeline.base_pipeline`
-Base Pipeline Module. 
+Base Pipeline. 
 
 This module contains functionality to construct a pipeline and run experiments in a standardized and modular fashion. This abstract BasePipeline class should be used as a super class for all specific evaluation pipelines. 
 
@@ -23,15 +23,18 @@ Abstract base class for evaluation pipelines.
 **Attributes:**
  
  - <b>`data_loader`</b> (DataLoader):  Data loader object. 
- - <b>`predictors List[BasePredictor]`</b>:  Predictive model(s). 
- - <b>`prediction_evaluators List[PredictionEvaluator]`</b>:  Evaluator(s) for the predictive model(s). 
+ - <b>`predictors`</b> (List[BasePredictor]):  Predictive model(s). 
+ - <b>`prediction_evaluators`</b> (List[PredictionEvaluator]):  Evaluator(s) for the predictive model(s). 
  - <b>`change_detector`</b> (ConceptDriftDetector | None):  Concept drift detection model. 
  - <b>`change_detection_evaluator`</b> (ChangeDetectionEvaluator | None):  Evaluator for active concept drift detection. 
  - <b>`feature_selector`</b> (BaseFeatureSelector | None):  Online feature selection model. 
  - <b>`feature_selection_evaluator`</b> (FeatureSelectionEvaluator | None):  Evaluator for the online feature selection. 
  - <b>`batch_size`</b> (int | None):  Batch size, i.e. no. of observations drawn from the data loader at one time step. 
  - <b>`n_pretrain`</b> (int | None):  Number of observations used for the initial training of the predictive model. 
- - <b>`n_max`</b> (int | None):  Maximum number of observations used in the evaluation. label_delay_range:  The min and max delay in the availability of labels in time steps. The delay is sampled uniformly from  this range. estimate_memory_alloc (bool):  Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.  Note that this delivers only an indication of the approximate memory consumption and can significantly  increase the total run time of the pipeline. test_interval (int):  The interval/frequency at which the online learning models are evaluated. This parameter is always 1 for a  prequential or distributed fold evaluation. 
+ - <b>`n_max`</b> (int | None):  Maximum number of observations used in the evaluation. 
+ - <b>`label_delay_range`</b> (tuple | None):  The min and max delay in the availability of labels in time steps. The delay is sampled uniformly from  this range. 
+ - <b>`estimate_memory_alloc`</b> (bool):  Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.  Note that this delivers only an indication of the approximate memory consumption and can significantly  increase the total run time of the pipeline. 
+ - <b>`test_interval`</b> (int):  The interval/frequency at which the online learning models are evaluated. This parameter is always 1 for a  prequential or distributed fold evaluation. 
  - <b>`rng`</b> (Generator):  A numpy random number generator object. 
  - <b>`start_time`</b> (float):  Physical start time. 
  - <b>`time_step`</b> (int):  Current logical time step, i.e. iteration. 
@@ -75,7 +78,9 @@ Initializes the pipeline.
  - <b>`feature_selection_evaluator`</b>:  Evaluator for the online feature selection. 
  - <b>`batch_size`</b>:  Batch size, i.e. no. of observations drawn from the data loader at one time step. 
  - <b>`n_pretrain`</b>:  Number of observations used for the initial training of the predictive model. 
- - <b>`n_max`</b>:  Maximum number of observations used in the evaluation. test_interval:  The interval/frequency at which the online learning models are evaluated. This parameter is always 1 for  a prequential evaluation. estimate_memory_alloc:  Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.  Note that this delivers only an indication of the approximate memory consumption and can significantly  increase the total run time of the pipeline. 
+ - <b>`n_max`</b>:  Maximum number of observations used in the evaluation. 
+ - <b>`test_interval`</b>:  The interval/frequency at which the online learning models are evaluated. This parameter is always 1 for  a prequential evaluation. 
+ - <b>`estimate_memory_alloc`</b>:  Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.  Note that this delivers only an indication of the approximate memory consumption and can significantly  increase the total run time of the pipeline. 
  - <b>`random_state`</b>:  A random integer seed used to specify a random number generator. 
 
 

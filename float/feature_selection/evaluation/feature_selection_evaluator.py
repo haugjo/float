@@ -1,4 +1,4 @@
-"""Evaluation Module for Online Feature Selection Methods.
+"""Online Feature Selection Evaluator.
 
 This module contains an evaluator class for online feature selection methods.
 

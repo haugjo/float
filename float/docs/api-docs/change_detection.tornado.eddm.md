@@ -5,8 +5,11 @@
 # <kbd>module</kbd> `change_detection.tornado.eddm`
 Early Drift Detection Method. 
 
-The source code was adopted from https://github.com/alipsgh/tornado, please cite: The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
---- Original Paper: Baena-García, Manuel, et al. "Early drift detection method." (2006). URL: http://www.cs.upc.edu/~abifet/EDDM.pdf 
+The source code was adopted from [tornado](https://github.com/alipsgh/tornado), please cite: 
+
+The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
+
+Original Paper: Baena-García, Manuel, et al. "Early drift detection method." (2006). URL: [http://www.cs.upc.edu/~abifet/EDDM.pdf](http://www.cs.upc.edu/~abifet/EDDM.pdf) 
 
 Copyright (C) 2022 Johannes Haug. 
 
@@ -107,7 +110,8 @@ Updates the change detector.
 
 
 **Args:**
-  pr_scores:  A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'. 
+
+- <b>`pr_scores`</b>: A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'.
 
 ---
 

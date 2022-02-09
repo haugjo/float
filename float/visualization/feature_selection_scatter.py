@@ -1,7 +1,7 @@
 """Feature Selection Scatter Plot.
 
-This function returns a special scatter plot that illustrates the selected features over time of one or multiple online
-feature selection methods.
+This function returns a special scatter plot that illustrates the selected features over time of one online
+feature selection method.
 
 Copyright (C) 2022 Johannes Haug.
 """
@@ -22,7 +22,7 @@ def feature_selection_scatter(selected_features: List[list],
 
     Args:
         selected_features:
-            A list of lists, where each list corresponds to the selected feature vectors of one feature selector.
+            A list of lists, where each list corresponds to the selected feature vector at one time step.
         fig_size: The figure size (length x height)
         font_size: The font size of the axis labels.
 

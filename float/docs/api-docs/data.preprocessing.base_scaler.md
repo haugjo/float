@@ -3,7 +3,7 @@
 <a href="https://github.com/haugjo/float/tree/main/float/data/preprocessing/base_scaler.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `data.preprocessing.base_scaler`
-Base Scaling Module. 
+Base Scaler. 
 
 This module encapsulates functionality to scale, i.e. normalize, streaming observations. The abstract BaseScaler should be used to implement custom scaling methods. A scaler object can be provided to the data loader object. 
 

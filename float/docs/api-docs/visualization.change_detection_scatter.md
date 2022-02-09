@@ -34,9 +34,13 @@ Returns a scatter plot showing the known and the detected concept drifts of the 
 
 
 **Args:**
-  detected_drifts:  A list of lists, where each list corresponds the detected drifts of one concept drift detector. 
+
+ - <b>`detected_drifts`</b>:  A list of lists, where each list corresponds the detected drifts of one concept drift detector. 
  - <b>`model_names`</b>:  Names of the concept drift detection models. These labels will be used in the legend. 
- - <b>`n_samples`</b>:  The total number of samples observed. known_drifts (List[int] | List[tuple]):  The positions in the dataset (indices) corresponding to known concept drifts. batch_size:  The batch size used for the evaluation of the data stream. This is needed to translate the known drift  positions to logical time steps (which is the format of the detected drifts). n_pretrain:  The number of observations used for pre-training. This number needs to be subtracted from the known drift  positions in order to translate them to the correct logical time steps. 
+ - <b>`n_samples`</b>:  The total number of samples observed. 
+ - <b>`known_drifts`</b>:  The positions in the dataset (indices) corresponding to known concept drifts. 
+ - <b>`batch_size`</b>:  The batch size used for the evaluation of the data stream. This is needed to translate the known drift  positions to logical time steps (which is the format of the detected drifts). 
+ - <b>`n_pretrain`</b>:  The number of observations used for pre-training. This number needs to be subtracted from the known drift  positions in order to translate them to the correct logical time steps. 
  - <b>`fig_size`</b>:  The figure size (length x height) 
  - <b>`font_size`</b>:  The font size of the axis labels. 
 

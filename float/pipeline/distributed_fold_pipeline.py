@@ -1,4 +1,4 @@
-"""Distributed Fold Pipeline Module.
+"""Distributed Fold Pipeline.
 
 This module contains a pipeline that performs a k-fold distributed validation as proposed by
 Albert Bifet, Gianmarco de Francisci Morales, Jesse Read,
@@ -44,8 +44,8 @@ class DistributedFoldPipeline(BasePipeline):
             A string indicating the k-fold distributed validation mode to use. One of 'cross', 'batch' and 'bootstrap'.
         n_parallel_instances (int): The number of instances of the specified predictor that will be trained in parallel.
         n_unique_predictors (int): The number of predictor objects originally specified.
-        predictors List[BasePredictor]: All instances of the predictive model(s).
-        prediction_evaluators List[PredictionEvaluator]: Evaluator(s) for all instances of the predictive model(s).
+        predictors (List[BasePredictor]): All instances of the predictive model(s).
+        prediction_evaluators (List[PredictionEvaluator]): Evaluator(s) for all instances of the predictive model(s).
     """
     def __init__(self, data_loader: DataLoader,
                  predictor: Union[BasePredictor, List[BasePredictor]],

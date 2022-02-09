@@ -1,4 +1,4 @@
-"""Pipeline Utils Module.
+"""Pipeline Utils.
 
 This module contains utility functions for the Pipeline Module. In particular, this module contains functionality to
 validate provided attributes, update the console progress bar and print a final summary of the evaluation run.

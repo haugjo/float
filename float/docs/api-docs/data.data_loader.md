@@ -3,7 +3,7 @@
 <a href="https://github.com/haugjo/float/tree/main/float/data/data_loader.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `data.data_loader`
-Data Loader Module. 
+Data Loader. 
 
 This module encapsulates functionality to load and preprocess input data. The data loader class uses the scikit-multiflow Stream class to simulate streaming data. 
 
@@ -44,9 +44,9 @@ __init__(
 
 Inits the data loader. 
 
-The data loader init function must receive either one of the following inputs: 
-- the path to a .csv file (+ a target index), which is then mapped to a skmultiflow FileStream object. 
-- a valid scikit multiflow Stream object. 
+The data loader init function must receive either one of the following inputs:
+1.) the path to a .csv file (+ a target index), which is then mapped to a skmultiflow FileStream object.
+2.) a valid scikit multiflow Stream object. 
 
 
 

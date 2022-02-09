@@ -32,9 +32,11 @@ Returns a bar plot that shows the number of times a feature was selected for the
 
 
 **Args:**
-  selected_features:  A list of lists, where each list corresponds to the selected feature vectors of one feature selection model. 
+
+ - <b>`selected_features`</b>  A list of lists, where each list corresponds to the selected feature vectors of one feature selection model. 
  - <b>`model_names`</b>:  Names of the feature selection models. These labels will be used in the legend. 
- - <b>`feature_names`</b>:  The names of all input features. The feature names will be used as x-tick labels. top_n_features:  Specifies the top number of features to be displayed. If the attribute is None, we show all features in  their original order. If the attribute is not None, we select the top features of the first provided model  and compare it with the remaining models. 
+ - <b>`feature_names`</b>:  The names of all input features. The feature names will be used as x-tick labels. 
+ - <b>`top_n_features`</b>:  Specifies the top number of features to be displayed. If the attribute is None, we show all features in  their original order. If the attribute is not None, we select the top features of the first provided model  and compare it with the remaining models. 
  - <b>`fig_size`</b>:  The figure size (length x height) 
  - <b>`font_size`</b>:  The font size of the axis labels. 
 

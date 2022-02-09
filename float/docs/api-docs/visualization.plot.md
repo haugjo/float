@@ -24,8 +24,7 @@ plot(
     fig_size: tuple = (13, 5),
     font_size: int = 16,
     x_label: str = 'Time Step $t$',
-    variance_measures: Optional[List[list]] = None,
-    apply_smoothing: bool = False
+    variance_measures: Optional[List[list]] = None
 ) → Axes
 ```
 
@@ -42,7 +41,8 @@ Each list provided in the measures attribute is displayed as one line.
  - <b>`y_label`</b>:  The y-axis label text (e.g. the name of the performance measure that is displayed). 
  - <b>`fig_size`</b>:  The figure size (length x height) 
  - <b>`font_size`</b>:  The font size of the axis labels. 
- - <b>`x_label`</b>:  The x-axis label text. This defaults to 'Time Step t'. variance_measures:  Optionally, one can depict variances (as shaded areas around the line plot). This parameter must have the  same dimensionality as 'measures'. apply_smoothing:  If true, we apply a savgol_filter to the provided measures. However, note that this may distort the actual  results or hide interesting effects. In general, we do not recommend to apply a smoothing. 
+ - <b>`x_label`</b>:  The x-axis label text. This defaults to 'Time Step t'. 
+ - <b>`variance_measures`</b>:  Optionally, one can depict variances (as shaded areas around the line plot). This parameter must have the  same dimensionality as 'measures'.
 
 
 

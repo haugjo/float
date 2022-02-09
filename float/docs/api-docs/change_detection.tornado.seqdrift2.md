@@ -5,8 +5,11 @@
 # <kbd>module</kbd> `change_detection.tornado.seqdrift2`
 SeqDrift2 Drift Detection Method. 
 
-The source code was adopted from https://github.com/alipsgh/tornado, please cite: The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
---- Original Paper: Pears, Russel, Sripirakas Sakthithasan, and Yun Sing Koh. "Detecting concept change in dynamic data streams." Published in: Machine Learning 97.3 (2014): 259-293. URL: https://link.springer.com/article/10.1007/s10994-013-5433-9 
+The source code was adopted from [tornado](https://github.com/alipsgh/tornado), please cite: 
+
+The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
+
+Original Paper: Pears, Russel, Sripirakas Sakthithasan, and Yun Sing Koh. "Detecting concept change in dynamic data streams." Published in: Machine Learning 97.3 (2014): 259-293. URL: [https://link.springer.com/article/10.1007/s10994-013-5433-9](https://link.springer.com/article/10.1007/s10994-013-5433-9) 
 
 Copyright (C) 2022 Johannes Haug. 
 
@@ -113,7 +116,8 @@ Updates the change detector.
 
 
 **Args:**
-  pr_scores:  A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'. 
+
+- <b>`pr_scores`</b>: A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'.
 
 ---
 

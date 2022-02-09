@@ -1,4 +1,4 @@
-"""Base Online Predictor Module.
+"""Base Online Predictor.
 
 This module encapsulates functionality for online predictive modelling.
 The abstract BasePredictor class should be used as super class for all online predictive models.

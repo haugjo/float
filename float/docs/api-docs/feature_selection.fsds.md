@@ -50,7 +50,9 @@ Inits the feature selector.
  - <b>`m`</b>:  Size of the feature space (i.e. dimensionality). 
  - <b>`B`</b>:  Matrix sketch. 
  - <b>`k`</b>:  Number of singular vectors. 
- - <b>`reset_after_drift`</b>:  A boolean indicating if the change detector will be reset after a drift was detected. baseline:  A string identifier of the baseline method. The baseline is the value that we substitute non-selected  features with. This is necessary, because most online learning models are not able to handle arbitrary  patterns of missing data. ref_sample:  A sample used to compute the baseline. If the constant baseline is used, one needs to provide a single  float value. 
+ - <b>`reset_after_drift`</b>:  A boolean indicating if the change detector will be reset after a drift was detected. 
+ - <b>`baseline`</b>  A string identifier of the baseline method. The baseline is the value that we substitute non-selected  features with. This is necessary, because most online learning models are not able to handle arbitrary  patterns of missing data. 
+ - <b>`ref_sample`</b>:  A sample used to compute the baseline. If the constant baseline is used, one needs to provide a single  float value. 
 
 
 

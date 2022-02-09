@@ -1,4 +1,4 @@
-"""Scaling Module.
+"""Preprocessing Module.
 
 This module encapsulates functionality to scale, i.e. normalize, streaming observations.
 

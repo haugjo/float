@@ -32,9 +32,11 @@ Returns a box plot that shows the distribution of weights for the selected or al
 
 
 **Args:**
-  feature_weights:  A list of lists, where each list corresponds to the feature weights of one feature selection model. 
+
+ - <b>`feature_weights`</b>:  A list of lists, where each list corresponds to the feature weights of one feature selection model. 
  - <b>`model_names`</b>:  Names of the feature selection models. These labels will be used in the legend. 
- - <b>`feature_names`</b>:  The names of all input features. The feature names will be used as x-tick labels. top_n_features:  Specifies the top number of features to be displayed. If the attribute is None, we show all features in  their original order. If the attribute is not None, we select the top features according to their median  value. 
+ - <b>`feature_names`</b>:  The names of all input features. The feature names will be used as x-tick labels. 
+ - <b>`top_n_features`</b>:  Specifies the top number of features to be displayed. If the attribute is None, we show all features in  their original order. If the attribute is not None, we select the top features according to their median  value. 
  - <b>`fig_size`</b>:  The figure size (length x height) 
  - <b>`font_size`</b>:  The font size of the axis labels. 
 

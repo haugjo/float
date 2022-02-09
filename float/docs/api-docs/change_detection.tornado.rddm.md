@@ -5,8 +5,11 @@
 # <kbd>module</kbd> `change_detection.tornado.rddm`
 Reactive Drift Detection Method. 
 
-The source code was adopted from https://github.com/alipsgh/tornado, please cite: The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
---- Original Paper: Barros, Roberto, et al. "RDDM: Reactive drift detection method." Published in: Expert Systems with Applications. Elsevier, 2017. URL: https://www.sciencedirect.com/science/article/pii/S0957417417305614 
+The source code was adopted from [tornado](https://github.com/alipsgh/tornado), please cite: 
+
+The Tornado Framework By Ali Pesaranghader University of Ottawa, Ontario, Canada E-mail: apesaran -at- uottawa -dot- ca / alipsgh -at- gmail -dot- com 
+
+Original Paper: Barros, Roberto, et al. "RDDM: Reactive drift detection method." Published in: Expert Systems with Applications. Elsevier, 2017. URL: [https://www.sciencedirect.com/science/article/pii/S0957417417305614](https://www.sciencedirect.com/science/article/pii/S0957417417305614) 
 
 Copyright (C) 2022 Johannes Haug. 
 
@@ -121,7 +124,8 @@ Updates the change detector.
 
 
 **Args:**
-  pr_scores:  A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'. 
+
+- <b>`pr_scores`</b>: A boolean vector indicating correct predictions. 'True' values indicate that the prediction by the  online learner was correct, otherwise the vector contains 'False'.
 
 ---
 

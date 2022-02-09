@@ -3,7 +3,7 @@
 <a href="https://github.com/haugjo/float/tree/main/float/pipeline/prequential_pipeline.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `pipeline.prequential_pipeline`
-Prequential Pipeline Module. 
+Prequential Pipeline. 
 
 This module implements a pipeline following the prequential (i.e. test-then-train) evaluation strategy. 
 
@@ -55,7 +55,9 @@ Initializes the pipeline.
  - <b>`feature_selection_evaluator`</b>:  Evaluator for the online feature selection. 
  - <b>`batch_size`</b>:  Batch size, i.e. no. of observations drawn from the data loader at one time step. 
  - <b>`n_pretrain`</b>:  Number of observations used for the initial training of the predictive model. 
- - <b>`n_max`</b>:  Maximum number of observations used in the evaluation. label_delay_range:  The min and max delay in the availability of labels in time steps. The delay is sampled uniformly from  this range. estimate_memory_alloc:  Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.  Note that this delivers only an indication of the approximate memory consumption and can significantly  increase the total run time of the pipeline. 
+ - <b>`n_max`</b>:  Maximum number of observations used in the evaluation. 
+ - <b>`label_delay_range`</b>:  The min and max delay in the availability of labels in time steps. The delay is sampled uniformly from  this range. 
+ - <b>`estimate_memory_alloc`</b>:  Boolean that indicates if the method-wise change in allocated memory (GB) shall be monitored.  Note that this delivers only an indication of the approximate memory consumption and can significantly  increase the total run time of the pipeline. 
  - <b>`random_state`</b>:  A random integer seed used to specify a random number generator. 
 
 
