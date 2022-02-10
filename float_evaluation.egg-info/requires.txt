@@ -1,0 +1,8 @@
+numpy>=1.22.1
+scikit-learn>=1.0.2
+tabulate>=0.8.5
+matplotlib>=3.4.2
+scipy>=1.7.3
+pandas>=1.4.0
+river>=0.9.0
+scikit-multiflow>=0.5.3

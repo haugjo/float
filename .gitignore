@@ -5,3 +5,4 @@ MANIFEST
 poker.csv
 covertype.csv
 .DS_Store
+site/

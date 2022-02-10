@@ -1,11 +1,24 @@
+Metadata-Version: 2.1
+Name: float-evaluation
+Version: 0.0.1
+Summary: A modular Python framework for standardised evaluation and benchmarking of online learning models
+Home-page: https://github.com/haugjo/float
+Author: Johannes Haug
+Author-email: johannes-christian.haug@uni-tuebingen.de
+License: UNKNOWN
+Project-URL: Documentation, https://haugjo.github.io/float/
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 <p align="center">
   <img alt="float" src="https://github.com/haugjo/float/raw/main/logo.png" width="400"/>
 </p>
 <p align="center">
-  <!-- Pypi -->
-  <a href="https://pypi.org/project/float-evaluation/">
-    <img src="https://img.shields.io/pypi/v/float-evaluation" alt="Pypi">
-  </a>
   <!-- Documentation -->
   <a href="https://haugjo.github.io/float/">
     <img src="https://img.shields.io/badge/docs-pages-informational" alt="Documentation">
@@ -158,3 +171,5 @@ All contributed source code must adhere to the following criteria:
 ```./tests/run_test_suite.py```.
 
 Please feel free to contact us, if you plan to make a contribution.
+
+
