@@ -151,8 +151,6 @@
                     </li>
                     <li class="toctree-l1"><a class="reference internal" href="../api-docs/feature_selection.evaluation.measures.nogueira_stability/">feature_selection.evaluation.measures.nogueira_stability</a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../api-docs/feature_selection.cancel_out/">feature_selection.cancel_out</a>
-                    </li>
                     <li class="toctree-l1"><a class="reference internal" href="../api-docs/feature_selection.efs/">feature_selection.efs</a>
                     </li>
                     <li class="toctree-l1"><a class="reference internal" href="../api-docs/feature_selection.fires/">feature_selection.fires</a>
@@ -241,14 +239,15 @@
               
                 <h1 id="about">About</h1>
 <h2 id="vision-scope">Vision &amp; Scope</h2>
-<p>Todo</p>
+<p>Float is a modular framework for simple and more standardized evaluations of online learning methods. Our framework provides easy and high-level access to popular evaluation strategies and measures, as described above. In this way, float handles large parts of the evaluation and reduces the possibility of human error.</p>
+<p>Float enables joint integration of popular Python libraries and custom functionality. Accordingly, float is a meaningful extension of comprehensive libraries like <a href="https://scikit-multiflow.readthedocs.io/en/stable/index.html">scikit-mukltiflow</a> or <a href="https://riverml.xyz/latest/">river</a>. In this sense, float is not intended to be another library of state-of-the-art models. Rather, our goal is to provide tools for creating high-quality experiments and visualisations.</p>
 <h2 id="references">References</h2>
 <p>Please refer to the following paper when using float: <em>Link will following soon.</em></p>
 <p>Please also make sure that you acknowledge the corresponding authors, when using one of the provided models (Relevant 
-sources and papers are linked in the docstrings of each file).</p>
+sources and papers are linked in the documentation of each module).</p>
 <h2 id="package-structure">Package Structure</h2>
 <p>Float is fully modular. The package has dedicated modules for the data preparation, online prediction, online 
-feature selection, concept drift detection and their evaluation (corresponding to the directories in <code>./float</code>). </p>
+feature selection, concept drift detection and their evaluation. </p>
 <p>The pipeline module is at the heart of every experiment in float. The pipeline can be run with arbitrary combinations of 
 predictors, online feature selectors and concept drift detectors. </p>
 <p>The results of every experiment are stored in dedicated evaluator objects. Via these evaluators, the user is 
@@ -270,8 +269,8 @@ of the major libraries, e.g. <a href="https://scikit-multiflow.readthedocs.io/en
 <ul>
 <li>Code must conform with the <a href="https://www.python.org/dev/peps/pep-0008/">PEP8</a> standard.</li>
 <li>Docstrings must conform with the <a href="https://google.github.io/styleguide/pyguide.html">Google docstring</a> convention.</li>
-<li>All tests in <code>./unit_tests</code> must run successfully. To run the complete test suite, one may execute 
-<code>./unit_tests/run_test_suite.py</code>.</li>
+<li>All unit tests in <code>./tests</code> (see Github) must run successfully. To run the complete test suite, one may execute 
+<code>./tests/run_test_suite.py</code>.</li>
 </ul>
 <p>Please feel free to contact us, if you plan to make a contribution.</p>
               

@@ -54,10 +54,12 @@
                     <li class="toctree-l1 current"><a class="reference internal current" href="./">Getting Started</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#requirements">Requirements</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a>
+        </ul>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#simple-experiment">Simple Experiment</a>
+    <li class="toctree-l2"><a class="reference internal" href="#run-your-first-experiment">Run Your First Experiment</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#datasets">Datasets</a>
     </li>
@@ -151,8 +153,6 @@
                     </li>
                     <li class="toctree-l1"><a class="reference internal" href="../api-docs/feature_selection.evaluation.measures.nogueira_stability/">feature_selection.evaluation.measures.nogueira_stability</a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../api-docs/feature_selection.cancel_out/">feature_selection.cancel_out</a>
-                    </li>
                     <li class="toctree-l1"><a class="reference internal" href="../api-docs/feature_selection.efs/">feature_selection.efs</a>
                     </li>
                     <li class="toctree-l1"><a class="reference internal" href="../api-docs/feature_selection.fires/">feature_selection.fires</a>
@@ -242,32 +242,25 @@
                 <h1 id="getting-started">Getting Started</h1>
 <h2 id="installation">Installation</h2>
 <p>Install float with pip:</p>
-<pre><code>pip install float
+<pre><code>pip install float-evaluation
 </code></pre>
 <p>Alternatively, clone the float repository from Github:</p>
 <pre><code>git clone git@github.com:haugjo/float.git
 </code></pre>
-<h2 id="requirements">Requirements</h2>
+<h3 id="requirements">Requirements</h3>
 <p>Float is supported by python versions &gt;=3.8.x and has the following package requirements:</p>
 <ul>
-<li>numpy~=1.22.1</li>
-<li>scikit-learn~=1.0.2</li>
-<li>tabulate~=0.8.5</li>
-<li>matplotlib~=3.4.2</li>
-<li>scipy~=1.7.3</li>
-<li>pytorch~=1.4.0</li>
-<li>pandas~=1.4.0</li>
-<li>river~=0.9.0</li>
-<li>scikit-multiflow~=0.5.3</li>
+<li>numpy &gt;= 1.22.1</li>
+<li>scikit-learn &gt;= 1.0.2</li>
+<li>tabulate &gt;= 0.8.5</li>
+<li>matplotlib &gt;= 3.4.2</li>
+<li>scipy &gt;= 1.7.3</li>
+<li>pandas &gt;= 1.4.0</li>
+<li>river &gt;= 0.9.0</li>
+<li>scikit-multiflow &gt;= 0.5.3</li>
 </ul>
 <p><em>[!] Older versions have not been tested, but might also be compatible.</em></p>
-<h2 id="simple-experiment">Simple Experiment</h2>
-<p>The easiest way to become familiar with float and its functionality is to look at the experiment notebooks in the <code>./float/experiments</code> 
-folder. We provide experiments that showcase each of the three evaluation pipelines <em>prequential</em>, <em>holdout</em> and 
-<em>distributed fold</em>. We also demonstrate the use of the <em>change detection</em>, <em>online feature selection</em> and 
-<em>visualization</em> modules. </p>
-<p><em>[!]Note that each module and file of float is fully documented via docstring. A dedicated documentation page is soon 
-to follow. More information about the general package structure is provided in the section below.</em></p>
+<h2 id="run-your-first-experiment">Run Your First Experiment</h2>
 <p>As a quickstart, you can run the following basic experiment:</p>
 <pre><code class="language-python">from skmultiflow.trees import HoeffdingTreeClassifier
 from sklearn.metrics import zero_one_loss
@@ -279,8 +272,8 @@ from float.pipeline import PrequentialPipeline
 from float.prediction.skmultiflow import SkmultiflowClassifier
 
 # Load a data set from main memory with the DataLoader module. 
-# Alternatively, we can provide a sciki-multiflow FileStream object via the 'stream' attribute.
-data_loader = DataLoader(path='./float/data/datasets/spambase.csv', target_col=-1)
+# Alternatively, we can provide a scikit-multiflow FileStream object via the 'stream' attribute.
+data_loader = DataLoader(path='./datasets/spambase.csv', target_col=-1)
 
 # Set up an online classifier. Note that we need a wrapper to use scikit-multiflow functionality.
 classifier = SkmultiflowClassifier(model=HoeffdingTreeClassifier(),
@@ -321,18 +314,20 @@ Model: SkmultiflowClassifier.HoeffdingTreeClassifier
 | Avg. noise_variability | 0.241901  |
 #############################################################################
 </code></pre>
+<p>To become more familiar with float and its functionality you may look at the <strong>examples provided in this documentation</strong>.
+Specifically, we provide experiments that showcase each of the three evaluation pipelines <em>prequential</em>, <em>holdout</em> and 
+<em>distributed fold</em>. We also demonstrate the use of the <em>change detection</em>, <em>online feature selection</em> and 
+<em>visualization</em> modules.</p>
 <h2 id="datasets">Datasets</h2>
-<p>Float is accompanied by a small set of popular streaming data sets that are required to run the 
-experiment notebooks and unit tests. These fully cleansed and normalized data sets can be found in <code>./data/datasets</code>.</p>
-<p>There is a general shortage of publicly available streaming data sets. Still, there are useful resources, including the following:</p>
+<p>On the float Github page, you can find a small set of popular streaming data sets that are required to run the 
+example notebooks and unit tests.</p>
+<p>Although there is a general shortage of publicly available streaming data sets, there are some useful resources:</p>
 <ul>
-<li>https://www.openml.org/search?type=data (search for "data stream" or "concept drift")</li>
-<li>https://sites.google.com/view/uspdsrepository</li>
-<li>https://github.com/ogozuacik/concept-drift-datasets-scikit-multiflow</li>
-<li>https://github.com/vlosing/driftDatasets</li>
+<li><a href="https://www.openml.org/search?type=data">https://www.openml.org/search?type=data</a> (search for "data stream" or "concept drift")</li>
+<li><a href="https://sites.google.com/view/uspdsrepository">https://sites.google.com/view/uspdsrepository</a></li>
+<li><a href="https://github.com/ogozuacik/concept-drift-datasets-scikit-multiflow">https://github.com/ogozuacik/concept-drift-datasets-scikit-multiflow</a></li>
+<li><a href="https://github.com/vlosing/driftDatasets">https://github.com/vlosing/driftDatasets</a></li>
 </ul>
-<p><em>[!] We will soon introduce an extensive set of benchmark data sets that can be directly accessed 
-from a remote source using the float.DataLoader module.</em></p>
               
             </div>
           </div>
