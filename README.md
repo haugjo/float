@@ -137,7 +137,8 @@ Although there is a general shortage of publicly available streaming data sets, 
 - https://github.com/vlosing/driftDatasets
 
 ## References
-Please refer to the following paper when using float: *Link will following soon.*
+Please refer to the following paper when using float:
+*Haug, Johannes, Effi Tramountani, and Gjergji Kasneci. "Standardized Evaluation of Machine Learning Methods for Evolving Data Streams." arXiv preprint [arXiv:2204.13625](https://arxiv.org/abs/2204.13625) (2022).*
 
 Please also make sure that you acknowledge the corresponding authors, when using one of the provided models (Relevant 
 sources and papers are linked in the docstrings of each file).
