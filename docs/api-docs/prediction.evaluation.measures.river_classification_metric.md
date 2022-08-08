@@ -1,31 +1,31 @@
 <!-- markdownlint-disable -->
 
-<a href="https://github.com/haugjo/float/tree/main/float/prediction/evaluation/measures/river_classification_metric.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/haugjo/float/tree/main/float/prediction/evaluation/measures/river_metric.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-# <kbd>module</kbd> `prediction.evaluation.measures.river_classification_metric`
-River Classification Metric Wrapper. 
+# <kbd>module</kbd> `prediction.evaluation.measures.river_metric`
+River Metric Wrapper. 
 
-This function is a wrapper for [river](https://riverml.xyz/latest/) classification metrics. This wrapper is required, as river metrics cannot process batches of observations out of the box. 
+This function is a wrapper for [river](https://riverml.xyz/latest/) metrics. This wrapper is required, as river metrics cannot process batches of observations out of the box. 
 
 Copyright (C) 2022 Johannes Haug. 
 
 
 ---
 
-<a href="https://github.com/haugjo/float/tree/main/float/prediction/evaluation/measures/river_classification_metric.py#L13"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/haugjo/float/tree/main/float/prediction/evaluation/measures/river_metric.py#L13"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-## <kbd>function</kbd> `river_classification_metric`
+## <kbd>function</kbd> `river_metric`
 
 ```python
-river_classification_metric(
+river_metric(
     y_true: Union[numpy._array_like._SupportsArray[numpy.dtype], numpy._nested_sequence._NestedSequence[numpy._array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy._nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]],
     y_pred: Union[numpy._array_like._SupportsArray[numpy.dtype], numpy._nested_sequence._NestedSequence[numpy._array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy._nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]],
-    metric: river.metrics.base.ClassificationMetric,
+    metric: river.metrics.base.Metric,
     **kwargs
 ) → Any
 ```
 
-Wrapper function for river classification metrics. 
+Wrapper function for river metrics. 
 
 
 

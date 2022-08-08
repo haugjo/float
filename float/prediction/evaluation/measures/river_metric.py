@@ -6,20 +6,20 @@ batches of observations out of the box.
 Copyright (C) 2022 Johannes Haug.
 """
 from numpy.typing import ArrayLike
-from river.metrics import ClassificationMetric
+from river.metrics import Metric
 from typing import Any
 
 
-def river_classification_metric(y_true: ArrayLike,
-                                y_pred: ArrayLike,
-                                metric: ClassificationMetric,
-                                **kwargs) -> Any:
+def river_metric(y_true: ArrayLike,
+                 y_pred: ArrayLike,
+                 metric: Metric,
+                 **kwargs) -> Any:
     """Wrapper function for river classification metrics.
 
     Args:
         y_true: True target labels.
         y_pred: Predicted target labels.
-        metric: The river classification metric.
+        metric: A river object of type Metric.
         kwargs:
             A dictionary containing additional and specific keyword arguments, which are passed to the evaluation
             functions.

@@ -44,7 +44,7 @@ nav:
     - prediction.evaluation.measures.mean_drift_performance_deterioration: prediction.evaluation.measures.mean_drift_performance_deterioration.md
     - prediction.evaluation.measures.mean_drift_restoration_time: prediction.evaluation.measures.mean_drift_restoration_time.md
     - prediction.evaluation.measures.noise_variability: prediction.evaluation.measures.noise_variability.md
-    - prediction.evaluation.measures.river_classification_metric: prediction.evaluation.measures.river_classification_metric.md
+    - prediction.evaluation.measures.river_metric: prediction.evaluation.measures.river_metric.md
     - prediction.river.river_classifier: prediction.river.river_classifier.md
     - prediction.skmultiflow.skmultiflow_classifier: prediction.skmultiflow.skmultiflow_classifier.md
     - pipeline.base_pipeline: pipeline.base_pipeline.md

@@ -52,7 +52,7 @@
 - [`prediction.evaluation.measures.mean_drift_performance_deterioration`](prediction.evaluation.measures.mean_drift_performance_deterioration.md#module-predictionevaluationmeasuresmean_drift_performance_deterioration): Drift Performance Deterioration Measure.
 - [`prediction.evaluation.measures.mean_drift_restoration_time`](prediction.evaluation.measures.mean_drift_restoration_time.md#module-predictionevaluationmeasuresmean_drift_restoration_time): Drift Restoration Time Measure.
 - [`prediction.evaluation.measures.noise_variability`](prediction.evaluation.measures.noise_variability.md#module-predictionevaluationmeasuresnoise_variability): Noise Variability Measure.
-- [`prediction.evaluation.measures.river_classification_metric`](prediction.evaluation.measures.river_classification_metric.md#module-predictionevaluationmeasuresriver_classification_metric): River Classification Metric Wrapper.
+- [`prediction.evaluation.measures.river_metric`](prediction.evaluation.measures.river_metric.md#module-predictionevaluationmeasuresriver_metric): River Metric Wrapper.
 - [`prediction.river.river_classifier`](prediction.river.river_classifier.md#module-predictionriverriver_classifier): River Predictive Model Wrapper.
 - [`prediction.skmultiflow.skmultiflow_classifier`](prediction.skmultiflow.skmultiflow_classifier.md#module-predictionskmultiflowskmultiflow_classifier): Scikit-Multiflow Predictive Model Wrapper.
 

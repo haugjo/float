@@ -67,7 +67,7 @@ float/prediction/evaluation/measures/__init__.py
 float/prediction/evaluation/measures/mean_drift_performance_deterioration.py
 float/prediction/evaluation/measures/mean_drift_restoration_time.py
 float/prediction/evaluation/measures/noise_variability.py
-float/prediction/evaluation/measures/river_classification_metric.py
+float/prediction/evaluation/measures/river_metric.py
 float/prediction/river/__init__.py
 float/prediction/river/river_classifier.py
 float/prediction/skmultiflow/__init__.py
