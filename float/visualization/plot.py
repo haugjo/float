@@ -46,12 +46,13 @@ def plot(measures: List[list],
     for i in range(len(measures)):
         y = measures[i]
 
-        ax.plot(np.arange(len(measures[i])), y, color=_PALETTE[i], label=legend_labels[i], lw=2)
+        not_nan_idx = np.isfinite(y)
+        ax.plot(np.arange(len(y))[not_nan_idx], np.asarray(y)[not_nan_idx], color=_PALETTE[i], label=legend_labels[i], lw=2)
 
         if variance_measures:  # Display variances as shaded areas around the line plot
-            ax.fill_between(np.arange(len(measures[i])),
-                            y - np.array(variance_measures[i]),
-                            y + np.array(variance_measures[i]),
+            ax.fill_between(np.arange(len(y))[not_nan_idx],
+                            np.asarray(y)[not_nan_idx] - np.array(variance_measures[i])[not_nan_idx],
+                            np.asarray(y)[not_nan_idx] + np.array(variance_measures[i])[not_nan_idx],
                             color=_PALETTE[i],
                             alpha=0.5)
 

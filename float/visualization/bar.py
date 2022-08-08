@@ -40,7 +40,7 @@ def bar(measures: List[list],
     n_measures = len(measures)
 
     for i in range(n_measures):
-        ax.bar(np.arange(n_measures) - width / 2. + i / n_measures * width,
+        ax.bar(np.arange(len(measures[i])) - width / 2. + i / n_measures * width,
                measures[i],
                width=width / n_measures,
                align="edge",

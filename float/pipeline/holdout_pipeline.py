@@ -94,9 +94,8 @@ class HoldoutPipeline(BasePipeline):
         self.test_set = test_set
         self.test_replace_interval = test_replace_interval
         if self.test_set is None:
-            warnings.warn("No initial test set has been provided. By default, the holdout pipeline will use a test set "
-                          "with the same size as the batch size. If the replace interval is None, the pipeline will "
-                          "use the current data batch for testing, resembling a prequential evaluation.")
+            warnings.warn("No initial test set has been provided. By default, the holdout pipeline will use the first "
+                          "batch as the initial test set.")
             self._test_set_size = self.batch_size
         else:
             self._test_set_size = self.test_set[0].shape[0]
@@ -118,35 +117,26 @@ class HoldoutPipeline(BasePipeline):
             if self.n_total + n_batch >= self.n_max:
                 last_iteration = True
 
-            (X_train, y_train), (X_test, y_test) = self._draw_observations(n_batch=n_batch)
+            train_set, (X_test, y_test) = self._draw_observations(n_batch=n_batch)
 
-            if self.test_replace_interval is None:
-                if self.test_set is not None:
-                    X_test, y_test = self.test_set
-            else:
-                # Check if we need to replace the oldest test instance in this iteration.
-                mods = (np.arange(1, X_train.shape[0] + 1) + self.n_total) % self.test_replace_interval
-                new_test_X = X_train[mods == 0]
-                new_test_y = y_train[mods == 0]
+            if self.test_set is None:  # Set initial test set, if it has not been provided.
+                self.test_set = (X_test, y_test)
+            elif self.test_replace_interval is not None:
+                    # Select new test instances for replacement in the holdout set.
+                    mods = (np.arange(1, X_test.shape[0] + 1) + self.n_total) % self.test_replace_interval
+                    new_test_X = X_test[mods == 0]
+                    new_test_y = y_test[mods == 0]
 
-                X_train = X_train[mods != 0]  # Drop test instances from the training set.
-                y_train = y_train[mods != 0]
-
-                if self.test_set is not None:
-                    X_test, y_test = self.test_set
+                    X_test, y_test = self.test_set  # Load current holdout set.
                     X_test = np.append(X_test, new_test_X, axis=0)
                     y_test = np.append(y_test, new_test_y, axis=0)
-                else:
-                    X_test = new_test_X
-                    y_test = new_test_y
 
-                if X_test.shape[0] >= self._test_set_size:  # Drop old instances.
-                    n_remove = X_test.shape[0] - self._test_set_size
-                    X_test = X_test[n_remove:, :]
-                    y_test = y_test[n_remove:]
+                    if X_test.shape[0] >= self._test_set_size:  # Drop old instances.
+                        n_remove = X_test.shape[0] - self._test_set_size
+                        X_test = X_test[n_remove:, :]
+                        y_test = y_test[n_remove:]
 
-            train_set = (X_train, y_train)
-            self.test_set = (X_test, y_test)
+                    self.test_set = (X_test, y_test)  # Save updated holdout set.
 
             try:
                 self._run_iteration(train_set=train_set,
