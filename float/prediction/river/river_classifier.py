@@ -42,21 +42,22 @@ class RiverClassifier(BasePredictor):
 
         super().__init__(reset_after_drift=reset_after_drift)
 
-    def partial_fit(self, X: ArrayLike, y: ArrayLike, sample_weight: Optional[ArrayLike] = None):
+    def partial_fit(self, X: ArrayLike, y: ArrayLike, sample_weight: Optional[ArrayLike] = 1):
         """Updates the predictor.
 
         Args:
             X: Array/matrix of observations.
             y: Array of corresponding labels.
-            sample_weight: Weights per sample. If no weights are provided, we weigh observations uniformly.
+            sample_weight: Weights per sample. Not used by float at the moment, i.e., all observations in x receive
+                equal weight in a pipeline run.
         """
         if self.can_mini_batch:
             X = pd.DataFrame(X, columns=self.feature_names)
             y = pd.Series(y)
-            self.model.learn_many(X=X, y=y)
+            self.model.learn_many(X=X, y=y, w=sample_weight)
         else:
             x = {key: value[0] for key, value in zip(self.feature_names, X.reshape((-1, 1)))}
-            self.model.learn_one(x=x, y=bool(y))
+            self.model.learn_one(x=x, y=bool(y), w=sample_weight)
 
     def predict(self, X: ArrayLike) -> ArrayLike:
         """Predicts the target values.

@@ -72,7 +72,7 @@ Updates the predictor.
  
  - <b>`X`</b>:  Array/matrix of observations. 
  - <b>`y`</b>:  Array of corresponding labels. 
- - <b>`sample_weight`</b>:  Weights per sample. If no weights are provided, we weigh observations uniformly. 
+ - <b>`sample_weight`</b>:  Weights per sample. Not used by float at the moment, i.e., all observations in x receive equal weight in a pipeline run. 
 
 ---
 

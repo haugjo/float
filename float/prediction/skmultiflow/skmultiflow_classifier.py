@@ -36,7 +36,8 @@ class SkmultiflowClassifier(BasePredictor):
         Args:
             X: Array/matrix of observations.
             y: Array of corresponding labels.
-            sample_weight: Weights per sample. If no weights are provided, we weigh observations uniformly.
+            sample_weight: Weights per sample. Not used by float at the moment, i.e., all observations in x receive
+                equal weight in a pipeline run.
         """
         self.model.partial_fit(X=X, y=y, classes=self.classes, sample_weight=sample_weight)
 

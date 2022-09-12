@@ -28,13 +28,12 @@ class BasePredictor(metaclass=ABCMeta):
         self.has_been_trained = False
 
     @abstractmethod
-    def partial_fit(self, X: ArrayLike, y: ArrayLike, sample_weight: Optional[ArrayLike] = None):
+    def partial_fit(self, X: ArrayLike, y: ArrayLike):
         """Updates the predictor.
 
         Args:
             X: Array/matrix of observations.
             y: Array of corresponding labels.
-            sample_weight: Weights per sample. If no weights are provided, we weigh observations uniformly.
         """
         raise NotImplementedError
 

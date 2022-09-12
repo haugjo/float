@@ -53,8 +53,7 @@ Inits the predictor.
 ```python
 partial_fit(
     X: Union[numpy._array_like._SupportsArray[numpy.dtype], numpy._nested_sequence._NestedSequence[numpy._array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy._nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]],
-    y: Union[numpy._array_like._SupportsArray[numpy.dtype], numpy._nested_sequence._NestedSequence[numpy._array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy._nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]],
-    sample_weight: Optional[numpy._array_like._SupportsArray[numpy.dtype], numpy._nested_sequence._NestedSequence[numpy._array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy._nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]] = None
+    y: Union[numpy._array_like._SupportsArray[numpy.dtype], numpy._nested_sequence._NestedSequence[numpy._array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy._nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]]
 )
 ```
 
@@ -65,8 +64,7 @@ Updates the predictor.
 **Args:**
  
  - <b>`X`</b>:  Array/matrix of observations. 
- - <b>`y`</b>:  Array of corresponding labels. 
- - <b>`sample_weight`</b>:  Weights per sample. If no weights are provided, we weigh observations uniformly. 
+ - <b>`y`</b>:  Array of corresponding labels.
 
 ---
 
