@@ -21,14 +21,15 @@ from float.prediction import BasePredictor
 class DynamicModelTreeClassifier(BasePredictor):
     """Dynamic Model Tree Classifier.
 
+    This implementation of the DMT uses linear (logit) simple models and the negative log likelihood loss.
+
     Attributes:
-        weak_model (Any):
-            Weak model trained at each node. The estimated loss of the weak models is used to identify
-            candidates for splitting, prune outdated branches and obtain the prediction at leaf nodes.
         n_classes (int): Number of target classes. Required to compute and store the log-likelihoods.
-        learning_rate (float):
-            Learning rate for approximation of the candidate loss (typically, this can be equal to the learning rate
-            of the weak models).
+        learning_rate (float): Learning rate of the linear models.
+        penalty_term (float): Regularization term for the linear model (0 = no regularization penalty).
+        penalty (str):
+            String identifier of the type of regularization used by the linear model.
+            Either 'l1', 'l2', or 'elasticnet' (see documentation of sklearn SGDClassifier).
         epsilon (float):
             Threshold required before attempting to split or prune based on the Akaike Information Criterion.
         n_saved_candidates (int): Max. number of saved split candidates per node.
@@ -39,14 +40,10 @@ class DynamicModelTreeClassifier(BasePredictor):
         root (Node): Root node of the Dynamic Model Tree.
     """
     def __init__(self,
-                 weak_model: Any = SGDClassifier(loss='log',
-                                                 penalty='l2',
-                                                 alpha=0,
-                                                 eta0=0.05,
-                                                 learning_rate='constant',
-                                                 random_state=0),
                  n_classes: int = 2,
                  learning_rate: float = 0.05,
+                 penalty_term: float = 0,
+                 penalty: str = 'l2',
                  epsilon: float = 10e-8,
                  n_saved_candidates: int = 100,
                  p_replaceable_candidates: float = 0.5,
@@ -55,13 +52,12 @@ class DynamicModelTreeClassifier(BasePredictor):
         """Inits the DMT.
 
         Args:
-            weak_model:
-                Weak model trained at each node. The estimated loss of the weak models is used to identify
-                candidates for splitting, prune outdated branches and obtain the prediction at leaf nodes.
             n_classes: Number of target classes. Required to compute and store the log-likelihoods.
-            learning_rate:
-                Learning rate for approximation of the candidate loss (typically, this can be equal to the learning rate
-                of the weak models).
+            learning_rate: Learning rate of the linear models.
+            penalty_term: Regularization term for the linear model (0 = no regularization penalty).
+            penalty:
+                String identifier of the type of regularization used by the linear model.
+                Either 'l1', 'l2', or 'elasticnet' (see documentation of sklearn SGDClassifier).
             epsilon: Threshold required before attempting to split or prune based on the Akaike Information Criterion.
             n_saved_candidates: Max. number of saved split candidates per node.
             p_replaceable_candidates:
@@ -73,9 +69,10 @@ class DynamicModelTreeClassifier(BasePredictor):
         """
         super().__init__(reset_after_drift=reset_after_drift)
 
-        self.weak_model = weak_model
         self.n_classes = n_classes
         self.learning_rate = learning_rate
+        self.penalty_term = penalty_term
+        self.penalty = penalty
         self.epsilon = epsilon
         self.n_saved_candidates = n_saved_candidates
         self.p_replaceable_candidates = p_replaceable_candidates
@@ -97,11 +94,13 @@ class DynamicModelTreeClassifier(BasePredictor):
         if self.root is None:
             self.root = Node(n_classes=self.n_classes,
                              n_features=X.shape[1],
-                             cat_features=self.cat_features,
                              learning_rate=self.learning_rate,
+                             penalty_term=self.penalty_term,
+                             penalty=self.penalty,
                              epsilon=self.epsilon,
                              n_saved_candidates=self.n_saved_candidates,
-                             p_replaceable_candidates=self.p_replaceable_candidates)
+                             p_replaceable_candidates=self.p_replaceable_candidates,
+                             cat_features=self.cat_features)
 
         if np.unique(y)[0] > self.n_classes:
             raise ValueError('DMT: The observed number of classes {} does not match the specified number of '
@@ -120,9 +119,6 @@ class DynamicModelTreeClassifier(BasePredictor):
         """
         if self.root is None:
             raise RuntimeError('DMT has not been fitted before calling predict.')
-        if not hasattr(self.weak_model, 'predict'):
-            raise AttributeError('DMT: The specified weak model {} does not have a predict() '
-                                 'function.'.format(self.weak_model.__name__))
 
         y_pred = []
         for x in X:
@@ -140,10 +136,7 @@ class DynamicModelTreeClassifier(BasePredictor):
             ArrayLike: Predicted probability per class label for all observations.
         """
         if self.root is None:
-            raise RuntimeError('DMT has not been fitted before calling predict.')
-        if not hasattr(self.weak_model, 'predict_proba'):
-            raise AttributeError('DMT: The specified weak model {} does not have a predict_proba() '
-                                 'function.'.format(self.weak_model.__name__))
+            raise RuntimeError('DMT has not been fitted before calling predict_proba.')
 
         y_pred = []
         for x in X:
@@ -205,26 +198,56 @@ class DynamicModelTreeClassifier(BasePredictor):
 # Node of the DMT
 # ********************
 class Node(metaclass=ABCMeta):
+    """Node of the Dynamic Model Tree.
+
+    Attributes:
+        n_classes (int): Number of target classes. Required to compute and store the log-likelihoods.
+        n_features (int): Number of input features.
+        learning_rate (float): Learning rate of the linear models.
+        penalty_term (float): Regularization term for the linear model (0 = no regularization penalty).
+        penalty (str):
+            String identifier of the type of regularization used by the linear model.
+            Either 'l1', 'l2', or 'elasticnet' (see documentation of sklearn SGDClassifier).
+        epsilon (float):
+            Threshold required before attempting to split or prune based on the Akaike Information Criterion.
+        n_saved_candidates (int): Max. number of saved split candidates per node.
+        p_replaceable_candidates (float):
+            Max. percent of saved candidates that can be replaced by new/better candidates per training iteration.
+        cat_features (List[bool]):
+            List of bool-indices indicating categorical features (1 = categorical, 0 = non-categorical).
+        linear_model (Any): Linear (logit) model trained at the node.
+        counts (int): Observation count.
+        log_likelihoods (ArrayLike): Log-likelihoods for observations that reached the node.
+        counts_left (dict): Number of observations potentially forwarded to the left child per split candidate.
+        log_likelihoods_left (dict): Log-likelihoods for the left child per split candidate.
+        gradients_left (dict): Gradients for the left child per split candidate.
+        counts_right (dict): Number of observations potentially forwarded to the right child per split candidate.
+        log_likelihoods_right (dict): Log-likelihoods for the left child per split candidate.
+        gradients_right (dict): Gradients for the right child per split candidate
+        children (List[Node]): List of child nodes.
+        split (tuple): Feature/value combination for splitting.
+        is_leaf (bool): Indicator of whether the node is a leaf.
+    """
     def __init__(self,
-                 weak_model: Any,
                  n_classes: int,
                  n_features: int,
                  learning_rate: float,
+                 penalty_term: float,
+                 penalty: str,
                  epsilon: float,
                  n_saved_candidates: int,
                  p_replaceable_candidates: float,
                  cat_features: List[bool]):
-        """Node of the Dynamic Model Tree.
+        """Inits Node.
 
         Args:
-            weak_model:
-                Weak model trained at each node. The estimated loss of the weak models is used to identify
-                candidates for splitting, prune outdated branches and obtain the prediction at leaf nodes.
             n_classes: Number of target classes. Required to compute and store the log-likelihoods.
             n_features: Number of input features.
-            learning_rate:
-                Learning rate for approximation of the candidate loss (typically, this can be equal to the learning rate
-                of the weak models).
+            learning_rate: Learning rate of the linear models.
+            penalty_term: Regularization term for the linear model (0 = no regularization penalty).
+            penalty:
+                String identifier of the type of regularization used by the linear model.
+                Either 'l1', 'l2', or 'elasticnet' (see documentation of sklearn SGDClassifier).
             epsilon: Threshold required before attempting to split or prune based on the Akaike Information Criterion.
             n_saved_candidates: Max. number of saved split candidates per node.
             p_replaceable_candidates:
@@ -233,38 +256,45 @@ class Node(metaclass=ABCMeta):
         """
         self.n_classes = n_classes
         self.n_features = n_features
-        self.cat_features = cat_features
         self.learning_rate = learning_rate
+        self.penalty_term = penalty_term
+        self.penalty = penalty
         self.epsilon = epsilon
         self.n_saved_candidates = n_saved_candidates
         self.p_replaceable_candidates = p_replaceable_candidates
+        self.cat_features = cat_features
 
-        self.linear_model = weak_model
+        self.linear_model = SGDClassifier(loss='log',
+                                          penalty=penalty,
+                                          alpha=penalty_term,
+                                          eta0=learning_rate,
+                                          learning_rate='constant',
+                                          random_state=0)
         self.counts = 0
         self.log_likelihoods = np.zeros(n_classes)
 
-        self.counts_left = dict()               # number of observations in the left child per split candidate
-        self.log_likelihoods_left = dict()      # likelihoods for left child per split candidate
-        self.gradients_left = dict()            # gradients for left child per split candidate
-        self.counts_right = dict()              # number of observations in the right child per split candidate
-        self.log_likelihoods_right = dict()     # likelihoods for left child per split candidate
-        self.gradients_right = dict()           # gradients for right child per split candidate
+        self.counts_left = dict()
+        self.log_likelihoods_left = dict()
+        self.gradients_left = dict()
+        self.counts_right = dict()
+        self.log_likelihoods_right = dict()
+        self.gradients_right = dict()
 
-        self.children = []      # array of child nodes
-        self.split = None       # split feature/value combination
-        self.is_leaf = True     # indicate whether node is a leaf
+        self.children = []
+        self.split = None
+        self.is_leaf = True
 
-    def update(self, X, y):
-        """ Update the node and all descendants
+    def update(self, X: ArrayLike, y: ArrayLike):
+        """Updates the node and all descendants.
+
         Update the parameters of the weak model at the given node.
         If the node is an inner node, we may attempt to split on a different feature or to replace the inner node
         by a leaf and drop all children. If the node is a leaf node, we may attempt to split.
         We evoke the function recursively for all children.
 
-        Parameters
-        ----------
-        X - (np.array) vector/matrix of observations
-        y - (np.array) vector of target labels
+        Args:
+            X: Array/matrix of observations.
+            y: Array of corresponding labels.
         """
         # Update the simple/linear model
         log_likelihood_X, gradient_X = self._update_linear_model(X, y)
@@ -305,12 +335,11 @@ class Node(metaclass=ABCMeta):
                 # Replace leaf node by an inner node
                 self._make_inner_node(split=top_split)
 
-    def _make_inner_node(self, split):
-        """ Make current node an inner node
+    def _make_inner_node(self, split: tuple):
+        """Makes current node an inner node.
 
-        Parameters
-        ----------
-        split - (tuple) feature/value pair of the current optimal split
+        Args:
+            split: Feature/value pair of the current optimal split.
         """
         self.split = split
         self.children = []
@@ -320,11 +349,13 @@ class Node(metaclass=ABCMeta):
         for i in range(2):
             self.children.append(Node(n_classes=self.n_classes,
                                       n_features=self.n_features,
-                                      cat_features=self.cat_features,
                                       learning_rate=self.learning_rate,
+                                      penalty_term=self.penalty_term,
+                                      penalty=self.penalty,
                                       epsilon=self.epsilon,
                                       n_saved_candidates=self.n_saved_candidates,
-                                      p_replaceable_candidates=self.p_replaceable_candidates))
+                                      p_replaceable_candidates=self.p_replaceable_candidates,
+                                      cat_features=self.cat_features))
 
         # Set statistics of LEFT child (as we dynamically replace candidates, we need to scale the saved statistics to
         # the same number of observations as the current node has observed).
@@ -362,21 +393,18 @@ class Node(metaclass=ABCMeta):
         else:
             self.children[1].linear_model.coef_ = copy.deepcopy(self.linear_model.coef_)
 
-    def _update_linear_model(self, X, y):
-        """ Update Simple Model
+    def _update_linear_model(self, X: ArrayLike, y: ArrayLike):
+        """Updates the weak model.
 
-        Update the simple model via gradient ascent on the neg. log-likelihood loss.
-        Afterwards, compute and store current likelihoods and gradients
+        Update the linear model and compute/store the current log-likelihoods and gradients.
 
-        Parameters
-        ----------
-        X - (np.array) vector/matrix of observations
-        y - (np.array) vector of target labels
+        Args:
+            X: Array/matrix of observations.
+            y: Array of corresponding labels.
 
-        Returns
-        -------
-        log_likelihood_X - (np.array) log likelihoods regarding each observation
-        gradient_X - (dict) gradients regarding the parameters of each class
+        Returns:
+            ArrayLike: Log-likelihoods for current observations.
+            dict: Gradients of each class for current observations.
         """
         self.counts += X.shape[0]
         self.linear_model.partial_fit(X, y, classes=np.arange(self.n_classes))
@@ -410,21 +438,20 @@ class Node(metaclass=ABCMeta):
 
         return log_likelihood_X, gradient_X
 
-    def _add_and_replace_candidates(self, X, log_likelihood_X, gradient_X):
-        """ Add new and replace candidate splits in the node statistics
-        Identify the split candidates with highest gain (i.e. smallest AIC) in the given data sample.
-        Replace partition of old candidates, where the current gain of a new candidate exceeds the old gain.
-        Add new candidates if the max size of saved statistics has not been reached yet.
+    def _add_and_replace_candidates(self, X: ArrayLike, log_likelihood_X: ArrayLike, gradient_X: dict):
+        """Adds and replaces candidate splits and corresponding statistics.
 
-        Parameters
-        ----------
-        X - (np.array) vector/matrix of observations
-        log_likelihood_X - (np.array) log likelihoods regarding each observation in X
-        gradient_X - (dict) gradients regarding the parameters of each class
+        Identifies the split candidates with highest gain (i.e. smallest AIC) in the given data sample.
+        Replaces partition of old candidates, where the current gain of a new candidate exceeds the old gain.
+        Adds new candidates if the max. size of saved statistics has not been reached yet.
 
-        Returns
-        -------
-        current_cand_aic - (dict) aic of all currently saved split candidates
+        Args:
+            X: Array/matrix of observations.
+            log_likelihood_X: Log-likelihoods for current observations.
+            gradient_X: Gradients of each class for current observations.
+
+        Returns:
+            dict: AIC of all currently stored split candidates.
         """
         # Update statistics and compute AIC of current candidates
         current_cand_aic = dict()
@@ -500,18 +527,17 @@ class Node(metaclass=ABCMeta):
 
         return current_cand_aic
 
-    def _check_for_split(self, candidate_aic):
-        """ Check if we need to split the node
-        Identify the split candidate with top gain and check whether there is enough evidence to split.
+    def _check_for_split(self, candidate_aic: dict):
+        """Checks if we need to split the node.
 
-        Parameters
-        ----------
-        candidate_aic - (dict) aic of all currently saved split candidates
+        Identifies the split candidate with top gain and checks whether there is enough evidence to split.
 
-        Returns
-        -------
-        do_split - (bool) indicator whether to do a split or not
-        top_split - (tuple) top feature/value pair used for splitting
+        Args:
+            candidate_aic: AIC of all currently stored split candidates.
+
+        Returns:
+            bool: Indicator whether to do a split or not.
+            tuple: Top feature/value pair used for splitting.
         """
         # Get best split candidate with minimal AIC
         cand = min(candidate_aic, key=candidate_aic.get)
@@ -519,7 +545,7 @@ class Node(metaclass=ABCMeta):
 
         # AIC for a leaf node
         k = self.n_features * self.n_classes if self.n_classes > 2 else self.n_features  # no. of free parameters
-        aic_leaf = 2 * k - 2 * np.max(self.log_likelihoods)
+        aic_leaf = 2 * k - 2 * np.max(self.log_likelihoods)  # Todo: should this be a sum?
 
         # Perform a statistical test based on the corrected Akaike Information Criterion
         if self.is_leaf:
@@ -542,15 +568,18 @@ class Node(metaclass=ABCMeta):
             else:
                 return True, self.split  # Retain current split
 
-    def _aic(self, cand, idx_left=None, log_likelihood_X=None, gradient_X=None):
-        """ Compute the Akaike Information Criterion of a given split candidate
+    def _aic(self,
+             cand: tuple,
+             idx_left: Optional[ArrayLike[bool]] = None,
+             log_likelihood_X: Optional[ArrayLike] = None,
+             gradient_X: Optional[ArrayLike] = None):
+        """Computes the Akaike Information Criterion of a given split candidate.
 
-        Parameters
-        ----------
-        cand - (tuple) feature value pair for which we compute the AIC
-        idx_left - (np.array) bool array indicating all current observations that fall to the left child
-        log_likelihood_X - (np.array) log likelihoods regarding each observation in X
-        gradient_X - (np.array) gradients of current observations for each class
+        Args:
+            cand: Feature value pair for which we compute the AIC.
+            idx_left: Bool-array indicating all current observations that fall to the left child
+            log_likelihood_X: Log-likelihoods for current observations.
+            gradient_X: Gradients of each class for current observations.
 
         Returns
         -------
@@ -607,22 +636,20 @@ class Node(metaclass=ABCMeta):
 
         k = self.n_features * self.n_classes if self.n_classes > 2 else self.n_features  # no. of free param
 
-        return 2 * k - 2 * np.max(log_like)
+        return 2 * k - 2 * np.max(log_like)  # Todo: should this be a sum?
 
     @staticmethod
-    def _sum_leaf_likelihoods(node, likelihoods=0, leaf_count=0):
-        """ Sum up the likelihoods at the leaves of a subtree
+    def _sum_leaf_likelihoods(node: Any, likelihoods: int = 0, leaf_count: int = 0):
+        """Sums up the likelihoods at the leaves of a subtree.
 
-        Parameters
-        ----------
-        node - (Node) current node in the DMT
-        likelihoods - (int) sum of likelihoods
-        leaf_count - (int) count of leaves
+        Args:
+            node: Current node in the DMT.
+            likelihoods: Sum of likelihoods.
+            leaf_count: Counter of leaf nodes.
 
-        Returns
-        -------
-        likelihoods - (int) updated sum of likelihoods
-        leaf_count - (int) updated count of leaves
+        Returns:
+        float: Updated sum of likelihoods.
+        int: Updated counter of leaf nodes.
         """
         if node.is_leaf:
             return likelihoods + node.log_likelihoods, leaf_count + 1
@@ -631,18 +658,18 @@ class Node(metaclass=ABCMeta):
             likelihoods, leaf_count = Node._sum_leaf_likelihoods(node.children[1], likelihoods, leaf_count)
             return likelihoods, leaf_count
 
-    def predict_observation(self, x, get_prob=False):
-        """ Predict one observation (recurrent function)
-        Pass observation down the tree until a leaf is reached. Make prediction at leaf.
+    def predict_observation(self, x: ArrayLike, get_prob: bool = False):
+        """Predicts one observation (recurrent function).
 
-        Parameters
-        ----------
-        x - (np.array) observation vector
-        get_prob - (bool) indicator whether to return class probabilities
+        Passes an observation down the tree until a leaf is reached. Makes prediction at leaf.
+
+        Args:
+            x: Observation.
+            get_prob: Indicator whether to return class probabilities.
 
         Returns
         -------
-        y_pred/y_prob - (np.array) predicted class label/probability of the given observation
+            ArrayLike: Predicted class label/probability of the given observation.
         """
         if self.is_leaf:
             x = x.reshape(1, -1)
