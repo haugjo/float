@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>prediction.dynamic_model_tree - float</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "prediction.dynamic_model_tree";
+        var mkdocs_page_input_path = "api-docs\\prediction.dynamic_model_tree.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> float
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../getting_started/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../about/">About</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Examples</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/prequential_classification/">Prequential Pipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/holdout_classification/">Holdout Pipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/distributed_fold_classification/">Distributed Fold Pipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/prequential_concept_drift_detection/">Concept Drift Detection</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../examples/prequential_online_feature_selection/">Online Feature Selection</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../README_overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../data.data_loader/">data.data_loader</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../data.preprocessing.base_scaler/">data.preprocessing.base_scaler</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../data.preprocessing.sklearn_scaler/">data.preprocessing.sklearn_scaler</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.base_change_detector/">change_detection.base_change_detector</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.change_detection_evaluator/">change_detection.evaluation.change_detection_evaluator</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.detected_change_rate/">change_detection.evaluation.measures.detected_change_rate</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.detection_delay/">change_detection.evaluation.measures.detection_delay</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.false_discovery_rate/">change_detection.evaluation.measures.false_discovery_rate</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.mean_time_ratio/">change_detection.evaluation.measures.mean_time_ratio</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.missed_detection_rate/">change_detection.evaluation.measures.missed_detection_rate</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.evaluation.measures.time_between_false_alarms/">change_detection.evaluation.measures.time_between_false_alarms</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.erics/">change_detection.erics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.river.river_change_detector/">change_detection.river.river_change_detector</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.skmultiflow.skmultiflow_change_detector/">change_detection.skmultiflow.skmultiflow_change_detector</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.adwin/">change_detection.tornado.adwin</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.cusum/">change_detection.tornado.cusum</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.ddm/">change_detection.tornado.ddm</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.eddm/">change_detection.tornado.eddm</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.ewma/">change_detection.tornado.ewma</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.fhddm/">change_detection.tornado.fhddm</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.fhddms/">change_detection.tornado.fhddms</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.fhddms_add/">change_detection.tornado.fhddms_add</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.hddm_a/">change_detection.tornado.hddm_a</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.hddm_w/">change_detection.tornado.hddm_w</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.mddm_a/">change_detection.tornado.mddm_a</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.mddm_e/">change_detection.tornado.mddm_e</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.mddm_g/">change_detection.tornado.mddm_g</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.page_hinkley/">change_detection.tornado.page_hinkley</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.rddm/">change_detection.tornado.rddm</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../change_detection.tornado.seqdrift2/">change_detection.tornado.seqdrift2</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../feature_selection.base_feature_selector/">feature_selection.base_feature_selector</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../feature_selection.evaluation.feature_selection_evaluator/">feature_selection.evaluation.feature_selection_evaluator</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../feature_selection.evaluation.measures.nogueira_stability/">feature_selection.evaluation.measures.nogueira_stability</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../feature_selection.efs/">feature_selection.efs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../feature_selection.fires/">feature_selection.fires</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../feature_selection.fsds/">feature_selection.fsds</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../feature_selection.ofs/">feature_selection.ofs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../feature_selection.river.river_feature_selector/">feature_selection.river.river_feature_selector</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../prediction.base_predictor/">prediction.base_predictor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../prediction.evaluation.prediction_evaluator/">prediction.evaluation.prediction_evaluator</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../prediction.evaluation.measures.mean_drift_performance_deterioration/">prediction.evaluation.measures.mean_drift_performance_deterioration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../prediction.evaluation.measures.mean_drift_restoration_time/">prediction.evaluation.measures.mean_drift_restoration_time</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../prediction.evaluation.measures.noise_variability/">prediction.evaluation.measures.noise_variability</a>
+                  </li>
+                  <li class="toctree-l1"><a class="" href="../../prediction.evaluation.measures.river_metric.md">prediction.evaluation.measures.river_metric</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../prediction.river.river_classifier/">prediction.river.river_classifier</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../prediction.skmultiflow.skmultiflow_classifier/">prediction.skmultiflow.skmultiflow_classifier</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">prediction.dynamic_model_tree</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#class-dynamicmodeltreeclassifier">class DynamicModelTreeClassifier</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#method-dynamicmodeltreeclassifier__init__">method DynamicModelTreeClassifier.__init__</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#method-dynamicmodeltreeclassifiern_nodes">method DynamicModelTreeClassifier.n_nodes</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#method-dynamicmodeltreeclassifierpartial_fit">method DynamicModelTreeClassifier.partial_fit</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#method-dynamicmodeltreeclassifierpredict">method DynamicModelTreeClassifier.predict</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#method-dynamicmodeltreeclassifierpredict_proba">method DynamicModelTreeClassifier.predict_proba</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#method-dynamicmodeltreeclassifierreset">method DynamicModelTreeClassifier.reset</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#class-node">class Node</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#method-node__init__">method Node.__init__</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#method-nodepredict_observation">method Node.predict_observation</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#method-nodeupdate">method Node.update</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../pipeline.base_pipeline/">pipeline.base_pipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../pipeline.distributed_fold_pipeline/">pipeline.distributed_fold_pipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../pipeline.holdout_pipeline/">pipeline.holdout_pipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../pipeline.prequential_pipeline/">pipeline.prequential_pipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../pipeline.utils_pipeline/">pipeline.utils_pipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualization.bar/">visualization.bar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualization.change_detection_scatter/">visualization.change_detection_scatter</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualization.feature_selection_bar/">visualization.feature_selection_bar</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualization.feature_selection_scatter/">visualization.feature_selection_scatter</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualization.feature_weight_box/">visualization.feature_weight_box</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualization.plot/">visualization.plot</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualization.scatter/">visualization.scatter</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualization.spider_chart/">visualization.spider_chart</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">float</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+          <li>API Reference &raquo;</li>
+      <li>prediction.dynamic_model_tree</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <!-- markdownlint-disable -->
+
+<p><a href="https://github.com/haugjo/float/tree/main\float\prediction\dynamic_model_tree.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h1 id="module-predictiondynamic_model_tree"><kbd>module</kbd> <code>prediction.dynamic_model_tree</code></h1>
+<p>Dynamic Model Tree Classifier. </p>
+<p>This module contains an implementation of the Dynamic Model Tree classification framework proposed in:</p>
+<p>Haug, Johannes; Broelemann, Klaus; Kasneci, Gjergji. Dynamic Model Tree for Interpretable Data Stream Learning. In: 38th IEEE International Conference on Data Engineering, DOI: <a href="https://doi.org/10.1109/ICDE53745.2022.00237">10.1109/ICDE53745.2022.00237</a>, 2022. </p>
+<p>Copyright (C) 2022 Johannes Haug. </p>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main\float\prediction\dynamic_model_tree.py#L21"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h2 id="class-dynamicmodeltreeclassifier"><kbd>class</kbd> <code>DynamicModelTreeClassifier</code></h2>
+<p>Dynamic Model Tree Classifier. </p>
+<p>This implementation of the DMT uses linear (logit) simple models and the negative log likelihood loss (as described in the corresponding paper). </p>
+<p><strong>Attributes:</strong></p>
+<ul>
+<li><b><code>classes</code></b> (List):  List of the target classes. </li>
+<li><b><code>learning_rate</code></b> (float):  Learning rate of the linear models. </li>
+<li><b><code>penalty_term</code></b> (float):  Regularization term for the linear model (0 = no regularization penalty). </li>
+<li><b><code>penalty</code></b> (str): String identifier of the type of regularization used by the linear model.  Either 'l1', 'l2', or 'elasticnet' (see documentation of sklearn SGDClassifier). </li>
+<li><b><code>epsilon</code></b> (float):  Threshold required before attempting to split or prune based on the Akaike Information Criterion.  The smaller the epsilon-threshold, the stronger the evidence for splitting/pruning must be. Choose  0 &lt; epsilon &lt;= 1. </li>
+<li><b><code>n_saved_candidates</code></b> (int):  Max. number of saved split candidates per node. </li>
+<li><b><code>p_replaceable_candidates</code></b> (float):  Max. percent of saved split candidates that can be replaced by new/better candidates per training iteration. </li>
+<li><b><code>cat_features</code></b> (List[int]):  List of indices (pos. in the feature vector) corresponding to categorical features. </li>
+<li><b><code>root</code></b> (Node):  Root node of the Dynamic Model Tree. </li>
+</ul>
+<p><a href="https://github.com/haugjo/float/tree/main\float\prediction\dynamic_model_tree.py#L44"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-dynamicmodeltreeclassifier__init__"><kbd>method</kbd> <code>DynamicModelTreeClassifier.__init__</code></h3>
+<pre><code class="language-python">__init__(
+    classes: List,
+    learning_rate: float = 0.05,
+    penalty_term: float = 0,
+    penalty: str = 'l2',
+    epsilon: float = 1e-07,
+    n_saved_candidates: int = 100,
+    p_replaceable_candidates: float = 0.5,
+    cat_features: Optional[List[int]] = None,
+    reset_after_drift: Optional[bool] = False
+)
+</code></pre>
+<p>Inits the DMT. </p>
+<p><strong>Args:</strong></p>
+<ul>
+<li><b><code>classes</code></b>:  List of the target classes. </li>
+<li><b><code>learning_rate</code></b>:  Learning rate of the linear models. </li>
+<li><b><code>penalty_term</code></b>:  Regularization term for the linear model (0 = no regularization penalty). </li>
+<li><b><code>penalty</code></b>:  String identifier of the type of regularization used by the linear model.  Either 'l1', 'l2', or 'elasticnet' (see documentation of sklearn SGDClassifier). </li>
+<li><b><code>epsilon</code></b>:  Threshold required before attempting to split or prune based on the Akaike Information Criterion.  The smaller the epsilon-threshold, the stronger the evidence for splitting/pruning must be. Choose  0 &lt; epsilon &lt;= 1. </li>
+<li><b><code>n_saved_candidates</code></b>:  Max. number of saved split candidates per node. </li>
+<li><b><code>p_replaceable_candidates</code></b>:  Max. percent of saved split candidates that can be replaced by new/better candidates per training iteration. </li>
+<li><b><code>cat_features</code></b>:  List of indices (pos. in the feature vector) corresponding to categorical features. </li>
+<li><b><code>reset_after_drift</code></b>:  A boolean indicating if the predictor will be reset after a drift was detected. Note that the DMT  automatically adjusts to concept drift and thus generally need not be retrained. </li>
+</ul>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main\float\prediction\dynamic_model_tree.py#L161"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-dynamicmodeltreeclassifiern_nodes"><kbd>method</kbd> <code>DynamicModelTreeClassifier.n_nodes</code></h3>
+<pre><code class="language-python">n_nodes() → Tuple[int, int, int]
+</code></pre>
+<p>Returns the number of nodes, leaves and the depth of the DMT. </p>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><b><code>int</code></b>:  Total number of nodes. </li>
+<li><b><code>int</code></b>:  Total number of leaves. </li>
+<li><b><code>int</code></b>:  Depth (where a single root node has depth = 1). </li>
+</ul>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main\float\prediction\dynamic_model_tree.py#L92"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-dynamicmodeltreeclassifierpartial_fit"><kbd>method</kbd> <code>DynamicModelTreeClassifier.partial_fit</code></h3>
+<pre><code class="language-python">partial_fit(
+    X: Union[numpy.__array_like._SupportsArray[numpy.dtype], numpy.__nested_sequence._NestedSequence[numpy.__array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy.__nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]],
+    y: Union[numpy.__array_like._SupportsArray[numpy.dtype], numpy.__nested_sequence._NestedSequence[numpy.__array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy.__nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]]
+)
+</code></pre>
+<p>Updates the predictor. </p>
+<p><strong>Args:</strong></p>
+<ul>
+<li><b><code>X</code></b>:  Array/matrix of observations. </li>
+<li><b><code>y</code></b>:  Array of corresponding labels. </li>
+</ul>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main\float\prediction\dynamic_model_tree.py#L120"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-dynamicmodeltreeclassifierpredict"><kbd>method</kbd> <code>DynamicModelTreeClassifier.predict</code></h3>
+<pre><code class="language-python">predict(
+    X: Union[numpy.__array_like._SupportsArray[numpy.dtype], numpy.__nested_sequence._NestedSequence[numpy.__array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy.__nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]]
+) → Union[numpy.__array_like._SupportsArray[numpy.dtype], numpy.__nested_sequence._NestedSequence[numpy.__array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy.__nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]]
+</code></pre>
+<p>Predicts the target values. </p>
+<p><strong>Args:</strong></p>
+<ul>
+<li><b><code>X</code></b>:  Array/matrix of observations. </li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><b><code>ArrayLike</code></b>:  Predicted labels for all observations. </li>
+</ul>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main\float\prediction\dynamic_model_tree.py#L138"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-dynamicmodeltreeclassifierpredict_proba"><kbd>method</kbd> <code>DynamicModelTreeClassifier.predict_proba</code></h3>
+<pre><code class="language-python">predict_proba(
+    X: Union[numpy.__array_like._SupportsArray[numpy.dtype], numpy.__nested_sequence._NestedSequence[numpy.__array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy.__nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]]
+) → Union[numpy.__array_like._SupportsArray[numpy.dtype], numpy.__nested_sequence._NestedSequence[numpy.__array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy.__nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]]
+</code></pre>
+<p>Predicts the probability of target values. </p>
+<p><strong>Args:</strong></p>
+<ul>
+<li><b><code>X</code></b>:  Array/matrix of observations. </li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><b><code>ArrayLike</code></b>:  Predicted probability per class label for all observations. </li>
+</ul>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main\float\prediction\dynamic_model_tree.py#L156"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-dynamicmodeltreeclassifierreset"><kbd>method</kbd> <code>DynamicModelTreeClassifier.reset</code></h3>
+<pre><code class="language-python">reset()
+</code></pre>
+<p>Resets the predictor. </p>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main\float\prediction\dynamic_model_tree.py#L209"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h2 id="class-node"><kbd>class</kbd> <code>Node</code></h2>
+<p>Node of the Dynamic Model Tree. </p>
+<p><strong>Attributes:</strong></p>
+<ul>
+<li><b><code>classes</code></b> (List):  List of the target classes. </li>
+<li><b><code>n_features</code></b> (int):  Number of input features. </li>
+<li><b><code>learning_rate</code></b> (float):  Learning rate of the linear models. </li>
+<li><b><code>penalty_term</code></b> (float):  Regularization term for the linear model (0 = no regularization penalty). </li>
+<li><b><code>penalty</code></b> (str): String identifier of the type of regularization used by the linear model.  Either 'l1', 'l2', or 'elasticnet' (see documentation of sklearn SGDClassifier). </li>
+<li><b><code>epsilon</code></b> (float):  Threshold required before attempting to split or prune based on the Akaike Information Criterion.  The smaller the epsilon-threshold, the stronger the evidence for splitting/pruning must be. Choose  0 &lt; epsilon &lt;= 1. </li>
+<li><b><code>n_saved_candidates</code></b> (int):  Max. number of saved split candidates per node. </li>
+<li><b><code>p_replaceable_candidates</code></b> (float):  Max. percent of saved split candidates that can be replaced by new/better candidates per training iteration. </li>
+<li><b><code>cat_features</code></b> (List[int]):  List of indices (pos. in the feature vector) corresponding to categorical features. </li>
+<li><b><code>linear_model</code></b> (Any):  Linear (logit) model trained at the node. </li>
+<li><b><code>log_likelihood</code></b> (ArrayLike):  Log-likelihood given observations that reached the node. </li>
+<li><b><code>counts_left</code></b> (dict):  Number of observations per split candidate falling to the left child. </li>
+<li><b><code>log_likelihoods_left</code></b> (dict):  Log-likelihoods of the left child per split candidate. </li>
+<li><b><code>gradients_left</code></b> (dict):  Gradients of the left child per split candidate. </li>
+<li><b><code>counts_right</code></b> (dict):  Number of observations per split candidate falling to the right child. </li>
+<li><b><code>log_likelihoods_right</code></b> (dict):  Log-likelihoods of the right child per split candidate. </li>
+<li><b><code>gradients_right</code></b> (dict):  Gradients of the right child per split candidate </li>
+<li><b><code>children</code></b> (List[Node]):  List of child nodes. </li>
+<li><b><code>split</code></b> (tuple):  Feature/value combination used for splitting. </li>
+<li><b><code>is_leaf</code></b> (bool):  Indicator of whether the node is a leaf. </li>
+</ul>
+<p><a href="https://github.com/haugjo/float/tree/main\float\prediction\dynamic_model_tree.py#L240"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-node__init__"><kbd>method</kbd> <code>Node.__init__</code></h3>
+<pre><code class="language-python">__init__(
+    classes: List,
+    n_features: int,
+    learning_rate: float,
+    penalty_term: float,
+    penalty: str,
+    epsilon: float,
+    n_saved_candidates: int,
+    p_replaceable_candidates: float,
+    cat_features: List[int]
+)
+</code></pre>
+<p>Inits Node. </p>
+<p><strong>Args:</strong></p>
+<ul>
+<li><b><code>classes</code></b>:  List of the target classes. </li>
+<li><b><code>n_features</code></b>:  Number of input features. </li>
+<li><b><code>learning_rate</code></b>:  Learning rate of the linear models. </li>
+<li><b><code>penalty_term</code></b>:  Regularization term for the linear model (0 = no regularization penalty). </li>
+<li><b><code>penalty</code></b>:  String identifier of the type of regularization used by the linear model.  Either 'l1', 'l2', or 'elasticnet' (see documentation of sklearn SGDClassifier). </li>
+<li><b><code>epsilon</code></b>:  Threshold required before attempting to split or prune based on the Akaike Information Criterion.  The smaller the epsilon-threshold, the stronger the evidence for splitting/pruning must be. Choose  0 &lt; epsilon &lt;= 1. </li>
+<li><b><code>n_saved_candidates</code></b>:  Max. number of saved split candidates per node. </li>
+<li><b><code>p_replaceable_candidates</code></b>:  Max. percent of saved split candidates that can be replaced by new/better candidates per training iteration. </li>
+<li><b><code>cat_features</code></b>:  List of indices (pos. in the feature vector) corresponding to categorical features. </li>
+</ul>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main\float\prediction\dynamic_model_tree.py#L671"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-nodepredict_observation"><kbd>method</kbd> <code>Node.predict_observation</code></h3>
+<pre><code class="language-python">predict_observation(
+    x: Union[numpy.__array_like._SupportsArray[numpy.dtype], numpy.__nested_sequence._NestedSequence[numpy.__array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy.__nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]],
+    get_prob: bool = False
+) → Union[numpy.__array_like._SupportsArray[numpy.dtype], numpy.__nested_sequence._NestedSequence[numpy.__array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy.__nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]]
+</code></pre>
+<p>Predicts one observation (recurrent function). </p>
+<p>Passes an observation down the tree until a leaf is reached. Makes prediction at leaf. </p>
+<p><strong>Args:</strong></p>
+<ul>
+<li><b><code>x</code></b>:  Observation. </li>
+<li><b><code>get_prob</code></b>:  Indicator whether to return class probabilities. </li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><b><code>ArrayLike</code></b>:  Predicted class label/probability of the given observation. </li>
+</ul>
+<hr />
+<p><a href="https://github.com/haugjo/float/tree/main\float\prediction\dynamic_model_tree.py#L299"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3 id="method-nodeupdate"><kbd>method</kbd> <code>Node.update</code></h3>
+<pre><code class="language-python">update(
+    X: Union[numpy.__array_like._SupportsArray[numpy.dtype], numpy.__nested_sequence._NestedSequence[numpy.__array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy.__nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]],
+    y: Union[numpy.__array_like._SupportsArray[numpy.dtype], numpy.__nested_sequence._NestedSequence[numpy.__array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy.__nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]]
+)
+</code></pre>
+<p>Updates the node and all descendants. </p>
+<p>Update the parameters of the weak model at the given node. If the node is an inner node, we attempt to split on a different feature or replace the inner node by a leaf and thereby prune all previous children/subbranches. If the node is a leaf node, we attempt to split. </p>
+<p><strong>Args:</strong></p>
+<ul>
+<li><b><code>X</code></b>:  Array/matrix of observations. </li>
+<li><b><code>y</code></b>:  Array of corresponding labels. </li>
+</ul>
+<hr />
+<p><em>This file was automatically generated via <a href="https://github.com/ml-tooling/lazydocs">lazydocs</a>.</em></p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../prediction.skmultiflow.skmultiflow_classifier/" class="btn btn-neutral float-left" title="prediction.skmultiflow.skmultiflow_classifier"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../pipeline.base_pipeline/" class="btn btn-neutral float-right" title="pipeline.base_pipeline">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../prediction.skmultiflow.skmultiflow_classifier/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../pipeline.base_pipeline/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
