@@ -2,7 +2,7 @@
 
 This module contains the Dynamic Model Tree Classifier proposed in
 HAUG, Johannes; BROELEMANN, Klaus; KASNECI, Gjergji. Dynamic Model Tree for Interpretable Data Stream Learning.
-In: 38th IEEE International Conference on Data Engineering, preprint at arXiv:2203.16181, 2022.
+In: 38th IEEE International Conference on Data Engineering, DOI: 10.1109/ICDE53745.2022.00237, 2022.
 
 Copyright (C) 2022 Johannes Haug.
 """
@@ -110,6 +110,10 @@ class DynamicModelTreeClassifier(BasePredictor):
         if np.unique(y)[0] > len(self.classes):
             raise ValueError('DMT: The observed number of classes {} does not match the specified number of '
                              'classes {}.'.format(np.unique(y)[0], len(self.classes)))
+
+        if np.isnan(X).any() or np.isnan(y).any():
+            raise ValueError('Dynamic Model Trees can only be trained on numeric values. Please encode non-numeric '
+                             'features and targets before training a DMT.')
 
         self.root.update(X=X, y=y)
 
@@ -222,8 +226,7 @@ class Node(metaclass=ABCMeta):
             Max. percent of saved split candidates that can be replaced by new/better candidates per training iteration.
         cat_features (List[int]): List of indices (pos. in the feature vector) corresponding to categorical features.
         linear_model (Any): Linear (logit) model trained at the node.
-        counts (int): Number of observations received at the node.
-        log_likelihoods (ArrayLike): Log-likelihoods for observations that reached the node.
+        log_likelihood (ArrayLike): Log-likelihood given observations that reached the node.
         counts_left (dict): Number of observations per split candidate falling to the left child.
         log_likelihoods_left (dict): Log-likelihoods of the left child per split candidate.
         gradients_left (dict): Gradients of the left child per split candidate.
@@ -280,8 +283,7 @@ class Node(metaclass=ABCMeta):
                                           eta0=learning_rate,
                                           learning_rate='constant',
                                           random_state=0)
-        self.counts = 0
-        self.log_likelihoods = np.zeros(self.n_classes)
+        self.log_likelihood = 0
 
         self.counts_left = dict()
         self.log_likelihoods_left = dict()
@@ -366,16 +368,11 @@ class Node(metaclass=ABCMeta):
                                       p_replaceable_candidates=self.p_replaceable_candidates,
                                       cat_features=self.cat_features))
 
-        # Set statistics of LEFT child (as we dynamically replace candidates, we need to scale the saved statistics to
-        # the same number of observations as the current node has observed).
-        self.children[0].counts = round(self.counts_left[split] * self.counts / (self.counts_left[split] + self.counts_right[split]))
-        relative_frac = np.divide(self.log_likelihoods_left[split],
-                                  self.log_likelihoods_left[split] + self.log_likelihoods_right[split],
-                                  out=np.zeros_like(self.log_likelihoods_left[split]),
-                                  where=(self.log_likelihoods_left[split] + self.log_likelihoods_right[split]) != 0)
-        self.children[0].log_likelihoods = self.log_likelihoods * relative_frac
+        # Set statistics of LEFT child.
+        self.children[0].log_likelihood = self.log_likelihoods_left[split]
 
         self.children[0].linear_model = copy.deepcopy(self.linear_model)
+        self.children[0].linear_model.intercept_ = copy.copy(self.linear_model.intercept_)
         if self.counts_left[split] > 0:  # Apply one gradient update to the parent parameters and assign to child model
             if self.n_classes == 2:
                 self.children[0].linear_model.coef_ = copy.deepcopy(self.linear_model.coef_) \
@@ -386,12 +383,11 @@ class Node(metaclass=ABCMeta):
         else:
             self.children[0].linear_model.coef_ = copy.deepcopy(self.linear_model.coef_)
 
-        # Set statistics of RIGHT child (as we dynamically replace candidates, we need to scale the saved statistics to
-        # the same number of observations as the current node has observed).
-        self.children[1].counts = self.counts - self.children[0].counts
-        self.children[1].log_likelihoods = self.log_likelihoods - self.children[0].log_likelihoods
+        # Set statistics of RIGHT child.
+        self.children[1].log_likelihood = self.log_likelihoods_right[split]
 
         self.children[1].linear_model = copy.deepcopy(self.linear_model)
+        self.children[1].linear_model.intercept_ = copy.copy(self.linear_model.intercept_)
         if self.counts_right[split] > 0:  # Apply one gradient update to the parent parameters and assign to child model
             if self.n_classes == 2:
                 self.children[1].linear_model.coef_ = copy.deepcopy(self.linear_model.coef_) \
@@ -415,18 +411,15 @@ class Node(metaclass=ABCMeta):
             ArrayLike: Log-likelihoods for current observations.
             dict: Gradients of each class for current observations.
         """
-        self.counts += X.shape[0]
         self.linear_model.partial_fit(X, y, classes=self.classes)
 
         log_prob_X = self.linear_model.predict_log_proba(X)
         log_likelihood_X = []
         for lp_i, y_i in zip(log_prob_X, y):  # Save probabilities of the true class
-            ll = np.zeros(self.n_classes)
-            ll[y_i] = lp_i[y_i]
-            log_likelihood_X.append(ll)
+            log_likelihood_X.append(lp_i[y_i])
         log_likelihood_X = np.asarray(log_likelihood_X)
 
-        self.log_likelihoods += np.sum(log_likelihood_X, axis=0)
+        self.log_likelihood += np.sum(log_likelihood_X)
 
         # Compute Gradients on updated parameters
         gradient_X = dict()
@@ -473,17 +466,17 @@ class Node(metaclass=ABCMeta):
 
             # Update statistics for potential left and right children
             self.counts_left[cand] += np.count_nonzero(idx_left)
-            self.log_likelihoods_left[cand] += np.sum(log_likelihood_X[idx_left], axis=0)
+            self.log_likelihoods_left[cand] += np.sum(log_likelihood_X[idx_left])
             self.gradients_left[cand] += np.asarray(
                 [np.sum(gradient_X[c][idx_left], axis=0) for c in range(self.n_classes)])
 
             self.counts_right[cand] += np.count_nonzero(~idx_left)
-            self.log_likelihoods_right[cand] += np.sum(log_likelihood_X[~idx_left], axis=0)
+            self.log_likelihoods_right[cand] += np.sum(log_likelihood_X[~idx_left])
             self.gradients_right[cand] += np.asarray(
                 [np.sum(gradient_X[c][~idx_left], axis=0) for c in range(self.n_classes)])
 
             # Compute AIC
-            current_cand_aic[cand] = self._aic(cand=cand)
+            current_cand_aic[cand], _ = self._aic(cand=cand)
 
         # Allow replacement of x% of the highest ranking candidates (i.e. candidates with worst AIC)
         replaceable_cand_aic = dict(sorted(current_cand_aic.items(), key=lambda item: item[1])[-math.ceil(
@@ -495,7 +488,7 @@ class Node(metaclass=ABCMeta):
             if ftr in self.cat_features:
                 uniques = np.unique(X[:, ftr])
             else:
-                uniques = np.unique(np.around(X[:, ftr], decimals=2))  # Round to two decimals and select uniques
+                uniques = np.unique(np.trunc(X[:, ftr] * 10 ** 2) / (10 ** 2))  # Trunc. all but the first two decimals
 
             for val in uniques:
                 if (ftr, val) not in old_candidates:  # only replace by candidates that are not already saved
@@ -503,7 +496,11 @@ class Node(metaclass=ABCMeta):
                         idx_left = X[:, ftr] == val
                     else:
                         idx_left = X[:, ftr] <= val
-                    aic = self._aic(cand=(ftr, val), idx_left=idx_left, log_likelihood_X=log_likelihood_X, gradient_X=gradient_X)
+
+                    aic, cand_stats = self._aic(cand=(ftr, val),
+                                                idx_left=idx_left,
+                                                log_likelihood_X=log_likelihood_X,
+                                                gradient_X=gradient_X)
 
                     # Find first existing candidate with larger aic
                     replace_cand = next((cand for cand in replaceable_cand_aic.keys()
@@ -521,15 +518,12 @@ class Node(metaclass=ABCMeta):
 
                     # Add new candidate as long as max size is not reached
                     if len(self.log_likelihoods_left.keys()) < self.n_saved_candidates:
-                        self.counts_left[(ftr, val)] = np.count_nonzero(idx_left)
-                        self.log_likelihoods_left[(ftr, val)] = np.sum(log_likelihood_X[idx_left], axis=0)
-                        self.gradients_left[(ftr, val)] = np.asarray(
-                            [np.sum(gradient_X[c][idx_left], axis=0) for c in range(self.n_classes)])
-
-                        self.counts_right[(ftr, val)] = np.count_nonzero(~idx_left)
-                        self.log_likelihoods_right[(ftr, val)] = np.sum(log_likelihood_X[~idx_left], axis=0)
-                        self.gradients_right[(ftr, val)] = np.asarray(
-                            [np.sum(gradient_X[c][~idx_left], axis=0) for c in range(self.n_classes)])
+                        self.counts_left[(ftr, val)] = cand_stats['count_left']
+                        self.log_likelihoods_left[(ftr, val)] = cand_stats['likelihood_left']
+                        self.gradients_left[(ftr, val)] = cand_stats['gradient_left']
+                        self.counts_right[(ftr, val)] = cand_stats['count_right']
+                        self.log_likelihoods_right[(ftr, val)] = cand_stats['likelihood_right']
+                        self.gradients_right[(ftr, val)] = cand_stats['gradient_right']
 
                         current_cand_aic[(ftr, val)] = aic
                         replaceable_cand_aic[(ftr, val)] = aic
@@ -554,7 +548,7 @@ class Node(metaclass=ABCMeta):
 
         # AIC for a leaf node
         k = self.n_features * self.n_classes if self.n_classes > 2 else self.n_features  # no. of free parameters
-        aic_leaf = 2 * k - 2 * np.sum(self.log_likelihoods)
+        aic_leaf = 2 * k - 2 * self.log_likelihood
 
         # Perform a statistical test based on the corrected Akaike Information Criterion
         if self.is_leaf:
@@ -567,7 +561,7 @@ class Node(metaclass=ABCMeta):
             # AIC of the subtree
             log_like_subtree, leaf_count = Node._sum_leaf_likelihoods(self)
             k = leaf_count * self.n_features * self.n_classes if self.n_classes > 2 else leaf_count * self.n_features
-            aic_subtree = 2 * k - 2 * np.sum(log_like_subtree)
+            aic_subtree = 2 * k - 2 * log_like_subtree
 
             # Test at inner node
             if aic_leaf < aic_subtree and math.exp((aic_leaf - aic_subtree) / 2) <= self.epsilon:
@@ -581,7 +575,7 @@ class Node(metaclass=ABCMeta):
              cand: tuple,
              idx_left: Optional[ArrayLike] = None,
              log_likelihood_X: Optional[ArrayLike] = None,
-             gradient_X: Optional[ArrayLike] = None) -> float:
+             gradient_X: Optional[ArrayLike] = None) -> Tuple[float, Optional[dict]]:
         """Computes the Akaike Information Criterion of a given split candidate.
 
         Args:
@@ -592,68 +586,75 @@ class Node(metaclass=ABCMeta):
 
         Returns:
             float: AIC score for the given split candidate.
+            Optional[dict]: statistics (count, likelihood, gradient) of the new split candidate.
         """
-        log_like = np.zeros_like(self.log_likelihoods)
+        log_like = 0
+        new_cand_stats = None
 
         if cand in self.counts_left:  # If candidate is already stored
-            count_left = self.counts_left[cand]
-            count_right = self.counts_right[cand]
+            for count, likelihood, gradient in zip([self.counts_left[cand], self.counts_right[cand]],
+                                                   [self.log_likelihoods_left[cand], self.log_likelihoods_right[cand]],
+                                                   [self.gradients_left[cand], self.gradients_right[cand]]):
+                if count > 0:
+                    xmax = np.max(np.abs(gradient), axis=1)  # we normalize the gradients to avoid numpy overflow
+                    xmax[xmax == 0] = 1  # replace xmax 0 by 1 to avoid division by zero
+                    norm = np.linalg.norm(gradient / xmax.reshape(-1, 1), axis=1) * xmax
+                    log_like += likelihood + np.sum((self.learning_rate / count) * norm ** 2)
 
-            # As we replace split candidates over time, the candidate stats might not have the same number
-            # of observations as the parent node. To compare likelihoods, we scale the candidate likelihood to the
-            # same range as the parent node.
-            relative_frac = np.divide(self.log_likelihoods_left[cand],
-                                      self.log_likelihoods_left[cand] + self.log_likelihoods_right[cand],
-                                      out=np.zeros_like(self.log_likelihoods),
-                                      where=(self.log_likelihoods_left[cand] + self.log_likelihoods_right[cand]) != 0)
-            likelihood_left = self.log_likelihoods * relative_frac
+        else:  # If a candidate is not already stored, we need to approximate the likelihood based on current sample.
+            # As we replace split candidates over time, new candidate likelihoods might not correspond to the same no.
+            # of observations as the parent node. To compare AICs, we scale the candidate likelihoods according
+            # to the corresponding stats of the parent node.
+            relative_frac = np.abs(np.divide(np.sum(log_likelihood_X[idx_left]),
+                                             np.sum(log_likelihood_X[idx_left]) + np.sum(log_likelihood_X[~idx_left]),
+                                             out=np.zeros_like(self.log_likelihood),
+                                             where=(np.sum(log_likelihood_X[idx_left]) + np.sum(log_likelihood_X[~idx_left])) != 0
+                                             )
+                                   )
+            likelihood_left = (self.log_likelihood - np.sum(log_likelihood_X)) * relative_frac + np.sum(log_likelihood_X[idx_left])
+            likelihood_right = (self.log_likelihood - np.sum(log_likelihood_X)) * (1 - relative_frac) + np.sum(log_likelihood_X[~idx_left])
 
-            relative_frac = np.ones_like(self.log_likelihoods) - relative_frac
-            likelihood_right = self.log_likelihoods * relative_frac
-
-            gradient_left = self.gradients_left[cand]
-            gradient_right = self.gradients_right[cand]
-
-        else:  # If candidate is not already stored, we approximate the likelihood with just the current sample
             count_left = np.count_nonzero(idx_left)
             count_right = np.count_nonzero(~idx_left)
-
-            # As we replace split candidates over time, the candidate stats might not have the same number
-            # of observations as the parent node. To compare likelihoods, we scale the candidate likelihood to the
-            # same range as the parent node.
-            relative_frac = np.divide(np.sum(log_likelihood_X[idx_left], axis=0),
-                                      np.sum(log_likelihood_X, axis=0),
-                                      out=np.zeros_like(self.log_likelihoods),
-                                      where=np.sum(log_likelihood_X, axis=0) != 0)
-            likelihood_left = self.log_likelihoods * relative_frac
-
-            relative_frac = np.ones_like(self.log_likelihoods) - relative_frac
-            likelihood_right = self.log_likelihoods * relative_frac
-
             gradient_left = np.asarray([np.sum(gradient_X[c][idx_left], axis=0) for c in range(self.n_classes)])
             gradient_right = np.asarray([np.sum(gradient_X[c][~idx_left], axis=0) for c in range(self.n_classes)])
 
-        for count, likelihood, gradient in zip([count_left, count_right],
-                                               [likelihood_left, likelihood_right],
-                                               [gradient_left, gradient_right]):
-            if count > 0:
-                xmax = np.max(np.abs(gradient), axis=1)  # we normalize the gradients to avoid numpy overflow in linalg.norm
-                xmax[xmax == 0] = 1  # replace xmax 0 by 1 to avoid division by zero
-                norm = np.linalg.norm(gradient / xmax.reshape(-1, 1), axis=1) * xmax
-                log_like += likelihood + (self.learning_rate / count) * norm ** 2
+            new_cand_stats = {
+                'count_left': count_left,
+                'count_right': count_right,
+                'likelihood_left': 0,
+                'likelihood_right': 0,
+                'gradient_left': gradient_left,
+                'gradient_right': gradient_right
+            }
+
+            for like_id, count, likelihood, gradient in zip(['likelihood_left', 'likelihood_right'],
+                                                            [count_left, count_right],
+                                                            [likelihood_left, likelihood_right],
+                                                            [gradient_left, gradient_right]):
+                if count > 0:
+                    xmax = np.max(np.abs(gradient), axis=1)  # we normalize the gradients to avoid numpy overflow
+                    xmax[xmax == 0] = 1  # replace xmax 0 by 1 to avoid division by zero
+                    norm = np.linalg.norm(gradient / xmax.reshape(-1, 1), axis=1) * xmax
+                    new_cand_stats[like_id] = likelihood + np.sum((self.learning_rate / count) * norm ** 2)
+                else:
+                    new_cand_stats[like_id] = likelihood
+
+                log_like += new_cand_stats[like_id]
 
         # Calculate no. of free parameters (i.e., parameters for a left and right child node)
         k = 2 * self.n_features * self.n_classes if self.n_classes > 2 else 2 * self.n_features
+        aic = 2 * k - 2 * log_like
 
-        return 2 * k - 2 * np.sum(log_like)
+        return aic, new_cand_stats
 
     @staticmethod
-    def _sum_leaf_likelihoods(node: Any, likelihoods: int = 0, leaf_count: int = 0) -> Tuple[int, int]:
+    def _sum_leaf_likelihoods(node: Any, likelihood: int = 0, leaf_count: int = 0) -> Tuple[int, int]:
         """Sums up the likelihoods at the leaves of a subtree.
 
         Args:
             node: Current node in the DMT.
-            likelihoods: Sum of likelihoods.
+            likelihood: Sum of laef likelihoods.
             leaf_count: Counter of leaf nodes.
 
         Returns:
@@ -661,11 +662,11 @@ class Node(metaclass=ABCMeta):
             int: Updated counter of leaf nodes.
         """
         if node.is_leaf:
-            return likelihoods + node.log_likelihoods, leaf_count + 1
+            return likelihood + node.log_likelihood, leaf_count + 1
         else:
-            likelihoods, leaf_count = Node._sum_leaf_likelihoods(node.children[0], likelihoods, leaf_count)
-            likelihoods, leaf_count = Node._sum_leaf_likelihoods(node.children[1], likelihoods, leaf_count)
-            return likelihoods, leaf_count
+            likelihood, leaf_count = Node._sum_leaf_likelihoods(node.children[0], likelihood, leaf_count)
+            likelihood, leaf_count = Node._sum_leaf_likelihoods(node.children[1], likelihood, leaf_count)
+            return likelihood, leaf_count
 
     def predict_observation(self, x: ArrayLike, get_prob: bool = False) -> ArrayLike:
         """Predicts one observation (recurrent function).

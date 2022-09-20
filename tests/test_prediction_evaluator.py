@@ -16,7 +16,7 @@ class TestPredictionEvaluator(unittest.TestCase):
         known_drifts = [round(self.data_loader.stream.n_samples * 0.2), round(self.data_loader.stream.n_samples * 0.4),
                         round(self.data_loader.stream.n_samples * 0.6), round(self.data_loader.stream.n_samples * 0.8)]
         batch_size = 10
-        self.predictor = SkmultiflowClassifier(PerceptronMask(), self.data_loader.stream.target_values, reset_after_drift=True)  # todo: can we get rid of the target values parameter?
+        self.predictor = SkmultiflowClassifier(PerceptronMask(), self.data_loader.stream.target_values, reset_after_drift=True)
         self.prediction_evaluator = PredictionEvaluator([accuracy_score,
                                                          zero_one_loss,
                                                          mean_drift_performance_deterioration,
