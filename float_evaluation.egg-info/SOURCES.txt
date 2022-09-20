@@ -61,6 +61,7 @@ float/pipeline/prequential_pipeline.py
 float/pipeline/utils_pipeline.py
 float/prediction/__init__.py
 float/prediction/base_predictor.py
+float/prediction/dynamic_model_tree.py
 float/prediction/evaluation/__init__.py
 float/prediction/evaluation/prediction_evaluator.py
 float/prediction/evaluation/measures/__init__.py

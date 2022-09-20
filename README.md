@@ -22,7 +22,8 @@
 </p>
 
 >**Release Notes:**<br>
->*02/02/22* - Initial release.
+>*02/02/22* - v0.0.1, Initial release.
+><br>*22/09/22* - v0.0.2, Minor updates and corrections + Dynamic Model Tree classifier.
 
 ## Installation
 Install float with pip:

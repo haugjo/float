@@ -5,7 +5,8 @@ Float is a modular framework for simple and more standardized evaluations of onl
 Float enables joint integration of popular Python libraries and custom functionality. Accordingly, float is a meaningful extension of comprehensive libraries like [scikit-mukltiflow](https://scikit-multiflow.readthedocs.io/en/stable/index.html) or [river](https://riverml.xyz/latest/). In this sense, float is not intended to be another library of state-of-the-art models. Rather, our goal is to provide tools for creating high-quality experiments and visualisations.
 
 ## References
-Please refer to the following paper when using float: *Link will following soon.*
+Please refer to the following paper when using float:
+*Haug, Johannes, Effi Tramountani, and Gjergji Kasneci. "Standardized Evaluation of Machine Learning Methods for Evolving Data Streams." arXiv preprint [arXiv:2204.13625](https://arxiv.org/abs/2204.13625) (2022).*
 
 Please also make sure that you acknowledge the corresponding authors, when using one of the provided models (Relevant 
 sources and papers are linked in the documentation of each module).

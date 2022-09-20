@@ -55,6 +55,7 @@
 - [`prediction.evaluation.measures.river_metric`](prediction.evaluation.measures.river_metric.md#module-predictionevaluationmeasuresriver_metric): River Metric Wrapper.
 - [`prediction.river.river_classifier`](prediction.river.river_classifier.md#module-predictionriverriver_classifier): River Predictive Model Wrapper.
 - [`prediction.skmultiflow.skmultiflow_classifier`](prediction.skmultiflow.skmultiflow_classifier.md#module-predictionskmultiflowskmultiflow_classifier): Scikit-Multiflow Predictive Model Wrapper.
+- [`prediction.dynamic_model_tree`](prediction.dynamic_model_tree.md#module-predictiondynamic_model_tree): Dynamic Model Tree Online Learning Method.
 
 ## Pipeline
 - [`pipeline.base_pipeline`](pipeline.base_pipeline.md#module-pipelinebase_pipeline): Base Pipeline.

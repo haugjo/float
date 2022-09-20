@@ -293,7 +293,6 @@ class BasePipeline(metaclass=ABCMeta):
                     if self.estimate_memory_alloc:
                         start_snapshot = tracemalloc.take_snapshot()
 
-                    start_time = time.time()
                     X_train_weighted = copy.copy(X_train)
                     y_train_weighted = copy.copy(y_train)
                     if predictors_training_weights is not None:
@@ -301,6 +300,7 @@ class BasePipeline(metaclass=ABCMeta):
                         X_train_weighted = np.repeat(X_train, predictors_training_weights[pred_idx], axis=0)
                         y_train_weighted = np.repeat(y_train, predictors_training_weights[pred_idx])
 
+                    start_time = time.time()
                     predictor.partial_fit(X_train_weighted, y_train_weighted)
                     prediction_evaluator.training_comp_times.append(time.time() - start_time)
 

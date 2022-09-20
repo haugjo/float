@@ -1,7 +1,7 @@
 """Dynamic Model Tree Classifier.
 
-This module contains the Dynamic Model Tree Classifier proposed in
-HAUG, Johannes; BROELEMANN, Klaus; KASNECI, Gjergji. Dynamic Model Tree for Interpretable Data Stream Learning.
+This module contains an implementation of the Dynamic Model Tree classification framework proposed in
+Haug, Johannes; Broelemann, Klaus; Kasneci, Gjergji. Dynamic Model Tree for Interpretable Data Stream Learning.
 In: 38th IEEE International Conference on Data Engineering, DOI: 10.1109/ICDE53745.2022.00237, 2022.
 
 Copyright (C) 2022 Johannes Haug.
@@ -46,7 +46,7 @@ class DynamicModelTreeClassifier(BasePredictor):
                  learning_rate: float = 0.05,
                  penalty_term: float = 0,
                  penalty: str = 'l2',
-                 epsilon: float = 10e-8,
+                 epsilon: float = 1e-7,
                  n_saved_candidates: int = 100,
                  p_replaceable_candidates: float = 0.5,
                  cat_features: Optional[List[int]] = None,
@@ -231,7 +231,7 @@ class Node(metaclass=ABCMeta):
         log_likelihoods_left (dict): Log-likelihoods of the left child per split candidate.
         gradients_left (dict): Gradients of the left child per split candidate.
         counts_right (dict): Number of observations per split candidate falling to the right child.
-        log_likelihoods_right (dict): Log-likelihoods of the left child per split candidate.
+        log_likelihoods_right (dict): Log-likelihoods of the right child per split candidate.
         gradients_right (dict): Gradients of the right child per split candidate
         children (List[Node]): List of child nodes.
         split (tuple): Feature/value combination used for splitting.

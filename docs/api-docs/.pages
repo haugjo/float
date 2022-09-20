@@ -47,6 +47,7 @@ nav:
     - prediction.evaluation.measures.river_metric: prediction.evaluation.measures.river_metric.md
     - prediction.river.river_classifier: prediction.river.river_classifier.md
     - prediction.skmultiflow.skmultiflow_classifier: prediction.skmultiflow.skmultiflow_classifier.md
+    - prediction.dynamic_model_tree: prediction.dynamic_model_tree.md
     - pipeline.base_pipeline: pipeline.base_pipeline.md
     - pipeline.distributed_fold_pipeline: pipeline.distributed_fold_pipeline.md
     - pipeline.holdout_pipeline: pipeline.holdout_pipeline.md

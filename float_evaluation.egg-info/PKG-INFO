@@ -1,13 +1,11 @@
 Metadata-Version: 2.1
 Name: float-evaluation
-Version: 0.0.1
+Version: 0.0.2
 Summary: A modular Python framework for standardised evaluation and benchmarking of online learning models
 Home-page: https://github.com/haugjo/float
 Author: Johannes Haug
 Author-email: johannes-christian.haug@uni-tuebingen.de
-License: UNKNOWN
 Project-URL: Documentation, https://haugjo.github.io/float/
-Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
@@ -19,6 +17,10 @@ License-File: LICENSE
   <img alt="float" src="https://github.com/haugjo/float/raw/main/logo.png" width="400"/>
 </p>
 <p align="center">
+  <!-- Pypi -->
+  <a href="https://pypi.org/project/float-evaluation/">
+    <img src="https://img.shields.io/pypi/v/float-evaluation" alt="Pypi">
+  </a>
   <!-- Documentation -->
   <a href="https://haugjo.github.io/float/">
     <img src="https://img.shields.io/badge/docs-pages-informational" alt="Documentation">
@@ -35,7 +37,8 @@ License-File: LICENSE
 </p>
 
 >**Release Notes:**<br>
->*02/02/22* - Initial release.
+>*02/02/22* - v0.0.1, Initial release.
+><br>*22/09/22* - v0.0.2, Minor updates and corrections + Dynamic Model Tree classifier.
 
 ## Installation
 Install float with pip:
@@ -150,7 +153,8 @@ Although there is a general shortage of publicly available streaming data sets, 
 - https://github.com/vlosing/driftDatasets
 
 ## References
-Please refer to the following paper when using float: *Link will following soon.*
+Please refer to the following paper when using float:
+*Haug, Johannes, Effi Tramountani, and Gjergji Kasneci. "Standardized Evaluation of Machine Learning Methods for Evolving Data Streams." arXiv preprint [arXiv:2204.13625](https://arxiv.org/abs/2204.13625) (2022).*
 
 Please also make sure that you acknowledge the corresponding authors, when using one of the provided models (Relevant 
 sources and papers are linked in the docstrings of each file).
@@ -171,5 +175,3 @@ All contributed source code must adhere to the following criteria:
 ```./tests/run_test_suite.py```.
 
 Please feel free to contact us, if you plan to make a contribution.
-
-
