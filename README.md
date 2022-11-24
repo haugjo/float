@@ -36,6 +36,8 @@ git clone git@github.com:haugjo/float.git
 ```
 
 ## Requirements
+>**Warning (possible issues with newer versions of river):** Having installed a version of river >0.9.0 may cause errors when importing certain modules of float (which reference river internally). The river online learning package undergoes frequent structural updates, which are sometimes hard to keep track of. I will implement a more robust import of river modules in one of the upcoming updates. In the meantime, I suggest using earlier versions of river, e.g., v0.9.0.
+
 Float is supported by python versions >=3.8.x and has the following package requirements:
 - numpy >= 1.22.1
 - scikit-learn >= 1.0.2
